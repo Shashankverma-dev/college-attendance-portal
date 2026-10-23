@@ -428,18 +428,19 @@ if (localStudents.length === 0) {
     { student_profile_id: 'test-s3', user_uid: 'u-s3', student_id: 'STU-103', enrollment_no: 'ENR-103', registration_no: null, registration_id: null, full_name: 'Akash Verma', student_gmail: 'akash@college.edu', course_code: 'BCA', semester_number: 1, section_name: 'A', roll_number: '03', phone_number: null, parent_guardian_contact: null, status: 'ACTIVE', created_at: new Date().toISOString(), activated_at: null }
   );
 }
-if (!localSectionGroups.some((g) => g.group_name === 'C1')) {
-  localSectionGroups.push({
+let c1Group = localSectionGroups.find((g) => g.section_id === secBCA_A.id && g.group_name === 'C1');
+if (!c1Group) {
+  c1Group = {
     group_id: 'grp-c1-sec-a',
     section_id: secBCA_A.id,
     group_name: 'C1',
     description: 'Batch C1',
     enrolled_student_ids: ['STU-101', 'STU-102'],
-  });
+  };
+  localSectionGroups.push(c1Group);
 }
 
 const allSectionStudents = localStudents.filter((s) => s.section_name === 'A' && s.semester_number === 1);
-const c1Group = localSectionGroups.find((g) => g.group_name === 'C1');
 const c1Students = allSectionStudents.filter((s) => c1Group?.enrolled_student_ids.includes(s.student_id));
 
 assert(

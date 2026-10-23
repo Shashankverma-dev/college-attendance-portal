@@ -646,12 +646,15 @@ router.get(['/', '/list'], authenticate, async (req: Request, res: Response): Pr
 
 // Specific /published route must precede parameterized /:id route
 router.get('/published', async (req: Request, res: Response): Promise<void> => {
-  const { course, semester, section } = req.query;
+  const { course, semester, section, term } = req.query;
+  const courseStr = course ? String(course).trim() : '';
+  const termStr = term ? String(term).trim() : '';
   const tt = localTimetables.find(
     (t) =>
-      (!course || t.course_code === course) &&
+      (!courseStr || t.course_code === courseStr || t.course_name === courseStr || courseStr.startsWith(t.course_code) || t.course_code.includes(courseStr)) &&
       (!semester || t.semester_number === Number(semester)) &&
       (!section || t.section_name === section) &&
+      (!termStr || t.academic_calendar_term.includes(termStr.slice(0, 11)) || termStr.includes(t.academic_calendar_term)) &&
       t.status === 'PUBLISHED'
   );
   if (!tt) {

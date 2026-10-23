@@ -131,6 +131,7 @@ export interface InMemCourse {
   department_id?: string;
   course_code: string;
   course_name: string;
+  total_semesters?: number;
 }
 
 export interface InMemSemester {
@@ -231,16 +232,59 @@ export const localDepartments: InMemDepartment[] = [
   },
 ];
 
-// No default programmes — admin must create all programmes from scratch.
-export const localCourses: InMemCourse[] = [];
+// Foundational Institutional Degree Programmes
+export const localCourses: InMemCourse[] = [
+  {
+    course_id: 'prog-bca',
+    department_id: '10000000-0000-0000-0000-000000000004',
+    course_code: 'BCA',
+    course_name: 'Bachelor of Computer Applications',
+    total_semesters: 6,
+  },
+  {
+    course_id: 'prog-mca',
+    department_id: '10000000-0000-0000-0000-000000000004',
+    course_code: 'MCA',
+    course_name: 'Master of Computer Applications',
+    total_semesters: 4,
+  },
+  {
+    course_id: 'prog-btech',
+    department_id: '10000000-0000-0000-0000-000000000001',
+    course_code: 'BTECH',
+    course_name: 'Bachelor of Technology (CSE)',
+    total_semesters: 8,
+  },
+];
 
-// No default semesters — auto-generated when a programme is created.
-export const localSemesters: InMemSemester[] = [];
+// Foundational Academic Semesters
+export const localSemesters: InMemSemester[] = [
+  { semester_id: 'sem-bca-1', course_id: 'prog-bca', semester_number: 1, display_label: 'Semester 1' },
+  { semester_id: 'sem-bca-2', course_id: 'prog-bca', semester_number: 2, display_label: 'Semester 2' },
+  { semester_id: 'sem-bca-3', course_id: 'prog-bca', semester_number: 3, display_label: 'Semester 3' },
+  { semester_id: 'sem-bca-4', course_id: 'prog-bca', semester_number: 4, display_label: 'Semester 4' },
+  { semester_id: 'sem-bca-5', course_id: 'prog-bca', semester_number: 5, display_label: 'Semester 5' },
+  { semester_id: 'sem-bca-6', course_id: 'prog-bca', semester_number: 6, display_label: 'Semester 6' },
+  { semester_id: 'sem-mca-1', course_id: 'prog-mca', semester_number: 1, display_label: 'Semester 1' },
+  { semester_id: 'sem-mca-2', course_id: 'prog-mca', semester_number: 2, display_label: 'Semester 2' },
+  { semester_id: 'sem-mca-3', course_id: 'prog-mca', semester_number: 3, display_label: 'Semester 3' },
+  { semester_id: 'sem-mca-4', course_id: 'prog-mca', semester_number: 4, display_label: 'Semester 4' },
+];
 
-// No default sections — admin must create sections per programme/semester.
-export const localSections: InMemSection[] = [];
+// Foundational Academic Sections
+export const localSections: InMemSection[] = [
+  { section_id: 'sec-bca-5a', semester_id: 'sem-bca-5', section_name: 'A', max_capacity: 80, academic_calendar_term: 'Autumn 2026' },
+  { section_id: 'sec-bca-5b', semester_id: 'sem-bca-5', section_name: 'B', max_capacity: 80, academic_calendar_term: 'Autumn 2026' },
+  { section_id: 'sec-bca-5c', semester_id: 'sem-bca-5', section_name: 'C', max_capacity: 80, academic_calendar_term: 'Autumn 2026' },
+];
 
-export const localSubjects: InMemSubject[] = [];
+export const localSubjects: InMemSubject[] = [
+  { subject_id: 'subj-501', course_id: 'prog-bca', semester_id: 'sem-bca-5', subject_code: 'BCA-501', subject_name: 'Java Programming', planned_hours: 45, credit_value: 4 },
+  { subject_id: 'subj-502', course_id: 'prog-bca', semester_id: 'sem-bca-5', subject_code: 'BCA-502', subject_name: 'Operating Systems', planned_hours: 45, credit_value: 4 },
+  { subject_id: 'subj-503', course_id: 'prog-bca', semester_id: 'sem-bca-5', subject_code: 'BCA-503', subject_name: 'Computer Networks', planned_hours: 45, credit_value: 4 },
+  { subject_id: 'subj-504', course_id: 'prog-bca', semester_id: 'sem-bca-5', subject_code: 'BCA-504', subject_name: 'Database Management', planned_hours: 45, credit_value: 4 },
+  { subject_id: 'subj-505', course_id: 'prog-bca', semester_id: 'sem-bca-5', subject_code: 'BCA-505', subject_name: 'Web Frameworks', planned_hours: 45, credit_value: 4 },
+];
 
 export const localTeachers: InMemTeacher[] = [];
 

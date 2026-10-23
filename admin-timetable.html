@@ -1477,30 +1477,83 @@
     let currentFacultyMappings = {};
     let uploadedFile = null;
     let facultyDirectory = [];
-    let academicState = {
-      departments: [],
-      courses: [],
-      semesters: [],
-      sections: [],
-      rooms: [],
-      groups: [],
-      periods: [],
-      subjects: []
+
+    const defaultInstitutionalState = {
+      departments: [
+        { id: 'dept-ca', code: 'CA', name: 'Department of Computer Applications' },
+        { id: 'dept-cse', code: 'CSE', name: 'Department of Computer Science & Engineering' },
+        { id: 'dept-ece', code: 'ECE', name: 'Department of Electronics & Communication' },
+        { id: 'dept-me', code: 'ME', name: 'Department of Mechanical Engineering' },
+        { id: 'dept-mgmt', code: 'MGMT', name: 'Department of Management Studies' },
+        { id: 'dept-appsci', code: 'APPSCI', name: 'Department of Applied Sciences' }
+      ],
+      courses: [
+        { id: 'prog-bca', department_id: 'dept-ca', code: 'BCA', name: 'Bachelor of Computer Applications', total_semesters: 6 },
+        { id: 'prog-mca', department_id: 'dept-ca', code: 'MCA', name: 'Master of Computer Applications', total_semesters: 4 },
+        { id: 'prog-btech', department_id: 'dept-cse', code: 'BTECH', name: 'Bachelor of Technology (CSE)', total_semesters: 8 }
+      ],
+      semesters: [
+        { id: 'sem-bca-1', course_id: 'prog-bca', semester_number: 1, display_label: 'Semester 1' },
+        { id: 'sem-bca-2', course_id: 'prog-bca', semester_number: 2, display_label: 'Semester 2' },
+        { id: 'sem-bca-3', course_id: 'prog-bca', semester_number: 3, display_label: 'Semester 3' },
+        { id: 'sem-bca-4', course_id: 'prog-bca', semester_number: 4, display_label: 'Semester 4' },
+        { id: 'sem-bca-5', course_id: 'prog-bca', semester_number: 5, display_label: 'Semester 5' },
+        { id: 'sem-bca-6', course_id: 'prog-bca', semester_number: 6, display_label: 'Semester 6' }
+      ],
+      sections: [
+        { id: 'sec-bca-5a', semester_id: 'sem-bca-5', name: 'A', capacity: 80, academic_calendar_term: 'Autumn 2026' },
+        { id: 'sec-bca-5b', semester_id: 'sem-bca-5', name: 'B', capacity: 80, academic_calendar_term: 'Autumn 2026' },
+        { id: 'sec-bca-5c', semester_id: 'sem-bca-5', name: 'C', capacity: 80, academic_calendar_term: 'Autumn 2026' }
+      ],
+      rooms: [
+        { id: 'r-101', room_code: 'R-101', name: 'Lecture Hall 101', type: 'LECTURE_HALL', capacity: 90, department_id: 'dept-ca' },
+        { id: 'r-102', room_code: 'R-102', name: 'Lecture Hall 102', type: 'LECTURE_HALL', capacity: 90, department_id: 'dept-ca' },
+        { id: 'r-204', room_code: 'R-204', name: 'Academic Block B, Room 204', type: 'CLASSROOM', capacity: 80, department_id: 'dept-ca' },
+        { id: 'r-305', room_code: 'R-305', name: 'Academic Block B, Room 305', type: 'CLASSROOM', capacity: 80, department_id: 'dept-ca' },
+        { id: 'lab-1', room_code: 'LAB-1', name: 'Software Engineering Laboratory (Lab 1)', type: 'LABORATORY', capacity: 45, department_id: 'dept-ca' },
+        { id: 'lab-3', room_code: 'LAB-3', name: 'Turing Computing Laboratory (Lab 3)', type: 'LABORATORY', capacity: 45, department_id: 'dept-ca' },
+        { id: 'lab-4', room_code: 'LAB-4', name: 'Web & Cloud Laboratory (Lab 4)', type: 'LABORATORY', capacity: 45, department_id: 'dept-cse' },
+        { id: 'hw-lab', room_code: 'HARDWARE-LAB', name: 'Digital Electronics & Hardware Lab', type: 'LABORATORY', capacity: 40, department_id: 'dept-ece' }
+      ],
+      groups: [
+        { id: 'grp-c1', section_id: 'sec-bca-5c', name: 'C1', description: 'Subgroup C1 (Roll No 1-40)' },
+        { id: 'grp-c2', section_id: 'sec-bca-5c', name: 'C2', description: 'Subgroup C2 (Roll No 41-80)' }
+      ],
+      periods: [
+        { period_index: 1, period_label: 'Period 1', start_time: '09:00', end_time: '09:55' },
+        { period_index: 2, period_label: 'Period 2', start_time: '09:55', end_time: '10:50' },
+        { period_index: 3, period_label: 'Period 3', start_time: '10:50', end_time: '11:45' },
+        { period_index: 4, period_label: 'Period 4', start_time: '11:45', end_time: '12:40' },
+        { period_index: 5, period_label: 'Lunch', start_time: '12:40', end_time: '13:30' },
+        { period_index: 6, period_label: 'Period 5', start_time: '13:30', end_time: '14:25' },
+        { period_index: 7, period_label: 'Period 6', start_time: '14:25', end_time: '15:20' },
+        { period_index: 8, period_label: 'Period 7', start_time: '15:20', end_time: '16:15' }
+      ],
+      subjects: [
+        { id: 'subj-501', code: 'BCA-501', name: 'Java Programming' },
+        { id: 'subj-502', code: 'BCA-502', name: 'Operating Systems' },
+        { id: 'subj-503', code: 'BCA-503', name: 'Computer Networks' },
+        { id: 'subj-504', code: 'BCA-504', name: 'Database Management' },
+        { id: 'subj-505', code: 'BCA-505', name: 'Web Frameworks' }
+      ]
     };
 
-    // -------------------------------------------------------------------------
+    let academicState = JSON.parse(JSON.stringify(defaultInstitutionalState));
+
     // -------------------------------------------------------------------------
     // API Base URL — auto-detect local backend vs Firebase Hosting (static only)
     // -------------------------------------------------------------------------
     function getApiBase() {
-      if (typeof window.getApiBase === 'function') {
+      if (typeof window.getApiBase === 'function' && window.getApiBase !== getApiBase) {
         return window.getApiBase();
       }
-      const h = window.location.hostname;
+      var custom = localStorage.getItem('attendance_api_url') || window.APP_API_URL;
+      if (custom) return custom.replace(/\/$/, '');
+      var h = window.location.hostname;
       if (h === 'localhost' || h === '127.0.0.1') {
         return 'http://localhost:8080';
       }
-      return '';
+      return (window.DEFAULT_RENDER_URL || 'https://college-attendance-backend-ib8i.onrender.com').replace(/\/$/, '');
     }
 
     // Default authentic BCA Semester 5 Section C published timetable
@@ -1718,7 +1771,8 @@
 
     function switchTab(tabId) {
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-      document.getElementById('tab-' + tabId).classList.add('active');
+      const activeBtn = document.getElementById('tab-' + tabId);
+      if (activeBtn) activeBtn.classList.add('active');
 
       document.getElementById('panel-timetable').style.display = tabId === 'timetable' ? 'block' : 'none';
       document.getElementById('panel-academic-entities').style.display = tabId === 'academic-entities' ? 'block' : 'none';
@@ -1726,7 +1780,21 @@
       if (document.getElementById('panel-schools')) {
         document.getElementById('panel-schools').style.display = tabId === 'schools' ? 'block' : 'none';
       }
-      if (tabId === 'schools') {
+
+      if (tabId === 'timetable') {
+        syncFilterDropdowns();
+        loadScheduleGrid();
+      } else if (tabId === 'academic-entities') {
+        renderDepartmentsTable();
+        renderCoursesTable();
+        renderRoomsTable();
+        populateAcademicDropdowns();
+      } else if (tabId === 'subgroups') {
+        renderSemestersTable();
+        renderSectionsTable();
+        renderSubgroups();
+        populateAcademicDropdowns();
+      } else if (tabId === 'schools') {
         loadSchoolsGrid();
       }
     }
@@ -1915,14 +1983,18 @@
       if (!container) return;
       loadedSchools = deduplicateSchoolsList(schools);
 
-      document.getElementById('kpi-schools-count').textContent = schools.length;
+      const kpiSchools = document.getElementById('kpi-schools-count');
+      if (kpiSchools) kpiSchools.textContent = schools.length;
       const totalDepts = schools.reduce((acc, s) => acc + (s.department_count || 0), 0);
       const totalProgs = schools.reduce((acc, s) => acc + (s.course_count || 0), 0);
       const totalStudents = schools.reduce((acc, s) => acc + (s.student_count || 0), 0);
       
-      document.getElementById('kpi-depts-count').textContent = totalDepts;
-      document.getElementById('kpi-programmes-count').textContent = totalProgs;
-      document.getElementById('kpi-students-count').textContent = totalStudents;
+      const kpiDepts = document.getElementById('kpi-depts-count');
+      if (kpiDepts) kpiDepts.textContent = totalDepts;
+      const kpiProgs = document.getElementById('kpi-programmes-count');
+      if (kpiProgs) kpiProgs.textContent = totalProgs;
+      const kpiStudents = document.getElementById('kpi-students-count');
+      if (kpiStudents) kpiStudents.textContent = totalStudents;
 
       container.innerHTML = '';
       schools.forEach(school => {
@@ -2190,7 +2262,9 @@
 
       try {
         if (getApiBase() !== null) {
-          const res = await fetch(getApiBase() + '/api/timetable/published?course=' + encodeURIComponent(course) + '&semester=' + encodeURIComponent(semester) + '&section=' + encodeURIComponent(section) + '&term=' + encodeURIComponent(term));
+          const res = await fetch(getApiBase() + '/api/timetable/published?course=' + encodeURIComponent(course) + '&semester=' + encodeURIComponent(semester) + '&section=' + encodeURIComponent(section) + '&term=' + encodeURIComponent(term), {
+            headers: getAuthHeaders()
+          });
           const data = await res.json();
           if (data.success && data.timetable) {
             currentTimetable = data.timetable;
@@ -2211,13 +2285,13 @@
 
       // Find matching in stored
       let match = storedList.find(t => 
-        (t.course_code === course || t.course_name === course) && 
+        (t.course_code === course || t.course_name === course || (course && course.includes(t.course_code))) && 
         String(t.semester_number) === String(semester) && 
         t.section_name === section
       );
 
       // If no stored entry, but filter is BCA Sem 5 Sec C, load the verified defaultBCATimetable
-      if (!match && (course === 'BCA' || course === 'BCA - Computer Applications') && String(semester) === '5' && section === 'C') {
+      if (!match && (course === 'BCA' || (course && course.includes('BCA'))) && String(semester) === '5' && section === 'C') {
         match = defaultBCATimetable;
       }
 
@@ -2729,50 +2803,77 @@
     async function loadAcademicEntities() {
       try {
         if (getApiBase() !== null) {
-          const res = await fetch(getApiBase() + '/api/timetable/academic/all');
+          const res = await fetch(getApiBase() + '/api/timetable/academic/all', {
+            headers: getAuthHeaders()
+          });
           const data = await res.json();
-          if (data.success && data.departments && data.departments.length > 0) {
-            academicState.departments = deduplicateDepartmentsList((data.departments || []).map(d => ({
-              id: d.id || d.department_id,
-              code: d.code || d.department_code,
-              name: d.name || d.department_name
-            })));
-            academicState.courses = (data.courses || []).map(c => ({
-              id: c.id || c.course_id,
-              department_id: c.department_id,
-              code: c.code || c.course_code,
-              name: c.name || c.course_name,
-              total_semesters: c.total_semesters || 6
-            }));
-            academicState.semesters = (data.semesters || []).map(s => ({
-              id: s.id || s.semester_id,
-              course_id: s.course_id,
-              semester_number: s.semester_number,
-              display_label: s.display_label
-            }));
-            academicState.sections = (data.sections || []).map(s => ({
-              id: s.id || s.section_id,
-              semester_id: s.semester_id,
-              name: s.name || s.section_name,
-              capacity: s.capacity || s.max_capacity || 80,
-              academic_calendar_term: s.academic_calendar_term || 'Autumn 2026'
-            }));
-            academicState.rooms = (data.rooms || []).map(r => ({
-              id: r.id || r.room_id,
-              room_code: r.room_code,
-              name: r.name || r.room_name,
-              type: r.type || r.room_type || 'CLASSROOM',
-              capacity: r.capacity || 45,
-              department_id: r.department_id
-            }));
-            academicState.groups = (data.groups || []).map(g => ({
-              id: g.id || g.group_id,
-              section_id: g.section_id,
-              name: g.name || g.group_name,
-              description: g.description
-            }));
-            academicState.periods = data.periods || [];
-            academicState.subjects = data.subjects || [];
+          if (data && data.success) {
+            academicState.departments = (Array.isArray(data.departments) && data.departments.length > 0)
+              ? deduplicateDepartmentsList(data.departments.map(d => ({
+                  id: d.id || d.department_id,
+                  code: d.code || d.department_code,
+                  name: d.name || d.department_name
+                })))
+              : (academicState.departments && academicState.departments.length > 0 ? academicState.departments : defaultInstitutionalState.departments);
+
+            academicState.courses = (Array.isArray(data.courses) && data.courses.length > 0)
+              ? data.courses.map(c => ({
+                  id: c.id || c.course_id,
+                  department_id: c.department_id,
+                  code: c.code || c.course_code,
+                  name: c.name || c.course_name,
+                  total_semesters: c.total_semesters || 6
+                }))
+              : (academicState.courses && academicState.courses.length > 0 ? academicState.courses : defaultInstitutionalState.courses);
+
+            academicState.semesters = (Array.isArray(data.semesters) && data.semesters.length > 0)
+              ? data.semesters.map(s => ({
+                  id: s.id || s.semester_id,
+                  course_id: s.course_id,
+                  semester_number: s.semester_number,
+                  display_label: s.display_label || `Semester ${s.semester_number}`
+                }))
+              : (academicState.semesters && academicState.semesters.length > 0 ? academicState.semesters : defaultInstitutionalState.semesters);
+
+            academicState.sections = (Array.isArray(data.sections) && data.sections.length > 0)
+              ? data.sections.map(s => ({
+                  id: s.id || s.section_id,
+                  semester_id: s.semester_id,
+                  name: s.name || s.section_name,
+                  capacity: s.capacity || s.max_capacity || 80,
+                  academic_calendar_term: s.academic_calendar_term || 'Autumn 2026'
+                }))
+              : (academicState.sections && academicState.sections.length > 0 ? academicState.sections : defaultInstitutionalState.sections);
+
+            academicState.rooms = (Array.isArray(data.rooms) && data.rooms.length > 0)
+              ? data.rooms.map(r => ({
+                  id: r.id || r.room_id,
+                  room_code: r.room_code,
+                  name: r.name || r.room_name,
+                  type: r.type || r.room_type || 'CLASSROOM',
+                  capacity: r.capacity || 45,
+                  department_id: r.department_id
+                }))
+              : (academicState.rooms && academicState.rooms.length > 0 ? academicState.rooms : defaultInstitutionalState.rooms);
+
+            academicState.groups = (Array.isArray(data.groups) && data.groups.length > 0)
+              ? data.groups.map(g => ({
+                  id: g.id || g.group_id,
+                  section_id: g.section_id,
+                  name: g.name || g.group_name,
+                  description: g.description
+                }))
+              : (academicState.groups && academicState.groups.length > 0 ? academicState.groups : defaultInstitutionalState.groups);
+
+            academicState.periods = (Array.isArray(data.periods) && data.periods.length > 0)
+              ? data.periods
+              : (academicState.periods && academicState.periods.length > 0 ? academicState.periods : defaultInstitutionalState.periods);
+
+            academicState.subjects = (Array.isArray(data.subjects) && data.subjects.length > 0)
+              ? data.subjects
+              : (academicState.subjects && academicState.subjects.length > 0 ? academicState.subjects : defaultInstitutionalState.subjects);
+
+            try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
 
             renderDepartmentsTable();
             renderCoursesTable();
@@ -2799,65 +2900,7 @@
         savedState.departments = deduplicateDepartmentsList(savedState.departments);
         academicState = savedState;
       } else {
-        academicState = {
-          departments: deduplicateDepartmentsList([
-            { id: 'dept-ca', code: 'CA', name: 'Department of Computer Applications' },
-            { id: 'dept-cse', code: 'CSE', name: 'Department of Computer Science & Engineering' },
-            { id: 'dept-ece', code: 'ECE', name: 'Department of Electronics & Communication' },
-            { id: 'dept-me', code: 'ME', name: 'Department of Mechanical Engineering' },
-            { id: 'dept-mgmt', code: 'MGMT', name: 'Department of Management Studies' },
-            { id: 'dept-appsci', code: 'APPSCI', name: 'Department of Applied Sciences' }
-          ]),
-          courses: [
-            { id: 'prog-bca', department_id: 'dept-ca', code: 'BCA', name: 'Bachelor of Computer Applications', total_semesters: 6 },
-            { id: 'prog-mca', department_id: 'dept-ca', code: 'MCA', name: 'Master of Computer Applications', total_semesters: 4 },
-            { id: 'prog-btech', department_id: 'dept-cse', code: 'BTECH', name: 'Bachelor of Technology (CSE)', total_semesters: 8 }
-          ],
-          semesters: [
-            { id: 'sem-bca-1', course_id: 'prog-bca', semester_number: 1, display_label: 'Semester 1' },
-            { id: 'sem-bca-2', course_id: 'prog-bca', semester_number: 2, display_label: 'Semester 2' },
-            { id: 'sem-bca-3', course_id: 'prog-bca', semester_number: 3, display_label: 'Semester 3' },
-            { id: 'sem-bca-4', course_id: 'prog-bca', semester_number: 4, display_label: 'Semester 4' },
-            { id: 'sem-bca-5', course_id: 'prog-bca', semester_number: 5, display_label: 'Semester 5' },
-            { id: 'sem-bca-6', course_id: 'prog-bca', semester_number: 6, display_label: 'Semester 6' }
-          ],
-          sections: [
-            { id: 'sec-bca-5a', semester_id: 'sem-bca-5', name: 'A', capacity: 80, academic_calendar_term: 'Autumn 2026' },
-            { id: 'sec-bca-5b', semester_id: 'sem-bca-5', name: 'B', capacity: 80, academic_calendar_term: 'Autumn 2026' },
-            { id: 'sec-bca-5c', semester_id: 'sem-bca-5', name: 'C', capacity: 80, academic_calendar_term: 'Autumn 2026' }
-          ],
-          rooms: [
-            { id: 'r-101', room_code: 'R-101', name: 'Lecture Hall 101', type: 'LECTURE_HALL', capacity: 90, department_id: 'dept-ca' },
-            { id: 'r-102', room_code: 'R-102', name: 'Lecture Hall 102', type: 'LECTURE_HALL', capacity: 90, department_id: 'dept-ca' },
-            { id: 'r-204', room_code: 'R-204', name: 'Academic Block B, Room 204', type: 'CLASSROOM', capacity: 80, department_id: 'dept-ca' },
-            { id: 'r-305', room_code: 'R-305', name: 'Academic Block B, Room 305', type: 'CLASSROOM', capacity: 80, department_id: 'dept-ca' },
-            { id: 'lab-1', room_code: 'LAB-1', name: 'Software Engineering Laboratory (Lab 1)', type: 'LABORATORY', capacity: 45, department_id: 'dept-ca' },
-            { id: 'lab-3', room_code: 'LAB-3', name: 'Turing Computing Laboratory (Lab 3)', type: 'LABORATORY', capacity: 45, department_id: 'dept-ca' },
-            { id: 'lab-4', room_code: 'LAB-4', name: 'Web & Cloud Laboratory (Lab 4)', type: 'LABORATORY', capacity: 45, department_id: 'dept-cse' },
-            { id: 'hw-lab', room_code: 'HARDWARE-LAB', name: 'Digital Electronics & Hardware Lab', type: 'LABORATORY', capacity: 40, department_id: 'dept-ece' }
-          ],
-          groups: [
-            { id: 'grp-c1', section_id: 'sec-bca-5c', name: 'C1', description: 'Subgroup C1 (Roll No 1-40)' },
-            { id: 'grp-c2', section_id: 'sec-bca-5c', name: 'C2', description: 'Subgroup C2 (Roll No 41-80)' }
-          ],
-          periods: [
-            { period_index: 1, period_label: 'Period 1', start_time: '09:00', end_time: '09:55' },
-            { period_index: 2, period_label: 'Period 2', start_time: '09:55', end_time: '10:50' },
-            { period_index: 3, period_label: 'Period 3', start_time: '10:50', end_time: '11:45' },
-            { period_index: 4, period_label: 'Period 4', start_time: '11:45', end_time: '12:40' },
-            { period_index: 5, period_label: 'Lunch', start_time: '12:40', end_time: '13:30' },
-            { period_index: 6, period_label: 'Period 5', start_time: '13:30', end_time: '14:25' },
-            { period_index: 7, period_label: 'Period 6', start_time: '14:25', end_time: '15:20' },
-            { period_index: 8, period_label: 'Period 7', start_time: '15:20', end_time: '16:15' }
-          ],
-          subjects: [
-            { id: 'subj-501', code: 'BCA-501', name: 'Java Programming' },
-            { id: 'subj-502', code: 'BCA-502', name: 'Operating Systems' },
-            { id: 'subj-503', code: 'BCA-503', name: 'Computer Networks' },
-            { id: 'subj-504', code: 'BCA-504', name: 'Database Management' },
-            { id: 'subj-505', code: 'BCA-505', name: 'Web Frameworks' }
-          ]
-        };
+        academicState = JSON.parse(JSON.stringify(defaultInstitutionalState));
       }
 
       renderDepartmentsTable();
@@ -3348,10 +3391,14 @@
       const sems = academicState.semesters.filter(s => s.course_id === progId);
       if (sems.length > 0) {
         semSelect.innerHTML = sems.map(s => `
-          <option value="${s.id}">Semester ${s.semester_number}</option>
+          <option value="${s.id}">Semester ${s.semester_number} (${s.display_label || 'Sem ' + s.semester_number})</option>
         `).join('');
       } else {
-        semSelect.innerHTML = '<option value="">Default Semester 1</option>';
+        const crs = academicState.courses.find(c => c.id === progId || c.code === progId);
+        const total = (crs && crs.total_semesters) ? crs.total_semesters : 6;
+        semSelect.innerHTML = Array.from({length: total}, (_, i) => i + 1).map(num => `
+          <option value="sem-${progId}-${num}">Semester ${num}</option>
+        `).join('');
       }
     }
 
