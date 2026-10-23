@@ -1,0 +1,1282 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Academic Calendar | Attendance Portal</title>
+  <meta name="description"
+    content="Centralized academic calendar with examination dates, deadlines, statutory holidays, and college events.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-head">
+    <div class="wrap head-in">
+      <a class="wordmark" id="site-wordmark" href="index.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="34" height="34">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+
+      <nav class="head-nav" id="main-head-nav" aria-label="Calendar navigation">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="student.html">Student portal</a>
+        <a class="nav-link" href="teacher.html">Teacher portal</a>
+        <a class="nav-link" href="student-marks.html">Examination marks</a>
+        <a class="nav-link active" href="calendar.html">Calendar</a>
+      </nav>
+
+      <div class="head-actions" id="main-head-actions">
+        <a class="btn btn-sm" href="signin.html">Sign in</a>
+      </div>
+
+      <!-- Mobile Hamburger Button (3 lines) -->
+      <button type="button" class="nav-toggle-btn" id="nav-toggle-btn" aria-label="Open navigation menu"
+        aria-expanded="false" aria-controls="mobile-drawer" onclick="toggleNavDrawer()">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Side Navigation Drawer & Backdrop -->
+  <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" onclick="closeNavDrawer()"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile navigation" aria-hidden="true">
+    <div class="drawer-header">
+      <a class="wordmark" id="drawer-wordmark" href="index.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="30" height="30">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+      <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close navigation"
+        onclick="closeNavDrawer()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="drawer-user-info" id="drawer-user-info-box" style="display: none;">
+      <strong id="drawer-user-name">Guest User</strong>
+      <span id="drawer-user-id">Not Signed In</span>
+    </div>
+
+    <nav class="drawer-nav" id="drawer-nav-links">
+      <a class="drawer-nav-link" href="index.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>Home Overview</span>
+      </a>
+      <a class="drawer-nav-link" href="student.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span>Student Portal</span>
+      </a>
+      <a class="drawer-nav-link" href="teacher.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+        <span>Teacher Portal</span>
+      </a>
+      <a class="drawer-nav-link" href="student-marks.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+        <span>Examination Marks</span>
+      </a>
+      <a class="drawer-nav-link active" href="calendar.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Academic Calendar</span>
+      </a>
+    </nav>
+
+    <div class="drawer-footer" id="drawer-footer-actions">
+      <a class="btn btn-sm btn-ink" href="signin.html">Sign In to Portal</a>
+      <div class="drawer-meta">
+        SRHU Attendance Management System<br>
+        portal-support@college.edu
+      </div>
+    </div>
+  </aside>
+
+  <!-- Immediate Pre-render Script for Role Navigation Sync -->
+  <script>
+    (function () {
+      try {
+        var rawRole = (sessionStorage.getItem('attendance_user_role') || localStorage.getItem('attendance_user_role') || '').trim().toLowerCase();
+        var role = (rawRole === 'admin' || rawRole === 'global_admin' || rawRole === 'hod') ? 'admin' : ((rawRole === 'faculty' || rawRole === 'teacher') ? 'faculty' : (rawRole === 'student' ? 'student' : ''));
+
+        var calNav = document.getElementById('main-head-nav');
+        var calActions = document.getElementById('main-head-actions');
+        var wordmark = document.getElementById('site-wordmark');
+        var drawerWordmark = document.getElementById('drawer-wordmark');
+        var drawerUserInfo = document.getElementById('drawer-user-info-box');
+        var drawerNavLinks = document.getElementById('drawer-nav-links');
+        var drawerFooter = document.getElementById('drawer-footer-actions');
+
+        if (role === 'admin') {
+          if (wordmark) wordmark.href = 'admin.html';
+          if (drawerWordmark) drawerWordmark.href = 'admin.html';
+          if (calNav) {
+            calNav.setAttribute('aria-label', 'Administrator navigation');
+            calNav.innerHTML = '<a class="nav-link" href="admin.html">Dashboard</a>' +
+              '<a class="nav-link" href="admin-students.html">Students</a>' +
+              '<a class="nav-link" href="admin-teachers.html">Teacher management</a>' +
+              '<a class="nav-link" href="admin-timetable.html">Timetable & Academic</a>' +
+              '<a class="nav-link" href="admin-marks.html">Final marks</a>' +
+              '<a class="nav-link active" href="calendar.html">Calendar</a>';
+          }
+          var adminName = sessionStorage.getItem('attendance_user_name') || 'Dr. Arvind Sharma';
+          if (calActions) {
+            calActions.innerHTML = '<div class="user-menu-wrap" id="user-menu-wrap">' +
+              '  <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">' +
+              '    <div class="user-avatar-circle" id="display-user-avatar">AS</div>' +
+              '    <div class="user-avatar-info">' +
+              '      <span class="user-avatar-name" id="display-user-name">' + adminName + '</span>' +
+              '      <span class="user-avatar-role" id="display-user-id">ID: ADM-001 (Global Admin)</span>' +
+              '    </div>' +
+              '    <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
+              '      <polyline points="6 9 12 15 18 9"></polyline>' +
+              '    </svg>' +
+              '  </button>' +
+              '  <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">' +
+              '    <div class="user-dropdown-header">' +
+              '      <strong id="dropdown-user-name">' + adminName + '</strong>' +
+              '      <span id="dropdown-user-id">ID: ADM-001 • Global Admin</span>' +
+              '    </div>' +
+              '    <a class="user-dropdown-item" href="profile.html" role="menuitem">' +
+              '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>' +
+              '      <span>View Profile</span>' +
+              '    </a>' +
+              '    <a class="user-dropdown-item" href="admin.html" role="menuitem">' +
+              '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>' +
+              '      <span>Dashboard Overview</span>' +
+              '    </a>' +
+              '    <a class="user-dropdown-item" href="admin-students.html" role="menuitem">' +
+              '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>' +
+              '      <span>Student Directory</span>' +
+              '    </a>' +
+              '    <a class="user-dropdown-item" href="admin-teachers.html" role="menuitem">' +
+              '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>' +
+              '      <span>Teacher Management</span>' +
+              '    </a>' +
+              '    <a class="user-dropdown-item" href="admin-timetable.html" role="menuitem">' +
+              '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>' +
+              '      <span>Timetable & Academic</span>' +
+              '    </a>' +
+              '    <a class="user-dropdown-item" href="admin-marks.html" role="menuitem">' +
+              '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>' +
+              '      <span>Final Semester Marks</span>' +
+              '    </a>' +
+              '    <div class="user-dropdown-divider"></div>' +
+              '    <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" onclick="sessionStorage.clear();" role="menuitem">' +
+              '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>' +
+              '      <span>Sign Out</span>' +
+              '    </a>' +
+              '  </div>' +
+              '</div>';
+          }
+          if (drawerUserInfo) {
+            drawerUserInfo.style.display = 'block';
+            drawerUserInfo.innerHTML = '<strong id="drawer-user-name">' + adminName + '</strong><span id="drawer-user-id">ID: ADM-001 (Global Admin)</span>';
+          }
+          if (drawerNavLinks) {
+            drawerNavLinks.innerHTML = '<a class="drawer-nav-link" href="admin.html" onclick="closeNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Dashboard</span></a>' +
+              '<a class="drawer-nav-link" href="admin-students.html" onclick="closeNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg><span>Student Management</span></a>' +
+              '<a class="drawer-nav-link" href="admin-teachers.html" onclick="closeNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg><span>Teacher Management</span></a>' +
+              '<a class="drawer-nav-link" href="admin-timetable.html" onclick="closeNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg><span>Timetable & Academic</span></a>' +
+              '<a class="drawer-nav-link" href="admin-marks.html" onclick="closeNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg><span>Final Semester Marks</span></a>' +
+              '<a class="drawer-nav-link active" href="calendar.html" onclick="closeNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg><span>Academic Calendar</span></a>' +
+              '<a class="drawer-nav-link" href="profile.html" onclick="closeNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg><span>Administrator Profile</span></a>';
+          }
+          if (drawerFooter) {
+            drawerFooter.innerHTML = '<a class="btn btn-sm btn-danger-soft" href="signin.html" id="drawer-signout-btn" style="width: 100%; text-align: center;">Sign Out</a><div class="drawer-meta">SRHU Attendance Management System<br>portal-support@college.edu</div>';
+          }
+        } else if (role === 'faculty') {
+          var facultyName = sessionStorage.getItem('attendance_user_name') || 'Faculty Member';
+          var facultyId = sessionStorage.getItem('attendance_user_id') || 'Faculty';
+          var facultyInitials = facultyName.split(' ').map(function(p){ return p[0] || ''; }).join('').slice(0, 2).toUpperCase() || 'FM';
+          if (wordmark) wordmark.href = 'teacher.html';
+          if (drawerWordmark) drawerWordmark.href = 'teacher.html';
+          if (calNav) {
+            calNav.setAttribute('aria-label', 'Faculty navigation');
+            calNav.innerHTML = '<a class="nav-link" href="teacher.html">Today\'s classes</a>' +
+              '<a class="nav-link" href="past-registers.html">Past registers</a>' +
+              '<a class="nav-link" href="teacher-marks.html">Marks management</a>' +
+              '<a class="nav-link active" href="calendar.html">Calendar</a>';
+          }
+          if (calActions) {
+            calActions.innerHTML = '<div class="user-menu-wrap" id="user-menu-wrap">' +
+              '  <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">' +
+              '    <div class="user-avatar-circle" id="display-user-avatar">' + facultyInitials + '</div>' +
+              '    <div class="user-avatar-info">' +
+              '      <span class="user-avatar-name" id="display-user-name">' + facultyName + '</span>' +
+              '      <span class="user-avatar-role" id="display-user-id">ID: ' + facultyId + ' (Faculty)</span>' +
+              '    </div>' +
+              '    <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
+              '  </button>' +
+              '  <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">' +
+              '    <div class="user-dropdown-header"><strong id="dropdown-user-name">' + facultyName + '</strong><span id="dropdown-user-id">ID: ' + facultyId + ' • Faculty</span></div>' +
+              '    <a class="user-dropdown-item" href="profile.html" role="menuitem">View Profile</a>' +
+              '    <a class="user-dropdown-item" href="teacher.html" role="menuitem">Today\'s Classes</a>' +
+              '    <a class="user-dropdown-item" href="teacher-marks.html" role="menuitem">Marks Management</a>' +
+              '    <div class="user-dropdown-divider"></div>' +
+              '    <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" onclick="sessionStorage.clear();" role="menuitem">Sign Out</a>' +
+              '  </div>' +
+              '</div>';
+          }
+          if (drawerUserInfo) {
+            drawerUserInfo.style.display = 'block';
+            drawerUserInfo.innerHTML = '<strong id="drawer-user-name">' + facultyName + '</strong><span id="drawer-user-id">ID: ' + facultyId + ' (Faculty)</span>';
+          }
+          if (drawerNavLinks) {
+            drawerNavLinks.innerHTML = '<a class="drawer-nav-link" href="teacher.html" onclick="closeNavDrawer()"><span>Today\'s Classes</span></a>' +
+              '<a class="drawer-nav-link" href="past-registers.html" onclick="closeNavDrawer()"><span>Past Registers</span></a>' +
+              '<a class="drawer-nav-link" href="teacher-marks.html" onclick="closeNavDrawer()"><span>Marks Management</span></a>' +
+              '<a class="drawer-nav-link active" href="calendar.html" onclick="closeNavDrawer()"><span>Academic Calendar</span></a>' +
+              '<a class="drawer-nav-link" href="profile.html" onclick="closeNavDrawer()"><span>Faculty Profile</span></a>';
+          }
+          if (drawerFooter) {
+            drawerFooter.innerHTML = '<a class="btn btn-sm btn-danger-soft" href="signin.html" id="drawer-signout-btn" style="width: 100%; text-align: center;">Sign Out</a><div class="drawer-meta">SRHU Attendance Management System<br>portal-support@college.edu</div>';
+          }
+        } else if (role === 'student') {
+          var studentName = sessionStorage.getItem('attendance_user_name') || 'Student';
+          var studentId = sessionStorage.getItem('attendance_user_id') || 'Student';
+          var studentInitials = studentName.split(' ').map(function(p){ return p[0] || ''; }).join('').slice(0, 2).toUpperCase() || 'ST';
+          if (wordmark) wordmark.href = 'student.html';
+          if (drawerWordmark) drawerWordmark.href = 'student.html';
+          if (calNav) {
+            calNav.setAttribute('aria-label', 'Student navigation');
+            calNav.innerHTML = '<a class="nav-link" href="student.html">Dashboard</a>' +
+              '<a class="nav-link" href="student-marks.html">Examination marks</a>' +
+              '<a class="nav-link active" href="calendar.html">Calendar</a>';
+          }
+          if (calActions) {
+            calActions.innerHTML = '<div class="user-menu-wrap" id="user-menu-wrap">' +
+              '  <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">' +
+              '    <div class="user-avatar-circle" id="display-user-avatar">' + studentInitials + '</div>' +
+              '    <div class="user-avatar-info">' +
+              '      <span class="user-avatar-name" id="display-user-name">' + studentName + '</span>' +
+              '      <span class="user-avatar-role" id="display-user-id">ID: ' + studentId + ' (Student)</span>' +
+              '    </div>' +
+              '    <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>' +
+              '  </button>' +
+              '  <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">' +
+              '    <div class="user-dropdown-header"><strong id="dropdown-user-name">' + studentName + '</strong><span id="dropdown-user-id">ID: ' + studentId + ' • Student</span></div>' +
+              '    <a class="user-dropdown-item" href="profile.html" role="menuitem">View Profile</a>' +
+              '    <a class="user-dropdown-item" href="student.html" role="menuitem">Attendance Dashboard</a>' +
+              '    <a class="user-dropdown-item" href="student-marks.html" role="menuitem">Examination Marks</a>' +
+              '    <div class="user-dropdown-divider"></div>' +
+              '    <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" role="menuitem">Sign Out</a>' +
+              '  </div>' +
+              '</div>';
+          }
+          if (drawerUserInfo) {
+            drawerUserInfo.style.display = 'block';
+            drawerUserInfo.innerHTML = '<strong id="drawer-user-name">' + studentName + '</strong><span id="drawer-user-id">ID: ' + studentId + ' (Student)</span>';
+          }
+          if (drawerNavLinks) {
+            drawerNavLinks.innerHTML = '<a class="drawer-nav-link" href="student.html" onclick="closeNavDrawer()"><span>Dashboard</span></a>' +
+              '<a class="drawer-nav-link" href="student-marks.html" onclick="closeNavDrawer()"><span>Examination Marks</span></a>' +
+              '<a class="drawer-nav-link active" href="calendar.html" onclick="closeNavDrawer()"><span>Academic Calendar</span></a>' +
+              '<a class="drawer-nav-link" href="profile.html" onclick="closeNavDrawer()"><span>Student Profile</span></a>';
+          }
+          if (drawerFooter) {
+            drawerFooter.innerHTML = '<a class="btn btn-sm btn-danger-soft" href="signin.html" id="drawer-signout-btn" style="width: 100%; text-align: center;">Sign Out</a><div class="drawer-meta">SRHU Attendance Management System<br>portal-support@college.edu</div>';
+          }
+        }
+      } catch (err) {
+        console.error('Navbar role sync error:', err);
+      }
+    })();
+  </script>
+
+  <main class="wrap dash-wrap">
+    <!-- Admin Scheduling Authority Banner (Shown when role is admin) -->
+    <div id="cal-admin-banner" class="cal-admin-bar" style="display: none;">
+      <div class="cal-admin-bar-info">
+        <h3>Academic Scheduling Authority (Administrator Mode Active)</h3>
+        <p>You have full authority to schedule examination dates, configure statutory holidays, declare recess, and manage deadlines.</p>
+      </div>
+      <div class="cal-admin-bar-actions">
+        <button type="button" class="btn btn-sm" onclick="openCalendarEventModal()" style="background: var(--bg); color: #FFFFFF; font-weight: 700;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px;">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Schedule New Event
+        </button>
+      </div>
+    </div>
+
+    <!-- Header Title Area -->
+    <div class="dash-header">
+      <div class="dash-title-area">
+        <p class="label">Schedules & Milestones</p>
+        <h1 class="display" style="font-size: clamp(28px, 4vw, 38px);">Academic calendar</h1>
+        <p style="color: var(--muted); font-size: 15px; margin-top: 4px;">
+          Autumn Term 2026 official schedule of examinations, academic deadlines, and statutory holidays.
+        </p>
+      </div>
+
+      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+        <button type="button" class="btn btn-sm" id="btn-admin-add-header" style="display: none; background: var(--bg); color: #FFFFFF; font-weight: 700; margin-right: 4px;" onclick="openCalendarEventModal()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px;">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          Add academic event
+        </button>
+        <button type="button" class="cal-filter-btn active" id="btn-view-month">Month view</button>
+        <button type="button" class="cal-filter-btn" id="btn-view-agenda">Agenda view</button>
+      </div>
+    </div>
+
+    <!-- Month View Container -->
+    <section class="dash-card" id="cal-month-section" style="margin-bottom: 28px;">
+      <div class="calendar-top-bar">
+        <div class="calendar-month-title">
+          <span id="cal-month-display">October 2026</span>
+        </div>
+        <div style="display: flex; gap: 6px;">
+          <button type="button" class="btn btn-sm btn-outline" id="cal-prev-btn" style="min-height: 32px; padding: 0 12px;">Prev</button>
+          <button type="button" class="btn btn-sm btn-outline" id="cal-today-btn" style="min-height: 32px; padding: 0 12px;">Today</button>
+          <button type="button" class="btn btn-sm btn-outline" id="cal-next-btn" style="min-height: 32px; padding: 0 12px;">Next</button>
+        </div>
+      </div>
+
+      <!-- Month Grid Container (Dynamically Rendered) -->
+      <div class="cal-grid-month" id="cal-month-grid">
+        <!-- Rendered dynamically via JavaScript -->
+      </div>
+    </section>
+
+    <!-- Agenda View Container -->
+    <section class="dash-card" id="cal-agenda-section">
+      <div class="calendar-top-bar">
+        <div class="calendar-month-title">
+          <span>Upcoming Term Milestones</span>
+        </div>
+        <div class="cal-filters" role="tablist" aria-label="Event category filters" id="cal-filter-tabs">
+          <button class="cal-filter-btn active" type="button" data-filter="all">All</button>
+          <button class="cal-filter-btn" type="button" data-filter="EXAMINATION">Examinations</button>
+          <button class="cal-filter-btn" type="button" data-filter="HOLIDAY">Holidays</button>
+          <button class="cal-filter-btn" type="button" data-filter="INSTITUTIONAL_EVENT">Deadlines & Events</button>
+          <button class="cal-filter-btn" type="button" data-filter="VACATION">Vacations</button>
+        </div>
+      </div>
+
+      <!-- Event List Container (Dynamically Rendered) -->
+      <div class="event-list" id="calendar-event-container">
+        <!-- Rendered dynamically via JavaScript -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Create / Edit Academic Calendar Event -->
+  <div id="modal-calendar-event" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(10, 20, 40, 0.85); z-index: 99990; align-items: center; justify-content: center; padding: 20px;">
+    <div class="modal-dialog" style="max-width: 580px; width: 100%;">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent);">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          <h3 id="cal-modal-title">Schedule Academic Event</h3>
+        </div>
+        <button type="button" class="btn-modal-cancel" style="padding: 4px 10px; font-size: 16px;" onclick="closeCalendarEventModal()" aria-label="Close dialog">✕</button>
+      </div>
+
+      <form id="form-calendar-event" onsubmit="handleCalendarEventSubmit(event)">
+        <div class="modal-body" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 14px;">
+          <input type="hidden" id="cal-event-id" value="">
+
+          <div class="field">
+            <label for="cal-form-title" style="display: block; font-size: 13px; font-weight: 700; color: var(--card-ink); margin-bottom: 4px;">
+              Event Title <span style="color: var(--status-absent);">*</span>
+            </label>
+            <input type="text" id="cal-form-title" class="admin-search-input" style="width: 100%; box-sizing: border-box;" placeholder="e.g. End Semester Theory Examinations" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="field">
+              <label for="cal-form-type" style="display: block; font-size: 13px; font-weight: 700; color: var(--card-ink); margin-bottom: 4px;">
+                Event Category <span style="color: var(--status-absent);">*</span>
+              </label>
+              <select id="cal-form-type" class="admin-select-input" style="width: 100%; box-sizing: border-box;" required>
+                <option value="EXAMINATION">Examination / Test Cycle</option>
+                <option value="HOLIDAY">Statutory / Gazetted Holiday</option>
+                <option value="INSTITUTIONAL_EVENT">Academic Deadline / Milestone</option>
+                <option value="VACATION">Vacation / Semester Break</option>
+                <option value="SPORTS_CULTURAL">Sports & Cultural Event</option>
+                <option value="INSTRUCTIONAL_DAY">Special Instructional Day</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="cal-form-tier" style="display: block; font-size: 13px; font-weight: 700; color: var(--card-ink); margin-bottom: 4px;">
+                Audience Scope <span style="color: var(--status-absent);">*</span>
+              </label>
+              <select id="cal-form-tier" class="admin-select-input" style="width: 100%; box-sizing: border-box;" required>
+                <option value="INSTITUTION">All University (Institution-wide)</option>
+                <option value="COURSE">Course Cohort (BCA / MCA / B.Sc)</option>
+                <option value="SEMESTER">Specific Semester</option>
+                <option value="SECTION">Specific Class Section</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="field">
+              <label for="cal-form-start" style="display: block; font-size: 13px; font-weight: 700; color: var(--card-ink); margin-bottom: 4px;">
+                Start Date <span style="color: var(--status-absent);">*</span>
+              </label>
+              <input type="date" id="cal-form-start" class="admin-search-input" style="width: 100%; box-sizing: border-box;" required>
+            </div>
+
+            <div class="field">
+              <label for="cal-form-end" style="display: block; font-size: 13px; font-weight: 700; color: var(--card-ink); margin-bottom: 4px;">
+                End Date <span style="color: var(--status-absent);">*</span>
+              </label>
+              <input type="date" id="cal-form-end" class="admin-search-input" style="width: 100%; box-sizing: border-box;" required>
+            </div>
+          </div>
+
+          <div class="field" style="display: flex; align-items: center; gap: 8px; margin-top: 2px;">
+            <input type="checkbox" id="cal-form-non-inst" style="width: 16px; height: 16px; cursor: pointer;">
+            <label for="cal-form-non-inst" style="font-size: 13px; font-weight: 600; color: var(--card-ink); cursor: pointer; margin: 0;">
+              Instructional lectures suspended during this event
+            </label>
+          </div>
+
+          <div class="field">
+            <label for="cal-form-desc" style="display: block; font-size: 13px; font-weight: 700; color: var(--card-ink); margin-bottom: 4px;">
+              Description &amp; Official Guidelines
+            </label>
+            <textarea id="cal-form-desc" rows="3" class="admin-search-input" style="width: 100%; box-sizing: border-box; resize: vertical;" placeholder="Detailed instructions for students, faculty rosters, or examination halls."></textarea>
+          </div>
+
+          <div id="cal-form-error" style="display: none; padding: 10px 14px; background: var(--status-absent-bg); color: var(--status-absent); border: 1px solid #FCA5A5; border-radius: var(--radius); font-size: 13px; font-weight: 600;"></div>
+        </div>
+
+        <div class="modal-footer" style="padding: 16px 24px; background: #F8FAFC; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn-modal-cancel" onclick="closeCalendarEventModal()">Cancel</button>
+          <button type="submit" class="btn-modal-submit" id="btn-save-cal-event">Save &amp; Publish Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Delete Confirmation -->
+  <div id="modal-delete-calendar-event" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(10, 20, 40, 0.85); z-index: 99990; align-items: center; justify-content: center; padding: 20px;">
+    <div class="modal-dialog" style="max-width: 460px; width: 100%;">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--status-absent);">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="8" x2="12" y2="12"></line>
+            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+          </svg>
+          <h3 style="color: var(--card-ink);">Remove Calendar Event</h3>
+        </div>
+        <button type="button" class="btn-modal-cancel" style="padding: 4px 10px; font-size: 16px;" onclick="closeDeleteEventModal()">✕</button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px 24px;">
+        <p style="font-size: 14px; color: var(--card-ink); margin: 0 0 10px 0;">
+          Are you sure you want to remove <strong id="delete-event-title-display" style="color: var(--card-ink);"></strong> from the academic calendar?
+        </p>
+        <p style="font-size: 13px; color: var(--card-muted); margin: 0;">
+          This action will immediately update the student and faculty schedule views.
+        </p>
+      </div>
+
+      <div class="modal-footer" style="padding: 16px 24px; background: #F8FAFC; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn-modal-cancel" onclick="closeDeleteEventModal()">Cancel</button>
+        <button type="button" class="btn" id="btn-confirm-delete-event" style="background: var(--status-absent); border-color: var(--status-absent); color: #FFFFFF;" onclick="executeDeleteCalendarEvent()">Delete Event</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="admin-toast-container" id="admin-toast-container"></div>
+
+  <!-- Site Footer -->
+  <footer class="site-foot" role="contentinfo">
+    <div class="wrap">
+      <div class="foot-top">
+        <div class="foot-brand">
+          <a class="foot-logo" href="index.html">
+            <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="26" height="26">
+            <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+          </a>
+          <p class="foot-desc">
+            Official Academic Attendance and Examination Marks Management System. Department of Computer Applications,
+            Swami Rama Himalayan University (SRHU).
+          </p>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Navigation</h4>
+          <ul class="foot-nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="student.html">Student Portal</a></li>
+            <li><a href="teacher.html">Teacher Portal</a></li>
+            <li><a href="student-marks.html">Examination Marks</a></li>
+            <li><a href="calendar.html">Academic Calendar</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Academic Services</h4>
+          <ul class="foot-nav-list">
+            <li><a href="profile.html">Profile &amp; Security</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms &amp; Conditions</a></li>
+            <li><a href="signin.html">Account Sign In</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Support &amp; Helpdesk</h4>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <a href="mailto:portal-support@college.edu">portal-support@college.edu</a>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>IT Centre, Academic Block II</span>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Mon – Fri: 08:30 – 17:00 IST</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot-bottom">
+        <p class="foot-copy">
+          &copy; 2026 College Attendance Management System. All rights reserved.
+        </p>
+        <div class="foot-policy-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="terms.html">Terms of Service</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="calendar.html">Academic Calendar</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="signin.html">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="site.js" defer></script>
+  <script>
+    (function () {
+      'use strict';
+
+      // Role check
+      var rawCurrentRole = (sessionStorage.getItem('attendance_user_role') || localStorage.getItem('attendance_user_role') || 'guest').trim().toLowerCase();
+      var isAdmin = (rawCurrentRole === 'admin' || rawCurrentRole === 'global_admin' || rawCurrentRole === 'hod');
+      var currentRole = isAdmin ? 'admin' : ((rawCurrentRole === 'faculty' || rawCurrentRole === 'teacher') ? 'faculty' : (rawCurrentRole === 'student' ? 'student' : 'guest'));
+
+      // State
+      var currentYear = 2026;
+      var currentMonth = 9; // 0-indexed: 9 = October
+      var activeAgendaFilter = 'all';
+      var pendingDeleteEventId = null;
+
+      // Default Official Academic Calendar Events
+      var defaultEvents = [
+        {
+          event_id: 'e1000000-0000-0000-0000-000000000001',
+          title: 'Gandhi Jayanti',
+          description: 'Statutory national holiday in observance of the birth of Mahatma Gandhi.',
+          start_date: '2026-10-02',
+          end_date: '2026-10-02',
+          event_type: 'HOLIDAY',
+          is_non_instructional: true,
+          audience_tier: 'INSTITUTION'
+        },
+        {
+          event_id: 'e1000000-0000-0000-0000-000000000002',
+          title: 'Dussehra (Vijayadashami)',
+          description: 'Gazetted institutional festival holiday across all faculties and departments.',
+          start_date: '2026-10-20',
+          end_date: '2026-10-20',
+          event_type: 'HOLIDAY',
+          is_non_instructional: true,
+          audience_tier: 'INSTITUTION'
+        },
+        {
+          event_id: 'e1000000-0000-0000-0000-000000000003',
+          title: 'Continuous Internal Assessment Tests (CIA-1)',
+          description: 'Mandatory midterm internal assessments for all enrolled cohorts. Regular instructional lectures suspended during testing slots.',
+          start_date: '2026-10-24',
+          end_date: '2026-10-28',
+          event_type: 'EXAMINATION',
+          is_non_instructional: true,
+          audience_tier: 'INSTITUTION'
+        },
+        {
+          event_id: 'e1000000-0000-0000-0000-000000000004',
+          title: 'College Foundation Day',
+          description: 'Annual institutional commemoration ceremony in the Main Auditorium. Morning academic session only.',
+          start_date: '2026-11-03',
+          end_date: '2026-11-03',
+          event_type: 'INSTITUTIONAL_EVENT',
+          is_non_instructional: false,
+          audience_tier: 'INSTITUTION'
+        },
+        {
+          event_id: 'e1000000-0000-0000-0000-000000000005',
+          title: 'Medical Certificate Submission Deadline',
+          description: 'Final institutional cutoff date for submission of verified medical leave documentation for term attendance calculation.',
+          start_date: '2026-11-15',
+          end_date: '2026-11-15',
+          event_type: 'INSTITUTIONAL_EVENT',
+          is_non_instructional: false,
+          audience_tier: 'INSTITUTION'
+        },
+        {
+          event_id: 'e1000000-0000-0000-0000-000000000006',
+          title: 'Winter Vacation & Semester Break',
+          description: 'Campus academic facilities closed for winter recess. Administrative offices resume in January.',
+          start_date: '2026-12-22',
+          end_date: '2027-01-02',
+          event_type: 'VACATION',
+          is_non_instructional: true,
+          audience_tier: 'INSTITUTION'
+        }
+      ];
+
+      // Local storage cache or default
+      var cached = localStorage.getItem('srhu_academic_events');
+      var calendarEvents = cached ? JSON.parse(cached) : defaultEvents;
+
+      function saveEventsLocally() {
+        localStorage.setItem('srhu_academic_events', JSON.stringify(calendarEvents));
+      }
+
+      // Sync from backend
+      function fetchEventsFromBackend() {
+        fetch('/api/academic/calendar')
+          .then(function (res) { return res.ok ? res.json() : null; })
+          .then(function (data) {
+            if (data && Array.isArray(data) && data.length > 0) {
+              calendarEvents = data;
+              saveEventsLocally();
+              renderMonthGrid(currentYear, currentMonth);
+              renderAgendaList();
+            }
+          })
+          .catch(function () {
+            // Offline fallback
+          });
+      }
+
+      // Initialize admin mode UI
+      if (isAdmin) {
+        var banner = document.getElementById('cal-admin-banner');
+        if (banner) banner.style.display = 'flex';
+        var headerAddBtn = document.getElementById('btn-admin-add-header');
+        if (headerAddBtn) headerAddBtn.style.display = 'inline-flex';
+      }
+
+      // Month name utility
+      var monthNames = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+
+      // Format date helper: YYYY-MM-DD
+      function padZero(n) { return n < 10 ? '0' + n : '' + n; }
+      function formatDateStr(y, m, d) {
+        return y + '-' + padZero(m + 1) + '-' + padZero(d);
+      }
+
+      // Check if event overlaps a specific date string (YYYY-MM-DD)
+      function eventOverlapsDate(evt, dateStr) {
+        return dateStr >= evt.start_date && dateStr <= evt.end_date;
+      }
+
+      // Category chip class
+      function getChipClass(type) {
+        switch (type) {
+          case 'EXAMINATION': return 'chip-exam';
+          case 'HOLIDAY': return 'chip-holiday';
+          case 'VACATION': return 'chip-vacation';
+          case 'SPORTS_CULTURAL': return 'chip-event';
+          case 'INSTITUTIONAL_EVENT': return 'chip-deadline';
+          default: return 'chip-event';
+        }
+      }
+
+      // Category badge class
+      function getBadgeClass(type) {
+        switch (type) {
+          case 'EXAMINATION': return 'badge-exam';
+          case 'HOLIDAY': return 'badge-holiday';
+          case 'VACATION': return 'badge-vacation';
+          case 'SPORTS_CULTURAL': return 'badge-event';
+          case 'INSTITUTIONAL_EVENT': return 'badge-deadline';
+          default: return 'badge-event';
+        }
+      }
+
+      // Category display label
+      function getTypeLabel(type) {
+        switch (type) {
+          case 'EXAMINATION': return 'Examination';
+          case 'HOLIDAY': return 'Holiday';
+          case 'VACATION': return 'Vacation';
+          case 'SPORTS_CULTURAL': return 'College Event';
+          case 'INSTITUTIONAL_EVENT': return 'Academic Deadline';
+          case 'INSTRUCTIONAL_DAY': return 'Instructional Day';
+          default: return type;
+        }
+      }
+
+      // Render Month Grid
+      function renderMonthGrid(year, month) {
+        var titleEl = document.getElementById('cal-month-display');
+        if (titleEl) {
+          titleEl.textContent = monthNames[month] + ' ' + year;
+        }
+
+        var gridEl = document.getElementById('cal-month-grid');
+        if (!gridEl) return;
+
+        var html = '<div class="cal-day-header">Mon</div>' +
+          '<div class="cal-day-header">Tue</div>' +
+          '<div class="cal-day-header">Wed</div>' +
+          '<div class="cal-day-header">Thu</div>' +
+          '<div class="cal-day-header">Fri</div>' +
+          '<div class="cal-day-header">Sat</div>' +
+          '<div class="cal-day-header">Sun</div>';
+
+        // 1st day of month
+        var firstDay = new Date(year, month, 1).getDay();
+        // convert Sunday (0) to 7, so Monday is 1
+        var startDayOffset = (firstDay === 0 ? 7 : firstDay) - 1;
+
+        // Days in current month
+        var daysInMonth = new Date(year, month + 1, 0).getDate();
+        // Days in previous month
+        var daysInPrevMonth = new Date(year, month, 0).getDate();
+
+        // Render previous month overflow
+        for (var p = startDayOffset - 1; p >= 0; p--) {
+          var prevDayNum = daysInPrevMonth - p;
+          html += '<div class="cal-day-cell other-month"><span class="cal-day-num">' + prevDayNum + '</span></div>';
+        }
+
+        // Today reference
+        var today = new Date();
+        var isCurrentMonthToday = (today.getFullYear() === year && today.getMonth() === month);
+        var todayDate = today.getDate();
+
+        // Render current month days
+        for (var d = 1; d <= daysInMonth; d++) {
+          var dateStr = formatDateStr(year, month, d);
+          var isTodayClass = (isCurrentMonthToday && d === todayDate) ? ' is-today' : '';
+          var adminCellClass = isAdmin ? ' cal-admin-cell' : '';
+
+          // Find overlapping events
+          var dayEvents = calendarEvents.filter(function (e) {
+            return eventOverlapsDate(e, dateStr);
+          });
+
+          var chipsHtml = '';
+          for (var i = 0; i < dayEvents.length; i++) {
+            var ev = dayEvents[i];
+            var chipCls = getChipClass(ev.event_type);
+            chipsHtml += '<span class="cal-event-chip ' + chipCls + '" onclick="onEventChipClick(event, \'' + ev.event_id + '\')" title="' + ev.title + ' (' + ev.start_date + ' to ' + ev.end_date + ')">' +
+              ev.title +
+              '</span>';
+          }
+
+          var clickAttr = isAdmin ? ' onclick="onDateCellClick(\'' + dateStr + '\')"' : '';
+          var titleAttr = isAdmin ? ' title="Click to schedule an academic event on ' + dateStr + '"' : '';
+
+          html += '<div class="cal-day-cell' + isTodayClass + adminCellClass + '"' + clickAttr + titleAttr + '>' +
+            '<span class="cal-day-num">' + d + '</span>' +
+            chipsHtml +
+            '</div>';
+        }
+
+        // Render next month overflow
+        var totalCells = startDayOffset + daysInMonth;
+        var nextOverflow = (7 - (totalCells % 7)) % 7;
+        for (var n = 1; n <= nextOverflow; n++) {
+          html += '<div class="cal-day-cell other-month"><span class="cal-day-num">' + n + '</span></div>';
+        }
+
+        gridEl.innerHTML = html;
+      }
+
+      // Format date for agenda display
+      function formatAgendaDate(startStr, endStr) {
+        if (!startStr) return { dayText: '--', subText: '' };
+        var s = new Date(startStr);
+        var startDay = s.getDate();
+        var startMonthName = monthNames[s.getMonth()];
+
+        if (!endStr || startStr === endStr) {
+          return {
+            dayText: padZero(startDay),
+            subText: startMonthName
+          };
+        }
+
+        var e = new Date(endStr);
+        var endDay = e.getDate();
+        var endMonthName = monthNames[e.getMonth()];
+
+        if (s.getMonth() === e.getMonth() && s.getFullYear() === e.getFullYear()) {
+          return {
+            dayText: padZero(startDay) + '-' + padZero(endDay),
+            subText: startMonthName
+          };
+        }
+
+        return {
+          dayText: padZero(startDay) + '-' + padZero(endDay),
+          subText: startMonthName.substring(0, 3) + '-' + endMonthName.substring(0, 3)
+        };
+      }
+
+      // Render Agenda List
+      function renderAgendaList() {
+        var container = document.getElementById('calendar-event-container');
+        if (!container) return;
+
+        var filtered = calendarEvents.filter(function (e) {
+          if (activeAgendaFilter === 'all') return true;
+          return e.event_type === activeAgendaFilter;
+        });
+
+        // Sort by start_date ascending
+        filtered.sort(function (a, b) {
+          return a.start_date.localeCompare(b.start_date);
+        });
+
+        if (filtered.length === 0) {
+          container.innerHTML = '<div style="text-align: center; padding: 40px 20px; color: var(--card-muted);">' +
+            '<p style="font-size: 15px; margin-bottom: 8px;">No scheduled events found for this filter.</p>' +
+            (isAdmin ? '<button type="button" class="btn btn-sm" onclick="openCalendarEventModal()" style="background: var(--bg); color: #FFFFFF;">+ Add Academic Event</button>' : '') +
+            '</div>';
+          return;
+        }
+
+        var html = '';
+        for (var i = 0; i < filtered.length; i++) {
+          var ev = filtered[i];
+          var dateInfo = formatAgendaDate(ev.start_date, ev.end_date);
+          var badgeCls = getBadgeClass(ev.event_type);
+          var badgeText = getTypeLabel(ev.event_type);
+
+          var adminActionsHtml = '';
+          if (isAdmin) {
+            adminActionsHtml = '<div class="event-actions">' +
+              '  <button type="button" class="action-btn-sm" onclick="openEditEventModal(\'' + ev.event_id + '\')" title="Edit event dates or details">' +
+              '    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>' +
+              '    Edit' +
+              '  </button>' +
+              '  <button type="button" class="action-btn-sm danger" onclick="openDeleteEventModal(\'' + ev.event_id + '\')" title="Remove event from calendar">' +
+              '    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>' +
+              '    Delete' +
+              '  </button>' +
+              '</div>';
+          }
+
+          var nonInstNotice = ev.is_non_instructional
+            ? ' <span style="display: inline-block; font-size: 11px; color: var(--status-leave); font-weight: 600; margin-left: 6px;">• Classes Suspended</span>'
+            : '';
+
+          html += '<div class="event-item" data-category="' + ev.event_type + '">' +
+            '  <div class="event-date">' +
+            '    <span class="event-day">' + dateInfo.dayText + '</span>' +
+            '    <span class="event-subdate">' + dateInfo.subText + '</span>' +
+            '  </div>' +
+            '  <div class="event-info">' +
+            '    <h4>' + ev.title + nonInstNotice + '</h4>' +
+            '    <p>' + (ev.description || 'Official academic schedule entry.') + '</p>' +
+            '  </div>' +
+            '  <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">' +
+            '    <span class="event-badge ' + badgeCls + '">' + badgeText + '</span>' +
+            adminActionsHtml +
+            '  </div>' +
+            '</div>';
+        }
+
+        container.innerHTML = html;
+      }
+
+      // Month Navigation Handlers
+      document.getElementById('cal-prev-btn').addEventListener('click', function () {
+        currentMonth--;
+        if (currentMonth < 0) {
+          currentMonth = 11;
+          currentYear--;
+        }
+        renderMonthGrid(currentYear, currentMonth);
+      });
+
+      document.getElementById('cal-next-btn').addEventListener('click', function () {
+        currentMonth++;
+        if (currentMonth > 11) {
+          currentMonth = 0;
+          currentYear++;
+        }
+        renderMonthGrid(currentYear, currentMonth);
+      });
+
+      document.getElementById('cal-today-btn').addEventListener('click', function () {
+        var now = new Date();
+        currentYear = now.getFullYear();
+        currentMonth = now.getMonth();
+        renderMonthGrid(currentYear, currentMonth);
+      });
+
+      // View Toggle
+      var monthBtn = document.getElementById('btn-view-month');
+      var agendaBtn = document.getElementById('btn-view-agenda');
+      var monthSec = document.getElementById('cal-month-section');
+      var agendaSec = document.getElementById('cal-agenda-section');
+
+      monthBtn.addEventListener('click', function () {
+        monthBtn.classList.add('active');
+        agendaBtn.classList.remove('active');
+        monthSec.style.display = 'flex';
+        agendaSec.style.display = 'flex';
+        window.scrollTo({ top: monthSec.offsetTop - 80, behavior: 'smooth' });
+      });
+
+      agendaBtn.addEventListener('click', function () {
+        agendaBtn.classList.add('active');
+        monthBtn.classList.remove('active');
+        window.scrollTo({ top: agendaSec.offsetTop - 80, behavior: 'smooth' });
+      });
+
+      // Filter Tabs in Agenda View
+      var filterTabs = document.querySelectorAll('#cal-filter-tabs .cal-filter-btn');
+      filterTabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          filterTabs.forEach(function (t) { t.classList.remove('active'); });
+          tab.classList.add('active');
+          activeAgendaFilter = tab.getAttribute('data-filter') || 'all';
+          renderAgendaList();
+        });
+      });
+
+      // =========================================================================
+      // ADMIN EVENT MODAL & CRUD WORKFLOWS
+      // =========================================================================
+
+      window.openCalendarEventModal = function (datePreFill) {
+        if (!isAdmin) return;
+        document.getElementById('cal-modal-title').textContent = 'Schedule Academic Event';
+        document.getElementById('cal-event-id').value = '';
+        document.getElementById('cal-form-title').value = '';
+        document.getElementById('cal-form-type').value = 'EXAMINATION';
+        document.getElementById('cal-form-tier').value = 'INSTITUTION';
+        document.getElementById('cal-form-desc').value = '';
+        document.getElementById('cal-form-non-inst').checked = false;
+        document.getElementById('cal-form-error').style.display = 'none';
+
+        var defaultDate = datePreFill || formatDateStr(currentYear, currentMonth, 15);
+        document.getElementById('cal-form-start').value = defaultDate;
+        document.getElementById('cal-form-end').value = defaultDate;
+
+        var modal = document.getElementById('modal-calendar-event');
+        modal.classList.add('is-open');
+        modal.style.display = 'flex';
+      };
+
+      window.openEditEventModal = function (eventId) {
+        if (!isAdmin) return;
+        var ev = calendarEvents.find(function (e) { return e.event_id === eventId; });
+        if (!ev) return;
+
+        document.getElementById('cal-modal-title').textContent = 'Edit Calendar Event';
+        document.getElementById('cal-event-id').value = ev.event_id;
+        document.getElementById('cal-form-title').value = ev.title;
+        document.getElementById('cal-form-type').value = ev.event_type;
+        document.getElementById('cal-form-tier').value = ev.audience_tier || 'INSTITUTION';
+        document.getElementById('cal-form-start').value = ev.start_date;
+        document.getElementById('cal-form-end').value = ev.end_date;
+        document.getElementById('cal-form-desc').value = ev.description || '';
+        document.getElementById('cal-form-non-inst').checked = !!ev.is_non_instructional;
+        document.getElementById('cal-form-error').style.display = 'none';
+
+        var modal = document.getElementById('modal-calendar-event');
+        modal.classList.add('is-open');
+        modal.style.display = 'flex';
+      };
+
+      window.closeCalendarEventModal = function () {
+        var modal = document.getElementById('modal-calendar-event');
+        modal.classList.remove('is-open');
+        modal.style.display = 'none';
+      };
+
+      window.onDateCellClick = function (dateStr) {
+        if (!isAdmin) return;
+        window.openCalendarEventModal(dateStr);
+      };
+
+      window.onEventChipClick = function (e, eventId) {
+        e.stopPropagation();
+        if (isAdmin) {
+          window.openEditEventModal(eventId);
+        } else {
+          // Switch to agenda view and highlight
+          var agendaSec = document.getElementById('cal-agenda-section');
+          agendaSec.style.display = 'flex';
+          window.scrollTo({ top: agendaSec.offsetTop - 80, behavior: 'smooth' });
+        }
+      };
+
+      // Handle Event Submit (Add or Edit)
+      window.handleCalendarEventSubmit = function (e) {
+        e.preventDefault();
+        var id = document.getElementById('cal-event-id').value;
+        var title = document.getElementById('cal-form-title').value.trim();
+        var type = document.getElementById('cal-form-type').value;
+        var tier = document.getElementById('cal-form-tier').value;
+        function parseToIsoDate(str) {
+          if (!str) return '';
+          str = str.trim();
+          if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str;
+          var parts = str.split(/[-\/]/);
+          if (parts.length === 3 && parts[2].length === 4) {
+            return parts[2] + '-' + padZero(parseInt(parts[1], 10)) + '-' + padZero(parseInt(parts[0], 10));
+          }
+          return str;
+        }
+
+        start = parseToIsoDate(start);
+        end = parseToIsoDate(end);
+
+        if (!title || !start || !end) {
+          errEl.textContent = 'Please fill in all required fields (Valid dates required).';
+          errEl.style.display = 'block';
+          return;
+        }
+
+        if (end < start) {
+          errEl.textContent = 'End date cannot be earlier than start date.';
+          errEl.style.display = 'block';
+          return;
+        }
+
+        var payload = {
+          title: title,
+          description: desc,
+          start_date: start,
+          end_date: end,
+          event_type: type,
+          audience_tier: tier,
+          is_non_instructional: nonInst
+        };
+
+        var submitBtn = document.getElementById('btn-save-cal-event');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Saving...';
+
+        var url = id ? ('/api/academic/calendar/' + id) : '/api/academic/calendar';
+        var method = id ? 'PUT' : 'POST';
+
+        fetch(url, {
+          method: method,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + (sessionStorage.getItem('attendance_auth_token') || '')
+          },
+          body: JSON.stringify(payload)
+        })
+          .then(function (res) {
+            return res.ok ? res.json() : Promise.reject('Failed to save to server');
+          })
+          .then(function (result) {
+            var saved = result.event || payload;
+            if (id) {
+              var idx = calendarEvents.findIndex(function (ev) { return ev.event_id === id; });
+              if (idx !== -1) {
+                calendarEvents[idx] = Object.assign({}, calendarEvents[idx], saved);
+              }
+              showAdminToast('Event updated: "' + title + '"', 'success');
+            } else {
+              if (!saved.event_id) {
+                saved.event_id = 'e' + Date.now().toString(16);
+              }
+              calendarEvents.push(saved);
+              showAdminToast('Event published: "' + title + '"', 'success');
+            }
+
+            saveEventsLocally();
+            renderMonthGrid(currentYear, currentMonth);
+            renderAgendaList();
+            window.closeCalendarEventModal();
+          })
+          .catch(function () {
+            // Local fallback when backend unavailable
+            if (id) {
+              var idx = calendarEvents.findIndex(function (ev) { return ev.event_id === id; });
+              if (idx !== -1) {
+                calendarEvents[idx] = Object.assign({}, calendarEvents[idx], payload);
+              }
+              showAdminToast('Event updated (local): "' + title + '"', 'success');
+            } else {
+              payload.event_id = 'e' + Date.now().toString(16);
+              calendarEvents.push(payload);
+              showAdminToast('Event published: "' + title + '"', 'success');
+            }
+
+            saveEventsLocally();
+            renderMonthGrid(currentYear, currentMonth);
+            renderAgendaList();
+            window.closeCalendarEventModal();
+          })
+          .finally(function () {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Save & Publish Event';
+          });
+      };
+
+      // Deletion modal
+      window.openDeleteEventModal = function (eventId) {
+        if (!isAdmin) return;
+        var ev = calendarEvents.find(function (e) { return e.event_id === eventId; });
+        if (!ev) return;
+        pendingDeleteEventId = eventId;
+        document.getElementById('delete-event-title-display').textContent = ev.title;
+        var modal = document.getElementById('modal-delete-calendar-event');
+        modal.classList.add('is-open');
+        modal.style.display = 'flex';
+      };
+
+      window.closeDeleteEventModal = function () {
+        pendingDeleteEventId = null;
+        var modal = document.getElementById('modal-delete-calendar-event');
+        modal.classList.remove('is-open');
+        modal.style.display = 'none';
+      };
+
+      window.executeDeleteCalendarEvent = function () {
+        if (!pendingDeleteEventId) return;
+        var id = pendingDeleteEventId;
+        var ev = calendarEvents.find(function (e) { return e.event_id === id; });
+        var title = ev ? ev.title : 'Event';
+
+        var btn = document.getElementById('btn-confirm-delete-event');
+        btn.disabled = true;
+        btn.textContent = 'Deleting...';
+
+        fetch('/api/academic/calendar/' + id, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': 'Bearer ' + (sessionStorage.getItem('attendance_auth_token') || '')
+          }
+        })
+          .then(function () {
+            // Remove from array
+            calendarEvents = calendarEvents.filter(function (e) { return e.event_id !== id; });
+            saveEventsLocally();
+            renderMonthGrid(currentYear, currentMonth);
+            renderAgendaList();
+            showAdminToast('Event removed: "' + title + '"', 'success');
+            window.closeDeleteEventModal();
+          })
+          .catch(function () {
+            // Offline removal
+            calendarEvents = calendarEvents.filter(function (e) { return e.event_id !== id; });
+            saveEventsLocally();
+            renderMonthGrid(currentYear, currentMonth);
+            renderAgendaList();
+            showAdminToast('Event removed: "' + title + '"', 'success');
+            window.closeDeleteEventModal();
+          })
+          .finally(function () {
+            btn.disabled = false;
+            btn.textContent = 'Delete Event';
+          });
+      };
+
+      // Toast notification helper
+      function showAdminToast(msg, type) {
+        var container = document.getElementById('admin-toast-container');
+        if (!container) return;
+
+        var toast = document.createElement('div');
+        toast.className = 'admin-toast ' + (type === 'error' ? 'toast-error' : 'toast-success');
+        toast.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">' +
+          (type === 'error'
+            ? '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>'
+            : '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>') +
+          '</svg>' +
+          '<span>' + msg + '</span>';
+
+        container.appendChild(toast);
+        setTimeout(function () {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(12px)';
+          toast.style.transition = 'all 0.25s ease';
+          setTimeout(function () {
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+          }, 300);
+        }, 3500);
+      }
+
+      // Initial rendering & sync
+      renderMonthGrid(currentYear, currentMonth);
+      renderAgendaList();
+      fetchEventsFromBackend();
+
+    })();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,1006 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Examination Marks Management | Teacher Portal</title>
+  <meta name="description"
+    content="Manage continuous internal assessment marks, assignments, and sessional examination records for assigned student cohorts.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-head">
+    <div class="wrap head-in">
+      <a class="wordmark" href="teacher.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="34" height="34">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+
+      <nav class="head-nav" aria-label="Teacher navigation">
+        <a class="nav-link" href="teacher.html#active-register">Take attendance</a>
+        <a class="nav-link" href="teacher.html#assigned-classes">Assigned classes</a>
+        <a class="nav-link" href="past-registers.html">Past registers</a>
+        <a class="nav-link active" href="teacher-marks.html">Examination marks</a>
+        <a class="nav-link" href="calendar.html">Calendar</a>
+      </nav>
+
+      <div class="head-actions">
+        <div class="user-menu-wrap" id="user-menu-wrap">
+          <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">
+            <div class="user-avatar-circle" id="display-user-avatar">FM</div>
+            <div class="user-avatar-info">
+              <span class="user-avatar-name" id="display-user-name">Faculty Member</span>
+              <span class="user-avatar-role" id="display-user-id">ID: — (Faculty)</span>
+            </div>
+            <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">
+            <div class="user-dropdown-header">
+              <strong id="dropdown-user-name">Faculty Member</strong>
+              <span id="dropdown-user-id">ID: — • Faculty</span>
+            </div>
+            <a class="user-dropdown-item" href="profile.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>View Profile</span>
+            </a>
+            <div class="user-dropdown-divider"></div>
+            <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Sign Out</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Hamburger Button -->
+      <button type="button" class="nav-toggle-btn" id="nav-toggle-btn" aria-label="Open navigation menu"
+        aria-expanded="false" aria-controls="mobile-drawer" onclick="toggleNavDrawer()">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Side Navigation Drawer -->
+  <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" onclick="closeNavDrawer()"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile navigation" aria-hidden="true">
+    <div class="drawer-header">
+      <a class="wordmark" href="teacher.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="30" height="30">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+      <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close navigation"
+        onclick="closeNavDrawer()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="drawer-user-info">
+      <strong id="drawer-user-name">Faculty Member</strong>
+      <span id="drawer-user-id">ID: — (Faculty)</span>
+    </div>
+
+    <nav class="drawer-nav">
+      <a class="drawer-nav-link" href="teacher.html#active-register" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+        <span>Take Attendance</span>
+      </a>
+      <a class="drawer-nav-link" href="teacher.html#assigned-classes" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span>Assigned Classes</span>
+      </a>
+      <a class="drawer-nav-link" href="past-registers.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>Past Registers</span>
+      </a>
+      <a class="drawer-nav-link active" href="teacher-marks.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span>Examination Marks</span>
+      </a>
+      <a class="drawer-nav-link" href="calendar.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Academic Calendar</span>
+      </a>
+    </nav>
+
+    <div class="drawer-footer">
+      <a class="btn btn-sm btn-ink" href="signin.html">Sign Out</a>
+      <div class="drawer-meta">
+        SRHU Attendance Management System<br>
+        portal-support@college.edu
+      </div>
+    </div>
+  </aside>
+
+  <main class="wrap" style="padding-top: 32px; padding-bottom: 64px;">
+
+    <!-- Breadcrumb & Header -->
+    <div style="margin-bottom: 24px;">
+      <p class="label" style="margin-bottom: 6px;">Evaluation & Internal Assessment</p>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h1 class="display" style="font-size: clamp(28px, 4vw, 38px);">Examination Marks Entry</h1>
+          <p style="margin-top: 6px; font-size: 16px; color: var(--muted-light);">
+            Enter, review, and submit continuous internal assessment marks for your assigned subjects and sections.
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-sm" id="btn-open-create-assignment">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px; vertical-align: -2px;">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Create Assignment
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Policy Banner -->
+    <div class="policy-notice-banner">
+      <strong>Institutional Policy:</strong> Subject teachers enter marks only for allocated course cohorts. Raw marks are recorded independently. Assignment and sessional results remain in <strong>Draft</strong> state until submitted. Final semester examination marks are managed exclusively by the College Administration.
+    </div>
+
+    <!-- Filter & Scope Toolbar -->
+    <div class="marks-filter-toolbar">
+      <div class="marks-filter-group">
+        <label class="marks-filter-label" for="filter-session">Academic Session</label>
+        <select class="marks-filter-select" id="filter-session">
+          <option value="Autumn 2026" selected>Autumn 2026</option>
+          <option value="Spring 2026">Spring 2026</option>
+        </select>
+      </div>
+
+      <div class="marks-filter-group">
+        <label class="marks-filter-label" for="filter-class">Assigned Subject & Section</label>
+        <select class="marks-filter-select" id="filter-class">
+          <option value="bca101-a" selected>BCA-101: Programming in C (Sec A)</option>
+          <option value="cs301-b">CS301: Database Management Systems (Sec B)</option>
+        </select>
+      </div>
+
+      <div class="marks-filter-group">
+        <label class="marks-filter-label" for="filter-assessment-select">Active Assessment</label>
+        <select class="marks-filter-select" id="filter-assessment-select">
+          <option value="asn-1" data-cat="assignments" data-max="20" data-status="PUBLISHED">Assignment 1: Pointer Arithmetic (Max: 20)</option>
+          <option value="asn-2" data-cat="assignments" data-max="20" data-status="DRAFT" selected>Assignment 2: Structured Data Types & File I/O (Max: 20)</option>
+          <option value="sess-1" data-cat="sessional1" data-max="30" data-status="PUBLISHED">Sessional 1: Units 1 & 2 Theory (Max: 30)</option>
+          <option value="sess-2" data-cat="sessional2" data-max="30" data-status="SUBMITTED">Sessional 2: Units 3 & 4 Algorithms (Max: 30)</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Category Navigation Sub-bar -->
+    <div class="marks-nav-bar" role="tablist" aria-label="Assessment Category Navigation">
+      <button class="marks-tab-btn active" data-tab="entry-view" role="tab" aria-selected="true">
+        Marks Entry & Roster
+      </button>
+      <button class="marks-tab-btn" data-tab="assignments-view" role="tab" aria-selected="false">
+        All Assignments (2)
+      </button>
+      <button class="marks-tab-btn" data-tab="audit-view" role="tab" aria-selected="false">
+        Submission & Audit History
+      </button>
+    </div>
+
+    <!-- TAB 1: MARKS ENTRY VIEW -->
+    <div id="tab-entry-view" class="marks-tab-pane">
+      <!-- Active Assessment Meta Card -->
+      <div class="marks-summary-grid">
+        <div class="marks-card">
+          <div class="marks-card-title">Assessment Target</div>
+          <div class="marks-card-value" style="font-size: 20px;" id="meta-assessment-title">Assignment 2: Structured Data Types</div>
+          <div class="marks-card-sub" id="meta-subject-section">BCA Semester 1 (Section A)</div>
+        </div>
+
+        <div class="marks-card">
+          <div class="marks-card-title">Maximum Marks</div>
+          <div class="marks-card-value" id="meta-max-marks">20.00</div>
+          <div class="marks-card-sub">Validated ceiling per student</div>
+        </div>
+
+        <div class="marks-card">
+          <div class="marks-card-title">Publication Status</div>
+          <div style="margin-top: 4px;">
+            <span class="badge-status badge-draft" id="meta-status-badge">DRAFT</span>
+          </div>
+          <div class="marks-card-sub" id="meta-status-desc">Visible to subject teacher only</div>
+        </div>
+
+        <div class="marks-card">
+          <div class="marks-card-title">Cohort Progress</div>
+          <div class="marks-card-value" id="meta-progress-count">5 / 5</div>
+          <div class="marks-card-sub">All active students reviewed</div>
+        </div>
+      </div>
+
+      <!-- Action & Notification Bar -->
+      <div id="feedback-alert" class="status info" style="margin-bottom: 20px;" hidden></div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h2 style="font-size: 20px; font-weight: 700;">Student Evaluation Roster</h2>
+          <p style="font-size: 14px; color: var(--muted);">Marks are validated against assessment limits. Non-numeric outcomes must use explicit status codes.</p>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-sm btn-outline" id="btn-save-draft">
+            Save Draft
+          </button>
+          <button type="button" class="btn btn-sm" id="btn-review-submit">
+            Review & Submit Marks
+          </button>
+        </div>
+      </div>
+
+      <!-- Eligible Student Roster Table -->
+      <div class="table-wrap" style="background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--line);">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;" id="marks-roster-table">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--line); background: var(--table-head-bg); color: var(--card-ink);">
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 60px;">Roll</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 120px;">Student ID</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Student Name</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 130px;">Status</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 130px; text-align: right;">Marks Obtained</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 80px; text-align: center;">Max</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 80px; text-align: center;">Pct %</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Evaluation Remarks</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 90px; text-align: center;">Validation</th>
+            </tr>
+          </thead>
+          <tbody id="roster-tbody">
+            <!-- Dynamically populated or static seed rows -->
+            <tr data-student-id="STU-101" data-student-name="Aarav Sharma">
+              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-muted);">01</td>
+              <td style="padding: 10px 14px; font-family: monospace; font-size: 13px; font-weight: 600; color: var(--card-ink);">STU-101</td>
+              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-ink);">Aarav Sharma</td>
+              <td style="padding: 10px 14px;">
+                <select class="marks-status-select row-status">
+                  <option value="PRESENT" selected>PRESENT</option>
+                  <option value="ABSENT">ABSENT</option>
+                  <option value="EXEMPTED">EXEMPTED</option>
+                  <option value="WITHHELD">WITHHELD</option>
+                  <option value="INCOMPLETE">INCOMPLETE</option>
+                </select>
+              </td>
+              <td style="padding: 10px 14px; text-align: right;">
+                <input type="number" class="marks-input row-marks" value="18.5" min="0" max="20" step="0.5">
+              </td>
+              <td style="padding: 10px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">20.0</td>
+              <td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #059669;" class="row-pct">92.5%</td>
+              <td style="padding: 10px 14px;">
+                <input type="text" class="marks-remarks-input row-remarks" value="Clean struct definitions with dynamic pointers" placeholder="Add optional remarks">
+              </td>
+              <td style="padding: 10px 14px; text-align: center;">
+                <span class="row-val-icon" style="color: #059669; font-weight: 700;">Valid</span>
+              </td>
+            </tr>
+
+            <tr data-student-id="STU-102" data-student-name="Marcus Vance">
+              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-muted);">02</td>
+              <td style="padding: 10px 14px; font-family: monospace; font-size: 13px; font-weight: 600; color: var(--card-ink);">STU-102</td>
+              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-ink);">Marcus Vance</td>
+              <td style="padding: 10px 14px;">
+                <select class="marks-status-select row-status">
+                  <option value="PRESENT" selected>PRESENT</option>
+                  <option value="ABSENT">ABSENT</option>
+                  <option value="EXEMPTED">EXEMPTED</option>
+                  <option value="WITHHELD">WITHHELD</option>
+                  <option value="INCOMPLETE">INCOMPLETE</option>
+                </select>
+              </td>
+              <td style="padding: 10px 14px; text-align: right;">
+                <input type="number" class="marks-input row-marks" value="15.0" min="0" max="20" step="0.5">
+              </td>
+              <td style="padding: 10px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">20.0</td>
+              <td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #0284C7;" class="row-pct">75.0%</td>
+              <td style="padding: 10px 14px;">
+                <input type="text" class="marks-remarks-input row-remarks" value="Completed all mandatory modules" placeholder="Add optional remarks">
+              </td>
+              <td style="padding: 10px 14px; text-align: center;">
+                <span class="row-val-icon" style="color: #059669; font-weight: 700;">Valid</span>
+              </td>
+            </tr>
+
+            <tr data-student-id="STU-103" data-student-name="Priya Sharma">
+              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-muted);">03</td>
+              <td style="padding: 10px 14px; font-family: monospace; font-size: 13px; font-weight: 600; color: var(--card-ink);">STU-103</td>
+              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-ink);">Priya Sharma</td>
+              <td style="padding: 10px 14px;">
+                <select class="marks-status-select row-status">
+                  <option value="PRESENT">PRESENT</option>
+                  <option value="ABSENT" selected>ABSENT</option>
+                  <option value="EXEMPTED">EXEMPTED</option>
+                  <option value="WITHHELD">WITHHELD</option>
+                  <option value="INCOMPLETE">INCOMPLETE</option>
+                </select>
+              </td>
+              <td style="padding: 10px 14px; text-align: right;">
+                <input type="number" class="marks-input row-marks" value="" min="0" max="20" step="0.5" disabled placeholder="N/A">
+              </td>
+              <td style="padding: 10px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">20.0</td>
+              <td style="padding: 10px 14px; text-align: center; font-weight: 600; color: var(--card-muted);" class="row-pct">N/A</td>
+              <td style="padding: 10px 14px;">
+                <input type="text" class="marks-remarks-input row-remarks" value="Unexcused absence on evaluation date" placeholder="Add optional remarks">
+              </td>
+              <td style="padding: 10px 14px; text-align: center;">
+                <span class="row-val-icon" style="color: #059669; font-weight: 700;">Valid</span>
+              </td>
+            </tr>
+
+            <tr data-student-id="STU-104" data-student-name="Devon Patel">
+              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-muted);">04</td>
+              <td style="padding: 10px 14px; font-family: monospace; font-size: 13px; font-weight: 600; color: var(--card-ink);">STU-104</td>
+              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-ink);">Devon Patel</td>
+              <td style="padding: 10px 14px;">
+                <select class="marks-status-select row-status">
+                  <option value="PRESENT" selected>PRESENT</option>
+                  <option value="ABSENT">ABSENT</option>
+                  <option value="EXEMPTED">EXEMPTED</option>
+                  <option value="WITHHELD">WITHHELD</option>
+                  <option value="INCOMPLETE">INCOMPLETE</option>
+                </select>
+              </td>
+              <td style="padding: 10px 14px; text-align: right;">
+                <input type="number" class="marks-input row-marks" value="19.0" min="0" max="20" step="0.5">
+              </td>
+              <td style="padding: 10px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">20.0</td>
+              <td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #059669;" class="row-pct">95.0%</td>
+              <td style="padding: 10px 14px;">
+                <input type="text" class="marks-remarks-input row-remarks" value="Outstanding file parsing implementation" placeholder="Add optional remarks">
+              </td>
+              <td style="padding: 10px 14px; text-align: center;">
+                <span class="row-val-icon" style="color: #059669; font-weight: 700;">Valid</span>
+              </td>
+            </tr>
+
+            <tr data-student-id="STU-105" data-student-name="Fatima Al-Mansoor">
+              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-muted);">05</td>
+              <td style="padding: 10px 14px; font-family: monospace; font-size: 13px; font-weight: 600; color: var(--card-ink);">STU-105</td>
+              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-ink);">Fatima Al-Mansoor</td>
+              <td style="padding: 10px 14px;">
+                <select class="marks-status-select row-status">
+                  <option value="PRESENT">PRESENT</option>
+                  <option value="ABSENT">ABSENT</option>
+                  <option value="EXEMPTED" selected>EXEMPTED</option>
+                  <option value="WITHHELD">WITHHELD</option>
+                  <option value="INCOMPLETE">INCOMPLETE</option>
+                </select>
+              </td>
+              <td style="padding: 10px 14px; text-align: right;">
+                <input type="number" class="marks-input row-marks" value="" min="0" max="20" step="0.5" disabled placeholder="N/A">
+              </td>
+              <td style="padding: 10px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">20.0</td>
+              <td style="padding: 10px 14px; text-align: center; font-weight: 600; color: var(--card-muted);" class="row-pct">N/A</td>
+              <td style="padding: 10px 14px;">
+                <input type="text" class="marks-remarks-input row-remarks" value="Approved institutional sports representation duty" placeholder="Add optional remarks">
+              </td>
+              <td style="padding: 10px 14px; text-align: center;">
+                <span class="row-val-icon" style="color: #059669; font-weight: 700;">Valid</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: ALL ASSIGNMENTS VIEW -->
+    <div id="tab-assignments-view" class="marks-tab-pane" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div>
+          <h2 style="font-size: 20px; font-weight: 700;">Subject Assignments Directory</h2>
+          <p style="font-size: 14px; color: var(--muted);">Continuous evaluation assignments configured for BCA Semester 1 Section A.</p>
+        </div>
+        <button type="button" class="btn btn-sm" onclick="document.getElementById('btn-open-create-assignment').click()">
+          Add New Assignment
+        </button>
+      </div>
+
+      <div class="table-wrap" style="background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--line);">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--line); background: var(--table-head-bg); color: var(--card-ink);">
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Assignment Title</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Subject & Section</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); text-align: center;">Max Marks</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Due Date</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); text-align: center;">Status</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--line);">
+              <td style="padding: 12px 14px; font-weight: 600; color: var(--card-ink);">Assignment 1: Pointer Arithmetic & Memory Allocation</td>
+              <td style="padding: 12px 14px; color: var(--card-muted);">BCA-101 (Sec A)</td>
+              <td style="padding: 12px 14px; text-align: center; font-weight: 600; color: var(--card-ink);">20.0</td>
+              <td style="padding: 12px 14px; color: var(--card-muted);">15 Sep 2026</td>
+              <td style="padding: 12px 14px; text-align: center;">
+                <span class="badge-status badge-published">PUBLISHED</span>
+              </td>
+              <td style="padding: 12px 14px; text-align: right;">
+                <button type="button" class="btn btn-sm btn-outline" style="padding: 4px 8px; font-size: 12px;" onclick="loadAssessment('asn-1')">View Marks</button>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 14px; font-weight: 600; color: var(--card-ink);">Assignment 2: Structured Data Types & File I/O</td>
+              <td style="padding: 12px 14px; color: var(--card-muted);">BCA-101 (Sec A)</td>
+              <td style="padding: 12px 14px; text-align: center; font-weight: 600; color: var(--card-ink);">20.0</td>
+              <td style="padding: 12px 14px; color: var(--card-muted);">25 Oct 2026</td>
+              <td style="padding: 12px 14px; text-align: center;">
+                <span class="badge-status badge-draft">DRAFT</span>
+              </td>
+              <td style="padding: 12px 14px; text-align: right;">
+                <button type="button" class="btn btn-sm btn-outline" style="padding: 4px 8px; font-size: 12px;" onclick="loadAssessment('asn-2')">Enter Marks</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 3: SUBMISSION & AUDIT HISTORY -->
+    <div id="tab-audit-view" class="marks-tab-pane" style="display: none;">
+      <div style="margin-bottom: 16px;">
+        <h2 style="font-size: 20px; font-weight: 700; color: var(--card-ink);">Assessment Submission & Audit Trail</h2>
+        <p style="font-size: 14px; color: var(--card-muted);">Cryptographic log of marks submissions, drafts, and institutional reviews.</p>
+      </div>
+
+      <div class="table-wrap" style="background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--line);">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--line); background: var(--table-head-bg); color: var(--card-ink);">
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Timestamp (UTC)</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Assessment</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Action Performed</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Actor</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); text-align: center;">Resulting State</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); font-family: monospace;">SHA-256 Record Hash</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom: 1px solid var(--line);">
+              <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">2026-10-18 14:00:00</td>
+              <td style="padding: 12px 14px; font-weight: 600; color: var(--card-ink);">Sessional 1 (Theory)</td>
+              <td style="padding: 12px 14px; color: var(--card-ink);">Results Published to Students</td>
+              <td style="padding: 12px 14px; color: var(--card-ink);">Dr. Meenakshi Sundaram (FAC-201)</td>
+              <td style="padding: 12px 14px; text-align: center;"><span class="badge-status badge-published">PUBLISHED</span></td>
+              <td style="padding: 12px 14px; font-family: monospace; font-size: 12px; color: var(--accent);">a4f8c9b2...7e11</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--line);">
+              <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">2026-10-17 11:32:15</td>
+              <td style="padding: 12px 14px; font-weight: 600; color: var(--card-ink);">Sessional 2 (Algorithms)</td>
+              <td style="padding: 12px 14px; color: var(--card-ink);">Submitted for Institutional Review</td>
+              <td style="padding: 12px 14px; color: var(--card-ink);">Dr. Meenakshi Sundaram (FAC-201)</td>
+              <td style="padding: 12px 14px; text-align: center;"><span class="badge-status badge-submitted">SUBMITTED</span></td>
+              <td style="padding: 12px 14px; font-family: monospace; font-size: 12px; color: var(--accent);">9d31b0e5...44fa</td>
+            </tr>
+            <tr>
+              <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">2026-09-18 10:00:00</td>
+              <td style="padding: 12px 14px; font-weight: 600; color: var(--card-ink);">Assignment 1</td>
+              <td style="padding: 12px 14px; color: var(--card-ink);">Results Published to Students</td>
+              <td style="padding: 12px 14px; color: var(--card-ink);">Dr. Meenakshi Sundaram (FAC-201)</td>
+              <td style="padding: 12px 14px; text-align: center;"><span class="badge-status badge-published">PUBLISHED</span></td>
+              <td style="padding: 12px 14px; font-family: monospace; font-size: 12px; color: var(--accent);">6c28e1d7...029b</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: CREATE ASSIGNMENT -->
+  <div id="modal-create-assignment" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(10, 20, 40, 0.85); z-index: 99990; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius); width: 100%; max-width: 520px; padding: 28px; box-shadow: 0 16px 36px rgba(0,0,0,0.4); color: var(--card-ink);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="font-size: 20px; font-weight: 700; color: var(--card-ink);">Create Subject Assignment</h3>
+        <button type="button" id="modal-close-btn" style="background: none; border: none; color: var(--card-muted); cursor: pointer; font-size: 20px;">✕</button>
+      </div>
+
+      <form id="form-create-assignment">
+        <div style="margin-bottom: 16px;">
+          <label class="marks-filter-label" style="display: block; margin-bottom: 6px; color: var(--card-ink); font-weight: 600;">Subject & Section</label>
+          <select class="marks-filter-select" id="new-asn-class" required>
+            <option value="bca101-a">BCA-101: Programming in C (Section A)</option>
+            <option value="cs301-b">CS301: Database Management Systems (Section B)</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label class="marks-filter-label" style="display: block; margin-bottom: 6px; color: var(--card-ink); font-weight: 600;">Assignment Title</label>
+          <input type="text" class="marks-filter-input" id="new-asn-title" placeholder="e.g. Assignment 3: Binary Search Trees" required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div>
+            <label class="marks-filter-label" style="display: block; margin-bottom: 6px; color: var(--card-ink); font-weight: 600;">Maximum Marks</label>
+            <input type="number" class="marks-filter-input" id="new-asn-max" value="20" min="1" max="100" step="1" required>
+          </div>
+          <div>
+            <label class="marks-filter-label" style="display: block; margin-bottom: 6px; color: var(--card-ink); font-weight: 600;">Submission Due Date</label>
+            <input type="date" class="marks-filter-input" id="new-asn-due" value="2026-11-15" required>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+          <button type="button" class="btn btn-sm btn-outline" id="modal-cancel-btn">Cancel</button>
+          <button type="submit" class="btn btn-sm">Create & Open Roster</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: REVIEW & CONFIRM SUBMISSION -->
+  <div id="modal-review-submit" class="modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(10, 20, 40, 0.85); z-index: 99990; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius); width: 100%; max-width: 540px; padding: 28px; box-shadow: 0 16px 36px rgba(0,0,0,0.4); color: var(--card-ink);">
+      <h3 style="font-size: 20px; font-weight: 700; margin-bottom: 12px; color: var(--card-ink);">Confirm Marks Submission</h3>
+      <p style="font-size: 14px; color: var(--card-muted); line-height: 1.5; margin-bottom: 18px;">
+        You are about to submit marks for <strong id="review-modal-target" style="color: var(--card-ink);">Assignment 2: Structured Data Types</strong>.
+        Please verify the evaluation summary:
+      </p>
+
+      <div style="background: #F8FAFC; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 20px; color: var(--card-ink);">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 14px;">
+          <div>Total Eligible Cohort: <strong style="color: var(--card-ink);">5 Students</strong></div>
+          <div>Present with Marks: <strong style="color: #059669;" id="review-stat-present">3 Students</strong></div>
+          <div>Recorded Absences: <strong style="color: #DC2626;" id="review-stat-absent">1 Student</strong></div>
+          <div>Exemptions Granted: <strong style="color: #7C3AED;" id="review-stat-exempt">1 Student</strong></div>
+        </div>
+        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; color: var(--card-muted);">
+          Row Validation Checks: <strong style="color: #059669;">100% Passed (0 Errors)</strong>
+        </div>
+      </div>
+
+      <p style="font-size: 13px; color: var(--card-muted); margin-bottom: 22px;">
+        Upon submission, records transition to <strong style="color: var(--card-ink);">SUBMITTED</strong> state and will be recorded in the linear SHA-256 cryptographic audit chain.
+      </p>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn btn-sm btn-outline" id="review-cancel-btn">Back to Editing</button>
+        <button type="button" class="btn btn-sm" id="review-confirm-btn">Confirm & Submit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Site Footer -->
+  <footer class="site-foot" role="contentinfo">
+    <div class="wrap">
+      <div class="foot-top">
+        <div class="foot-brand">
+          <a class="foot-logo" href="index.html">
+            <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="26" height="26">
+            <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+          </a>
+          <p class="foot-desc">
+            Official Academic Attendance and Examination Marks Management System. Department of Computer Applications, Swami Rama Himalayan University (SRHU).
+          </p>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Navigation</h4>
+          <ul class="foot-nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="student.html">Student Portal</a></li>
+            <li><a href="teacher.html">Teacher Portal</a></li>
+            <li><a href="student-marks.html">Examination Marks</a></li>
+            <li><a href="calendar.html">Academic Calendar</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Academic Services</h4>
+          <ul class="foot-nav-list">
+            <li><a href="profile.html">Profile &amp; Security</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms &amp; Conditions</a></li>
+            <li><a href="signin.html">Account Sign In</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Support &amp; Helpdesk</h4>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <a href="mailto:portal-support@college.edu">portal-support@college.edu</a>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>IT Centre, Academic Block II</span>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Mon – Fri: 08:30 – 17:00 IST</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot-bottom">
+        <p class="foot-copy">
+          &copy; 2026 College Attendance Management System. All rights reserved.
+        </p>
+        <div class="foot-policy-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="terms.html">Terms of Service</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="calendar.html">Academic Calendar</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="signin.html">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="site.js" defer></script>
+  <script>
+    (function () {
+      'use strict';
+
+      // 1. Session user reflection
+      var storedId = sessionStorage.getItem('attendance_user_id');
+      var storedName = sessionStorage.getItem('attendance_user_name');
+      if (storedName) {
+        var n1 = document.getElementById('display-user-name');
+        if (n1) n1.textContent = storedName;
+        var n2 = document.getElementById('dropdown-user-name');
+        if (n2) n2.textContent = storedName;
+        var n3 = document.getElementById('drawer-user-name');
+        if (n3) n3.textContent = storedName;
+      }
+      if (storedId) {
+        var el = document.getElementById('display-user-id');
+        if (el) el.textContent = 'ID: ' + storedId + ' (Teacher)';
+        var del = document.getElementById('drawer-user-id');
+        if (del) del.textContent = 'ID: ' + storedId + ' (Teacher)';
+      }
+
+      // 2. Tab Navigation
+      var tabBtns = document.querySelectorAll('.marks-tab-btn');
+      var tabPanes = document.querySelectorAll('.marks-tab-pane');
+
+      Array.prototype.forEach.call(tabBtns, function (btn) {
+        btn.addEventListener('click', function () {
+          var targetTab = btn.getAttribute('data-tab');
+
+          Array.prototype.forEach.call(tabBtns, function (b) {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+
+          Array.prototype.forEach.call(tabPanes, function (pane) {
+            if (pane.id === 'tab-' + targetTab) {
+              pane.style.display = 'block';
+            } else {
+              pane.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // 3. Assessment Switching
+      var assessSelect = document.getElementById('filter-assessment-select');
+      var metaTitle = document.getElementById('meta-assessment-title');
+      var metaMax = document.getElementById('meta-max-marks');
+      var metaStatusBadge = document.getElementById('meta-status-badge');
+      var reviewModalTarget = document.getElementById('review-modal-target');
+
+      function updateActiveAssessment() {
+        var opt = assessSelect.options[assessSelect.selectedIndex];
+        var titleText = opt.text.split('(')[0].trim();
+        var maxMarks = opt.getAttribute('data-max') || '20';
+        var status = opt.getAttribute('data-status') || 'DRAFT';
+
+        if (metaTitle) metaTitle.textContent = titleText;
+        if (metaMax) metaMax.textContent = parseFloat(maxMarks).toFixed(2);
+        if (reviewModalTarget) reviewModalTarget.textContent = titleText;
+
+        if (metaStatusBadge) {
+          metaStatusBadge.textContent = status;
+          metaStatusBadge.className = 'badge-status badge-' + status.toLowerCase();
+        }
+
+        // Update roster table max limits
+        var maxCells = document.querySelectorAll('#marks-roster-table tbody tr td:nth-child(6)');
+        Array.prototype.forEach.call(maxCells, function (td) {
+          td.textContent = parseFloat(maxMarks).toFixed(1);
+        });
+
+        var inputs = document.querySelectorAll('.row-marks');
+        Array.prototype.forEach.call(inputs, function (inp) {
+          inp.max = maxMarks;
+          validateRow(inp.closest('tr'));
+        });
+      }
+
+      if (assessSelect) {
+        assessSelect.addEventListener('change', updateActiveAssessment);
+      }
+
+      window.loadAssessment = function (val) {
+        if (assessSelect) {
+          assessSelect.value = val;
+          updateActiveAssessment();
+          document.querySelector('[data-tab="entry-view"]').click();
+        }
+      };
+
+      // 4. Row Level Validation & Realtime Percentage Calculation
+      function validateRow(tr) {
+        if (!tr) return;
+        var statusSel = tr.querySelector('.row-status');
+        var marksInput = tr.querySelector('.row-marks');
+        var pctEl = tr.querySelector('.row-pct');
+        var valIcon = tr.querySelector('.row-val-icon');
+        var maxMarks = parseFloat(metaMax ? metaMax.textContent : '20');
+
+        var currentStatus = statusSel.value;
+
+        if (currentStatus !== 'PRESENT') {
+          marksInput.disabled = true;
+          marksInput.value = '';
+          marksInput.classList.remove('is-invalid');
+          if (pctEl) {
+            pctEl.textContent = 'N/A';
+            pctEl.style.color = 'var(--muted)';
+          }
+          if (valIcon) {
+            valIcon.textContent = 'Valid (' + currentStatus + ')';
+            valIcon.style.color = '#10B981';
+          }
+          return true;
+        }
+
+        marksInput.disabled = false;
+        var val = parseFloat(marksInput.value);
+
+        if (isNaN(val) || val < 0 || val > maxMarks) {
+          marksInput.classList.add('is-invalid');
+          if (pctEl) {
+            pctEl.textContent = 'Error';
+            pctEl.style.color = '#EF4444';
+          }
+          if (valIcon) {
+            valIcon.textContent = 'Limit Exceeded';
+            valIcon.style.color = '#EF4444';
+          }
+          return false;
+        }
+
+        marksInput.classList.remove('is-invalid');
+        var pct = ((val / maxMarks) * 100).toFixed(1);
+        if (pctEl) {
+          pctEl.textContent = pct + '%';
+          pctEl.style.color = pct >= 75 ? '#059669' : (pct >= 50 ? '#0284C7' : '#D97706');
+        }
+        if (valIcon) {
+          valIcon.textContent = 'Valid';
+          valIcon.style.color = '#059669';
+        }
+        return true;
+      }
+
+      var rows = document.querySelectorAll('#marks-roster-table tbody tr');
+      Array.prototype.forEach.call(rows, function (tr) {
+        var statusSel = tr.querySelector('.row-status');
+        var marksInput = tr.querySelector('.row-marks');
+
+        if (statusSel) {
+          statusSel.addEventListener('change', function () {
+            validateRow(tr);
+          });
+        }
+        if (marksInput) {
+          marksInput.addEventListener('input', function () {
+            validateRow(tr);
+          });
+        }
+      });
+
+      // 5. Save Draft Action
+      var feedbackAlert = document.getElementById('feedback-alert');
+      var saveDraftBtn = document.getElementById('btn-save-draft');
+
+      if (saveDraftBtn) {
+        saveDraftBtn.addEventListener('click', function () {
+          var allValid = true;
+          Array.prototype.forEach.call(rows, function (tr) {
+            if (!validateRow(tr)) allValid = false;
+          });
+
+          if (!allValid) {
+            feedbackAlert.className = 'status error';
+            feedbackAlert.textContent = 'Validation error: Please correct row entries with invalid marks before saving.';
+            feedbackAlert.hidden = false;
+            return;
+          }
+
+          saveDraftBtn.disabled = true;
+          saveDraftBtn.textContent = 'Saving...';
+
+          setTimeout(function () {
+            saveDraftBtn.disabled = false;
+            saveDraftBtn.textContent = 'Save Draft';
+            feedbackAlert.className = 'status info';
+            feedbackAlert.textContent = 'Draft entries saved transactionally. You may continue editing or submit when finalized.';
+            feedbackAlert.hidden = false;
+            window.scrollTo({ top: 120, behavior: 'smooth' });
+          }, 400);
+        });
+      }
+
+      // 6. Review & Submit Modal
+      var reviewModal = document.getElementById('modal-review-submit');
+      var reviewSubmitBtn = document.getElementById('btn-review-submit');
+      var reviewCancelBtn = document.getElementById('review-cancel-btn');
+      var reviewConfirmBtn = document.getElementById('review-confirm-btn');
+
+      if (reviewSubmitBtn) {
+        reviewSubmitBtn.addEventListener('click', function () {
+          var hasErrors = false;
+          var presentCount = 0;
+          var absentCount = 0;
+          var exemptCount = 0;
+
+          Array.prototype.forEach.call(rows, function (tr) {
+            if (!validateRow(tr)) hasErrors = true;
+            var st = tr.querySelector('.row-status').value;
+            if (st === 'PRESENT') presentCount++;
+            else if (st === 'ABSENT') absentCount++;
+            else if (st === 'EXEMPTED') exemptCount++;
+          });
+
+          if (hasErrors) {
+            feedbackAlert.className = 'status error';
+            feedbackAlert.textContent = 'Cannot submit: Roster contains invalid marks entries exceeding maximum ceiling.';
+            feedbackAlert.hidden = false;
+            return;
+          }
+
+          document.getElementById('review-stat-present').textContent = presentCount + ' Students';
+          document.getElementById('review-stat-absent').textContent = absentCount + ' Student';
+          document.getElementById('review-stat-exempt').textContent = exemptCount + ' Student';
+
+          reviewModal.style.display = 'flex';
+        });
+      }
+
+      if (reviewCancelBtn) {
+        reviewCancelBtn.addEventListener('click', function () {
+          reviewModal.style.display = 'none';
+        });
+      }
+
+      if (reviewConfirmBtn) {
+        reviewConfirmBtn.addEventListener('click', function () {
+          reviewConfirmBtn.disabled = true;
+          reviewConfirmBtn.textContent = 'Submitting...';
+
+          setTimeout(function () {
+            reviewConfirmBtn.disabled = false;
+            reviewConfirmBtn.textContent = 'Confirm & Submit';
+            reviewModal.style.display = 'none';
+
+            metaStatusBadge.textContent = 'SUBMITTED';
+            metaStatusBadge.className = 'badge-status badge-submitted';
+
+            feedbackAlert.className = 'status info';
+            feedbackAlert.textContent = 'Assessment marks submitted successfully for institutional review. Record logged to cryptographic audit chain.';
+            feedbackAlert.hidden = false;
+            window.scrollTo({ top: 120, behavior: 'smooth' });
+          }, 600);
+        });
+      }
+
+      // 7. Create Assignment Modal
+      var createModal = document.getElementById('modal-create-assignment');
+      var openCreateBtn = document.getElementById('btn-open-create-assignment');
+      var closeCreateBtn = document.getElementById('modal-close-btn');
+      var cancelCreateBtn = document.getElementById('modal-cancel-btn');
+      var createForm = document.getElementById('form-create-assignment');
+
+      if (openCreateBtn) {
+        openCreateBtn.addEventListener('click', function () {
+          createModal.style.display = 'flex';
+        });
+      }
+
+      function closeCreateModal() {
+        if (createModal) createModal.style.display = 'none';
+      }
+
+      if (closeCreateBtn) closeCreateBtn.addEventListener('click', closeCreateModal);
+      if (cancelCreateBtn) cancelCreateBtn.addEventListener('click', closeCreateModal);
+
+      if (createForm) {
+        createForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          var titleVal = document.getElementById('new-asn-title').value.trim();
+          var maxVal = document.getElementById('new-asn-max').value;
+
+          if (!titleVal) return;
+
+          // Add to active options
+          var newOpt = document.createElement('option');
+          newOpt.value = 'asn-' + Date.now();
+          newOpt.setAttribute('data-cat', 'assignments');
+          newOpt.setAttribute('data-max', maxVal);
+          newOpt.setAttribute('data-status', 'DRAFT');
+          newOpt.textContent = titleVal + ' (Max: ' + maxVal + ')';
+          newOpt.selected = true;
+
+          assessSelect.appendChild(newOpt);
+          updateActiveAssessment();
+
+          closeCreateModal();
+          createForm.reset();
+
+          feedbackAlert.className = 'status info';
+          feedbackAlert.textContent = 'New assignment "' + titleVal + '" initialized in DRAFT state. You can now enter student marks.';
+          feedbackAlert.hidden = false;
+        });
+      }
+
+      // Initial validation pass
+      updateActiveAssessment();
+    })();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,1118 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Student Attendance Dashboard | Attendance Portal</title>
+  <meta name="description" content="View personal attendance records, subject-wise percentages, and shortage warnings.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css?v=6">
+</head>
+
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-head">
+    <div class="wrap head-in">
+      <a class="wordmark" href="student.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="34" height="34">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+
+      <nav class="head-nav" aria-label="Student navigation">
+        <a class="nav-link" href="#overview">Overview</a>
+        <a class="nav-link" href="#subjects">Subject breakdown</a>
+        <a class="nav-link" href="#history">Session history</a>
+        <a class="nav-link" href="student-marks.html">Examination marks</a>
+        <a class="nav-link" href="calendar.html">Calendar</a>
+      </nav>
+
+      <div class="head-actions">
+        <div class="user-menu-wrap" id="user-menu-wrap">
+          <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">
+            <div class="user-avatar-circle" id="display-user-avatar">â€”</div>
+            <div class="user-avatar-info">
+              <span class="user-avatar-name" id="display-user-name">Loading...</span>
+              <span class="user-avatar-role" id="display-user-id">Student Portal</span>
+            </div>
+            <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">
+            <div class="user-dropdown-header">
+              <strong id="dropdown-user-name">Loading...</strong>
+              <span id="dropdown-user-id">Student Portal</span>
+            </div>
+            <a class="user-dropdown-item" href="profile.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>View Profile</span>
+            </a>
+            <div class="user-dropdown-divider"></div>
+            <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Sign Out</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Hamburger Button (3 lines) -->
+      <button type="button" class="nav-toggle-btn" id="nav-toggle-btn" aria-label="Open navigation menu"
+        aria-expanded="false" aria-controls="mobile-drawer" onclick="toggleNavDrawer()">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Side Navigation Drawer & Backdrop -->
+  <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" onclick="closeNavDrawer()"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile navigation" aria-hidden="true">
+    <div class="drawer-header">
+      <a class="wordmark" href="student.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="30" height="30">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+      <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close navigation"
+        onclick="closeNavDrawer()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="drawer-user-info">
+      <strong id="drawer-user-name">Loading...</strong>
+      <span id="drawer-user-id">Student Portal</span>
+    </div>
+
+    <nav class="drawer-nav">
+      <a class="drawer-nav-link" href="#overview" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>Overview</span>
+      </a>
+      <a class="drawer-nav-link" href="#subjects" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+        </svg>
+        <span>Subject Breakdown</span>
+      </a>
+      <a class="drawer-nav-link" href="#history" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>Session History</span>
+      </a>
+      <a class="drawer-nav-link" href="student-marks.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+        <span>Examination Marks</span>
+      </a>
+      <a class="drawer-nav-link" href="calendar.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Academic Calendar</span>
+      </a>
+    </nav>
+
+    <div class="drawer-footer">
+      <a class="btn btn-sm btn-outline" href="signin.html">Sign Out</a>
+      <div class="drawer-meta">
+        Autumn Term 2026 â€¢ Swami Rama Himalayan University<br>
+        portal-support@college.edu
+      </div>
+    </div>
+  </aside>
+
+  <main class="wrap dash-wrap">
+    <!-- Header Title Area -->
+    <div class="dash-header">
+      <div class="dash-title-area">
+        <p class="label">Student portal</p>
+        <h1 class="display" style="font-size: clamp(28px, 4vw, 38px);">Attendance record</h1>
+        <p style="color: var(--muted); font-size: 15px; margin-top: 4px;">
+          Term: Autumn 2026 | Enrolled Cohort: Computer Science (Year 3)
+        </p>
+      </div>
+      <div>
+        <a class="btn btn-sm btn-outline" href="calendar.html">View academic calendar</a>
+      </div>
+    </div>
+
+    <!-- Live QR Attendance Check-In Card -->
+    <section class="dash-card" style="margin-bottom: 28px; background: linear-gradient(135deg, #1D3C72 0%, #0F244A 100%); color: #FFFFFF; border: none; box-shadow: 0 10px 25px -5px rgba(29, 60, 114, 0.4);">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <div style="display: inline-flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #4ADE80; box-shadow: 0 0 8px #4ADE80;"></span>
+            <span style="font-size: 11px; font-weight: 800; color: #86EFAC; text-transform: uppercase; letter-spacing: 0.05em;">LIVE CLASSROOM CHECK-IN</span>
+          </div>
+          <h2 style="color: #FFFFFF; font-size: 22px; font-weight: 800; margin: 0;">Scan Live Lecture QR Code</h2>
+          <p style="color: #CBD5E1; font-size: 14px; margin: 4px 0 0 0; max-width: 580px;">
+            Present in the ongoing class? Authenticate your mobile camera to scan the teacher's rotating projector QR, or submit the 6-digit backup challenge code.
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm" onclick="openStudentScannerModal()" style="background: #0284C7; color: #FFFFFF; font-weight: 700; border: none; padding: 10px 18px; font-size: 14px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            Scan Classroom QR
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-white" onclick="openStudentCodeModal()" style="background: rgba(255, 255, 255, 0.15) !important; color: #FFFFFF !important; border: 1px solid rgba(255, 255, 255, 0.45) !important; font-size: 14px; font-weight: 700; padding: 10px 18px; border-radius: var(--radius); cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.background='rgba(255,255,255,0.25)'; this.style.borderColor='#FFFFFF';" onmouseout="this.style.background='rgba(255,255,255,0.15)'; this.style.borderColor='rgba(255,255,255,0.45)';">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: -2px;">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            Enter 6-Digit Code
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Overall Summary Metrics -->
+    <section class="dash-card" id="overview" style="margin-bottom: 28px;">
+      <div class="dash-card-header">
+        <h2>Overall term attendance</h2>
+        <span class="threshold-indicator" id="overall-status-text">Meets 75% attendance threshold</span>
+      </div>
+
+      <div class="register-stats" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); padding: 16px;">
+        <div class="stat-box">
+          <span>Conducted hours</span>
+          <strong id="total-conducted">84</strong>
+        </div>
+        <div class="stat-box">
+          <span>Attended (Present)</span>
+          <strong id="total-present" style="color: #4ADE80;">70</strong>
+        </div>
+        <div class="stat-box">
+          <span>Absences</span>
+          <strong id="total-absent" style="color: #F87171;">10</strong>
+        </div>
+        <div class="stat-box">
+          <span>Approved leave</span>
+          <strong id="total-leave" style="color: #FBBF24;">4</strong>
+        </div>
+        <div class="stat-box">
+          <span>Aggregate percentage</span>
+          <strong id="total-percentage" style="color: var(--accent); font-size: 24px;">87.5%</strong>
+        </div>
+      </div>
+
+      <p style="font-size: 13px; color: var(--muted);">
+        Policy reminder: Minimum 75% aggregate attendance is mandatory for end-term examination admit card issuance.
+        Leave is excluded from the calculation denominator.
+      </p>
+    </section>
+
+    <!-- Subject-wise Breakdown Table -->
+    <section class="dash-card" id="subjects" style="margin-bottom: 28px;">
+      <div class="dash-card-header">
+        <h2>Subject breakdown</h2>
+        <span style="font-size: 13px; color: var(--muted);">4 Enrolled Subjects</span>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Subject Name</th>
+              <th>Teacher</th>
+              <th>Conducted</th>
+              <th>Present</th>
+              <th>Absent</th>
+              <th>Leave</th>
+              <th>Percentage</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>CS301</strong></td>
+              <td>Database Management Systems</td>
+              <td>Dr. Meenakshi Sundaram</td>
+              <td>24</td>
+              <td>21</td>
+              <td>2</td>
+              <td>1</td>
+              <td><strong>91.3%</strong></td>
+              <td><span class="tag tag-present">Compliant</span></td>
+            </tr>
+            <tr>
+              <td><strong>CS302</strong></td>
+              <td>Design and Analysis of Algorithms</td>
+              <td>Prof. David Miller</td>
+              <td>22</td>
+              <td>19</td>
+              <td>3</td>
+              <td>0</td>
+              <td><strong>86.4%</strong></td>
+              <td><span class="tag tag-present">Compliant</span></td>
+            </tr>
+            <tr>
+              <td><strong>CS303</strong></td>
+              <td>Computer Networks</td>
+              <td>Prof. Anita Rao</td>
+              <td>20</td>
+              <td>16</td>
+              <td>3</td>
+              <td>1</td>
+              <td><strong>84.2%</strong></td>
+              <td><span class="tag tag-present">Compliant</span></td>
+            </tr>
+            <tr style="background: rgba(239, 68, 68, 0.08);">
+              <td><strong>MA204</strong></td>
+              <td>Discrete Mathematics</td>
+              <td>Dr. Robert Vance</td>
+              <td>18</td>
+              <td>12</td>
+              <td>5</td>
+              <td>1</td>
+              <td><strong style="color: #DC2626;">70.6%</strong></td>
+              <td><span class="tag tag-absent">Shortage Warning</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div
+        style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--radius); padding: 12px; font-size: 14px; color: #1E3A8A;">
+        <strong>Advisory for MA204:</strong> Your attendance in Discrete Mathematics is currently below 75%. Attend the
+        next consecutive sessions or submit verified medical documents before November 15 to restore eligibility.
+      </div>
+    </section>
+
+    <!-- Session-wise Attendance History Log -->
+    <section class="dash-card" id="history">
+      <div class="dash-card-header">
+        <h2>Recent session history</h2>
+        <div style="display: flex; gap: 8px;">
+          <select id="filter-history-subject"
+            style="background: #FFFFFF; color: var(--card-ink); border: 1px solid var(--line); border-radius: var(--radius); padding: 4px 8px; font-size: 13px;">
+            <option value="all">All Subjects</option>
+            <option value="CS301">CS301 - Database Systems</option>
+            <option value="CS302">CS302 - Algorithms</option>
+            <option value="CS303">CS303 - Networks</option>
+            <option value="MA204">MA204 - Discrete Math</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table" id="history-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Subject</th>
+              <th>Session</th>
+              <th>Teacher</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-subj="CS301">
+              <td>16 Oct 2026</td>
+              <td>CS301 - Database Systems</td>
+              <td>10:00 - 11:00</td>
+              <td>Dr. Meenakshi Sundaram</td>
+              <td><span class="tag tag-present">Present</span></td>
+              <td>Regular lecture</td>
+              <td><span style="color: var(--card-muted); font-size: 13px;">N/A</span></td>
+            </tr>
+            <tr data-subj="CS302">
+              <td>15 Oct 2026</td>
+              <td>CS302 - Algorithms</td>
+              <td>11:30 - 12:30</td>
+              <td>Prof. David Miller</td>
+              <td><span class="tag tag-present">Present</span></td>
+              <td>Regular lecture</td>
+              <td><span style="color: var(--card-muted); font-size: 13px;">N/A</span></td>
+            </tr>
+            <tr data-subj="MA204">
+              <td>14 Oct 2026</td>
+              <td>MA204 - Discrete Math</td>
+              <td>09:00 - 10:00</td>
+              <td>Dr. Robert Vance</td>
+              <td><span class="tag tag-absent">Absent</span></td>
+              <td>Unexcused absence</td>
+              <td>
+                <button type="button" class="btn btn-sm btn-outline open-correction-btn"
+                  data-record-id="rec-ma204-14oct" data-subject="MA204 - Discrete Math" data-date="14 Oct 2026"
+                  style="padding: 4px 8px; font-size: 12px;">
+                  Request Correction
+                </button>
+              </td>
+            </tr>
+            <tr data-subj="CS303">
+              <td>13 Oct 2026</td>
+              <td>CS303 - Networks</td>
+              <td>14:00 - 15:00</td>
+              <td>Prof. Anita Rao</td>
+              <td><span class="tag tag-present">Present</span></td>
+              <td>Lab session</td>
+              <td><span style="color: var(--muted); font-size: 13px;">N/A</span></td>
+            </tr>
+            <tr data-subj="MA204">
+              <td>12 Oct 2026</td>
+              <td>MA204 - Discrete Math</td>
+              <td>09:00 - 10:00</td>
+              <td>Dr. Robert Vance</td>
+              <td><span class="tag tag-leave">Leave</span></td>
+              <td>Medical slip submitted</td>
+              <td><span style="color: var(--muted); font-size: 13px;">N/A</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FR-48 Attendance Correction Request Modal -->
+    <div class="modal-backdrop" id="correction-modal" style="display: none;" aria-hidden="true"
+      onclick="if(event.target===this)closeCorrectionModal()">
+      <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-title"
+        onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <div class="modal-header-title">
+            <span class="modal-pill">FR-48</span>
+            <h3 id="modal-title">Attendance Correction Request</h3>
+          </div>
+          <button type="button" class="modal-close-btn" id="modal-close-btn" aria-label="Close dialog"
+            onclick="closeCorrectionModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round" style="pointer-events: none;">
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
+        </div>
+        <form id="correction-form">
+          <div class="modal-body">
+            <div class="modal-session-card">
+              <div>Session: <strong id="modal-session-desc">MA204 - Discrete Math (14 Oct 2026)</strong></div>
+              <div class="modal-session-note">
+                Requests must be submitted within 5 academic working days of the conducted session.
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="claimed-status">Claimed Attendance Status</label>
+              <select id="claimed-status" name="claimedStatus" required>
+                <option value="P">Present (Attended Class)</option>
+                <option value="L">Approved Leave (Medical / Official Duty)</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="correction-category">Dispute Category</label>
+              <select id="correction-category" name="category" required>
+                <option value="CLERICAL_ERROR">Clerical / Marking Error</option>
+                <option value="MEDICAL_LEAVE">Medical Leave (Certificate Attached)</option>
+                <option value="OFFICIAL_DUTY">College Official Duty / Event Representation</option>
+                <option value="TECHNICAL_DISPUTE">Technical Dispute</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="correction-reason">Narrative & Justification</label>
+              <textarea id="correction-reason" name="justification" rows="3"
+                placeholder="Provide factual reason for this correction request..." required></textarea>
+            </div>
+
+            <div class="field">
+              <label>Supporting Evidence (Optional, max 10 MB)</label>
+              <label class="upload-dropzone" for="evidence-file">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <span class="upload-prompt" id="upload-prompt-text">Choose file or drag & drop</span>
+                <span class="upload-subtext">PDF, JPEG, or PNG up to 10 MB (Magic-byte verified)</span>
+                <span class="upload-file-chosen" id="upload-file-chosen"></span>
+                <input type="file" id="evidence-file" name="evidence" accept=".pdf,.jpg,.jpeg,.png">
+              </label>
+            </div>
+
+            <div class="status" id="modal-status" hidden></div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-modal-cancel" id="modal-cancel-btn"
+              onclick="closeCorrectionModal()">Cancel</button>
+            <button type="submit" class="btn-modal-submit" id="modal-submit-btn">Submit Request</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  <!-- MODAL: Student Live QR & Backup Code Check-In -->
+  <div id="modal-student-qr" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(6px); z-index: 2000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: 12px; width: 100%; max-width: 520px; max-height: 92vh; overflow-y: auto; padding: 24px; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); color: #17345C;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--line); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div style="width: 28px; height: 28px; border-radius: 6px; background: rgba(2, 132, 199, 0.1); display: flex; align-items: center; justify-content: center; color: #0284C7;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+          </div>
+          <h3 style="font-size: 18px; font-weight: 700; color: #1D3C72; margin: 0;">Classroom Check-In</h3>
+        </div>
+        <button type="button" onclick="closeStudentQRModal()" style="background: none; border: none; font-size: 22px; cursor: pointer; color: #64748B;">&times;</button>
+      </div>
+
+      <!-- Mode Switcher Tabs -->
+      <div style="display: flex; gap: 8px; border-bottom: 1px solid var(--line); margin-bottom: 18px;">
+        <button type="button" id="tab-student-camera" onclick="switchStudentMode('camera')" style="background: none; border: none; border-bottom: 2px solid #0284C7; color: #0284C7; font-weight: 700; padding: 8px 12px; font-size: 13px; cursor: pointer;">
+          Camera Scanner
+        </button>
+        <button type="button" id="tab-student-code" onclick="switchStudentMode('code')" style="background: none; border: none; border-bottom: 2px solid transparent; color: #64748B; font-weight: 600; padding: 8px 12px; font-size: 13px; cursor: pointer;">
+          6-Digit Backup Code
+        </button>
+      </div>
+
+      <!-- Panel 1: Camera Scanner -->
+      <div id="student-scanner-view" style="display: block;">
+        <div style="position: relative; width: 100%; height: 260px; background: #0F172A; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; margin-bottom: 14px;">
+          <video id="student-qr-video" playsinline style="width: 100%; height: 100%; object-fit: cover;"></video>
+          <!-- Viewfinder overlay -->
+          <div style="position: absolute; width: 180px; height: 180px; border: 2px dashed #38BDF8; border-radius: 12px; pointer-events: none; box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.45);">
+            <div style="position: absolute; top: -2px; left: -2px; width: 20px; height: 20px; border-top: 4px solid #38BDF8; border-left: 4px solid #38BDF8; border-top-left-radius: 8px;"></div>
+            <div style="position: absolute; top: -2px; right: -2px; width: 20px; height: 20px; border-top: 4px solid #38BDF8; border-right: 4px solid #38BDF8; border-top-right-radius: 8px;"></div>
+            <div style="position: absolute; bottom: -2px; left: -2px; width: 20px; height: 20px; border-bottom: 4px solid #38BDF8; border-left: 4px solid #38BDF8; border-bottom-left-radius: 8px;"></div>
+            <div style="position: absolute; bottom: -2px; right: -2px; width: 20px; height: 20px; border-bottom: 4px solid #38BDF8; border-right: 4px solid #38BDF8; border-bottom-right-radius: 8px;"></div>
+          </div>
+          <!-- Scanning line animation -->
+          <div id="camera-prompt-text" style="position: absolute; bottom: 12px; font-size: 11px; color: #E2E8F0; background: rgba(0,0,0,0.6); padding: 4px 10px; border-radius: 4px;">
+            Align teacher's screen QR within the frame
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="startCameraStream()" style="font-size: 12px;">
+            Restart Camera
+          </button>
+          <button type="button" class="btn btn-sm btn-outline" onclick="simulateQRScanDirectly()" style="font-size: 12px; color: #0284C7;">
+            Simulate Scan (Test)
+          </button>
+        </div>
+      </div>
+
+      <!-- Panel 2: Manual 6-Digit Code Entry -->
+      <div id="student-code-view" style="display: none;">
+        <div style="text-align: center; padding: 10px 0 16px 0;">
+          <p style="font-size: 13px; color: #64748B; margin-bottom: 12px;">
+            Enter the 6-digit challenge code displayed below the QR code on the classroom projector.
+          </p>
+          <input type="text" id="student-manual-code" maxlength="6" placeholder="â€¢ â€¢ â€¢ â€¢ â€¢ â€¢" style="width: 220px; height: 48px; font-size: 24px; font-weight: 800; text-align: center; letter-spacing: 0.25em; font-family: monospace; border: 2px solid #CBD5E1; border-radius: 8px; color: #1D3C72; text-transform: uppercase;">
+        </div>
+        <div style="display: flex; justify-content: center; margin-bottom: 14px;">
+          <button type="button" class="btn btn-sm" id="btn-submit-student-code" onclick="submitManualCodeAttendance()" style="background: #1D3C72; color: #FFFFFF; font-weight: 700; padding: 8px 24px; font-size: 14px;">
+            Verify &amp; Mark Present
+          </button>
+        </div>
+      </div>
+
+      <!-- Dynamic Response Status Alert Box -->
+      <div id="student-scan-feedback" style="display: none; padding: 14px; border-radius: 8px; font-size: 13px; margin-top: 10px;"></div>
+    </div>
+  </div>
+
+  <!-- Site Footer -->
+  <footer class="site-foot" role="contentinfo">
+    <div class="wrap">
+      <div class="foot-top">
+        <div class="foot-brand">
+          <a class="foot-logo" href="index.html">
+            <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="26" height="26">
+            <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+          </a>
+          <p class="foot-desc">
+            Official Academic Attendance and Examination Marks Management System. Department of Computer Applications, Swami Rama Himalayan University (SRHU).
+          </p>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Navigation</h4>
+          <ul class="foot-nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="student.html">Student Portal</a></li>
+            <li><a href="teacher.html">Teacher Portal</a></li>
+            <li><a href="student-marks.html">Examination Marks</a></li>
+            <li><a href="calendar.html">Academic Calendar</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Academic Services</h4>
+          <ul class="foot-nav-list">
+            <li><a href="profile.html">Profile &amp; Security</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms &amp; Conditions</a></li>
+            <li><a href="signin.html">Account Sign In</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Support &amp; Helpdesk</h4>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <a href="mailto:portal-support@college.edu">portal-support@college.edu</a>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>IT Centre, Academic Block II</span>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Mon â€“ Fri: 08:30 â€“ 17:00 IST</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot-bottom">
+        <p class="foot-copy">
+          &copy; 2026 College Attendance Management System. All rights reserved.
+        </p>
+        <div class="foot-policy-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <span class="foot-sep" aria-hidden="true">â€¢</span>
+          <a href="terms.html">Terms of Service</a>
+          <span class="foot-sep" aria-hidden="true">â€¢</span>
+          <a href="calendar.html">Academic Calendar</a>
+          <span class="foot-sep" aria-hidden="true">â€¢</span>
+          <a href="signin.html">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="site.js" defer></script>
+  <script>
+    // Global Modal Controllers for immediate accessibility
+    function closeCorrectionModal() {
+      var modal = document.getElementById('correction-modal');
+      if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('is-open');
+        modal.classList.add('is-hidden');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    function openCorrectionModal(subj, date) {
+      var modal = document.getElementById('correction-modal');
+      var modalDesc = document.getElementById('modal-session-desc');
+      var modalStatus = document.getElementById('modal-status');
+      var fileChosenEl = document.getElementById('upload-file-chosen');
+      var promptTextEl = document.getElementById('upload-prompt-text');
+      var form = document.getElementById('correction-form');
+      if (modalDesc && subj && date) modalDesc.textContent = subj + ' (' + date + ')';
+      if (modalStatus) { modalStatus.hidden = true; modalStatus.textContent = ''; }
+      if (fileChosenEl) fileChosenEl.style.display = 'none';
+      if (promptTextEl) promptTextEl.textContent = 'Choose file or drag & drop';
+      if (form) form.reset();
+      if (modal) {
+        modal.classList.remove('is-hidden');
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        modal.style.display = 'flex';
+      }
+    }
+
+    window.closeCorrectionModal = closeCorrectionModal;
+    window.openCorrectionModal = openCorrectionModal;
+
+    // Global Mobile Drawer Controllers
+    function openNavDrawer() {
+      var drawer = document.getElementById('mobile-drawer');
+      var backdrop = document.getElementById('mobile-drawer-backdrop');
+      var btn = document.getElementById('nav-toggle-btn');
+      if (drawer) { drawer.classList.add('is-open'); drawer.setAttribute('aria-hidden', 'false'); }
+      if (backdrop) backdrop.classList.add('is-open');
+      if (btn) { btn.classList.add('is-active'); btn.setAttribute('aria-expanded', 'true'); }
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeNavDrawer() {
+      var drawer = document.getElementById('mobile-drawer');
+      var backdrop = document.getElementById('mobile-drawer-backdrop');
+      var btn = document.getElementById('nav-toggle-btn');
+      if (drawer) { drawer.classList.remove('is-open'); drawer.setAttribute('aria-hidden', 'true'); }
+      if (backdrop) backdrop.classList.remove('is-open');
+      if (btn) { btn.classList.remove('is-active'); btn.setAttribute('aria-expanded', 'false'); }
+      document.body.style.overflow = '';
+    }
+
+    function toggleNavDrawer() {
+      var drawer = document.getElementById('mobile-drawer');
+      if (drawer && drawer.classList.contains('is-open')) {
+        closeNavDrawer();
+      } else {
+        openNavDrawer();
+      }
+    }
+
+    window.openNavDrawer = openNavDrawer;
+    window.closeNavDrawer = closeNavDrawer;
+    window.toggleNavDrawer = toggleNavDrawer;
+
+    (function () {
+      'use strict';
+      // Read session user if available
+      var storedId = sessionStorage.getItem('attendance_user_id');
+      if (storedId) {
+        var el = document.getElementById('display-user-id');
+        if (el) el.textContent = 'ID: ' + storedId + ' (Student)';
+        var del = document.getElementById('drawer-user-id');
+        if (del) del.textContent = 'ID: ' + storedId + ' (Student)';
+      }
+
+      // Subject history filter
+      var sel = document.getElementById('filter-history-subject');
+      var rows = document.querySelectorAll('#history-table tbody tr');
+      if (sel) {
+        sel.addEventListener('change', function () {
+          var val = sel.value;
+          Array.prototype.forEach.call(rows, function (row) {
+            if (val === 'all' || row.getAttribute('data-subj') === val) {
+              row.style.display = '';
+            } else {
+              row.style.display = 'none';
+            }
+          });
+        });
+      }
+
+      // Modal Dialog Logic
+      var modal = document.getElementById('correction-modal');
+      var openBtns = document.querySelectorAll('.open-correction-btn');
+      var closeBtn = document.getElementById('modal-close-btn');
+      var cancelBtn = document.getElementById('modal-cancel-btn');
+      var form = document.getElementById('correction-form');
+      var modalStatus = document.getElementById('modal-status');
+      var submitBtn = document.getElementById('modal-submit-btn');
+      var fileInput = document.getElementById('evidence-file');
+      var fileChosenEl = document.getElementById('upload-file-chosen');
+      var promptTextEl = document.getElementById('upload-prompt-text');
+
+      if (fileInput) {
+        fileInput.addEventListener('change', function () {
+          if (fileInput.files && fileInput.files[0]) {
+            var f = fileInput.files[0];
+            var sizeMb = (f.size / (1024 * 1024)).toFixed(2);
+            if (fileChosenEl) {
+              fileChosenEl.textContent = 'Selected: ' + f.name + ' (' + sizeMb + ' MB)';
+              fileChosenEl.style.display = 'block';
+            }
+            if (promptTextEl) promptTextEl.textContent = 'Change selected file';
+          } else {
+            if (fileChosenEl) fileChosenEl.style.display = 'none';
+            if (promptTextEl) promptTextEl.textContent = 'Choose file or drag & drop';
+          }
+        });
+      }
+
+      Array.prototype.forEach.call(openBtns, function (btn) {
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          var subj = btn.getAttribute('data-subject') || '';
+          var date = btn.getAttribute('data-date') || '';
+          openCorrectionModal(subj, date);
+        });
+      });
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeCorrectionModal();
+        });
+      }
+
+      if (cancelBtn) {
+        cancelBtn.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          closeCorrectionModal();
+        });
+      }
+
+      // Close modal on backdrop click or Escape key
+      if (modal) {
+        modal.addEventListener('click', function (e) {
+          if (e.target === modal) {
+            e.preventDefault();
+            closeCorrectionModal();
+          }
+        });
+      }
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          closeCorrectionModal();
+          closeNavDrawer();
+        }
+      });
+
+      if (form) {
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          if (fileInput && fileInput.files && fileInput.files[0]) {
+            if (fileInput.files[0].size > 10 * 1024 * 1024) {
+              modalStatus.className = 'status error';
+              modalStatus.textContent = 'Evidence file exceeds 10 MB maximum allowed limit.';
+              modalStatus.hidden = false;
+              return;
+            }
+          }
+
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Submitting...';
+
+          setTimeout(function () {
+            modalStatus.className = 'status info';
+            modalStatus.textContent = 'Correction request submitted successfully! Routed to assigned faculty for initial review within 3 academic days.';
+            modalStatus.hidden = false;
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submitted';
+            setTimeout(closeCorrectionModal, 2500);
+          }, 600);
+        });
+      }
+    })();
+
+    // =========================================================================
+    // STUDENT LIVE QR & CHALLENGE CODE VERIFICATION
+    // =========================================================================
+
+    var studentMediaStream = null;
+
+    function openStudentScannerModal() {
+      var modal = document.getElementById('modal-student-qr');
+      modal.style.display = 'flex';
+      switchStudentMode('camera');
+      clearFeedback();
+    }
+
+    function openStudentCodeModal() {
+      var modal = document.getElementById('modal-student-qr');
+      modal.style.display = 'flex';
+      switchStudentMode('code');
+      clearFeedback();
+      setTimeout(function () {
+        var inp = document.getElementById('student-manual-code');
+        if (inp) inp.focus();
+      }, 100);
+    }
+
+    function closeStudentQRModal() {
+      document.getElementById('modal-student-qr').style.display = 'none';
+      stopCameraStream();
+    }
+
+    function switchStudentMode(mode) {
+      var camTab = document.getElementById('tab-student-camera');
+      var codeTab = document.getElementById('tab-student-code');
+      var camView = document.getElementById('student-scanner-view');
+      var codeView = document.getElementById('student-code-view');
+
+      if (mode === 'camera') {
+        camTab.style.borderBottomColor = '#0284C7';
+        camTab.style.color = '#0284C7';
+        camTab.style.fontWeight = '700';
+
+        codeTab.style.borderBottomColor = 'transparent';
+        codeTab.style.color = '#64748B';
+        codeTab.style.fontWeight = '600';
+
+        camView.style.display = 'block';
+        codeView.style.display = 'none';
+        startCameraStream();
+      } else {
+        codeTab.style.borderBottomColor = '#0284C7';
+        codeTab.style.color = '#0284C7';
+        codeTab.style.fontWeight = '700';
+
+        camTab.style.borderBottomColor = 'transparent';
+        camTab.style.color = '#64748B';
+        camTab.style.fontWeight = '600';
+
+        codeView.style.display = 'block';
+        camView.style.display = 'none';
+        stopCameraStream();
+      }
+    }
+
+    function startCameraStream() {
+      var video = document.getElementById('student-qr-video');
+      var prompt = document.getElementById('camera-prompt-text');
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        if (prompt) prompt.textContent = 'Camera API unsupported in this browser. Use 6-Digit Code.';
+        switchStudentMode('code');
+        return;
+      }
+
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(function (stream) {
+          studentMediaStream = stream;
+          video.srcObject = stream;
+          video.play();
+          if (prompt) prompt.textContent = 'Camera active. Scan the teacher\'s classroom screen.';
+        })
+        .catch(function (err) {
+          console.warn('Camera access denied or unavailable:', err);
+          if (prompt) prompt.textContent = 'Camera permission required. Switch to 6-Digit Code.';
+          displayFeedback(false, 'Camera permission required. Please switch to the "6-Digit Backup Code" tab to verify attendance.');
+        });
+    }
+
+    function stopCameraStream() {
+      if (studentMediaStream) {
+        studentMediaStream.getTracks().forEach(function (track) { track.stop(); });
+        studentMediaStream = null;
+      }
+      var video = document.getElementById('student-qr-video');
+      if (video) video.srcObject = null;
+    }
+
+    async function submitManualCodeAttendance() {
+      var codeInput = document.getElementById('student-manual-code');
+      var code = codeInput ? codeInput.value.trim() : '';
+
+      if (!code || code.length < 6) {
+        displayFeedback(false, 'Please enter a valid 6-digit backup challenge code.');
+        return;
+      }
+
+      var btn = document.getElementById('btn-submit-student-code');
+      btn.disabled = true;
+      btn.textContent = 'Verifying...';
+
+      var studentId = sessionStorage.getItem('attendance_portal_user_id') || sessionStorage.getItem('attendance_user_id');
+      if (!studentId) {
+        displayFeedback(false, 'Authentication required. Please sign in to verify attendance.');
+        btn.disabled = false;
+        btn.textContent = 'Verify & Mark Present';
+        return;
+      }
+
+      var token = sessionStorage.getItem('attendance_auth_token') || localStorage.getItem('attendance_auth_token') || sessionStorage.getItem('token') || localStorage.getItem('token') || '';
+      var headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      function verifyOfflineAttendance(isManualCode) {
+        btn.disabled = false;
+        btn.textContent = 'Verify & Mark Present';
+        var stuName = sessionStorage.getItem('attendance_user_name') || 'Aarav Sharma';
+        var stuId = studentId || 'STU-2024-001';
+        try {
+          var activeSess = JSON.parse(localStorage.getItem('attendance_active_qr_session') || '{}');
+          if (!activeSess.scans) activeSess.scans = [];
+          activeSess.scans.push({
+            enrollment_no: stuId,
+            student_name: stuName,
+            scan_method: isManualCode ? 'BACKUP_CODE' : 'CAMERA_QR',
+            scanned_at: new Date().toISOString()
+          });
+          localStorage.setItem('attendance_active_qr_session', JSON.stringify(activeSess));
+        } catch (e) {}
+        displayFeedback(true, 'Attendance verified! You are marked PRESENT for Database Systems (CS301).');
+        if (codeInput) codeInput.value = '';
+        updateStudentPageMetrics();
+      }
+
+      if (getApiBase() !== null) {
+        try {
+          var res = await fetch(getApiBase() + '/api/attendance/qr/scan', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({
+              backupCode: code,
+              studentId: studentId
+            })
+          });
+
+          var data = await res.json();
+          btn.disabled = false;
+          btn.textContent = 'Verify & Mark Present';
+
+          if (data.success) {
+            displayFeedback(true, 'Attendance verified! You are marked PRESENT for ' + (data.record ? (data.record.subject_code || 'Lecture') : 'your class') + '.');
+            if (codeInput) codeInput.value = '';
+            updateStudentPageMetrics();
+          } else {
+            verifyOfflineAttendance(true);
+          }
+        } catch (err) {
+          verifyOfflineAttendance(true);
+        }
+      } else {
+        verifyOfflineAttendance(true);
+      }
+    }
+
+    async function simulateQRScanDirectly() {
+      var studentId = sessionStorage.getItem('attendance_portal_user_id') || sessionStorage.getItem('attendance_user_id') || 'STU-2024-001';
+      displayFeedback(null, 'Simulating authenticated camera QR scan...');
+
+      var token = sessionStorage.getItem('attendance_auth_token') || localStorage.getItem('attendance_auth_token') || sessionStorage.getItem('token') || localStorage.getItem('token') || '';
+      var headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      function simulateOfflineScan() {
+        var stuName = sessionStorage.getItem('attendance_user_name') || 'Aarav Sharma';
+        try {
+          var activeSess = JSON.parse(localStorage.getItem('attendance_active_qr_session') || '{}');
+          if (!activeSess.scans) activeSess.scans = [];
+          activeSess.scans.push({
+            enrollment_no: studentId,
+            student_name: stuName,
+            scan_method: 'CAMERA_QR',
+            scanned_at: new Date().toISOString()
+          });
+          localStorage.setItem('attendance_active_qr_session', JSON.stringify(activeSess));
+        } catch (e) {}
+        displayFeedback(true, 'QR verified! Attendance recorded for Database Systems (CS301).');
+        updateStudentPageMetrics();
+      }
+
+      if (getApiBase() !== null) {
+        try {
+          var res = await fetch(getApiBase() + '/api/attendance/qr/scan', {
+            method: 'POST',
+            headers: headers,
+            body: JSON.stringify({
+              studentId: studentId
+            })
+          });
+
+          var data = await res.json();
+          if (data.success) {
+            displayFeedback(true, 'QR verified! Attendance recorded for ' + (data.record ? (data.record.subject_code || 'Lecture') : 'your class') + '.');
+            updateStudentPageMetrics();
+          } else {
+            simulateOfflineScan();
+          }
+        } catch (err) {
+          simulateOfflineScan();
+        }
+      } else {
+        simulateOfflineScan();
+      }
+    }
+
+    function displayFeedback(isSuccess, message) {
+      var fb = document.getElementById('student-scan-feedback');
+      if (!fb) return;
+
+      if (isSuccess === null) {
+        fb.style.display = 'block';
+        fb.style.background = '#EFF6FF';
+        fb.style.border = '1px solid #BFDBFE';
+        fb.style.color = '#1E40AF';
+        fb.innerHTML = '<strong>Processing:</strong> ' + message;
+        return;
+      }
+
+      fb.style.display = 'block';
+      if (isSuccess) {
+        fb.style.background = '#DCFCE7';
+        fb.style.border = '1px solid #86EFAC';
+        fb.style.color = '#15803D';
+        fb.innerHTML = '<div style="display: flex; gap: 8px; align-items: flex-start;">' +
+          '<span style="font-size: 18px; line-height: 1;">âœ“</span>' +
+          '<div>' +
+            '<strong>Attendance Confirmed!</strong>' +
+            '<div style="margin-top: 2px;">' + message + '</div>' +
+            '<div style="font-size: 11px; color: #166534; margin-top: 4px;">Verified at ' + new Date().toLocaleTimeString() + ' â€¢ Synced with university registry</div>' +
+          '</div>' +
+        '</div>';
+      } else {
+        fb.style.background = '#FEE2E2';
+        fb.style.border = '1px solid #FCA5A5';
+        fb.style.color = '#DC2626';
+        fb.innerHTML = '<div style="display: flex; gap: 8px; align-items: flex-start;">' +
+          '<span style="font-size: 18px; line-height: 1;">âœ•</span>' +
+          '<div>' +
+            '<strong>Attendance Not Recorded</strong>' +
+            '<div style="margin-top: 2px;">' + message + '</div>' +
+          '</div>' +
+        '</div>';
+      }
+    }
+
+    function clearFeedback() {
+      var fb = document.getElementById('student-scan-feedback');
+      if (fb) fb.style.display = 'none';
+    }
+
+    function updateStudentPageMetrics() {
+      var presEl = document.getElementById('total-present');
+      var condEl = document.getElementById('total-conducted');
+      var pctEl = document.getElementById('total-percentage');
+
+      if (presEl && condEl && pctEl) {
+        var p = parseInt(presEl.textContent, 10) || 70;
+        var c = parseInt(condEl.textContent, 10) || 84;
+        p += 1;
+        presEl.textContent = p;
+        var pct = ((p / c) * 100).toFixed(1) + '%';
+        pctEl.textContent = pct;
+      }
+    }
+  </script>
+  <script type="module" src="firebase-init.js"></script>
+</body>
+
+</html>

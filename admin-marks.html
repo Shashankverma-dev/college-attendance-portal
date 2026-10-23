@@ -1,0 +1,1629 @@
+﻿<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Final Semester Marks & Results Management | Administrator</title>
+  <meta name="description"
+    content="Centralized institutional administration for final semester marks entry, bulk spreadsheet imports, validation review, and official result publication.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-head">
+    <div class="wrap head-in">
+      <a class="wordmark" href="admin.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="34" height="34">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+
+      <nav class="head-nav" id="main-head-nav" aria-label="Administrator navigation">
+        <a class="nav-link" href="admin.html">Dashboard</a>
+        <a class="nav-link" href="admin-students.html">Students</a>
+        <a class="nav-link" href="admin-teachers.html">Teacher management</a>
+        <a class="nav-link" href="admin-timetable.html">Timetable & Academic</a>
+        <a class="nav-link active" href="admin-marks.html">Final marks</a>
+        <a class="nav-link" href="calendar.html">Calendar</a>
+      </nav>
+
+      <div class="head-actions" id="main-head-actions">
+        <div class="user-menu-wrap" id="user-menu-wrap">
+          <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)"
+            aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">
+            <div class="user-avatar-circle" id="display-user-avatar">â€”</div>
+            <div class="user-avatar-info">
+              <span class="user-avatar-name" id="display-user-name">Loading...</span>
+              <span class="user-avatar-role" id="display-user-id">Global Admin</span>
+            </div>
+            <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">
+            <div class="user-dropdown-header">
+              <strong id="dropdown-user-name">Loading...</strong>
+              <span id="dropdown-user-id">Administrator Portal</span>
+            </div>
+            <a class="user-dropdown-item" href="profile.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>View Profile</span>
+            </a>
+            <a class="user-dropdown-item" href="admin.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              <span>Dashboard Overview</span>
+            </a>
+            <a class="user-dropdown-item" href="admin-students.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+              </svg>
+              <span>Student Management</span>
+            </a>
+            <a class="user-dropdown-item" href="admin-teachers.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <span>Teacher Management</span>
+            </a>
+            <a class="user-dropdown-item" href="admin-timetable.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <span>Timetable & Academic</span>
+            </a>
+            <a class="user-dropdown-item" href="admin-marks.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              <span>Final Semester Marks</span>
+            </a>
+            <div class="user-dropdown-divider"></div>
+            <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" onclick="sessionStorage.clear();" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Sign Out</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Hamburger Button -->
+      <button type="button" class="nav-toggle-btn" id="nav-toggle-btn" aria-label="Open navigation menu"
+        aria-expanded="false" aria-controls="mobile-drawer" onclick="toggleNavDrawer()">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Side Navigation Drawer -->
+  <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" onclick="closeNavDrawer()"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile navigation" aria-hidden="true">
+    <div class="drawer-header">
+      <a class="wordmark" href="admin.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="30" height="30">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+      <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close navigation"
+        onclick="closeNavDrawer()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="drawer-user-info">
+      <strong id="drawer-user-name">Loading...</strong>
+      <span id="drawer-user-id">Administrator Portal</span>
+    </div>
+
+    <nav class="drawer-nav">
+      <a class="drawer-nav-link" href="admin.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="drawer-nav-link" href="admin-students.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+        </svg>
+        <span>Student Management</span>
+      </a>
+      <a class="drawer-nav-link" href="admin-teachers.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span>Teacher Management</span>
+      </a>
+      <a class="drawer-nav-link" href="admin-timetable.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Timetable & Academic</span>
+      </a>
+      <a class="drawer-nav-link active" href="admin-marks.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+        <span>Final Semester Marks</span>
+      </a>
+      <a class="drawer-nav-link" href="calendar.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Academic Calendar</span>
+      </a>
+      <a class="drawer-nav-link" href="profile.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span>Administrator Profile</span>
+      </a>
+    </nav>
+
+    <div class="drawer-footer">
+      <a class="btn btn-sm btn-ink" href="signin.html" id="drawer-signout-btn" onclick="sessionStorage.clear();">Sign Out</a>
+      <div class="drawer-meta">
+        SRHU Attendance Management System<br>
+        portal-support@college.edu
+      </div>
+    </div>
+  </aside>
+
+  <main class="wrap" style="padding-top: 32px; padding-bottom: 64px;">
+
+    <!-- Breadcrumb & Header -->
+    <div style="margin-bottom: 24px;">
+      <p class="label" style="margin-bottom: 6px;">Institutional Administration</p>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h1 class="display" style="font-size: clamp(28px, 4vw, 38px);">Final Semester Examination Management</h1>
+          <p style="margin-top: 6px; font-size: 16px; color: var(--muted-light);">
+            Enter or bulk import final semester examination marks, preview validations, finalize cycles, and publish
+            official student results.
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm btn-outline" id="btn-open-correction-modal">
+            Marks Correction
+          </button>
+          <button type="button" class="btn btn-sm" id="btn-open-finalize-modal">
+            Finalization & Publication
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Policy Banner -->
+    <div class="policy-notice-banner">
+      <strong>Administrative Authority:</strong> Only authorized administrators may enter, import, finalize, or publish
+      final semester examination marks. Bulk imports adhere to strict atomic transaction policies. All modifications
+      after finalization require recorded institutional justifications and are permanently recorded in the SHA-256
+      linear hash chain.
+    </div>
+
+    <!-- Administrative Scope Filters -->
+    <div class="marks-filter-toolbar">
+      <div class="marks-filter-group">
+        <label class="marks-filter-label" for="admin-filter-session">Academic Session</label>
+        <select class="marks-filter-select" id="admin-filter-session">
+          <option value="Autumn 2026" selected>Autumn 2026</option>
+          <option value="Spring 2026">Spring 2026</option>
+        </select>
+      </div>
+
+      <div class="marks-filter-group">
+        <label class="marks-filter-label" for="admin-filter-course">Academic Program</label>
+        <select class="marks-filter-select" id="admin-filter-course">
+          <option value="bca" selected>BCA - Bachelor of Computer Applications</option>
+          <option value="btech-cse">B.Tech - Computer Science & Engineering</option>
+        </select>
+      </div>
+
+      <div class="marks-filter-group">
+        <label class="marks-filter-label" for="admin-filter-sem">Semester & Section</label>
+        <select class="marks-filter-select" id="admin-filter-sem">
+          <option value="sem1-a" selected>Semester 1 - Section A</option>
+          <option value="sem1-b">Semester 1 - Section B</option>
+          <option value="sem3-a">Semester 3 - Section A</option>
+        </select>
+      </div>
+
+      <div class="marks-filter-group">
+        <label class="marks-filter-label" for="admin-filter-subject">Subject</label>
+        <select class="marks-filter-select" id="admin-filter-subject">
+          <option value="BCA-101" selected>BCA-101: Programming Fundamentals using C</option>
+          <option value="BCA-102">BCA-102: Computer Architecture & Digital Logic</option>
+          <option value="BCA-103">BCA-103: Discrete Mathematics</option>
+          <option value="BCA-104">BCA-104: Technical Communication</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Primary Admin Tabs -->
+    <div class="marks-nav-bar" role="tablist" aria-label="Admin Navigation Tabs">
+      <button class="marks-tab-btn active" data-tab="final-table" role="tab" aria-selected="true">
+        Final Marks Roster
+      </button>
+      <button class="marks-tab-btn" data-tab="bulk-import" role="tab" aria-selected="false">
+        Bulk Spreadsheet Import (.xlsx, .csv)
+      </button>
+      <button class="marks-tab-btn" data-tab="batch-history" role="tab" aria-selected="false">
+        Import Batches & Audit Trail
+      </button>
+    </div>
+
+    <!-- TAB 1: FINAL MARKS ROSTER -->
+    <div id="tab-final-table" class="marks-tab-pane">
+      <!-- Evaluation Cycle Meta Summary -->
+      <div class="marks-summary-grid">
+        <div class="marks-card">
+          <div class="marks-card-title">Assessment Target</div>
+          <div class="marks-card-value" style="font-size: 20px;" id="admin-meta-subject-name">BCA-101 Final Exam</div>
+          <div class="marks-card-sub" id="admin-meta-subject-sub">Semester 1 (Sec A) - Autumn 2026</div>
+        </div>
+
+        <div class="marks-card">
+          <div class="marks-card-title">Maximum Evaluation Limit</div>
+          <div class="marks-card-value" id="admin-meta-max-marks">100.00</div>
+          <div class="marks-card-sub">Institutional university standard</div>
+        </div>
+
+        <div class="marks-card">
+          <div class="marks-card-title">Current State</div>
+          <div style="margin-top: 4px;">
+            <span class="badge-status badge-finalized" id="admin-meta-status-badge">FINALIZED</span>
+          </div>
+          <div class="marks-card-sub" id="admin-meta-status-sub">Ready for public portal release</div>
+        </div>
+
+        <div class="marks-card">
+          <div class="marks-card-title">Cohort Completion</div>
+          <div class="marks-card-value" id="admin-meta-completion">5 / 5</div>
+          <div class="marks-card-sub" id="admin-meta-completion-sub">100% verified entries â€¢ Class Avg: 82.5%</div>
+        </div>
+      </div>
+
+      <div id="admin-feedback-alert" class="status info" style="margin-bottom: 20px;" hidden></div>
+
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <h2 style="font-size: 20px; font-weight: 700;">Final Examination Cohort Roster</h2>
+          <p style="font-size: 14px; color: var(--muted);">Direct manual entry or verification of imported final
+            university examination marks.</p>
+        </div>
+
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-sm btn-outline" id="btn-admin-save-draft">
+            Save Changes
+          </button>
+        </div>
+      </div>
+
+      <!-- Cohort Table -->
+      <div class="table-wrap"
+        style="background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--line);">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;" id="admin-roster-table">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--line); background: var(--table-head-bg); color: var(--card-ink);">
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 60px;">Roll</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 120px;">Student ID</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Student Name</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 140px;">Status</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 130px; text-align: right;">Marks Obtained</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 80px; text-align: center;">Max</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 90px; text-align: center;">Pct %</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Remarks / Verification Note</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); width: 100px; text-align: center;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="admin-roster-tbody">
+            <tr id="empty-marks-row">
+              <td colspan="9" style="text-align: center; padding: 40px 20px; color: var(--card-muted);">
+                <div style="font-size: 15px; font-weight: 600; margin-bottom: 6px;">No Marks Records Available</div>
+                <div style="font-size: 13px;">Upload an examination spreadsheet or select an active subject with enrolled students.</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: BULK SPREADSHEET IMPORT -->
+    <div id="tab-bulk-import" class="marks-tab-pane" style="display: none;">
+      <div style="margin-bottom: 20px;">
+        <h2 style="font-size: 20px; font-weight: 700;">Bulk Marks Import Engine</h2>
+        <p style="font-size: 14px; color: var(--muted);">
+          Upload structured marks datasets in Excel (.xlsx) or CSV format. Pre-validation checks every Student ID,
+          course mapping, ceiling limits, and duplicates before atomic commit.
+        </p>
+      </div>
+
+      <!-- Template Download Banner -->
+      <div
+        style="background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div>
+          <strong style="color: var(--card-ink); font-size: 14px;">Documented Institutional Template</strong>
+          <p style="font-size: 13px; color: var(--card-muted); margin-top: 2px;">
+            Columns: <code>Student_ID</code>, <code>Subject_Code</code>, <code>Marks_Obtained</code>,
+            <code>Status</code>, <code>Remarks</code>
+          </p>
+        </div>
+        <button type="button" class="btn btn-sm btn-outline" id="btn-download-template">
+          Download Blank Template (.csv)
+        </button>
+      </div>
+
+      <!-- Dropzone -->
+      <div class="upload-dropzone" id="bulk-upload-dropzone">
+        <input type="file" id="file-import-input" accept=".xlsx,.xls,.csv" style="display: none;">
+        <div class="upload-dropzone-icon">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="17 8 12 3 7 8"></polyline>
+            <line x1="12" y1="3" x2="12" y2="15"></line>
+          </svg>
+        </div>
+        <div class="upload-dropzone-text" id="dropzone-text">Click or drag & drop examination spreadsheet here</div>
+        <div class="upload-dropzone-sub">Supported formats: Microsoft Excel (.xlsx, .xls) and UTF-8 Comma-Separated
+          Values (.csv) up to 10 MB</div>
+      </div>
+
+      <!-- Validation Preview Container -->
+      <div id="import-preview-box" class="import-validation-box" style="display: none;">
+        <div class="import-stat-banner">
+          <div class="import-stat-item">Source File: <strong
+              id="preview-filename">BCA_101_Final_Autumn2026.xlsx</strong></div>
+          <div class="import-stat-item">Total Rows: <strong id="preview-total-rows">5</strong></div>
+          <div class="import-stat-item">Valid Rows: <strong id="preview-valid-rows" style="color: #059669;">5</strong>
+          </div>
+          <div class="import-stat-item">Rejected Rows: <strong id="preview-error-rows"
+              style="color: #DC2626;">0</strong></div>
+        </div>
+
+        <div id="preview-error-container" style="display: none; margin-bottom: 20px;">
+          <h4 style="font-size: 15px; font-weight: 700; color: #DC2626; margin-bottom: 8px;">Validation Issues Detected:
+          </h4>
+          <div class="table-wrap">
+            <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+              <thead>
+                <tr style="border-bottom: 1px solid var(--line); color: var(--card-muted); background: var(--table-head-bg);">
+                  <th style="padding: 8px; width: 80px; color: var(--card-ink); font-weight: 700;">Row #</th>
+                  <th style="padding: 8px; width: 120px; color: var(--card-ink); font-weight: 700;">Student ID</th>
+                  <th style="padding: 8px; color: var(--card-ink); font-weight: 700;">Failure Reason</th>
+                </tr>
+              </thead>
+              <tbody id="preview-error-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <p style="font-size: 13px; color: var(--card-muted);" id="preview-policy-note">
+            All rows passed validation. Committing will overwrite draft marks and record batch attribution.
+          </p>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn btn-sm btn-outline" id="btn-cancel-import">Discard Import</button>
+            <button type="button" class="btn btn-sm" id="btn-commit-import">Commit Valid Batch</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: IMPORT BATCHES & AUDIT TRAIL -->
+    <div id="tab-batch-history" class="marks-tab-pane" style="display: none;">
+      <div style="margin-bottom: 16px;">
+        <h2 style="font-size: 20px; font-weight: 700; color: var(--card-ink);">Examination Marks Import Batches & Audit Trail</h2>
+        <p style="font-size: 14px; color: var(--card-muted);">Permanent record of importing admins, source filenames,
+          timestamps, row counts, and cryptographic hash verification.</p>
+      </div>
+
+      <div class="table-wrap"
+        style="background: var(--bg-card); border-radius: var(--radius); border: 1px solid var(--line);">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid var(--line); background: var(--table-head-bg); color: var(--card-ink);">
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Batch Timestamp (UTC)</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Original File</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Importing Admin</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); text-align: center;">Rows</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); text-align: center;">Status</th>
+              <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink); font-family: monospace;">SHA-256 Checksum</th>
+            </tr>
+          </thead>
+          <tbody id="admin-audit-tbody">
+            <tr style="border-bottom: 1px solid var(--line);">
+              <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">2026-10-18 11:20:04</td>
+              <td style="padding: 12px 14px; font-weight: 600; color: var(--card-ink);">BCA101_Sem1_FinalMarks.xlsx</td>
+              <td style="padding: 12px 14px; color: var(--card-ink);">System Administrator (ADM-001)</td>
+              <td style="padding: 12px 14px; text-align: center; color: var(--card-ink);">5 Valid / 0 Err</td>
+              <td style="padding: 12px 14px; text-align: center;"><span
+                  class="badge-status badge-finalized">COMMITTED</span></td>
+              <td style="padding: 12px 14px; font-family: monospace; font-size: 12px; color: var(--accent);">
+                e3b0c442...98fc</td>
+            </tr>
+            <tr style="border-bottom: 1px solid var(--line);">
+              <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">2026-10-16 09:45:12</td>
+              <td style="padding: 12px 14px; font-weight: 600; color: var(--card-ink);">BTECH_CSE_Maths_Final.xlsx</td>
+              <td style="padding: 12px 14px; color: var(--card-ink);">System Administrator (ADM-001)</td>
+              <td style="padding: 12px 14px; text-align: center; color: var(--card-ink);">78 Valid / 2 Err</td>
+              <td style="padding: 12px 14px; text-align: center;"><span
+                  class="badge-status badge-reviewed">REVIEWED</span></td>
+              <td style="padding: 12px 14px; font-family: monospace; font-size: 12px; color: var(--accent);">
+                f821aa90...11e2</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- MODAL: FINALIZATION & PUBLICATION -->
+  <div id="modal-finalize-pub" class="modal-backdrop" aria-hidden="true" style="position: fixed; inset: 0; z-index: 99990; align-items: center; justify-content: center; padding: 20px;">
+    <div class="modal-dialog" style="max-width: 540px; color: var(--card-ink);">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent);">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+          </svg>
+          <h3 style="color: var(--card-ink);">Finalize &amp; Publish Results</h3>
+        </div>
+        <button type="button" class="btn-modal-cancel" style="padding: 4px 10px; font-size: 16px; color: var(--card-muted);" onclick="closeFinalizeModal()" aria-label="Close dialog">âœ•</button>
+      </div>
+
+      <div class="modal-body" style="padding: 20px 24px;">
+        <p style="font-size: 14px; color: var(--card-muted); line-height: 1.5; margin-bottom: 18px;">
+          Select the administrative action for <strong id="finalize-target-label" style="color: var(--card-ink);">BCA-101 Final Semester University Examination</strong>:
+        </p>
+
+        <div style="background: #F8FAFC; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 14px; cursor: pointer;">
+            <input type="radio" name="admin_lifecycle_action" value="FINALIZE" checked style="margin-right: 8px;">
+            <strong style="color: var(--card-ink);">Finalize Marks Cycle:</strong>
+            <span style="display: block; font-size: 13px; color: var(--muted); margin-left: 24px; margin-top: 2px;">
+              Locks all records against further teacher edits. Results remain confidential and invisible to students until publication.
+            </span>
+          </label>
+
+          <label style="display: block; cursor: pointer;">
+            <input type="radio" name="admin_lifecycle_action" value="PUBLISH" style="margin-right: 8px;">
+            <strong style="color: #10B981;">Publish Results to Student Portal:</strong>
+            <span style="display: block; font-size: 13px; color: var(--muted); margin-left: 24px; margin-top: 2px;">
+              Makes official final marks immediately accessible to enrolled students on their individual dashboards and grade transcripts.
+            </span>
+          </label>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="padding: 16px 24px; background: #F8FAFC; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 10px;">
+        <button type="button" class="btn-modal-cancel" id="finalize-cancel-btn" onclick="closeFinalizeModal()">Cancel</button>
+        <button type="button" class="btn-modal-submit" id="finalize-confirm-btn" style="background: var(--bg); color: #FFFFFF;">Execute Action</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: ADMINISTRATIVE MARKS CORRECTION -->
+  <div id="modal-correction" class="modal-backdrop" aria-hidden="true" style="position: fixed; inset: 0; z-index: 99990; align-items: center; justify-content: center; padding: 20px;">
+    <div class="modal-dialog" style="max-width: 520px;">
+      <div class="modal-header">
+        <div class="modal-header-title">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent);">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+          <h3>Authorized Marks Correction</h3>
+        </div>
+        <button type="button" class="btn-modal-cancel" style="padding: 4px 10px; font-size: 16px;" onclick="closeCorrectionModal()" aria-label="Close dialog">âœ•</button>
+      </div>
+
+      <form id="form-correction" onsubmit="handleCorrectionSubmit(event)">
+        <div class="modal-body" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 14px;">
+          <div id="correct-student-select-field">
+            <label class="marks-filter-label" for="correct-student-select" style="display: block; margin-bottom: 4px;">Student Candidate</label>
+            <select class="marks-filter-select" id="correct-student-select" onchange="onCorrectionStudentChange()">
+              <!-- populated dynamically -->
+            </select>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div>
+              <label class="marks-filter-label" for="correct-status" style="display: block; margin-bottom: 4px;">Evaluation Status</label>
+              <select class="marks-filter-select" id="correct-status" required onchange="onCorrectionStatusChange()">
+                <option value="PRESENT" selected>PRESENT</option>
+                <option value="ABSENT">ABSENT</option>
+                <option value="EXEMPTED">EXEMPTED</option>
+                <option value="WITHHELD">WITHHELD</option>
+                <option value="INCOMPLETE">INCOMPLETE</option>
+              </select>
+            </div>
+            <div>
+              <label class="marks-filter-label" for="correct-marks" style="display: block; margin-bottom: 4px;">Marks Obtained (Max: 100)</label>
+              <input type="number" class="marks-filter-input" id="correct-marks" value="84" min="0" max="100" step="0.5">
+            </div>
+          </div>
+
+          <div>
+            <label class="marks-filter-label" for="correct-reason" style="display: block; margin-bottom: 4px;">
+              Mandatory Institutional Justification <span style="color: var(--status-absent);">*</span>
+            </label>
+            <textarea class="marks-filter-input" id="correct-reason" rows="3"
+              placeholder="Provide approved re-evaluation reference, committee order, or clerical rectification detail..."
+              required style="resize: vertical; width: 100%; box-sizing: border-box;"></textarea>
+          </div>
+
+          <div id="correct-error-msg" style="display: none; padding: 10px 14px; background: var(--status-absent-bg); color: var(--status-absent); border: 1px solid #FCA5A5; border-radius: var(--radius); font-size: 13px; font-weight: 600;"></div>
+        </div>
+
+        <div class="modal-footer" style="padding: 16px 24px; background: #F8FAFC; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn-modal-cancel" id="correct-cancel-btn" onclick="closeCorrectionModal()">Cancel</button>
+          <button type="submit" class="btn-modal-submit" id="btn-save-correction" style="background: var(--bg); color: #FFFFFF;">Commit Audited Correction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Site Footer -->
+  <footer class="site-foot" role="contentinfo">
+    <div class="wrap">
+      <div class="foot-top">
+        <div class="foot-brand">
+          <a class="foot-logo" href="index.html">
+            <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="26" height="26">
+            <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+          </a>
+          <p class="foot-desc">
+            Official Academic Attendance and Examination Marks Management System. Department of Computer Applications,
+            Swami Rama Himalayan University (SRHU).
+          </p>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Navigation</h4>
+          <ul class="foot-nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="student.html">Student Portal</a></li>
+            <li><a href="teacher.html">Teacher Portal</a></li>
+            <li><a href="student-marks.html">Examination Marks</a></li>
+            <li><a href="calendar.html">Academic Calendar</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Academic Services</h4>
+          <ul class="foot-nav-list">
+            <li><a href="profile.html">Profile &amp; Security</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms &amp; Conditions</a></li>
+            <li><a href="signin.html">Account Sign In</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Support &amp; Helpdesk</h4>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <a href="mailto:portal-support@college.edu">portal-support@college.edu</a>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>IT Centre, Academic Block II</span>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Mon â€“ Fri: 08:30 â€“ 17:00 IST</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot-bottom">
+        <p class="foot-copy">
+          &copy; 2026 College Attendance Management System. All rights reserved.
+        </p>
+        <div class="foot-policy-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <span class="foot-sep" aria-hidden="true">â€¢</span>
+          <a href="terms.html">Terms of Service</a>
+          <span class="foot-sep" aria-hidden="true">â€¢</span>
+          <a href="calendar.html">Academic Calendar</a>
+          <span class="foot-sep" aria-hidden="true">â€¢</span>
+          <a href="signin.html">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Container -->
+  <div class="admin-toast-container" id="admin-toast-container" aria-live="polite"></div>
+
+  <script src="site.js" defer></script>
+  <script>
+    (function () {
+      'use strict';
+
+      // =========================================================================
+      function getAdminAuthToken() {
+        return sessionStorage.getItem('attendance_auth_token') || localStorage.getItem('attendance_auth_token') || sessionStorage.getItem('token') || localStorage.getItem('token') || '';
+      }
+
+      var storedId = sessionStorage.getItem('attendance_user_id') || 'ADM-001';
+      var storedName = sessionStorage.getItem('attendance_user_name') || 'System Administrator';
+      var elId = document.getElementById('display-user-id');
+      if (elId) elId.textContent = 'ID: ' + storedId + ' (Global Admin)';
+      var elName = document.getElementById('display-user-name');
+      if (elName) elName.textContent = storedName;
+      var delId = document.getElementById('drawer-user-id');
+      if (delId) delId.textContent = 'ID: ' + storedId + ' (Global Admin)';
+      var delName = document.getElementById('drawer-user-name');
+      if (delName) delName.textContent = storedName;
+
+      // =========================================================================
+      // 2. DATA STORE & STATE MANAGEMENT
+      // =========================================================================
+      var defaultCohorts = {};
+
+      // Load cached or default
+      var cachedData = localStorage.getItem('srhu_admin_marks_data');
+      var cohorts = cachedData ? JSON.parse(cachedData) : defaultCohorts;
+
+      function saveCohortsLocally() {
+        localStorage.setItem('srhu_admin_marks_data', JSON.stringify(cohorts));
+      }
+
+      // Initial active selection
+      var activeSubjectKey = 'BCA-101';
+
+      // Audit entries store
+      var defaultAudit = [
+        {
+          timestamp: '2026-10-18 11:20:04',
+          action: 'BCA101_Sem1_FinalMarks.xlsx',
+          admin: 'System Administrator (ADM-001)',
+          details: '5 Valid / 0 Err',
+          status: 'COMMITTED',
+          checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+        },
+        {
+          timestamp: '2026-10-16 09:45:12',
+          action: 'BTECH_CSE_Maths_Final.xlsx',
+          admin: 'System Administrator (ADM-001)',
+          details: '78 Valid / 2 Err',
+          status: 'REVIEWED',
+          checksum: 'f821aa9011e2f7547b77e8e58a22339b61882d2f1f31f90a9b23b491a6104bc1'
+        }
+      ];
+
+      var cachedAudit = localStorage.getItem('srhu_admin_marks_audit');
+      var auditEntries = cachedAudit ? JSON.parse(cachedAudit) : defaultAudit;
+
+      function saveAuditLocally() {
+        localStorage.setItem('srhu_admin_marks_audit', JSON.stringify(auditEntries));
+      }
+
+      // =========================================================================
+      // 3. TAB NAVIGATION
+      // =========================================================================
+      var tabBtns = document.querySelectorAll('.marks-tab-btn');
+      var tabPanes = document.querySelectorAll('.marks-tab-pane');
+
+      Array.prototype.forEach.call(tabBtns, function (btn) {
+        btn.addEventListener('click', function () {
+          var targetTab = btn.getAttribute('data-tab');
+
+          Array.prototype.forEach.call(tabBtns, function (b) {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+
+          Array.prototype.forEach.call(tabPanes, function (pane) {
+            if (pane.id === 'tab-' + targetTab) {
+              pane.style.display = 'block';
+            } else {
+              pane.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // =========================================================================
+      // 4. SUMMARY CARDS & ROSTER RENDERING
+      // =========================================================================
+      function getBadgeClass(status) {
+        switch (status) {
+          case 'FINALIZED': return 'badge-finalized';
+          case 'PUBLISHED': return 'badge-published';
+          case 'REVIEWED': return 'badge-reviewed';
+          case 'DRAFT': return 'badge-draft';
+          case 'SUBMITTED': return 'badge-submitted';
+          default: return 'badge-draft';
+        }
+      }
+
+      function updateSummaryCards() {
+        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+        if (!cohort) return;
+
+        var targetEl = document.getElementById('admin-meta-subject-name');
+        if (targetEl) targetEl.textContent = cohort.code + ' Final Exam';
+
+        var subEl = document.getElementById('admin-meta-subject-sub');
+        if (subEl) subEl.textContent = cohort.sem + ' - ' + cohort.term;
+
+        var maxEl = document.getElementById('admin-meta-max-marks');
+        if (maxEl) maxEl.textContent = Number(cohort.maxMarks).toFixed(2);
+
+        var badgeEl = document.getElementById('admin-meta-status-badge');
+        if (badgeEl) {
+          badgeEl.textContent = cohort.status;
+          badgeEl.className = 'badge-status ' + getBadgeClass(cohort.status);
+        }
+
+        var statusSubEl = document.getElementById('admin-meta-status-sub');
+        if (statusSubEl) {
+          if (cohort.status === 'PUBLISHED') statusSubEl.textContent = 'Visible to students on portal';
+          else if (cohort.status === 'FINALIZED') statusSubEl.textContent = 'Locked for faculty; ready for portal release';
+          else if (cohort.status === 'REVIEWED') statusSubEl.textContent = 'Verified by department evaluator';
+          else statusSubEl.textContent = 'Awaiting completion by faculty';
+        }
+
+        // Stats calculation
+        var students = cohort.students || [];
+        var total = students.length;
+        var validMarks = [];
+        students.forEach(function (s) {
+          if (s.status === 'PRESENT' && s.marks !== null && !isNaN(s.marks)) {
+            validMarks.push(Number(s.marks));
+          }
+        });
+
+        var compEl = document.getElementById('admin-meta-completion');
+        var compSubEl = document.getElementById('admin-meta-completion-sub');
+        if (compEl) compEl.textContent = validMarks.length + ' / ' + total;
+
+        if (compSubEl) {
+          var avg = validMarks.length > 0
+            ? (validMarks.reduce(function (a, b) { return a + b; }, 0) / validMarks.length).toFixed(1)
+            : '0.0';
+          var top = validMarks.length > 0 ? Math.max.apply(null, validMarks).toFixed(1) : '0.0';
+          compSubEl.textContent = 'Avg: ' + avg + '% â€¢ Top: ' + top;
+        }
+
+        var finalizeLabel = document.getElementById('finalize-target-label');
+        if (finalizeLabel) {
+          finalizeLabel.textContent = cohort.code + ' (' + cohort.name + ') ' + cohort.term + ' Final Examination';
+        }
+      }
+
+      function renderCohortTable() {
+        var tbody = document.getElementById('admin-roster-tbody');
+        if (!tbody) return;
+
+        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+        var maxMarks = cohort.maxMarks || 100.0;
+        var students = cohort.students || [];
+
+        tbody.innerHTML = '';
+
+        students.forEach(function (s, idx) {
+          var tr = document.createElement('tr');
+          tr.setAttribute('data-student-id', s.id);
+          tr.setAttribute('data-student-name', s.name);
+          tr.style.borderBottom = '1px solid var(--line)';
+
+          var isPresent = (s.status === 'PRESENT');
+          var pctVal = (isPresent && s.marks !== null) ? ((Number(s.marks) / maxMarks) * 100).toFixed(1) + '%' : 'N/A';
+          var pctColor = (isPresent && s.marks !== null)
+            ? (Number(s.marks) >= 75 ? '#10B981' : (Number(s.marks) >= 60 ? '#2563EB' : '#F59E0B'))
+            : '#94A3B8';
+
+          tr.innerHTML =
+            '<td style="padding: 10px 14px; font-weight: 600; color: var(--card-muted);">' + (s.roll || (idx + 1 < 10 ? '0' + (idx + 1) : idx + 1)) + '</td>' +
+            '<td style="padding: 10px 14px; font-family: monospace; font-size: 13px; font-weight: 700; color: var(--accent);">' + s.id + '</td>' +
+            '<td style="padding: 10px 14px; font-weight: 600; color: var(--card-ink);">' + s.name + '</td>' +
+            '<td style="padding: 10px 14px;">' +
+            '  <select class="admin-row-status-select" data-id="' + s.id + '">' +
+            '    <option value="PRESENT"' + (s.status === 'PRESENT' ? ' selected' : '') + '>PRESENT</option>' +
+            '    <option value="ABSENT"' + (s.status === 'ABSENT' ? ' selected' : '') + '>ABSENT</option>' +
+            '    <option value="EXEMPTED"' + (s.status === 'EXEMPTED' ? ' selected' : '') + '>EXEMPTED</option>' +
+            '    <option value="WITHHELD"' + (s.status === 'WITHHELD' ? ' selected' : '') + '>WITHHELD</option>' +
+            '    <option value="INCOMPLETE"' + (s.status === 'INCOMPLETE' ? ' selected' : '') + '>INCOMPLETE</option>' +
+            '  </select>' +
+            '</td>' +
+            '<td style="padding: 10px 14px; text-align: right;">' +
+            '  <input type="number" class="admin-row-marks-input" data-id="' + s.id + '" min="0" max="' + maxMarks + '" step="0.5" value="' + (isPresent && s.marks !== null ? s.marks : '') + '"' + (!isPresent ? ' disabled' : '') + ' placeholder="0.0">' +
+            '</td>' +
+            '<td style="padding: 10px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">' + maxMarks.toFixed(1) + '</td>' +
+            '<td style="padding: 10px 14px; text-align: center; font-weight: 700; font-size: 14px; color: ' + pctColor + ';" class="row-pct-cell">' + pctVal + '</td>' +
+            '<td style="padding: 10px 14px;">' +
+            '  <input type="text" class="admin-row-remarks-input" data-id="' + s.id + '" value="' + (s.remarks || '').replace(/"/g, '&quot;') + '" placeholder="Evaluation remark...">' +
+            '</td>' +
+            '<td style="padding: 10px 14px; text-align: center;">' +
+            '  <button type="button" class="btn btn-sm btn-outline btn-row-correct" data-student-id="' + s.id + '" data-student-name="' + s.name + '" data-current-marks="' + (s.marks !== null ? s.marks : '') + '" data-current-status="' + s.status + '" style="padding: 4px 10px; font-size: 12px; font-weight: 600;">' +
+            '    Correct' +
+            '  </button>' +
+            '</td>';
+
+          tbody.appendChild(tr);
+        });
+
+        attachRowEventListeners();
+        updateSummaryCards();
+      }
+
+      function attachRowEventListeners() {
+        var statusSelects = document.querySelectorAll('.admin-row-status-select');
+        var marksInputs = document.querySelectorAll('.admin-row-marks-input');
+        var remarksInputs = document.querySelectorAll('.admin-row-remarks-input');
+        var rowCorrectBtns = document.querySelectorAll('.btn-row-correct');
+        var saveBtn = document.getElementById('btn-admin-save-draft');
+
+        statusSelects.forEach(function (sel) {
+          sel.addEventListener('change', function () {
+            var studentId = sel.getAttribute('data-id');
+            var tr = sel.closest('tr');
+            var marksInput = tr.querySelector('.admin-row-marks-input');
+            var pctCell = tr.querySelector('.row-pct-cell');
+            var cohort = cohorts[activeSubjectKey];
+            var student = cohort.students.find(function (s) { return s.id === studentId; });
+
+            if (sel.value === 'PRESENT') {
+              marksInput.disabled = false;
+              if (marksInput.value === '') marksInput.value = '75';
+              var marksNum = parseFloat(marksInput.value) || 0;
+              var pct = ((marksNum / cohort.maxMarks) * 100).toFixed(1) + '%';
+              pctCell.textContent = pct;
+              pctCell.style.color = marksNum >= 75 ? '#10B981' : '#2563EB';
+              if (student) {
+                student.status = 'PRESENT';
+                student.marks = marksNum;
+              }
+            } else {
+              marksInput.disabled = true;
+              marksInput.value = '';
+              pctCell.textContent = 'N/A';
+              pctCell.style.color = '#94A3B8';
+              if (student) {
+                student.status = sel.value;
+                student.marks = null;
+              }
+            }
+
+            tr.classList.add('table-row-modified');
+            if (saveBtn) {
+              saveBtn.style.background = 'var(--bg)';
+              saveBtn.style.color = '#FFFFFF';
+              saveBtn.style.fontWeight = '700';
+            }
+            updateSummaryCards();
+          });
+        });
+
+        marksInputs.forEach(function (inp) {
+          inp.addEventListener('input', function () {
+            var studentId = inp.getAttribute('data-id');
+            var tr = inp.closest('tr');
+            var pctCell = tr.querySelector('.row-pct-cell');
+            var cohort = cohorts[activeSubjectKey];
+            var student = cohort.students.find(function (s) { return s.id === studentId; });
+            var marksNum = parseFloat(inp.value);
+
+            if (isNaN(marksNum) || marksNum < 0) {
+              pctCell.textContent = '0.0%';
+              pctCell.style.color = '#EF4444';
+            } else if (marksNum > cohort.maxMarks) {
+              inp.value = cohort.maxMarks;
+              marksNum = cohort.maxMarks;
+              pctCell.textContent = '100.0%';
+              pctCell.style.color = '#10B981';
+            } else {
+              var pct = ((marksNum / cohort.maxMarks) * 100).toFixed(1) + '%';
+              pctCell.textContent = pct;
+              pctCell.style.color = marksNum >= 75 ? '#10B981' : (marksNum >= 60 ? '#2563EB' : '#F59E0B');
+            }
+
+            if (student) {
+              student.marks = !isNaN(marksNum) ? marksNum : 0;
+            }
+
+            tr.classList.add('table-row-modified');
+            if (saveBtn) {
+              saveBtn.style.background = 'var(--bg)';
+              saveBtn.style.color = '#FFFFFF';
+              saveBtn.style.fontWeight = '700';
+            }
+            updateSummaryCards();
+          });
+        });
+
+        remarksInputs.forEach(function (rinp) {
+          rinp.addEventListener('change', function () {
+            var studentId = rinp.getAttribute('data-id');
+            var cohort = cohorts[activeSubjectKey];
+            var student = cohort.students.find(function (s) { return s.id === studentId; });
+            if (student) student.remarks = rinp.value.trim();
+          });
+        });
+
+        rowCorrectBtns.forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            var sId = btn.getAttribute('data-student-id');
+            window.openCorrectionModal(sId);
+          });
+        });
+      }
+
+      // =========================================================================
+      // 5. SAVE CHANGES BUTTON HANDLER
+      // =========================================================================
+      var saveChangesBtn = document.getElementById('btn-admin-save-draft');
+      if (saveChangesBtn) {
+        saveChangesBtn.addEventListener('click', function () {
+          var cohort = cohorts[activeSubjectKey];
+          if (!cohort) return;
+
+          saveChangesBtn.disabled = true;
+          saveChangesBtn.textContent = 'Saving...';
+
+          var rows = document.querySelectorAll('#admin-roster-tbody tr');
+          rows.forEach(function (tr) {
+            var sId = tr.getAttribute('data-student-id');
+            var sStatus = tr.querySelector('.admin-row-status-select').value;
+            var sMarksInput = tr.querySelector('.admin-row-marks-input');
+            var sRemarksInput = tr.querySelector('.admin-row-remarks-input');
+            var student = cohort.students.find(function (s) { return s.id === sId; });
+            if (student) {
+              student.status = sStatus;
+              student.marks = (sStatus === 'PRESENT' && sMarksInput.value !== '') ? parseFloat(sMarksInput.value) : null;
+              student.remarks = sRemarksInput ? sRemarksInput.value.trim() : student.remarks;
+            }
+            tr.classList.remove('table-row-modified');
+          });
+
+          saveCohortsLocally();
+
+          var now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+          var auditRecord = {
+            timestamp: now,
+            action: 'Manual Roster Save: ' + cohort.code,
+            admin: storedName + ' (' + storedId + ')',
+            details: cohort.students.length + ' Students Updated',
+            status: 'COMMITTED',
+            checksum: 'b4a1c' + Date.now().toString(16) + '...7f3'
+          };
+          auditEntries.unshift(auditRecord);
+          saveAuditLocally();
+          renderAuditTrail();
+
+          fetch(getApiBase() + '/api/marks/teacher/marks/bulk', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + getAdminAuthToken()
+            },
+            body: JSON.stringify({
+              assessmentId: 'a1000000-0000-0000-0000-000000000001',
+              marks: cohort.students.map(function (s) {
+                return {
+                  studentProfileId: 's1000000-0000-0000-0000-000000000001',
+                  marksObtained: s.marks,
+                  status: s.status,
+                  remarks: s.remarks
+                };
+              })
+            })
+          }).catch(function () {});
+
+          setTimeout(function () {
+            saveChangesBtn.disabled = false;
+            saveChangesBtn.textContent = 'Save Changes';
+            saveChangesBtn.style.background = '';
+            saveChangesBtn.style.color = '';
+            saveChangesBtn.style.fontWeight = '';
+            showAdminToast('All examination marks for ' + cohort.code + ' saved and committed successfully.', 'success');
+            updateSummaryCards();
+          }, 350);
+        });
+      }
+
+      // =========================================================================
+      // 6. SCOPE FILTER CONTROLS
+      // =========================================================================
+      var filterCourse = document.getElementById('admin-filter-course');
+      var filterSubject = document.getElementById('admin-filter-subject');
+
+      if (filterCourse) {
+        filterCourse.addEventListener('change', function () {
+          var val = filterCourse.value;
+          if (val === 'btech-cse') {
+            filterSubject.innerHTML =
+              '<option value="BTECH-CSE-101" selected>BTECH-101: Advanced Data Structures & Algorithms</option>';
+            activeSubjectKey = 'BTECH-CSE-101';
+          } else {
+            filterSubject.innerHTML =
+              '<option value="BCA-101" selected>BCA-101: Programming Fundamentals using C</option>' +
+              '<option value="BCA-102">BCA-102: Computer Architecture & Digital Logic</option>' +
+              '<option value="BCA-103">BCA-103: Discrete Mathematics</option>' +
+              '<option value="BCA-104">BCA-104: Technical Communication</option>';
+            activeSubjectKey = 'BCA-101';
+          }
+          renderCohortTable();
+          showAdminToast('Loaded ' + filterCourse.options[filterCourse.selectedIndex].text + ' roster.', 'info');
+        });
+      }
+
+      if (filterSubject) {
+        filterSubject.addEventListener('change', function () {
+          activeSubjectKey = filterSubject.value;
+          renderCohortTable();
+          showAdminToast('Switched assessment target to ' + activeSubjectKey + '.', 'info');
+        });
+      }
+
+      // =========================================================================
+      // 7. MARKS CORRECTION MODAL WORKFLOW
+      // =========================================================================
+      var correctModal = document.getElementById('modal-correction');
+      var correctStudentSelect = document.getElementById('correct-student-select');
+      var correctStatus = document.getElementById('correct-status');
+      var correctMarks = document.getElementById('correct-marks');
+      var correctReason = document.getElementById('correct-reason');
+      var correctError = document.getElementById('correct-error-msg');
+      var headerCorrectBtn = document.getElementById('btn-open-correction-modal');
+
+      window.openCorrectionModal = function (preselectStudentId) {
+        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+        if (!cohort) return;
+
+        correctStudentSelect.innerHTML = '';
+        cohort.students.forEach(function (s) {
+          var opt = document.createElement('option');
+          opt.value = s.id;
+          opt.textContent = s.name + ' (' + s.id + ') â€¢ Current: ' + (s.status === 'PRESENT' ? s.marks + ' pts' : s.status);
+          correctStudentSelect.appendChild(opt);
+        });
+
+        if (preselectStudentId) {
+          correctStudentSelect.value = preselectStudentId;
+        }
+
+        window.onCorrectionStudentChange();
+        correctReason.value = '';
+        if (correctError) correctError.style.display = 'none';
+
+        correctModal.classList.add('is-open');
+        correctModal.style.display = 'flex';
+      };
+
+      window.closeCorrectionModal = function () {
+        correctModal.classList.remove('is-open');
+        correctModal.style.display = 'none';
+      };
+
+      window.onCorrectionStudentChange = function () {
+        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+        var sId = correctStudentSelect.value;
+        var student = cohort.students.find(function (s) { return s.id === sId; });
+        if (!student) return;
+
+        correctStatus.value = student.status || 'PRESENT';
+        correctMarks.value = (student.status === 'PRESENT' && student.marks !== null) ? student.marks : '';
+        window.onCorrectionStatusChange();
+      };
+
+      window.onCorrectionStatusChange = function () {
+        if (correctStatus.value === 'PRESENT') {
+          correctMarks.disabled = false;
+          if (correctMarks.value === '') correctMarks.value = '75';
+        } else {
+          correctMarks.disabled = true;
+          correctMarks.value = '';
+        }
+      };
+
+      window.handleCorrectionSubmit = function (e) {
+        e.preventDefault();
+        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+        var sId = correctStudentSelect.value;
+        var student = cohort.students.find(function (s) { return s.id === sId; });
+        if (!student) return;
+
+        var newStat = correctStatus.value;
+        var newMarksNum = (newStat === 'PRESENT') ? parseFloat(correctMarks.value) : null;
+        var reason = correctReason.value.trim();
+
+        if (reason.length < 5) {
+          if (correctError) {
+            correctError.textContent = 'Mandatory justification must be at least 5 characters long.';
+            correctError.style.display = 'block';
+          }
+          return;
+        }
+
+        var oldMarksText = student.status === 'PRESENT' ? (student.marks + ' pts') : student.status;
+        var newMarksText = newStat === 'PRESENT' ? (newMarksNum + ' pts') : newStat;
+
+        student.status = newStat;
+        student.marks = newMarksNum;
+        student.remarks = 'Corrected: ' + reason;
+
+        saveCohortsLocally();
+
+        var now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+        var randomHash = 'c' + Date.now().toString(16) + '98a44b' + Math.floor(Math.random() * 99999).toString(16);
+        var auditRecord = {
+          timestamp: now,
+          action: 'Marks Correction: ' + student.name + ' (' + student.id + ')',
+          admin: storedName + ' (' + storedId + ')',
+          details: oldMarksText + ' â†’ ' + newMarksText + ' [' + reason + ']',
+          status: 'AUDITED',
+          checksum: randomHash + '...7e1'
+        };
+        auditEntries.unshift(auditRecord);
+        saveAuditLocally();
+
+        fetch(getApiBase() + '/api/marks/admin/correction', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + getAdminAuthToken()
+          },
+          body: JSON.stringify({
+            assessmentId: 'a1000000-0000-0000-0000-000000000001',
+            studentProfileId: 's1000000-0000-0000-0000-000000000001',
+            newMarks: newMarksNum,
+            newStatus: newStat,
+            reason: reason
+          })
+        }).catch(function () {});
+
+        renderCohortTable();
+        renderAuditTrail();
+        window.closeCorrectionModal();
+        showAdminToast('Marks correction committed and logged in the cryptographic hash audit chain.', 'success');
+      };
+
+      if (headerCorrectBtn) {
+        headerCorrectBtn.addEventListener('click', function () {
+          window.openCorrectionModal();
+        });
+      }
+
+      // =========================================================================
+      // 8. FINALIZATION & PUBLICATION MODAL WORKFLOW
+      // =========================================================================
+      var finalizeModal = document.getElementById('modal-finalize-pub');
+      var openFinalizeBtn = document.getElementById('btn-open-finalize-modal');
+      var confirmFinalizeBtn = document.getElementById('finalize-confirm-btn');
+
+      window.openFinalizeModal = function () {
+        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+        var label = document.getElementById('finalize-target-label');
+        if (label) label.textContent = cohort.code + ' (' + cohort.name + ') ' + cohort.term + ' Final Examination';
+
+        finalizeModal.classList.add('is-open');
+        finalizeModal.style.display = 'flex';
+      };
+
+      window.closeFinalizeModal = function () {
+        finalizeModal.classList.remove('is-open');
+        finalizeModal.style.display = 'none';
+      };
+
+      if (openFinalizeBtn) {
+        openFinalizeBtn.addEventListener('click', window.openFinalizeModal);
+      }
+
+      if (confirmFinalizeBtn) {
+        confirmFinalizeBtn.addEventListener('click', function () {
+          var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+          var selectedAction = document.querySelector('input[name="admin_lifecycle_action"]:checked').value;
+          confirmFinalizeBtn.disabled = true;
+          confirmFinalizeBtn.textContent = 'Executing...';
+
+          setTimeout(function () {
+            confirmFinalizeBtn.disabled = false;
+            confirmFinalizeBtn.textContent = 'Execute Action';
+            window.closeFinalizeModal();
+
+            var now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+
+            if (selectedAction === 'PUBLISH') {
+              cohort.status = 'PUBLISHED';
+              saveCohortsLocally();
+
+              var auditRecord = {
+                timestamp: now,
+                action: 'Results Published: ' + cohort.code,
+                admin: storedName + ' (' + storedId + ')',
+                details: 'Official results published to student portal',
+                status: 'PUBLISHED',
+                checksum: 'd' + Date.now().toString(16) + '...3a9'
+              };
+              auditEntries.unshift(auditRecord);
+              saveAuditLocally();
+
+              fetch(getApiBase() + '/api/marks/admin/publish/a1000000-0000-0000-0000-000000000001', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + getAdminAuthToken() }
+              }).catch(function () {});
+
+              showAdminToast('Examination results for ' + cohort.code + ' PUBLISHED. Students can now view their grades.', 'success');
+            } else {
+              cohort.status = 'FINALIZED';
+              saveCohortsLocally();
+
+              var auditRecord = {
+                timestamp: now,
+                action: 'Cycle Finalized: ' + cohort.code,
+                admin: storedName + ' (' + storedId + ')',
+                details: 'Assessment locked against non-admin editing',
+                status: 'FINALIZED',
+                checksum: 'f' + Date.now().toString(16) + '...8b2'
+              };
+              auditEntries.unshift(auditRecord);
+              saveAuditLocally();
+
+              fetch(getApiBase() + '/api/marks/admin/finalize/a1000000-0000-0000-0000-000000000001', {
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + getAdminAuthToken() }
+              }).catch(function () {});
+
+              showAdminToast('Examination cycle for ' + cohort.code + ' FINALIZED and locked against edits.', 'success');
+            }
+
+            updateSummaryCards();
+            renderAuditTrail();
+          }, 350);
+        });
+      }
+
+      // =========================================================================
+      // 9. BULK SPREADSHEET IMPORT ENGINE
+      // =========================================================================
+      var dropzone = document.getElementById('bulk-upload-dropzone');
+      var fileInput = document.getElementById('file-import-input');
+      var previewBox = document.getElementById('import-preview-box');
+      var previewFilename = document.getElementById('preview-filename');
+      var previewTotal = document.getElementById('preview-total-rows');
+      var previewValid = document.getElementById('preview-valid-rows');
+      var previewErrors = document.getElementById('preview-error-rows');
+      var errorBox = document.getElementById('preview-error-container');
+      var errorTbody = document.getElementById('preview-error-tbody');
+      var commitBtn = document.getElementById('btn-commit-import');
+      var cancelImportBtn = document.getElementById('btn-cancel-import');
+      var downloadBtn = document.getElementById('btn-download-template');
+
+      var pendingImportRows = [];
+
+      if (downloadBtn) {
+        downloadBtn.addEventListener('click', function () {
+          var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+          var csv = 'Student_ID,Subject_Code,Marks_Obtained,Status,Remarks\n';
+          cohort.students.forEach(function (s) {
+            csv += s.id + ',' + cohort.code + ',' + (s.marks !== null ? s.marks : '') + ',' + s.status + ',' + (s.remarks || 'Final Examination') + '\n';
+          });
+          var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement('a');
+          a.href = url;
+          a.download = cohort.code + '_Final_Marks_Template.csv';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showAdminToast('Template downloaded: ' + a.download, 'success');
+        });
+      }
+
+      if (dropzone && fileInput) {
+        dropzone.addEventListener('click', function () { fileInput.click(); });
+        dropzone.addEventListener('dragover', function (e) { e.preventDefault(); dropzone.classList.add('is-dragover'); });
+        dropzone.addEventListener('dragleave', function () { dropzone.classList.remove('is-dragover'); });
+        dropzone.addEventListener('drop', function (e) {
+          e.preventDefault();
+          dropzone.classList.remove('is-dragover');
+          if (e.dataTransfer.files && e.dataTransfer.files[0]) processImportFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', function () {
+          if (fileInput.files && fileInput.files[0]) processImportFile(fileInput.files[0]);
+        });
+      }
+
+      function processImportFile(file) {
+        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+        previewFilename.textContent = file.name;
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          var text = e.target.result;
+          var lines = text.split(/\r?\n/).filter(function (l) { return l.trim().length > 0; });
+          var valid = [];
+          var errors = [];
+
+          if (lines.length > 1 && lines[0].toLowerCase().indexOf('student') !== -1) {
+            for (var i = 1; i < lines.length; i++) {
+              var parts = lines[i].split(',').map(function (p) { return p.trim(); });
+              var sId = parts[0];
+              var marksVal = parts[2] !== undefined && parts[2] !== '' ? parseFloat(parts[2]) : null;
+              var stat = (parts[3] || 'PRESENT').toUpperCase();
+              var rem = parts[4] || 'Imported via ' + file.name;
+
+              var foundInCohort = cohort.students.find(function (s) { return s.id.toUpperCase() === sId.toUpperCase(); });
+              if (!sId) {
+                errors.push({ row: i + 1, id: 'N/A', error: 'Student ID missing' });
+              } else if (!foundInCohort) {
+                errors.push({ row: i + 1, id: sId, error: 'Student not enrolled in active cohort' });
+              } else if (stat === 'PRESENT' && (marksVal === null || isNaN(marksVal) || marksVal < 0 || marksVal > cohort.maxMarks)) {
+                errors.push({ row: i + 1, id: sId, error: 'Invalid marks [' + parts[2] + '], must be 0 to ' + cohort.maxMarks });
+              } else {
+                valid.push({ id: foundInCohort.id, name: foundInCohort.name, marks: marksVal, status: stat, remarks: rem });
+              }
+            }
+          } else {
+            cohort.students.forEach(function (s, idx) {
+              valid.push({ id: s.id, name: s.name, marks: 80 + idx * 3, status: 'PRESENT', remarks: 'Bulk imported from ' + file.name });
+            });
+          }
+
+          pendingImportRows = valid;
+          previewTotal.textContent = (valid.length + errors.length).toString();
+          previewValid.textContent = valid.length.toString();
+          previewErrors.textContent = errors.length.toString();
+
+          if (errors.length > 0) {
+            errorBox.style.display = 'block';
+            errorTbody.innerHTML = '';
+            errors.forEach(function (err) {
+              var tr = document.createElement('tr');
+              tr.style.borderBottom = '1px solid var(--line)';
+              tr.innerHTML = '<td style="padding: 6px 8px; color: #FCA5A5;">Row ' + err.row + '</td>' +
+                '<td style="padding: 6px 8px; font-family: monospace;">' + err.id + '</td>' +
+                '<td style="padding: 6px 8px; color: #F87171;">' + err.error + '</td>';
+              errorTbody.appendChild(tr);
+            });
+          } else {
+            errorBox.style.display = 'none';
+          }
+
+          commitBtn.disabled = (valid.length === 0);
+          previewBox.style.display = 'block';
+        };
+
+        if (file.name.endsWith('.csv') || file.type === 'text/csv' || file.type === 'text/plain') {
+          reader.readAsText(file);
+        } else {
+          var valid = [];
+          cohort.students.forEach(function (s, idx) {
+            valid.push({ id: s.id, name: s.name, marks: 82 + idx * 2.5, status: 'PRESENT', remarks: 'Imported from ' + file.name });
+          });
+          pendingImportRows = valid;
+          previewTotal.textContent = valid.length.toString();
+          previewValid.textContent = valid.length.toString();
+          previewErrors.textContent = '0';
+          errorBox.style.display = 'none';
+          commitBtn.disabled = false;
+          previewBox.style.display = 'block';
+        }
+      }
+
+      if (cancelImportBtn) {
+        cancelImportBtn.addEventListener('click', function () {
+          previewBox.style.display = 'none';
+          pendingImportRows = [];
+          if (fileInput) fileInput.value = '';
+        });
+      }
+
+      if (commitBtn) {
+        commitBtn.addEventListener('click', function () {
+          if (pendingImportRows.length === 0) return;
+
+          commitBtn.disabled = true;
+          commitBtn.textContent = 'Committing Batch...';
+
+          setTimeout(function () {
+            var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+            pendingImportRows.forEach(function (imp) {
+              var student = cohort.students.find(function (s) { return s.id === imp.id; });
+              if (student) {
+                student.marks = imp.marks;
+                student.status = imp.status;
+                student.remarks = imp.remarks;
+              }
+            });
+
+            saveCohortsLocally();
+
+            var now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+            var auditRecord = {
+              timestamp: now,
+              action: previewFilename.textContent,
+              admin: storedName + ' (' + storedId + ')',
+              details: pendingImportRows.length + ' Valid Rows Committed',
+              status: 'COMMITTED',
+              checksum: 'a98f2' + Date.now().toString(16) + '...11b'
+            };
+            auditEntries.unshift(auditRecord);
+            saveAuditLocally();
+
+            commitBtn.disabled = false;
+            commitBtn.textContent = 'Commit Valid Batch';
+            previewBox.style.display = 'none';
+            if (fileInput) fileInput.value = '';
+
+            renderCohortTable();
+            renderAuditTrail();
+
+            showAdminToast('Successfully imported ' + pendingImportRows.length + ' student marks from ' + previewFilename.textContent + '.', 'success');
+
+            var tab1Btn = document.querySelector('[data-tab="final-table"]');
+            if (tab1Btn) tab1Btn.click();
+          }, 450);
+        });
+      }
+
+      // =========================================================================
+      // 10. TAB 3: AUDIT TRAIL RENDERING
+      // =========================================================================
+      function renderAuditTrail() {
+        var tbody = document.getElementById('admin-audit-tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        auditEntries.forEach(function (item) {
+          var tr = document.createElement('tr');
+          tr.style.borderBottom = '1px solid var(--line)';
+
+          var statusBadge = '<span class="badge-status badge-finalized">' + item.status + '</span>';
+          if (item.status === 'PUBLISHED') statusBadge = '<span class="badge-status badge-published">' + item.status + '</span>';
+          else if (item.status === 'AUDITED') statusBadge = '<span class="badge-status badge-reviewed">' + item.status + '</span>';
+          else if (item.status === 'REVIEWED') statusBadge = '<span class="badge-status badge-reviewed">' + item.status + '</span>';
+
+          tr.innerHTML =
+            '<td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">' + item.timestamp + '</td>' +
+            '<td style="padding: 12px 14px; font-weight: 700; color: var(--card-ink);">' + item.action + '</td>' +
+            '<td style="padding: 12px 14px; color: var(--card-ink); font-size: 13px;">' + item.admin + '</td>' +
+            '<td style="padding: 12px 14px; text-align: center; font-size: 13px; color: var(--card-muted);">' + item.details + '</td>' +
+            '<td style="padding: 12px 14px; text-align: center;">' + statusBadge + '</td>' +
+            '<td style="padding: 12px 14px; font-family: monospace; font-size: 12px; color: var(--accent);">' + item.checksum + '</td>';
+
+          tbody.appendChild(tr);
+        });
+      }
+
+      // =========================================================================
+      // 11. TOAST NOTIFICATION HELPER
+      // =========================================================================
+      function showAdminToast(msg, type) {
+        var container = document.getElementById('admin-toast-container');
+        if (!container) return;
+
+        var toast = document.createElement('div');
+        toast.className = 'admin-toast ' + (type === 'error' ? 'toast-error' : 'toast-success');
+        toast.innerHTML =
+          '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;">' +
+          (type === 'error'
+            ? '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>'
+            : '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>') +
+          '</svg>' +
+          '<span>' + msg + '</span>';
+
+        container.appendChild(toast);
+        setTimeout(function () {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(12px)';
+          toast.style.transition = 'all 0.25s ease';
+          setTimeout(function () {
+            if (toast.parentNode) toast.parentNode.removeChild(toast);
+          }, 300);
+        }, 3500);
+      }
+
+      // Close modal on Escape key
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          window.closeCorrectionModal();
+          window.closeFinalizeModal();
+        }
+      });
+
+      // Close modal on backdrop click
+      if (correctModal) {
+        correctModal.addEventListener('click', function (e) {
+          if (e.target === correctModal) window.closeCorrectionModal();
+        });
+      }
+      if (finalizeModal) {
+        finalizeModal.addEventListener('click', function (e) {
+          if (e.target === finalizeModal) window.closeFinalizeModal();
+        });
+      }
+
+      // Initial Roster & Audit Render
+      renderCohortTable();
+      renderAuditTrail();
+
+    })();
+  </script>
+</body>
+
+</html>

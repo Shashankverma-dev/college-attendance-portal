@@ -1,0 +1,1801 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Student Account & Enrollment Management | Administrator</title>
+  <meta name="description"
+    content="Centralized institutional student directory, section-wise enrollment management, bulk spreadsheet onboarding, transfer history tracking, and 48-hour secure cryptographic email activation for Swami Rama Himalayan University administrators.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-head">
+    <div class="wrap head-in">
+      <a class="wordmark" href="admin.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="34" height="34">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+
+      <!-- Desktop Admin Navigation -->
+      <nav class="head-nav" id="main-head-nav" aria-label="Administrator navigation">
+        <a class="nav-link" href="admin.html">Dashboard</a>
+        <a class="nav-link active" href="admin-students.html">Students</a>
+        <a class="nav-link" href="admin-teachers.html">Teacher management</a>
+        <a class="nav-link" href="admin-timetable.html">Timetable & Academic</a>
+        <a class="nav-link" href="admin-marks.html">Final marks</a>
+        <a class="nav-link" href="calendar.html">Calendar</a>
+      </nav>
+
+      <div class="head-actions" id="main-head-actions">
+        <!-- User Avatar & Dropdown Menu Component -->
+        <div class="user-menu-wrap" id="user-menu-wrap">
+          <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)"
+            aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">
+            <div class="user-avatar-circle" id="display-user-avatar">â€”</div>
+            <div class="user-avatar-info">
+              <span class="user-avatar-name" id="display-user-name">Loading...</span>
+              <span class="user-avatar-role" id="display-user-id">Global Admin</span>
+            </div>
+            <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">
+            <div class="user-dropdown-header">
+              <strong id="dropdown-user-name">Loading...</strong>
+              <span id="dropdown-user-id">Administrator Portal</span>
+            </div>
+            <a class="user-dropdown-item" href="profile.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>View Profile</span>
+            </a>
+            <a class="user-dropdown-item" href="admin.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              <span>Dashboard Overview</span>
+            </a>
+            <a class="user-dropdown-item" href="admin-students.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <span>Student Management</span>
+            </a>
+            <a class="user-dropdown-item" href="admin-teachers.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>Teacher Management</span>
+            </a>
+            <a class="user-dropdown-item" href="admin-timetable.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <span>Timetable & Academic</span>
+            </a>
+            <a class="user-dropdown-item" href="admin-marks.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+              </svg>
+              <span>Final Semester Marks</span>
+            </a>
+            <div class="user-dropdown-divider"></div>
+            <button type="button" class="user-dropdown-item user-dropdown-signout" onclick="handleSignOut()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Hamburger Button -->
+      <button type="button" class="nav-toggle-btn" id="nav-toggle-btn" aria-label="Open navigation menu"
+        aria-expanded="false" aria-controls="mobile-drawer" onclick="toggleNavDrawer()">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Side Navigation Drawer & Backdrop -->
+  <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" onclick="closeNavDrawer()"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile navigation" aria-hidden="true">
+    <div class="drawer-header">
+      <a class="wordmark" href="admin.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="30" height="30">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+      <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close navigation"
+        onclick="closeNavDrawer()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="drawer-user-info">
+      <strong id="drawer-user-name">Loading...</strong>
+      <span id="drawer-user-id">Administrator Portal</span>
+    </div>
+
+    <nav class="drawer-nav">
+      <a class="drawer-nav-link" href="admin.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="drawer-nav-link active" href="admin-students.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+        </svg>
+        <span>Student Management</span>
+      </a>
+      <a class="drawer-nav-link" href="admin-teachers.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span>Teacher Management</span>
+      </a>
+      <a class="drawer-nav-link" href="admin-timetable.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Timetable & Academic</span>
+      </a>
+      <a class="drawer-nav-link" href="admin-marks.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+        <span>Final Semester Marks</span>
+      </a>
+      <a class="drawer-nav-link" href="calendar.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Academic Calendar</span>
+      </a>
+      <a class="drawer-nav-link" href="profile.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+          <circle cx="12" cy="7" r="4"></circle>
+        </svg>
+        <span>Administrator Profile</span>
+      </a>
+    </nav>
+
+    <div class="drawer-footer">
+      <a class="btn btn-sm btn-ink" href="signin.html" id="drawer-signout-btn" onclick="sessionStorage.clear();">Sign Out</a>
+      <div class="drawer-meta">
+        SRHU Attendance Management System<br>
+        portal-support@college.edu
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrap -->
+  <main class="wrap" style="padding-top: 24px; padding-bottom: 64px;">
+
+    <!-- Breadcrumb & Page Header -->
+    <div style="margin-bottom: 20px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <a href="admin.html" style="font-size: 13px; color: var(--accent); text-decoration: none;">Admin Dashboard</a>
+        <span style="font-size: 13px; color: var(--muted);">/</span>
+        <span style="font-size: 13px; color: var(--muted-light);">Student Management & Activation</span>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px;">
+        <div>
+          <h1 class="display" style="font-size: clamp(24px, 3vw, 32px);">Student Account & Enrollment Management</h1>
+          <p style="margin-top: 4px; font-size: 14px; color: var(--muted-light); max-width: 820px; line-height: 1.4;">
+            Oversee institutional student admissions, configure department, programme, and section allocations, execute bulk spreadsheet onboarding, manage section transfers with historical preservation, and dispatch cryptographically secure 48-hour email activation tokens.
+          </p>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm btn-outline-white" id="btn-export-csv" onclick="exportStudentCSV()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Export Directory CSV
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-white" id="btn-download-template" onclick="downloadRosterTemplate()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <line x1="9" y1="15" x2="15" y2="15"></line>
+            </svg>
+            Download Template
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-white" id="btn-open-bulk" onclick="openBulkImportModal()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Bulk Import (XLSX / CSV)
+          </button>
+          <button type="button" class="btn btn-sm" id="btn-open-create" onclick="openCreateStudentModal()" style="background: #FFFFFF; color: var(--card-ink); border: 1px solid #FFFFFF; font-weight: 700; box-shadow: var(--shadow-sm);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            New Student Profile
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Institutional KPI Metrics Grid -->
+    <section class="admin-kpi-grid" aria-label="Student account and enrollment metrics" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-bottom: 20px;">
+      <!-- Total Enrolled Students -->
+      <div class="admin-kpi-card accent-blue" style="padding: 14px 18px;">
+        <div class="admin-kpi-header" style="margin-bottom: 6px;">
+          <span class="admin-kpi-label" style="font-size: 11px;">Total Enrolled Students</span>
+          <div class="admin-kpi-icon" style="width: 30px; height: 30px; color: var(--bg); background: var(--bg-dark); border-color: var(--line);">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+              <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="admin-kpi-val" style="font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 4px;" id="kpi-total-enrolled">--</div>
+        <div class="admin-kpi-sub" style="font-size: 12px;">Registered across all programmes</div>
+      </div>
+
+      <!-- Active Portal Accounts -->
+      <div class="admin-kpi-card accent-green" style="padding: 14px 18px;">
+        <div class="admin-kpi-header" style="margin-bottom: 6px;">
+          <span class="admin-kpi-label" style="font-size: 11px;">Active Portal Accounts</span>
+          <div class="admin-kpi-icon" style="width: 30px; height: 30px; color: #15803D; background: #DCFCE7; border-color: #BBF7D0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="admin-kpi-val" style="color: #15803D; font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 4px;" id="kpi-active-accounts">--</div>
+        <div class="admin-kpi-sub" style="font-size: 12px;">Fully activated &amp; password verified</div>
+      </div>
+
+      <!-- Pending Activation -->
+      <div class="admin-kpi-card accent-amber" style="padding: 14px 18px;">
+        <div class="admin-kpi-header" style="margin-bottom: 6px;">
+          <span class="admin-kpi-label" style="font-size: 11px;">Pending Activation</span>
+          <div class="admin-kpi-icon" style="width: 30px; height: 30px; color: #B45309; background: #FEF3C7; border-color: #FDE68A;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="admin-kpi-val" style="color: #B45309; font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 4px;" id="kpi-pending-activation">--</div>
+        <div class="admin-kpi-sub" style="font-size: 12px;">48-hour activation link outstanding</div>
+      </div>
+
+      <!-- Suspended Accounts -->
+      <div class="admin-kpi-card accent-red" style="padding: 14px 18px;">
+        <div class="admin-kpi-header" style="margin-bottom: 6px;">
+          <span class="admin-kpi-label" style="font-size: 11px;">Suspended Accounts</span>
+          <div class="admin-kpi-icon" style="width: 30px; height: 30px; color: #DC2626; background: #FEE2E2; border-color: #FECACA;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="admin-kpi-val" style="color: #DC2626; font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 4px;" id="kpi-suspended-accounts">--</div>
+        <div class="admin-kpi-sub" style="font-size: 12px;">Administrative access holds</div>
+      </div>
+    </section>
+
+    <!-- Student Filter Toolbar Card -->
+    <div class="admin-filter-card" style="background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
+      <!-- Row 1: Search & Primary Academic Hierarchy (Unified School & Department) -->
+      <div style="display: grid; grid-template-columns: minmax(260px, 1.8fr) minmax(220px, 1.3fr) minmax(200px, 1.2fr); gap: 12px; align-items: flex-end; margin-bottom: 12px;">
+        <div>
+          <label for="filter-search" style="display: block; font-size: 11px; font-weight: 700; color: var(--card-ink); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em;">SEARCH DIRECTORY</label>
+          <input type="text" id="filter-search" class="admin-search-input" placeholder="Enrollment No, Reg No, Name..."
+            style="width: 100%; min-width: 0; height: 36px;" oninput="debounceApplyFilters()">
+        </div>
+        <div>
+          <label for="filter-department" style="display: block; font-size: 11px; font-weight: 700; color: var(--card-ink); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em;">SCHOOL / ACADEMIC DEPARTMENT</label>
+          <select id="filter-department" class="admin-select-input" style="width: 100%; min-width: 0; height: 36px;" onchange="onDepartmentFilterChange()">
+            <option value="">All Schools &amp; Departments</option>
+          </select>
+          <input type="hidden" id="filter-school" value="">
+        </div>
+        <div>
+          <label for="filter-course" style="display: block; font-size: 11px; font-weight: 700; color: var(--card-ink); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em;">PROGRAMME</label>
+          <select id="filter-course" class="admin-select-input" style="width: 100%; min-width: 0; height: 36px;" onchange="onCourseFilterChange()">
+            <option value="">All Programmes</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Row 2: Cohort, Status & Inline Reset Action -->
+      <div style="display: grid; grid-template-columns: repeat(4, minmax(140px, 1fr)) auto; gap: 12px; align-items: flex-end;">
+        <div>
+          <label for="filter-semester" style="display: block; font-size: 11px; font-weight: 700; color: var(--card-ink); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em;">SEMESTER</label>
+          <select id="filter-semester" class="admin-select-input" style="width: 100%; min-width: 0; height: 36px;" onchange="applyFilters()">
+            <option value="">All Semesters</option>
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+            <option value="3">Semester 3</option>
+            <option value="4">Semester 4</option>
+            <option value="5">Semester 5</option>
+            <option value="6">Semester 6</option>
+          </select>
+        </div>
+        <div>
+          <label for="filter-section" style="display: block; font-size: 11px; font-weight: 700; color: var(--card-ink); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em;">SECTION</label>
+          <select id="filter-section" class="admin-select-input" style="width: 100%; min-width: 0; height: 36px;" onchange="applyFilters()">
+            <option value="">All Sections</option>
+            <option value="A">Section A</option>
+            <option value="B">Section B</option>
+            <option value="C">Section C</option>
+            <option value="D">Section D</option>
+          </select>
+        </div>
+        <div>
+          <label for="filter-status" style="display: block; font-size: 11px; font-weight: 700; color: var(--card-ink); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em;">ACCOUNT STATUS</label>
+          <select id="filter-status" class="admin-select-input" style="width: 100%; min-width: 0; height: 36px;" onchange="applyFilters()">
+            <option value="">All Account States</option>
+            <option value="ACTIVE">Active</option>
+            <option value="PENDING_ACTIVATION">Pending Activation</option>
+            <option value="SUSPENDED">Suspended</option>
+          </select>
+        </div>
+        <div>
+          <label for="filter-enrollment" style="display: block; font-size: 11px; font-weight: 700; color: var(--card-ink); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em;">ENROLLMENT</label>
+          <select id="filter-enrollment" class="admin-select-input" style="width: 100%; min-width: 0; height: 36px;" onchange="applyFilters()">
+            <option value="">All Enrollment States</option>
+            <option value="ACTIVE">Active</option>
+            <option value="TRANSFERRED">Transferred</option>
+            <option value="COMPLETED">Completed</option>
+            <option value="WITHDRAWN">Withdrawn</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: flex-end;">
+          <button type="button" class="btn btn-sm btn-outline" style="height: 36px; min-height: 36px; padding: 0 16px; white-space: nowrap; font-weight: 600;" onclick="resetFilters()">Reset All Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Student Table Card -->
+    <div class="admin-table-card" style="background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+      <div style="padding: 16px 20px; background: #F8FAFC; border-bottom: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+        <div style="font-size: 15px; font-weight: 700; color: var(--card-ink);" id="table-record-count">Showing 0 students</div>
+        <div style="font-size: 13px; color: var(--card-muted);">Official institutional identifiers: Enrollment Number &amp; Registration Number</div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+          <thead>
+            <tr style="background: #E8EEF5; color: #17345C; border-bottom: 1px solid #D7E3F0;">
+              <th style="padding: 12px 16px; font-weight: 700; width: 130px;">Enrollment No</th>
+              <th style="padding: 12px 16px; font-weight: 700; width: 145px;">Registration No</th>
+              <th style="padding: 12px 16px; font-weight: 700;">Student Name &amp; Email</th>
+              <th style="padding: 12px 16px; font-weight: 700;">School / Department &amp; Programme</th>
+              <th style="padding: 12px 16px; font-weight: 700; width: 100px;">Sem &amp; Sec</th>
+              <th style="padding: 12px 16px; font-weight: 700; width: 75px;">Roll No</th>
+              <th style="padding: 12px 16px; font-weight: 700; width: 110px;">Account Status</th>
+              <th style="padding: 12px 16px; font-weight: 700; width: 105px;">Enrollment</th>
+              <th style="padding: 12px 16px; font-weight: 700; text-align: right; width: 130px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="student-table-body">
+            <tr>
+              <td colspan="9" style="padding: 40px; text-align: center; color: var(--card-muted);">
+                <div style="font-weight: 600; font-size: 15px; margin-bottom: 4px; color: var(--card-ink);">Loading student registry...</div>
+                <div style="font-size: 13px;">Connecting to university database</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Toolbar -->
+      <div style="padding: 14px 20px; background: #F8FAFC; border-top: 1px solid var(--line); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+        <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--card-muted);">
+          <span style="font-weight: 600;">Rows per page:</span>
+          <select id="pagination-limit" class="admin-select-input" style="height: 32px; padding: 0 8px; font-size: 13px;" onchange="onLimitChange()">
+            <option value="10">10</option>
+            <option value="25" selected>25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span style="font-size: 13px; font-weight: 600; color: var(--card-muted);" id="pagination-page-indicator">Page 1 of 1</span>
+          <button type="button" class="btn btn-sm btn-outline" id="btn-prev-page" onclick="prevPage()" disabled>Previous</button>
+          <button type="button" class="btn btn-sm btn-outline" id="btn-next-page" onclick="nextPage()" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 1: CREATE SINGLE STUDENT PROFILE -->
+  <!-- ========================================================================= -->
+  <div class="modal" id="modal-create-student" role="dialog" aria-modal="true" aria-labelledby="create-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+    <div class="card" style="max-width: 680px; width: 100%; padding: 28px; background: #FFFFFF; border-radius: 12px; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+        <div>
+          <h3 id="create-modal-title" style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Create Student Profile</h3>
+          <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0 0;">Provisions student identity, assigns academic section, and dispatches 48-hour activation email.</p>
+        </div>
+        <button type="button" onclick="closeCreateStudentModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">âœ•</button>
+      </div>
+
+      <form id="form-create-student" onsubmit="handleCreateStudentSubmit(event)">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <div style="grid-column: 1 / -1;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Full Name *</label>
+            <input type="text" id="create-full-name" required placeholder="e.g. Aarav Sharma" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Institutional Email *</label>
+            <input type="email" id="create-email" required placeholder="e.g. aarav.sharma@college.edu" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Enrollment Number (e.g. SRHU238990) *</label>
+            <input type="text" id="create-enrollment-no" required placeholder="e.g. SRHU238990" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Registration Number (e.g. dd241104301172) *</label>
+            <input type="text" id="create-registration-no" required placeholder="e.g. dd241104301172" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">School / Academic Department *</label>
+            <select id="create-school-id" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;" onchange="onCreateSchoolChange()">
+              <option value="">Select School / Department</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Programme (Course) *</label>
+            <select id="create-course-code" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;" onchange="onCreateCourseChange()">
+              <option value="">Select Programme</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Semester *</label>
+            <select id="create-semester" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;" onchange="onCreateSemesterChange()">
+              <option value="">Select Semester</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Section *</label>
+            <select id="create-section" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+              <option value="">Select Section</option>
+            </select>
+            <span id="create-section-capacity-note" style="font-size: 11px; color: var(--muted); margin-top: 2px; display: block;"></span>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Roll Number *</label>
+            <input type="text" id="create-roll-number" required placeholder="e.g. 01" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Phone Number</label>
+            <input type="text" id="create-phone" placeholder="e.g. +91 98765 43210" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Parent / Guardian Contact</label>
+            <input type="text" id="create-parent" placeholder="e.g. +91 98765 43211" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+          </div>
+        </div>
+
+        <div id="create-student-error" style="display: none; background: #FEE2E2; color: #DC2626; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 16px;"></div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border); padding-top: 16px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeCreateStudentModal()">Cancel</button>
+          <button type="submit" class="btn btn-sm" id="btn-submit-create-student">Create & Dispatch Activation</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 2: VIEW STUDENT DETAILS & ENROLLMENT HISTORY -->
+  <!-- ========================================================================= -->
+  <div class="modal" id="modal-view-student" role="dialog" aria-modal="true" aria-labelledby="view-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+    <div class="card" style="max-width: 760px; width: 100%; padding: 28px; background: #FFFFFF; border-radius: 12px; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+        <div style="display: flex; gap: 14px; align-items: center;">
+          <div id="view-student-avatar" style="width: 52px; height: 52px; border-radius: 50%; background: #1D3C72; color: white; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold;">--</div>
+          <div>
+            <h3 id="view-modal-title" style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Student Profile</h3>
+            <span id="view-student-badges" style="display: inline-flex; gap: 6px; margin-top: 4px;"></span>
+          </div>
+        </div>
+        <button type="button" onclick="closeViewStudentModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">âœ•</button>
+      </div>
+
+      <!-- Profile Overview Grid -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; background: #F8FAFC; padding: 16px; border-radius: 8px; border: 1px solid #E2E8F0; margin-bottom: 20px;">
+        <div>
+          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Enrollment Number</span>
+          <div style="font-size: 15px; font-weight: 700; color: #1D3C72;" id="view-enrollment">--</div>
+        </div>
+        <div>
+          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Registration Number</span>
+          <div style="font-size: 15px; font-weight: 700; color: #0284C7;" id="view-registration">--</div>
+        </div>
+        <div>
+          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Institutional Email</span>
+          <div style="font-size: 14px; color: #17345C;" id="view-email">--</div>
+        </div>
+        <div>
+          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">School / Faculty</span>
+          <div style="font-size: 14px; font-weight: 600; color: #17345C;" id="view-school">--</div>
+        </div>
+        <div>
+          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Programme / Course</span>
+          <div style="font-size: 14px; font-weight: 600; color: #17345C;" id="view-programme">--</div>
+        </div>
+        <div>
+          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Academic Allocation</span>
+          <div style="font-size: 14px; color: #17345C;" id="view-allocation">--</div>
+        </div>
+        <div>
+          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Roll Number</span>
+          <div style="font-size: 14px; font-weight: 700; color: #17345C;" id="view-roll">--</div>
+        </div>
+        <div>
+          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Admission Year</span>
+          <div style="font-size: 14px; color: #17345C;" id="view-adm-year">--</div>
+        </div>
+      </div>
+
+      <!-- Activation & Token Status -->
+      <div style="margin-bottom: 24px;">
+        <h4 style="font-size: 15px; font-weight: 700; color: #17345C; margin: 0 0 10px 0;">Account Activation & Credential Status</h4>
+        <div id="view-token-container" style="background: #FFFFFF; border: 1px solid var(--border); border-radius: 8px; padding: 14px; font-size: 13px;"></div>
+      </div>
+
+      <!-- Enrollment & Section Transfer History -->
+      <div>
+        <h4 style="font-size: 15px; font-weight: 700; color: #17345C; margin: 0 0 10px 0;">Enrollment & Section Transfer History</h4>
+        <div style="overflow-x: auto; border: 1px solid var(--border); border-radius: 8px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
+            <thead>
+              <tr style="background: #E8EEF5; color: #17345C;">
+                <th style="padding: 10px 12px; font-weight: 700;">Programme</th>
+                <th style="padding: 10px 12px; font-weight: 700;">Sem & Sec</th>
+                <th style="padding: 10px 12px; font-weight: 700;">Term</th>
+                <th style="padding: 10px 12px; font-weight: 700;">Status</th>
+                <th style="padding: 10px 12px; font-weight: 700;">Effective Date</th>
+                <th style="padding: 10px 12px; font-weight: 700;">Notes</th>
+              </tr>
+            </thead>
+            <tbody id="view-history-tbody">
+              <tr><td colspan="6" style="padding: 20px; text-align: center; color: var(--muted);">No history recorded</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-top: 24px; border-top: 1px solid var(--border); padding-top: 16px;">
+        <button type="button" class="btn btn-sm btn-outline" onclick="closeViewStudentModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 3: SECTION & PROGRAMME TRANSFER -->
+  <!-- ========================================================================= -->
+  <div class="modal" id="modal-transfer-student" role="dialog" aria-modal="true" aria-labelledby="transfer-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+    <div class="card" style="max-width: 600px; width: 100%; padding: 28px; background: #FFFFFF; border-radius: 12px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+        <div>
+          <h3 id="transfer-modal-title" style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Transfer Student Section</h3>
+          <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0 0;">Reallocates future classes to a new section while preserving past attendance.</p>
+        </div>
+        <button type="button" onclick="closeTransferStudentModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">âœ•</button>
+      </div>
+
+      <form id="form-transfer-student" onsubmit="handleTransferSubmit(event)">
+        <input type="hidden" id="transfer-student-id">
+
+        <div style="background: #F1F5F9; padding: 12px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 13px;">
+          Current: <strong id="transfer-current-allocation" style="color: #1D3C72;">--</strong>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Target Programme *</label>
+            <select id="transfer-course-code" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;" onchange="onTransferCourseChange()">
+              <option value="">Select Programme</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Target Semester *</label>
+            <select id="transfer-semester" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;" onchange="onTransferSemesterChange()">
+              <option value="">Select Semester</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Target Section *</label>
+            <select id="transfer-section" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+              <option value="">Select Section</option>
+            </select>
+            <span id="transfer-section-capacity-note" style="font-size: 11px; color: var(--muted); margin-top: 2px; display: block;"></span>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Effective Date *</label>
+            <input type="date" id="transfer-effective-date" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+          </div>
+          <div style="grid-column: 1 / -1;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Reason for Transfer</label>
+            <textarea id="transfer-reason" rows="2" placeholder="e.g. Approved section balance or student elective change" style="width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 14px;"></textarea>
+          </div>
+        </div>
+
+        <div style="background: #FEF3C7; color: #92400E; padding: 12px 14px; border-radius: 6px; font-size: 12px; margin-bottom: 16px; border: 1px solid #FDE68A;">
+          <strong>Historical Integrity Notice:</strong> All prior attendance records, marks, and sessions remain permanently linked to the previous section. Future attendance sessions on or after the effective date will load this student into the new section roster.
+        </div>
+
+        <div id="transfer-student-error" style="display: none; background: #FEE2E2; color: #DC2626; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 16px;"></div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border); padding-top: 16px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeTransferStudentModal()">Cancel</button>
+          <button type="submit" class="btn btn-sm" id="btn-submit-transfer">Execute Transfer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL 4: BULK ROSTER IMPORT (CSV & XLSX) -->
+  <!-- ========================================================================= -->
+  <div class="modal" id="modal-bulk-import" role="dialog" aria-modal="true" aria-labelledby="bulk-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+    <div class="card" style="max-width: 860px; width: 100%; padding: 28px; background: #FFFFFF; border-radius: 12px; max-height: 90vh; overflow-y: auto;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+        <div>
+          <h3 id="bulk-modal-title" style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Bulk Student Roster Onboarding</h3>
+          <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0 0;">Upload cohort spreadsheet (.xlsx, .csv). Validates academic structure, detects duplicates, and provisions accounts.</p>
+        </div>
+        <button type="button" onclick="closeBulkImportModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">âœ•</button>
+      </div>
+
+      <!-- File Upload Zone -->
+      <div id="bulk-upload-zone" style="border: 2px dashed #93C5FD; background: #F8FAFC; border-radius: 8px; padding: 32px; text-align: center; cursor: pointer; margin-bottom: 18px;" onclick="document.getElementById('bulk-file-input').click()">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#1D3C72" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 8px;">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <div style="font-size: 15px; font-weight: 700; color: #17345C;">Click to upload or drag & drop student roster</div>
+        <div style="font-size: 13px; color: var(--muted); margin-top: 4px;">Supported formats: CSV (.csv) or Excel (.xlsx) â€¢ Up to 10 MB (5,000 students/batch)</div>
+        <input type="file" id="bulk-file-input" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, text/csv" style="display: none;" onchange="handleBulkFileSelect(event)">
+      </div>
+
+      <!-- Selected File & Preview Summary -->
+      <div id="bulk-preview-container" style="display: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 12px 14px; background: #F1F5F9; border-radius: 6px;">
+          <div>
+            <strong id="bulk-filename" style="color: #17345C;">--</strong>
+            <span id="bulk-filesize" style="font-size: 12px; color: var(--muted); margin-left: 8px;"></span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <span class="badge" style="background: #DCFCE7; color: #15803D; font-weight: 700;" id="bulk-valid-count">0 Valid</span>
+            <span class="badge" style="background: #FEE2E2; color: #DC2626; font-weight: 700;" id="bulk-invalid-count">0 Errors</span>
+          </div>
+        </div>
+
+        <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 16px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 12px; text-align: left;">
+            <thead>
+              <tr style="background: #E8EEF5; color: #17345C; position: sticky; top: 0;">
+                <th style="padding: 8px 10px;">Row</th>
+                <th style="padding: 8px 10px;">Student Name</th>
+                <th style="padding: 8px 10px;">Email</th>
+                <th style="padding: 8px 10px;">Programme</th>
+                <th style="padding: 8px 10px;">Sec</th>
+                <th style="padding: 8px 10px;">Roll</th>
+                <th style="padding: 8px 10px;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="bulk-preview-tbody"></tbody>
+          </table>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 16px;">
+          <input type="checkbox" id="bulk-skip-invalid" checked>
+          <label for="bulk-skip-invalid" style="font-size: 13px; color: #334155;">Skip invalid/duplicate rows and provision all valid students</label>
+        </div>
+      </div>
+
+      <div id="bulk-error-alert" style="display: none; background: #FEE2E2; color: #DC2626; padding: 10px 14px; border-radius: 6px; font-size: 13px; margin-bottom: 16px;"></div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--border); padding-top: 16px;">
+        <button type="button" class="btn btn-sm btn-outline" onclick="closeBulkImportModal()">Cancel</button>
+        <button type="button" class="btn btn-sm" id="btn-commit-bulk" onclick="commitBulkImport()" disabled>Commit Roster & Send Invites</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="admin-toast" style="display: none; position: fixed; bottom: 24px; right: 24px; background: #17345C; color: #FFFFFF; padding: 14px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); z-index: 2000; font-size: 14px; max-width: 400px;"></div>
+
+  <script src="site.js"></script>
+  <!-- Client-side Application Script -->
+  <script>
+    var currentStudents = [];
+    var academicTree = [];
+    var academicSchools = [];
+    var currentPage = 1;
+    var currentLimit = 25;
+    var totalPages = 1;
+    var parsedBulkPreview = null;
+    var debounceTimer = null;
+
+    document.addEventListener('DOMContentLoaded', function () {
+      loadAcademicTree();
+      loadStudents();
+    });
+
+    function showToast(msg, isError) {
+      var toast = document.getElementById('admin-toast');
+      if (!toast) return;
+      toast.style.background = isError ? '#DC2626' : '#17345C';
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(function () {
+        toast.style.display = 'none';
+      }, 4000);
+    }
+
+    function handleSignOut() {
+      sessionStorage.clear();
+      window.location.replace('signin.html');
+    }
+
+    // =========================================================================
+    // ACADEMIC STRUCTURE DATA & SCHOOLS
+    // =========================================================================
+
+    function loadAcademicTree() {
+      Promise.all([
+        fetch(getApiBase() + '/api/admin/students/resources/academic-tree').then(function (res) { return res.json(); }).catch(function () { return { success: false }; }),
+        fetch(getApiBase() + '/api/admin/schools').then(function (res) { return res.json(); }).catch(function () { return { success: false, schools: [] }; })
+      ])
+        .then(function (results) {
+          var treeData = results[0] || {};
+          var schoolData = results[1] || {};
+
+          if (schoolData && schoolData.success && schoolData.schools && schoolData.schools.length > 0) {
+            academicSchools = schoolData.schools;
+          } else {
+            academicSchools = [
+              { school_id: 'SST', school_name: 'School of Science & Technology' },
+              { school_id: 'SBS', school_name: 'School of Bioscience' },
+              { school_id: 'SOM', school_name: 'School of Management' },
+              { school_id: 'CA', school_name: 'Department of Computer Applications' }
+            ];
+          }
+
+          if (treeData && treeData.success && treeData.tree && treeData.tree.length > 0) {
+            academicTree = treeData.tree;
+          } else {
+            academicTree = [
+              {
+                department_id: 'ca',
+                department_code: 'CA',
+                department_name: 'Department of Computer Applications',
+                courses: [
+                  { course_id: 'bca', course_code: 'BCA', course_name: 'Bachelor of Computer Applications' },
+                  { course_id: 'mca', course_code: 'MCA', course_name: 'Master of Computer Applications' }
+                ]
+              },
+              {
+                department_id: 'cse',
+                department_code: 'CSE',
+                department_name: 'Computer Science & Engineering',
+                courses: [
+                  { course_id: 'btech_cse', course_code: 'BTECH', course_name: 'B.Tech Computer Science & Engineering' }
+                ]
+              }
+            ];
+          }
+
+          populateFilterDropdowns();
+          populateCreateModalDropdowns();
+        })
+        .catch(function (err) {
+          academicSchools = [
+            { school_id: 'SST', school_name: 'School of Science & Technology' },
+            { school_id: 'SBS', school_name: 'School of Bioscience' },
+            { school_id: 'SOM', school_name: 'School of Management' },
+            { school_id: 'CA', school_name: 'Department of Computer Applications' }
+          ];
+          academicTree = [
+            {
+              department_id: 'ca',
+              department_code: 'CA',
+              department_name: 'Department of Computer Applications',
+              courses: [
+                { course_id: 'bca', course_code: 'BCA', course_name: 'Bachelor of Computer Applications' },
+                { course_id: 'mca', course_code: 'MCA', course_name: 'Master of Computer Applications' }
+              ]
+            }
+          ];
+          populateFilterDropdowns();
+          populateCreateModalDropdowns();
+        });
+    }
+
+    function populateFilterDropdowns() {
+      var deptSel = document.getElementById('filter-department');
+      var courseSel = document.getElementById('filter-course');
+      if (!deptSel || !courseSel) return;
+
+      var unifiedList = [];
+      var seenCodes = new Set();
+
+      // Collect from academicSchools
+      academicSchools.forEach(function (sch) {
+        var code = (sch.school_code || sch.code || sch.school_id || sch.id || '').toUpperCase();
+        if (code && !seenCodes.has(code)) {
+          seenCodes.add(code);
+          unifiedList.push({
+            id: code,
+            name: sch.school_name || sch.name || ('School of ' + code),
+            code: code
+          });
+        }
+      });
+
+      // Collect from academicTree
+      academicTree.forEach(function (dept) {
+        var code = (dept.department_code || dept.code || dept.department_id || dept.id || '').toUpperCase();
+        if (code && !seenCodes.has(code)) {
+          seenCodes.add(code);
+          unifiedList.push({
+            id: code,
+            name: dept.department_name || dept.name || ('Department of ' + code),
+            code: code
+          });
+        }
+      });
+
+      deptSel.innerHTML = '<option value="">All Schools &amp; Departments</option>';
+      unifiedList.forEach(function (d) {
+        var opt = document.createElement('option');
+        opt.value = d.code;
+        opt.textContent = d.name + ' (' + d.code + ')';
+        deptSel.appendChild(opt);
+      });
+
+      courseSel.innerHTML = '<option value="">All Programmes</option>';
+      academicTree.forEach(function (dept) {
+        dept.courses.forEach(function (c) {
+          var opt = document.createElement('option');
+          opt.value = c.course_code;
+          opt.textContent = c.course_name + ' (' + c.course_code + ')';
+          courseSel.appendChild(opt);
+        });
+      });
+    }
+
+    function onSchoolFilterChange() {
+      var schoolHidden = document.getElementById('filter-school');
+      if (schoolHidden && document.getElementById('filter-department')) {
+        document.getElementById('filter-department').value = schoolHidden.value;
+      }
+      onDepartmentFilterChange();
+    }
+
+    function onDepartmentFilterChange() {
+      var deptCode = (document.getElementById('filter-department').value || '').toUpperCase();
+      var schoolHidden = document.getElementById('filter-school');
+      if (schoolHidden) schoolHidden.value = deptCode;
+
+      var courseSel = document.getElementById('filter-course');
+      courseSel.innerHTML = '<option value="">All Programmes</option>';
+
+      academicTree.forEach(function (dept) {
+        var dCode = (dept.department_code || dept.code || dept.school_id || '').toUpperCase();
+        if (!deptCode || dCode === deptCode || deptCode === 'SST' || (dept.courses && dept.courses.some(function(c) { return (c.department_code || '').toUpperCase() === deptCode; }))) {
+          dept.courses.forEach(function (c) {
+            var opt = document.createElement('option');
+            opt.value = c.course_code;
+            opt.textContent = c.course_name + ' (' + c.course_code + ')';
+            courseSel.appendChild(opt);
+          });
+        }
+      });
+      applyFilters();
+    }
+
+    function onCourseFilterChange() {
+      applyFilters();
+    }
+
+    function debounceApplyFilters() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(function () {
+        currentPage = 1;
+        loadStudents();
+      }, 300);
+    }
+
+    function applyFilters() {
+      currentPage = 1;
+      loadStudents();
+    }
+
+    function resetFilters() {
+      document.getElementById('filter-search').value = '';
+      if (document.getElementById('filter-school')) document.getElementById('filter-school').value = '';
+      document.getElementById('filter-department').value = '';
+      document.getElementById('filter-course').value = '';
+      document.getElementById('filter-semester').value = '';
+      document.getElementById('filter-section').value = '';
+      document.getElementById('filter-status').value = '';
+      document.getElementById('filter-enrollment').value = '';
+      currentPage = 1;
+      loadStudents();
+    }
+
+    function getAuthHeaders(extraHeaders) {
+      var token = sessionStorage.getItem('attendance_auth_token') || localStorage.getItem('attendance_auth_token') || sessionStorage.getItem('token') || localStorage.getItem('token') || '';
+      var headers = {
+        'Accept': 'application/json'
+      };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      if (extraHeaders) {
+        for (var k in extraHeaders) headers[k] = extraHeaders[k];
+      }
+      return headers;
+    }
+
+    // =========================================================================
+    // LOAD & RENDER STUDENTS
+    // =========================================================================
+
+    function loadStudents() {
+      var search = encodeURIComponent(document.getElementById('filter-search').value.trim());
+      var deptCode = (document.getElementById('filter-department') ? document.getElementById('filter-department').value : '').trim();
+      var dept = encodeURIComponent(deptCode);
+      var school = dept; // Unified: school and department are the exact same entity
+      var course = encodeURIComponent(document.getElementById('filter-course').value);
+      var sem = encodeURIComponent(document.getElementById('filter-semester').value);
+      var sec = encodeURIComponent(document.getElementById('filter-section').value);
+      var status = encodeURIComponent(document.getElementById('filter-status').value);
+      var enrollment = encodeURIComponent(document.getElementById('filter-enrollment').value);
+
+      var url = '/api/admin/students?page=' + currentPage + '&limit=' + currentLimit +
+        (search ? '&search=' + search : '') +
+        (school ? '&school_id=' + school : '') +
+        (dept ? '&department_id=' + dept : '') +
+        (course ? '&course_code=' + course : '') +
+        (sem ? '&semester_number=' + sem : '') +
+        (sec ? '&section_name=' + sec : '') +
+        (status ? '&status=' + status : '') +
+        (enrollment ? '&enrollment_status=' + enrollment : '');
+
+      function getStoredStudents() {
+        try {
+          var raw = localStorage.getItem('admin_students_registry');
+          if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return [
+          { student_profile_id: 's-101', student_id: 'STU-101', enrollment_no: 'ENR-101', registration_no: 'REG-2026-001', full_name: 'Aarav Gupta', student_gmail: 'aarav@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '01', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
+          { student_profile_id: 's-102', student_id: 'STU-102', enrollment_no: 'ENR-102', registration_no: 'REG-2026-002', full_name: 'Aditi Rao', student_gmail: 'aditi@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '02', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
+          { student_profile_id: 's-103', student_id: 'STU-103', enrollment_no: 'ENR-103', registration_no: 'REG-2026-003', full_name: 'Akash Verma', student_gmail: 'akash@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '03', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
+          { student_profile_id: 's-104', student_id: 'STU-104', enrollment_no: 'ENR-104', registration_no: 'REG-2026-004', full_name: 'Ananya Sharma', student_gmail: 'ananya@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '04', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
+          { student_profile_id: 's-105', student_id: 'STU-105', enrollment_no: 'ENR-105', registration_no: 'REG-2026-005', full_name: 'Aryan Patel', student_gmail: 'aryan@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '05', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
+          { student_profile_id: 's-106', student_id: 'STU-106', enrollment_no: 'ENR-106', registration_no: 'REG-2026-006', full_name: 'Bhavna Joshi', student_gmail: 'bhavna@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '06', status: 'PENDING_ACTIVATION', enrollment_status: 'PENDING' },
+          { student_profile_id: 's-107', student_id: 'STU-107', enrollment_no: 'ENR-107', registration_no: 'REG-2026-007', full_name: 'Chetan Rawat', student_gmail: 'chetan@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '07', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
+          { student_profile_id: 's-108', student_id: 'STU-108', enrollment_no: 'ENR-108', registration_no: 'REG-2026-008', full_name: 'Divya Negi', student_gmail: 'divya@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '08', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
+          { student_profile_id: 's-109', student_id: 'STU-109', enrollment_no: 'ENR-109', registration_no: 'REG-2026-009', full_name: 'Gaurav Bisht', student_gmail: 'gaurav@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '09', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
+          { student_profile_id: 's-110', student_id: 'STU-110', enrollment_no: 'ENR-110', registration_no: 'REG-2026-010', full_name: 'Harshit Nautiyal', student_gmail: 'harshit@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '10', status: 'ACTIVE', enrollment_status: 'ACTIVE' }
+        ];
+      }
+
+      function loadOfflineStudents() {
+        var rawSearch = (document.getElementById('filter-search') ? document.getElementById('filter-search').value : '').toLowerCase().trim();
+        var rawCourse = (document.getElementById('filter-course') ? document.getElementById('filter-course').value : '').trim();
+        var rawSem = (document.getElementById('filter-semester') ? document.getElementById('filter-semester').value : '').trim();
+        var rawSec = (document.getElementById('filter-section') ? document.getElementById('filter-section').value : '').trim();
+        var rawStatus = (document.getElementById('filter-status') ? document.getElementById('filter-status').value : '').trim();
+
+        var list = getStoredStudents();
+        var filtered = list.filter(function (s) {
+          if (rawSearch && (s.full_name || '').toLowerCase().indexOf(rawSearch) === -1 && (s.student_id || '').toLowerCase().indexOf(rawSearch) === -1 && (s.student_gmail || '').toLowerCase().indexOf(rawSearch) === -1) {
+            return false;
+          }
+          if (rawCourse && s.course_code !== rawCourse) return false;
+          if (rawSem && String(s.semester_number) !== rawSem) return false;
+          if (rawSec && s.section_name !== rawSec) return false;
+          if (rawStatus && s.status !== rawStatus) return false;
+          return true;
+        });
+
+        currentStudents = filtered;
+        totalPages = Math.max(1, Math.ceil(filtered.length / currentLimit));
+        renderStudentTable(filtered, filtered.length);
+
+        document.getElementById('kpi-total-enrolled').textContent = list.length.toLocaleString();
+        document.getElementById('kpi-active-accounts').textContent = list.filter(function (s) { return s.status === 'ACTIVE'; }).length.toLocaleString();
+        document.getElementById('kpi-pending-activation').textContent = list.filter(function (s) { return s.status === 'PENDING_ACTIVATION'; }).length.toLocaleString();
+        document.getElementById('kpi-suspended-accounts').textContent = list.filter(function (s) { return s.status === 'SUSPENDED'; }).length.toLocaleString();
+      }
+
+      fetch(url, { headers: getAuthHeaders() })
+        .then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        })
+        .then(function (data) {
+          if (data && data.success) {
+            currentStudents = data.students || [];
+            totalPages = data.totalPages || 1;
+            renderStudentTable(currentStudents, data.total || 0);
+
+            if (data.stats) {
+              document.getElementById('kpi-total-enrolled').textContent = (data.stats.totalEnrolled || 0).toLocaleString();
+              document.getElementById('kpi-active-accounts').textContent = (data.stats.activeAccounts || 0).toLocaleString();
+              document.getElementById('kpi-pending-activation').textContent = (data.stats.pendingActivation || 0).toLocaleString();
+              document.getElementById('kpi-suspended-accounts').textContent = (data.stats.suspendedAccounts || 0).toLocaleString();
+            }
+          } else {
+            loadOfflineStudents();
+          }
+        })
+        .catch(function (err) {
+          loadOfflineStudents();
+        });
+    }
+
+    function renderStudentTable(students, totalCount) {
+      var tbody = document.getElementById('student-table-body');
+      var countEl = document.getElementById('table-record-count');
+      var pageInd = document.getElementById('pagination-page-indicator');
+      var prevBtn = document.getElementById('btn-prev-page');
+      var nextBtn = document.getElementById('btn-next-page');
+
+      countEl.textContent = 'Showing ' + students.length + ' of ' + totalCount + ' student records';
+      pageInd.textContent = 'Page ' + currentPage + ' of ' + (totalPages || 1);
+      prevBtn.disabled = currentPage <= 1;
+      nextBtn.disabled = currentPage >= totalPages;
+
+      if (students.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="padding: 40px; text-align: center; color: var(--card-muted);">' +
+          '<div style="font-weight: 700; font-size: 15px; color: var(--card-ink);">No matching student records found</div>' +
+          '<div style="font-size: 13px; margin-top: 4px;">Try clearing filters or onboarding students via the New Student or Bulk Import buttons.</div>' +
+          '</td></tr>';
+        return;
+      }
+
+      var html = '';
+      students.forEach(function (s) {
+        var statusBadge = '';
+        if (s.account_status === 'ACTIVE') {
+          statusBadge = '<span class="badge" style="background: #DCFCE7; color: #15803D; font-weight: 700; border: 1px solid #BBF7D0;">Active</span>';
+        } else if (s.account_status === 'SUSPENDED') {
+          statusBadge = '<span class="badge" style="background: #FEE2E2; color: #DC2626; font-weight: 700; border: 1px solid #FECACA;">Suspended</span>';
+        } else {
+          statusBadge = '<span class="badge" style="background: #FEF3C7; color: #B45309; font-weight: 700; border: 1px solid #FDE68A;">Pending</span>';
+        }
+
+        var enrollBadge = '<span class="badge" style="background: #E0E7FF; color: #3730A3; font-weight: 600; border: 1px solid #C7D2FE;">' + (s.enrollment_status || 'ACTIVE') + '</span>';
+
+        var enrNo = s.enrollment_no || s.student_id || '--';
+        var regNo = s.registration_no || '--';
+        var schoolLabel = s.school_name || s.school_id || 'Science & Tech';
+
+        html += '<tr style="border-bottom: 1px solid #E2E8F0;">' +
+          '<td style="padding: 12px 16px; font-weight: 700; color: #1D3C72; font-family: monospace; font-size: 13px;">' + enrNo + '</td>' +
+          '<td style="padding: 12px 16px; font-weight: 600; color: #0284C7; font-family: monospace; font-size: 13px;">' + regNo + '</td>' +
+          '<td style="padding: 12px 16px;">' +
+            '<div style="font-weight: 600; color: #17345C;">' + s.full_name + '</div>' +
+            '<div style="font-size: 12px; color: var(--card-muted);">' + s.student_gmail + '</div>' +
+          '</td>' +
+          '<td style="padding: 12px 16px;">' +
+            '<div style="font-weight: 600; color: #17345C;">' + s.course_code + '</div>' +
+            '<div style="font-size: 11px; color: var(--card-muted);">' + schoolLabel + '</div>' +
+          '</td>' +
+          '<td style="padding: 12px 16px;">' +
+            '<span style="font-weight: 600; color: #17345C;">Sem ' + s.semester_number + ' â€¢ Sec ' + s.section_name + '</span>' +
+          '</td>' +
+          '<td style="padding: 12px 16px; font-weight: 600; color: #17345C;">' + s.roll_number + '</td>' +
+          '<td style="padding: 12px 16px;">' + statusBadge + '</td>' +
+          '<td style="padding: 12px 16px;">' + enrollBadge + '</td>' +
+          '<td style="padding: 12px 16px; text-align: right;">' +
+            '<div style="display: inline-flex; gap: 4px;">' +
+              '<button type="button" class="btn btn-sm btn-outline" style="min-height: 28px; height: 28px; padding: 0 8px; font-size: 12px;" onclick="viewStudentDetails(\'' + s.student_profile_id + '\')">View</button>' +
+              '<button type="button" class="btn btn-sm btn-outline" style="min-height: 28px; height: 28px; padding: 0 8px; font-size: 12px;" onclick="openTransferModal(\'' + s.student_profile_id + '\')">Transfer</button>' +
+              '<button type="button" class="btn btn-sm btn-outline" style="min-height: 28px; height: 28px; padding: 0 8px; font-size: 12px;" onclick="resendActivation(\'' + s.student_profile_id + '\')">Invite</button>' +
+              '<button type="button" class="btn btn-sm btn-outline" style="min-height: 28px; height: 28px; padding: 0 8px; font-size: 12px; color: #DC2626; border-color: #FECACA;" onclick="deleteStudent(\'' + s.student_profile_id + '\', \'' + s.full_name.replace(/'/g, "\\'") + '\')">Delete</button>' +
+            '</div>' +
+          '</td>' +
+        '</tr>';
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function onLimitChange() {
+      currentLimit = parseInt(document.getElementById('pagination-limit').value, 10) || 25;
+      currentPage = 1;
+      loadStudents();
+    }
+
+    function prevPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        loadStudents();
+      }
+    }
+
+    function nextPage() {
+      if (currentPage < totalPages) {
+        currentPage++;
+        loadStudents();
+      }
+    }
+
+    // =========================================================================
+    // MODAL 1: CREATE STUDENT
+    // =========================================================================
+
+    function openCreateStudentModal() {
+      document.getElementById('modal-create-student').style.display = 'flex';
+      document.getElementById('create-student-error').style.display = 'none';
+      populateCreateModalDropdowns();
+    }
+
+    function closeCreateStudentModal() {
+      document.getElementById('modal-create-student').style.display = 'none';
+      document.getElementById('form-create-student').reset();
+    }
+
+    function populateCreateModalDropdowns() {
+      var schoolSel = document.getElementById('create-school-id');
+      var courseSel = document.getElementById('create-course-code');
+      if (schoolSel) {
+        schoolSel.innerHTML = '<option value="">Select School / Department</option>';
+        var unifiedList = [];
+        var seenCodes = new Set();
+        academicSchools.forEach(function (sch) {
+          var code = (sch.school_code || sch.code || sch.school_id || sch.id || '').toUpperCase();
+          if (code && !seenCodes.has(code)) {
+            seenCodes.add(code);
+            unifiedList.push({ id: code, name: sch.school_name || sch.name || ('School of ' + code) });
+          }
+        });
+        academicTree.forEach(function (dept) {
+          var code = (dept.department_code || dept.code || dept.department_id || dept.id || '').toUpperCase();
+          if (code && !seenCodes.has(code)) {
+            seenCodes.add(code);
+            unifiedList.push({ id: code, name: dept.department_name || dept.name || ('Department of ' + code) });
+          }
+        });
+        unifiedList.forEach(function (sch) {
+          var opt = document.createElement('option');
+          opt.value = sch.id;
+          opt.textContent = sch.name + ' (' + sch.id + ')';
+          schoolSel.appendChild(opt);
+        });
+        if (unifiedList.length > 0) {
+          schoolSel.value = unifiedList[0].id;
+        }
+      }
+
+      if (courseSel) {
+        courseSel.innerHTML = '<option value="">Select Programme</option>';
+        academicTree.forEach(function (dept) {
+          dept.courses.forEach(function (c) {
+            var opt = document.createElement('option');
+            opt.value = c.course_code;
+            opt.textContent = c.course_name + ' (' + c.course_code + ')';
+            courseSel.appendChild(opt);
+          });
+        });
+      }
+    }
+
+    function onCreateSchoolChange() {
+      var schoolId = (document.getElementById('create-school-id').value || '').toUpperCase();
+      var courseSel = document.getElementById('create-course-code');
+      courseSel.innerHTML = '<option value="">Select Programme</option>';
+
+      academicTree.forEach(function (dept) {
+        var dCode = (dept.department_code || dept.code || dept.school_id || '').toUpperCase();
+        if (!schoolId || dCode === schoolId || schoolId === 'SST' || (dept.courses && dept.courses.some(function(c) { return (c.department_code || '').toUpperCase() === schoolId; }))) {
+          dept.courses.forEach(function (c) {
+            var opt = document.createElement('option');
+            opt.value = c.course_code;
+            opt.textContent = c.course_name + ' (' + c.course_code + ')';
+            courseSel.appendChild(opt);
+          });
+        }
+      });
+      onCreateCourseChange();
+    }
+
+    function onCreateCourseChange() {
+      var courseCode = document.getElementById('create-course-code').value;
+      var semSel = document.getElementById('create-semester');
+      var secSel = document.getElementById('create-section');
+      semSel.innerHTML = '<option value="">Select Semester</option>';
+      secSel.innerHTML = '<option value="">Select Section</option>';
+
+      academicTree.forEach(function (dept) {
+        dept.courses.forEach(function (c) {
+          if (c.course_code === courseCode) {
+            c.semesters.forEach(function (s) {
+              var opt = document.createElement('option');
+              opt.value = s.semester_number;
+              opt.textContent = s.display_label;
+              semSel.appendChild(opt);
+            });
+          }
+        });
+      });
+    }
+
+    function onCreateSemesterChange() {
+      var courseCode = document.getElementById('create-course-code').value;
+      var semNum = Number(document.getElementById('create-semester').value);
+      var secSel = document.getElementById('create-section');
+      secSel.innerHTML = '<option value="">Select Section</option>';
+
+      academicTree.forEach(function (dept) {
+        dept.courses.forEach(function (c) {
+          if (c.course_code === courseCode) {
+            c.semesters.forEach(function (s) {
+              if (s.semester_number === semNum) {
+                s.sections.forEach(function (sec) {
+                  var opt = document.createElement('option');
+                  opt.value = sec.section_name;
+                  opt.textContent = 'Section ' + sec.section_name + ' (' + sec.remaining_seats + ' seats remaining)';
+                  secSel.appendChild(opt);
+                });
+              }
+            });
+          }
+        });
+      });
+    }
+
+    function handleCreateStudentSubmit(e) {
+      e.preventDefault();
+      var submitBtn = document.getElementById('btn-submit-create-student');
+      var errorEl = document.getElementById('create-student-error');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating...';
+      errorEl.style.display = 'none';
+
+      var enrInput = document.getElementById('create-enrollment-no');
+      var regInput = document.getElementById('create-registration-no');
+      var schoolInput = document.getElementById('create-school-id');
+
+      var payload = {
+        fullName: document.getElementById('create-full-name').value.trim(),
+        studentGmail: document.getElementById('create-email').value.trim(),
+        enrollmentNo: enrInput ? enrInput.value.trim() : undefined,
+        registrationNo: regInput ? regInput.value.trim() : undefined,
+        schoolId: schoolInput ? schoolInput.value : undefined,
+        departmentId: schoolInput ? schoolInput.value : undefined,
+        courseCode: document.getElementById('create-course-code').value,
+        semesterNumber: Number(document.getElementById('create-semester').value),
+        sectionName: document.getElementById('create-section').value,
+        rollNumber: document.getElementById('create-roll-number').value.trim(),
+        phoneNumber: document.getElementById('create-phone').value.trim() || undefined,
+        parentContact: document.getElementById('create-parent').value.trim() || undefined,
+      };
+
+      fetch(getApiBase() + '/api/admin/students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create & Dispatch Activation';
+          if (data.success) {
+            closeCreateStudentModal();
+            showToast(data.message || 'Student account created successfully!');
+            loadStudents();
+          } else {
+            errorEl.textContent = data.message || 'Failed to create student.';
+            errorEl.style.display = 'block';
+          }
+        })
+        .catch(function (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Create & Dispatch Activation';
+          errorEl.textContent = err.message || 'Server error occurred.';
+          errorEl.style.display = 'block';
+        });
+    }
+
+    // =========================================================================
+    // MODAL 2: VIEW DETAILS & HISTORY
+    // =========================================================================
+
+    function viewStudentDetails(studentId) {
+      fetch(getApiBase() + '/api/admin/students/' + studentId)
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data.success && data.student) {
+            var s = data.student;
+            var enrEl = document.getElementById('view-enrollment');
+            var regEl = document.getElementById('view-registration');
+            var schEl = document.getElementById('view-school');
+            if (enrEl) enrEl.textContent = s.enrollment_no || s.student_id || '--';
+            if (regEl) regEl.textContent = s.registration_no || '--';
+            if (schEl) schEl.textContent = s.school_name || s.school_id || 'School of Science & Technology';
+
+            document.getElementById('view-email').textContent = s.student_gmail;
+            document.getElementById('view-programme').textContent = (s.course_name || s.course_code) + ' (' + s.course_code + ')';
+            document.getElementById('view-allocation').textContent = 'Semester ' + s.semester_number + ' â€¢ Section ' + s.section_name;
+            document.getElementById('view-roll').textContent = s.roll_number;
+            document.getElementById('view-adm-year').textContent = s.admission_academic_year || '2026-2027';
+
+            var initials = s.full_name.split(' ').map(function (n) { return n[0]; }).join('').substring(0, 2).toUpperCase();
+            document.getElementById('view-student-avatar').textContent = initials;
+            document.getElementById('view-modal-title').textContent = s.full_name;
+
+            var badges = '';
+            badges += '<span class="badge" style="background: ' + (s.status === 'ACTIVE' ? '#DCFCE7; color: #15803D;' : '#FEF3C7; color: #D97706;') + '">' + s.status + '</span>';
+            badges += '<span class="badge" style="background: #E0E7FF; color: #3730A3;">' + (s.enrollment_status || 'ACTIVE') + '</span>';
+            document.getElementById('view-student-badges').innerHTML = badges;
+
+            // Activation Token info
+            var tokenBox = document.getElementById('view-token-container');
+            if (data.activeTokens && data.activeTokens.length > 0) {
+              var t = data.activeTokens[0];
+              tokenBox.innerHTML = '<div style="display: flex; justify-content: space-between; align-items: center;">' +
+                '<div>' +
+                  '<strong>Active 48-Hour Token:</strong> Expires ' + new Date(t.expires_at).toLocaleString() +
+                  (t.is_expired ? ' <span style="color: #DC2626; font-weight: bold;">(Expired)</span>' : ' <span style="color: #15803D; font-weight: bold;">(Valid)</span>') +
+                '</div>' +
+                '<button type="button" class="btn btn-sm btn-outline" onclick="resendActivation(\'' + s.student_profile_id + '\')">Reissue Token</button>' +
+              '</div>';
+            } else {
+              tokenBox.innerHTML = '<div style="color: #15803D; font-weight: 600;">âœ“ Account password established. No outstanding activation tokens.</div>';
+            }
+
+            // Enrollment History Table
+            var historyTbody = document.getElementById('view-history-tbody');
+            if (data.enrollmentHistory && data.enrollmentHistory.length > 0) {
+              var hHtml = '';
+              data.enrollmentHistory.forEach(function (h) {
+                hHtml += '<tr style="border-bottom: 1px solid #E2E8F0;">' +
+                  '<td style="padding: 8px 10px; font-weight: 600;">' + h.course_code + '</td>' +
+                  '<td style="padding: 8px 10px;">Sem ' + h.semester_number + ' - Sec ' + h.section_name + '</td>' +
+                  '<td style="padding: 8px 10px;">' + h.academic_calendar_term + '</td>' +
+                  '<td style="padding: 8px 10px;"><span class="badge" style="background: #F1F5F9; color: #334155;">' + h.enrollment_status + '</span></td>' +
+                  '<td style="padding: 8px 10px;">' + h.effective_date + '</td>' +
+                  '<td style="padding: 8px 10px; color: var(--muted);">' + (h.transfer_reason || '--') + '</td>' +
+                '</tr>';
+              });
+              historyTbody.innerHTML = hHtml;
+            } else {
+              historyTbody.innerHTML = '<tr><td colspan="6" style="padding: 16px; text-align: center; color: var(--muted);">Initial enrollment active</td></tr>';
+            }
+
+            document.getElementById('modal-view-student').style.display = 'flex';
+          }
+        })
+        .catch(function (err) {
+          showToast('Failed to load student details: ' + err.message, true);
+        });
+    }
+
+    function closeViewStudentModal() {
+      document.getElementById('modal-view-student').style.display = 'none';
+    }
+
+    // =========================================================================
+    // MODAL 3: SECTION & PROGRAMME TRANSFER
+    // =========================================================================
+
+    function openTransferModal(studentProfileId) {
+      var student = currentStudents.find(function (s) { return s.student_profile_id === studentProfileId; });
+      if (!student) return;
+
+      document.getElementById('transfer-student-id').value = student.student_profile_id;
+      document.getElementById('transfer-current-allocation').textContent =
+        student.full_name + ' (' + student.student_id + ') â€¢ ' + student.course_code + ' Sem ' + student.semester_number + ' Section ' + student.section_name;
+      document.getElementById('transfer-effective-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('transfer-student-error').style.display = 'none';
+
+      // Populate courses
+      var courseSel = document.getElementById('transfer-course-code');
+      courseSel.innerHTML = '<option value="">Select Programme</option>';
+      academicTree.forEach(function (dept) {
+        dept.courses.forEach(function (c) {
+          var opt = document.createElement('option');
+          opt.value = c.course_code;
+          opt.textContent = c.course_name + ' (' + c.course_code + ')';
+          if (c.course_code === student.course_code) opt.selected = true;
+          courseSel.appendChild(opt);
+        });
+      });
+
+      onTransferCourseChange();
+      document.getElementById('modal-transfer-student').style.display = 'flex';
+    }
+
+    function closeTransferStudentModal() {
+      document.getElementById('modal-transfer-student').style.display = 'none';
+      document.getElementById('form-transfer-student').reset();
+    }
+
+    function onTransferCourseChange() {
+      var courseCode = document.getElementById('transfer-course-code').value;
+      var semSel = document.getElementById('transfer-semester');
+      var secSel = document.getElementById('transfer-section');
+      semSel.innerHTML = '<option value="">Select Semester</option>';
+      secSel.innerHTML = '<option value="">Select Section</option>';
+
+      academicTree.forEach(function (dept) {
+        dept.courses.forEach(function (c) {
+          if (c.course_code === courseCode) {
+            c.semesters.forEach(function (s) {
+              var opt = document.createElement('option');
+              opt.value = s.semester_number;
+              opt.textContent = s.display_label;
+              semSel.appendChild(opt);
+            });
+          }
+        });
+      });
+    }
+
+    function onTransferSemesterChange() {
+      var courseCode = document.getElementById('transfer-course-code').value;
+      var semNum = Number(document.getElementById('transfer-semester').value);
+      var secSel = document.getElementById('transfer-section');
+      secSel.innerHTML = '<option value="">Select Section</option>';
+
+      academicTree.forEach(function (dept) {
+        dept.courses.forEach(function (c) {
+          if (c.course_code === courseCode) {
+            c.semesters.forEach(function (s) {
+              if (s.semester_number === semNum) {
+                s.sections.forEach(function (sec) {
+                  var opt = document.createElement('option');
+                  opt.value = sec.section_name;
+                  opt.textContent = 'Section ' + sec.section_name + ' (' + sec.remaining_seats + ' seats remaining)';
+                  secSel.appendChild(opt);
+                });
+              }
+            });
+          }
+        });
+      });
+    }
+
+    function handleTransferSubmit(e) {
+      e.preventDefault();
+      var id = document.getElementById('transfer-student-id').value;
+      var submitBtn = document.getElementById('btn-submit-transfer');
+      var errorEl = document.getElementById('transfer-student-error');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Transferring...';
+      errorEl.style.display = 'none';
+
+      var payload = {
+        targetCourseCode: document.getElementById('transfer-course-code').value,
+        targetSemesterNumber: Number(document.getElementById('transfer-semester').value),
+        targetSectionName: document.getElementById('transfer-section').value,
+        effectiveDate: document.getElementById('transfer-effective-date').value,
+        transferReason: document.getElementById('transfer-reason').value.trim() || undefined,
+      };
+
+      fetch(getApiBase() + '/api/admin/students/' + id + '/transfer', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Execute Transfer';
+          if (data.success) {
+            closeTransferStudentModal();
+            showToast(data.message || 'Student transferred successfully!');
+            loadStudents();
+          } else {
+            errorEl.textContent = data.message || 'Transfer failed.';
+            errorEl.style.display = 'block';
+          }
+        })
+        .catch(function (err) {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Execute Transfer';
+          errorEl.textContent = err.message || 'Server error occurred.';
+          errorEl.style.display = 'block';
+        });
+    }
+
+    // =========================================================================
+    // MODAL 4: BULK ROSTER IMPORT
+    // =========================================================================
+
+    function openBulkImportModal() {
+      document.getElementById('modal-bulk-import').style.display = 'flex';
+      document.getElementById('bulk-preview-container').style.display = 'none';
+      document.getElementById('bulk-upload-zone').style.display = 'block';
+      document.getElementById('btn-commit-bulk').disabled = true;
+      document.getElementById('bulk-error-alert').style.display = 'none';
+      parsedBulkPreview = null;
+    }
+
+    function closeBulkImportModal() {
+      document.getElementById('modal-bulk-import').style.display = 'none';
+      document.getElementById('bulk-file-input').value = '';
+    }
+
+    function handleBulkFileSelect(e) {
+      var file = e.target.files[0];
+      if (!file) return;
+
+      var formData = new FormData();
+      formData.append('file', file);
+
+      var errorEl = document.getElementById('bulk-error-alert');
+      errorEl.style.display = 'none';
+
+      fetch(getApiBase() + '/api/admin/students/import/preview', {
+        method: 'POST',
+        body: formData,
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data.success) {
+            parsedBulkPreview = data;
+            document.getElementById('bulk-upload-zone').style.display = 'none';
+            document.getElementById('bulk-preview-container').style.display = 'block';
+            document.getElementById('bulk-filename').textContent = file.name;
+            document.getElementById('bulk-filesize').textContent = (file.size / 1024).toFixed(1) + ' KB';
+            document.getElementById('bulk-valid-count').textContent = data.validRowsCount + ' Valid';
+            document.getElementById('bulk-invalid-count').textContent = data.invalidRowsCount + ' Errors';
+            document.getElementById('btn-commit-bulk').disabled = data.validRowsCount === 0;
+
+            var tbody = document.getElementById('bulk-preview-tbody');
+            var rowsHtml = '';
+
+            data.validRows.slice(0, 50).forEach(function (r) {
+              rowsHtml += '<tr style="border-bottom: 1px solid #E2E8F0; background: #F0FDF4;">' +
+                '<td style="padding: 6px 10px; font-weight: bold;">' + r.rowNumber + '</td>' +
+                '<td style="padding: 6px 10px;">' + r.fullName + '</td>' +
+                '<td style="padding: 6px 10px;">' + r.studentGmail + '</td>' +
+                '<td style="padding: 6px 10px;">' + r.courseCode + ' Sem ' + r.semesterNumber + '</td>' +
+                '<td style="padding: 6px 10px;">' + r.sectionName + '</td>' +
+                '<td style="padding: 6px 10px;">' + r.rollNumber + '</td>' +
+                '<td style="padding: 6px 10px; color: #15803D; font-weight: bold;">âœ“ Ready</td>' +
+              '</tr>';
+            });
+
+            data.invalidRows.slice(0, 50).forEach(function (r) {
+              rowsHtml += '<tr style="border-bottom: 1px solid #E2E8F0; background: #FEF2F2;">' +
+                '<td style="padding: 6px 10px; font-weight: bold; color: #DC2626;">' + r.rowNumber + '</td>' +
+                '<td style="padding: 6px 10px;">' + (r.fullName || '--') + '</td>' +
+                '<td style="padding: 6px 10px;">' + (r.studentGmail || '--') + '</td>' +
+                '<td style="padding: 6px 10px;">' + (r.courseCode || '--') + '</td>' +
+                '<td style="padding: 6px 10px;">' + (r.sectionName || '--') + '</td>' +
+                '<td style="padding: 6px 10px;">' + (r.rollNumber || '--') + '</td>' +
+                '<td style="padding: 6px 10px; color: #DC2626; font-size: 11px;">' + r.errors.join('; ') + '</td>' +
+              '</tr>';
+            });
+
+            tbody.innerHTML = rowsHtml;
+          } else {
+            errorEl.textContent = data.message || 'Failed to inspect spreadsheet.';
+            errorEl.style.display = 'block';
+          }
+        })
+        .catch(function (err) {
+          errorEl.textContent = err.message || 'File upload error.';
+          errorEl.style.display = 'block';
+        });
+    }
+
+    function commitBulkImport() {
+      if (!parsedBulkPreview || !parsedBulkPreview.validRows) return;
+      var commitBtn = document.getElementById('btn-commit-bulk');
+      var skipInvalid = document.getElementById('bulk-skip-invalid').checked;
+
+      commitBtn.disabled = true;
+      commitBtn.textContent = 'Provisioning Accounts...';
+
+      fetch(getApiBase() + '/api/admin/students/import/commit', {
+        method: 'POST',
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+        body: JSON.stringify({
+          rows: parsedBulkPreview.validRows,
+          skipInvalid: skipInvalid,
+          academicTerm: 'Autumn 2026',
+        }),
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          commitBtn.disabled = false;
+          commitBtn.textContent = 'Commit Roster & Send Invites';
+          if (data.success) {
+            closeBulkImportModal();
+            showToast('Bulk Onboarding Completed: ' + data.successfulCount + ' student(s) provisioned with 48h activation invitations dispatched!');
+            loadStudents();
+          } else {
+            alert('Bulk import encountered issues: ' + (data.errors && data.errors.length ? data.errors[0].message : data.error));
+          }
+        })
+        .catch(function (err) {
+          commitBtn.disabled = false;
+          commitBtn.textContent = 'Commit Roster & Send Invites';
+          alert('Failed to commit bulk import: ' + err.message);
+        });
+    }
+
+    function resendActivation(studentProfileId) {
+      if (!confirm('Reissue a fresh 48-hour activation link? Any previous links will be invalidated.')) return;
+
+      fetch(getApiBase() + '/api/admin/students/' + studentProfileId + '/resend-activation', {
+        method: 'POST',
+        headers: getAuthHeaders()
+      })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data.success) {
+            showToast(data.message || 'Fresh activation link reissued!');
+            loadStudents();
+          } else {
+            showToast(data.message || 'Failed to reissue link.', true);
+          }
+        })
+        .catch(function (err) {
+          showToast('Error: ' + err.message, true);
+        });
+    }
+
+    function downloadRosterTemplate() {
+      window.location.href = '/api/admin/students/export/template';
+    }
+
+    function exportStudentCSV() {
+      var csvContent = 'data:text/csv;charset=utf-8,Enrollment Number,Registration Number,Full Name,Email,School,Course,Semester,Section,Roll No,Status,Enrollment\n';
+      currentStudents.forEach(function (s) {
+        csvContent += [
+          s.enrollment_no || s.student_id || '',
+          s.registration_no || '',
+          '"' + s.full_name + '"',
+          s.student_gmail,
+          '"' + (s.school_name || s.school_id || 'School of Science & Technology') + '"',
+          s.course_code,
+          s.semester_number,
+          s.section_name,
+          s.roll_number,
+          s.account_status,
+          s.enrollment_status
+        ].join(',') + '\n';
+      });
+
+      var encodedUri = encodeURI(csvContent);
+      var link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', 'srhu_students_directory.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function deleteStudent(studentProfileId, studentName) {
+      if (!confirm('Are you sure you want to permanently delete student "' + studentName + '"? All related tokens and history will be removed.')) return;
+
+      fetch(getApiBase() + '/api/admin/students/' + studentProfileId, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.success) {
+          showToast(data.message || 'Student record deleted successfully.');
+          loadStudents();
+        } else {
+          showToast(data.message || 'Failed to delete student.', true);
+        }
+      })
+      .catch(function (err) {
+        showToast('Error: ' + err.message, true);
+      });
+    }
+
+    function purgeAllTestData() {
+      if (!confirm('CAUTION: This will delete ALL test/mock students, teachers, allocations, attendance sessions, and marks, resetting the portal to a 100% clean directory.\n\nProceed with purge?')) return;
+
+      fetch(getApiBase() + '/api/admin/purge-test-data', {
+        method: 'POST',
+        headers: getAuthHeaders()
+      })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        if (data.success) {
+          showToast('Portal reset to 100% clean state. All mock and test entries deleted.');
+          loadStudents();
+        } else {
+          showToast(data.message || 'Failed to purge data.', true);
+        }
+      })
+      .catch(function (err) {
+        showToast('Error: ' + err.message, true);
+      });
+    }
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Attendance Portal</title>
+  <meta name="description"
+    content="Attendance management and academic calendar portal for students, teachers, and administrators.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css?v=6">
+</head>
+
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-head">
+    <div class="wrap head-in">
+      <a class="wordmark" href="index.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="34" height="34">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+
+      <nav class="head-nav" aria-label="Main navigation">
+        <a class="nav-link" href="#how-it-works">How it works</a>
+        <a class="nav-link" href="#register-example">Example register</a>
+        <a class="nav-link" href="#calendar">Academic calendar</a>
+        <a class="nav-link" href="#about">About</a>
+      </nav>
+
+      <div class="head-actions">
+        <a class="btn btn-sm" href="signin.html">Sign in</a>
+      </div>
+
+      <!-- Mobile Hamburger Button (3 lines) -->
+      <button type="button" class="nav-toggle-btn" id="nav-toggle-btn" aria-label="Open navigation menu"
+        aria-expanded="false" aria-controls="mobile-drawer" onclick="toggleNavDrawer()">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Side Navigation Drawer & Backdrop -->
+  <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" onclick="closeNavDrawer()"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile navigation" aria-hidden="true">
+    <div class="drawer-header">
+      <a class="wordmark" href="index.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="30" height="30">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+      <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close navigation"
+        onclick="closeNavDrawer()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="drawer-nav">
+      <a class="drawer-nav-link" href="#how-it-works" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="16" x2="12" y2="12"></line>
+          <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+        <span>How It Works</span>
+      </a>
+      <a class="drawer-nav-link" href="#register-example" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="3" y1="9" x2="21" y2="9"></line>
+          <line x1="9" y1="21" x2="9" y2="9"></line>
+        </svg>
+        <span>Example Register</span>
+      </a>
+      <a class="drawer-nav-link" href="#calendar" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Academic Calendar</span>
+      </a>
+      <a class="drawer-nav-link" href="#about" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+          <polyline points="9 22 9 12 15 12 15 22"></polyline>
+        </svg>
+        <span>About College</span>
+      </a>
+    </nav>
+
+    <div class="drawer-footer">
+      <a class="btn btn-sm btn-ink" href="signin.html">Sign In to Portal</a>
+      <div class="drawer-meta">
+        SRHU Attendance Management System<br>
+        portal-support@college.edu
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <p class="label">College Attendance System</p>
+          <h1 class="display">Check and take attendance.</h1>
+          <p class="lead">
+            Students check attendance records. Teachers take attendance for assigned classes. Sign in with your ID and
+            password on a phone, tablet, or desktop.
+          </p>
+          <div class="hero-ctas">
+            <a class="btn" href="signin.html">Sign in</a>
+            <a class="btn btn-outline" href="#register-example">View example register</a>
+          </div>
+        </div>
+
+        <!-- Example Register Demonstration Panel -->
+        <div class="panel" id="register-example">
+          <div class="panel-header">
+            <div>
+              <p class="label">Example register</p>
+              <div class="panel-header-title">Sample class session grid (24 units)</div>
+            </div>
+          </div>
+
+          <!-- Register SVG Matrix -->
+          <svg id="interactive-register-svg" viewBox="0 0 354 54" role="img"
+            aria-label="Illustration of attendance register rows. Filled squares are present, empty squares are absent, and squares with a diagonal line are leave. Click squares to test status calculation.">
+            <defs>
+              <symbol id="sq-p" viewBox="0 0 24 24">
+                <rect class="sq-p" x="1" y="1" width="22" height="22" rx="4" />
+              </symbol>
+              <symbol id="sq-a" viewBox="0 0 24 24">
+                <rect class="sq-a" x="1" y="1" width="22" height="22" rx="4" />
+              </symbol>
+              <symbol id="sq-l" viewBox="0 0 24 24">
+                <rect class="sq-l" x="1" y="1" width="22" height="22" rx="4" />
+                <path class="sq-l" d="M7 17L17 7" />
+              </symbol>
+            </defs>
+
+            <!-- Row 1: 12 sessions -->
+            <use class="reg-cell" data-idx="0" data-state="p" href="#sq-p" x="0" y="0" width="24" height="24" />
+            <use class="reg-cell" data-idx="1" data-state="p" href="#sq-p" x="30" y="0" width="24" height="24" />
+            <use class="reg-cell" data-idx="2" data-state="p" href="#sq-p" x="60" y="0" width="24" height="24" />
+            <use class="reg-cell" data-idx="3" data-state="a" href="#sq-a" x="90" y="0" width="24" height="24" />
+            <use class="reg-cell" data-idx="4" data-state="p" href="#sq-p" x="120" y="0" width="24" height="24" />
+            <use class="reg-cell" data-idx="5" data-state="p" href="#sq-p" x="150" y="0" width="24" height="24" />
+            <use class="reg-cell" data-idx="6" data-state="l" href="#sq-l" x="180" y="0" width="24" height="24" />
+            <use class="reg-cell" data-idx="7" data-state="p" href="#sq-p" x="210" y="0" width="24" height="24" />
+            <use class="reg-cell" data-idx="8" data-state="p" href="#sq-p" x="240" y="0" width="24" height="24" />
+            <use class="reg-cell" data-idx="9" data-state="p" href="#sq-p" x="270" y="0" width="24" height="24" />
+            <use class="reg-cell" data-idx="10" data-state="a" href="#sq-a" x="300" y="0" width="24" height="24" />
+            <use class="reg-cell" data-idx="11" data-state="p" href="#sq-p" x="330" y="0" width="24" height="24" />
+
+            <!-- Row 2: 12 sessions -->
+            <use class="reg-cell" data-idx="12" data-state="p" href="#sq-p" x="0" y="30" width="24" height="24" />
+            <use class="reg-cell" data-idx="13" data-state="a" href="#sq-a" x="30" y="30" width="24" height="24" />
+            <use class="reg-cell" data-idx="14" data-state="p" href="#sq-p" x="60" y="30" width="24" height="24" />
+            <use class="reg-cell" data-idx="15" data-state="p" href="#sq-p" x="90" y="30" width="24" height="24" />
+            <use class="reg-cell" data-idx="16" data-state="p" href="#sq-p" x="120" y="30" width="24" height="24" />
+            <use class="reg-cell" data-idx="17" data-state="l" href="#sq-l" x="150" y="30" width="24" height="24" />
+            <use class="reg-cell" data-idx="18" data-state="l" href="#sq-l" x="180" y="30" width="24" height="24" />
+            <use class="reg-cell" data-idx="19" data-state="p" href="#sq-p" x="210" y="30" width="24" height="24" />
+            <use class="reg-cell" data-idx="20" data-state="a" href="#sq-a" x="240" y="30" width="24" height="24" />
+            <use class="reg-cell" data-idx="21" data-state="p" href="#sq-p" x="270" y="30" width="24" height="24" />
+            <use class="reg-cell" data-idx="22" data-state="p" href="#sq-p" x="300" y="30" width="24" height="24" />
+            <use class="reg-cell" data-idx="23" data-state="p" href="#sq-p" x="330" y="30" width="24" height="24" />
+          </svg>
+
+          <!-- Status Legend -->
+          <ul class="legend">
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="#sq-p" width="24" height="24" />
+              </svg>
+              <span>Present</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="#sq-a" width="24" height="24" />
+              </svg>
+              <span>Absent</span>
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <use href="#sq-l" width="24" height="24" />
+              </svg>
+              <span>Leave</span>
+            </li>
+          </ul>
+
+          <!-- Live Calculation Metrics -->
+          <div class="register-stats">
+            <div class="stat-box">
+              <span>Conducted</span>
+              <strong id="stat-conducted">24</strong>
+            </div>
+            <div class="stat-box">
+              <span>Present</span>
+              <strong id="stat-present">17</strong>
+            </div>
+            <div class="stat-box">
+              <span>Absent</span>
+              <strong id="stat-absent">4</strong>
+            </div>
+            <div class="stat-box">
+              <span>Leave</span>
+              <strong id="stat-leave">3</strong>
+            </div>
+            <div class="stat-box">
+              <span>Calculated</span>
+              <strong id="stat-pct">80.9%</strong>
+            </div>
+          </div>
+
+          <div class="panel-note">
+            <span class="threshold-indicator" id="stat-threshold">Meets minimum 75% attendance threshold</span>
+            <span>Formula: Present / (Present + Absent) * 100</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Campus Photo Section -->
+    <section class="wide">
+      <div class="wrap">
+        <div class="slot slot-wide">
+          <div class="slot-ph">
+            <strong>Campus photograph</strong>
+            <span>images/hero.jpg, 1600 x 700 px (Upload approved institutional photo)</span>
+          </div>
+        </div>
+        <div class="wide-caption">
+          <span>Campus photograph</span>
+          <span>Approved institutional image slot</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section" id="how-it-works">
+      <div class="wrap">
+        <p class="label">Architecture</p>
+        <h2>How it works</h2>
+        <p class="section-subtitle">
+          The portal provides simple attendance tracking for students and teachers.
+        </p>
+
+        <div class="feature-grid">
+          <!-- Card 1: Everyone -->
+          <div class="feature-card">
+            <h3>Everyone</h3>
+            <p>
+              Sign in with your assigned ID and password. The application functions on mobile phones, tablets, and
+              desktop browsers.
+            </p>
+          </div>
+
+          <!-- Card 2: Students -->
+          <div class="feature-card">
+            <h3>Students</h3>
+            <p>
+              Check your attendance percentage for each enrolled subject. View session records and check whether you
+              meet the 75% requirement.
+            </p>
+          </div>
+
+          <!-- Card 3: Teachers -->
+          <div class="feature-card">
+            <h3>Teachers</h3>
+            <p>
+              Take attendance for assigned classes, create continuous evaluation assignments, and record sessional examination marks.
+            </p>
+          </div>
+
+          <!-- Card 4: Examination & Evaluation -->
+          <div class="feature-card">
+            <h3>Examinations</h3>
+            <p>
+              Admins and teachers manage assignments, sessionals, and final semester marks with bulk Excel imports and audited result publication.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Academic Calendar Section -->
+    <section class="section" id="calendar">
+      <div class="wrap">
+        <p class="label">Schedules</p>
+        <h2>Academic calendar</h2>
+        <p class="section-subtitle">
+          Centralized schedule of examinations, academic deadlines, holidays, and college events.
+        </p>
+
+        <div class="calendar-preview-wrap">
+          <div class="calendar-top-bar">
+            <div class="calendar-month-title">
+              <span>Term Schedule</span>
+            </div>
+
+            <div class="cal-filters" role="tablist" aria-label="Calendar categories">
+              <button class="cal-filter-btn active" type="button" data-filter="all">All</button>
+              <button class="cal-filter-btn" type="button" data-filter="exam">Examinations</button>
+              <button class="cal-filter-btn" type="button" data-filter="holiday">Holidays</button>
+              <button class="cal-filter-btn" type="button" data-filter="deadline">Deadlines</button>
+            </div>
+          </div>
+
+          <div class="event-list" id="calendar-event-container">
+            <!-- Event 1 -->
+            <div class="event-item" data-category="exam">
+              <div class="event-date">
+                <span class="event-day">24-28</span>
+                <span class="event-subdate">October</span>
+              </div>
+              <div class="event-info">
+                <h4>Continuous Internal Assessment Tests</h4>
+                <p>Internal examination period for all enrolled undergraduate and postgraduate cohorts.</p>
+              </div>
+              <span class="event-badge">Examination</span>
+            </div>
+
+            <!-- Event 2 -->
+            <div class="event-item" data-category="event">
+              <div class="event-date">
+                <span class="event-day">03</span>
+                <span class="event-subdate">November</span>
+              </div>
+              <div class="event-info">
+                <h4>College Foundation Day</h4>
+                <p>Institutional anniversary and annual assembly. Morning session only.</p>
+              </div>
+              <span class="event-badge">College Event</span>
+            </div>
+
+            <!-- Event 3 -->
+            <div class="event-item" data-category="deadline">
+              <div class="event-date">
+                <span class="event-day">15</span>
+                <span class="event-subdate">November</span>
+              </div>
+              <div class="event-info">
+                <h4>Medical Certificate and Leave Submission Deadline</h4>
+                <p>Last date for students to submit verified leave documentation for term calculation.</p>
+              </div>
+              <span class="event-badge">Deadline</span>
+            </div>
+
+            <!-- Event 4 -->
+            <div class="event-item" data-category="holiday">
+              <div class="event-date">
+                <span class="event-day">22-02</span>
+                <span class="event-subdate">Dec-Jan</span>
+              </div>
+              <div class="event-info">
+                <h4>Winter Vacation</h4>
+                <p>College closed for winter break. Administrative offices resume in January.</p>
+              </div>
+              <span class="event-badge">Holiday</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- About Section -->
+    <section class="section" id="about">
+      <div class="wrap about-grid">
+        <div class="about-copy">
+          <p class="label">About</p>
+          <h2>College attendance management</h2>
+          <p class="lead">
+            The Attendance Portal is a college-operated system designed to provide consistent attendance records and
+            schedule management.
+          </p>
+          <p>
+            The platform ensures students have direct visibility into their attendance records, faculty can mark
+            registers efficiently, and administrative departments can maintain compliance with institutional policies.
+          </p>
+        </div>
+
+        <div class="slot">
+          <div class="slot-ph">
+            <strong>Campus library photograph</strong>
+            <span>images/about.jpg, 1200 x 900 px (Upload approved photo)</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Facilities Gallery Section -->
+    <section class="section">
+      <div class="wrap">
+        <p class="label">Facilities</p>
+        <h2>Campus spaces</h2>
+        <p class="section-subtitle">
+          Approved photos will be added here upon institutional review.
+        </p>
+
+        <div class="gallery">
+          <figure>
+            <div class="slot">
+              <div class="slot-ph">
+                <strong>Lecture hall</strong>
+                <span>images/photo-1.jpg, 1200 x 900 px</span>
+              </div>
+            </div>
+            <figcaption>Tiered lecture hall</figcaption>
+          </figure>
+
+          <figure>
+            <div class="slot">
+              <div class="slot-ph">
+                <strong>Computer laboratory</strong>
+                <span>images/photo-2.jpg, 1200 x 900 px</span>
+              </div>
+            </div>
+            <figcaption>Computer laboratory</figcaption>
+          </figure>
+
+          <figure>
+            <div class="slot">
+              <div class="slot-ph">
+                <strong>Main building</strong>
+                <span>images/photo-3.jpg, 1200 x 900 px</span>
+              </div>
+            </div>
+            <figcaption>Academic building and administration</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- Call to Action Band -->
+    <section class="band">
+      <div class="wrap band-in">
+        <div class="band-copy">
+          <h2>Sign in with your ID and password.</h2>
+          <p>Access your student attendance records or teacher register.</p>
+        </div>
+        <a class="btn btn-ink" href="signin.html">Sign in</a>
+      </div>
+    </section>
+  </main>
+
+  <!-- Site Footer -->
+  <footer class="site-foot" role="contentinfo">
+    <div class="wrap">
+      <div class="foot-top">
+        <div class="foot-brand">
+          <a class="foot-logo" href="index.html">
+            <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="26" height="26">
+            <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+          </a>
+          <p class="foot-desc">
+            Official Academic Attendance and Examination Marks Management System. Department of Computer Applications, Swami Rama Himalayan University (SRHU).
+          </p>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Navigation</h4>
+          <ul class="foot-nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="student.html">Student Portal</a></li>
+            <li><a href="teacher.html">Teacher Portal</a></li>
+            <li><a href="student-marks.html">Examination Marks</a></li>
+            <li><a href="calendar.html">Academic Calendar</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Academic Services</h4>
+          <ul class="foot-nav-list">
+            <li><a href="profile.html">Profile &amp; Security</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms &amp; Conditions</a></li>
+            <li><a href="signin.html">Account Sign In</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Support &amp; Helpdesk</h4>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <a href="mailto:portal-support@college.edu">portal-support@college.edu</a>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>IT Centre, Academic Block II</span>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Mon – Fri: 08:30 – 17:00 IST</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot-bottom">
+        <p class="foot-copy">
+          &copy; 2026 College Attendance Management System. All rights reserved.
+        </p>
+        <div class="foot-policy-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="terms.html">Terms of Service</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="calendar.html">Academic Calendar</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="signin.html">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script type="module" src="firebase-init.js"></script>
+  <script src="site.js" defer></script>
+</body>
+
+</html>

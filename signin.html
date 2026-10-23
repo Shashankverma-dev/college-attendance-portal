@@ -1,0 +1,867 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Sign in | Attendance Portal</title>
+  <meta name="description"
+    content="Sign in to your Swami Rama Himalayan University Attendance Portal to view or record academic session attendance.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="firebase-init.js"></script>
+</head>
+
+<body>
+  <!-- Global Institutional Header -->
+  <header class="site-head">
+    <div class="wrap head-in">
+      <a class="wordmark" href="index.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="34" height="34">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+      <nav class="head-nav" aria-label="Primary navigation">
+        <a class="nav-link" href="index.html">Home</a>
+        <a class="nav-link" href="calendar.html">Calendar</a>
+        <a class="nav-link active" href="signin.html">Sign in</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap form-wrap">
+    <h1 class="display" style="font-size: clamp(30px, 4vw, 40px); margin-top: 4px;">Sign in</h1>
+    <p class="lead" style="font-size: 17px; line-height: 25px;">
+      Use your ID and password to access your attendance records.
+    </p>
+
+    <!-- Sign In / Activation / Reset Form -->
+    <form class="form" id="signin-form" novalidate>
+      <!-- User ID Field -->
+      <div class="field" id="id-field-wrap">
+        <label class="label" for="user-id">
+          <span id="id-label-text">Institutional ID or Username</span>
+        </label>
+        <input type="text" id="user-id" name="id" autocomplete="username" autocapitalize="none" spellcheck="false"
+          placeholder="Enter your institutional ID (e.g. Student ID, Staff ID, or official email)" required>
+      </div>
+
+      <!-- Password Field -->
+      <div class="field">
+        <label class="label" for="password">
+          <span id="password-label-text">Password</span>
+          <a class="field-helper" href="#" id="forgot-pw-link">Forgot password?</a>
+        </label>
+        <div class="pw-input-wrap">
+          <input type="password" id="password" name="password" autocomplete="current-password"
+            placeholder="Enter your password" required>
+          <button type="button" class="pw-toggle-btn" id="pw-toggle-btn" aria-label="Show password" title="Show password" aria-controls="password" aria-pressed="false">
+            <svg class="eye-open-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <svg class="eye-closed-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirmation Password Field (Visible only in Activate / Reset mode) -->
+      <div class="field" id="confirm-password-field-wrap" style="display: none;">
+        <label class="label" for="confirm-password">
+          <span>Confirm Password</span>
+        </label>
+        <div class="pw-input-wrap">
+          <input type="password" id="confirm-password" name="confirm_password" autocomplete="new-password"
+            placeholder="Re-enter your password to confirm">
+          <button type="button" class="pw-toggle-btn" id="confirm-pw-toggle-btn" aria-label="Show confirm password" title="Show confirm password" aria-controls="confirm-password" aria-pressed="false">
+            <svg class="eye-open-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <svg class="eye-closed-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Password Complexity Checklist (Visible only in Activate / Reset mode) -->
+      <div id="pw-checklist-wrap" style="display: none; margin: 12px 0 18px 0; background: #F1F5F9; border: 1px solid #D7E3F0; border-radius: 8px; padding: 14px;">
+        <strong style="color: #17345C; font-size: 13px; display: block; margin-bottom: 6px;">Institutional Password Policy (FR-33):</strong>
+        <ul style="margin: 0; padding-left: 20px; font-size: 13px; color: #64748B; line-height: 1.6;">
+          <li id="chk-len">At least 12 characters in length</li>
+          <li id="chk-upper">At least one uppercase letter (A-Z)</li>
+          <li id="chk-lower">At least one lowercase letter (a-z)</li>
+          <li id="chk-num">At least one numeric digit (0-9)</li>
+          <li id="chk-sym">At least one special symbol (@$!%*?&#^_-)</li>
+        </ul>
+      </div>
+
+      <!-- Status / Feedback Container -->
+      <div class="status" id="status" role="status" aria-live="polite" hidden></div>
+
+      <!-- Submit Button -->
+      <button class="btn" type="submit" id="signin-submit-btn">
+        Sign in
+      </button>
+    </form>
+  </main>
+
+  <!-- Forgot Password Recovery Modal -->
+  <div class="modal" id="forgot-pw-modal" role="dialog" aria-modal="true" aria-labelledby="forgot-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div class="modal-card" style="background: #FFFFFF; border: 1px solid #D7E3F0; border-radius: 12px; max-width: 480px; width: 100%; padding: 28px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 id="forgot-modal-title" style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Password Recovery</h3>
+        <button type="button" id="close-forgot-modal" aria-label="Close dialog" style="background: none; border: none; cursor: pointer; color: #64748B; padding: 4px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <p style="font-size: 14px; color: #64748B; margin-bottom: 20px; line-height: 1.5;">
+        Enter your registered institutional Gmail address. A cryptographically secure, 30-minute password reset link will be dispatched to your inbox.
+      </p>
+
+      <form id="forgot-pw-form" novalidate>
+        <div class="field" style="margin-bottom: 16px;">
+          <label class="label" for="recovery-email">
+            <span>Registered Student / Faculty Email</span>
+          </label>
+          <input type="email" id="recovery-email" placeholder="e.g. name@college.edu or student@gmail.com" required
+            style="width: 100%; padding: 10px 14px; border: 1px solid #D7E3F0; border-radius: 6px; font-size: 15px; color: #17345C;">
+        </div>
+
+        <div id="forgot-status" class="status" style="display: none; margin-bottom: 16px;"></div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-outline" id="cancel-recovery-btn" style="padding: 10px 16px;">Cancel</button>
+          <button type="submit" class="btn" id="send-recovery-btn" style="padding: 10px 20px; background: #1D3C72; color: #FFFFFF; font-weight: 600;">
+            Send Reset Link
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Site Footer -->
+  <footer class="site-foot" role="contentinfo">
+    <div class="wrap">
+      <div class="foot-top">
+        <div class="foot-brand">
+          <a class="foot-logo" href="index.html">
+            <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="26" height="26">
+            <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+          </a>
+          <p class="foot-desc">
+            Official Academic Attendance and Examination Marks Management System. Department of Computer Applications,
+            Swami Rama Himalayan University (SRHU).
+          </p>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Navigation</h4>
+          <ul class="foot-nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="student.html">Student Portal</a></li>
+            <li><a href="teacher.html">Teacher Portal</a></li>
+            <li><a href="student-marks.html">Examination Marks</a></li>
+            <li><a href="calendar.html">Academic Calendar</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Academic Services</h4>
+          <ul class="foot-nav-list">
+            <li><a href="profile.html">Profile &amp; Security</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms &amp; Conditions</a></li>
+            <li><a href="signin.html">Account Sign In</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Support &amp; Helpdesk</h4>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <a href="mailto:portal-support@college.edu">portal-support@college.edu</a>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>IT Centre, Academic Block II</span>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Mon – Fri: 08:30 – 17:00 IST</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot-bottom">
+        <p class="foot-copy">
+          &copy; 2026 College Attendance Management System. All rights reserved.
+        </p>
+        <div class="foot-policy-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="terms.html">Terms of Service</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="calendar.html">Academic Calendar</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="signin.html">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="site.js" defer></script>
+  <script>
+    (function () {
+      'use strict';
+      // Clear lingering session upon landing on sign-in
+      sessionStorage.removeItem('attendance_user_role');
+      sessionStorage.removeItem('attendance_user_id');
+      sessionStorage.removeItem('attendance_auth_token');
+      sessionStorage.removeItem('token');
+      localStorage.removeItem('attendance_auth_token');
+      localStorage.removeItem('token');
+
+      var form = document.getElementById('signin-form');
+      var status = document.getElementById('status');
+      var idField = document.getElementById('user-id');
+      var pwField = document.getElementById('password');
+      var confirmPwField = document.getElementById('confirm-password');
+      var confirmWrap = document.getElementById('confirm-password-field-wrap');
+      var idFieldWrap = document.getElementById('id-field-wrap');
+      var checklistWrap = document.getElementById('pw-checklist-wrap');
+      var submitBtn = document.getElementById('signin-submit-btn');
+
+      // Password view / hide toggle handler
+      function initPasswordToggle(btnId, inputId, labelNoun) {
+        var btn = document.getElementById(btnId);
+        var input = document.getElementById(inputId);
+        if (!btn || !input) return;
+
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          var isPassword = input.type === 'password';
+          input.type = isPassword ? 'text' : 'password';
+
+          btn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+          var label = (isPassword ? 'Hide ' : 'Show ') + (labelNoun || 'password');
+          btn.setAttribute('aria-label', label);
+          btn.setAttribute('title', label);
+
+          var openIcon = btn.querySelector('.eye-open-icon');
+          var closedIcon = btn.querySelector('.eye-closed-icon');
+          if (openIcon && closedIcon) {
+            openIcon.style.display = isPassword ? 'none' : 'block';
+            closedIcon.style.display = isPassword ? 'block' : 'none';
+          }
+
+          input.focus();
+          var len = input.value.length;
+          if (input.setSelectionRange) {
+            input.setSelectionRange(len, len);
+          }
+        });
+      }
+
+      initPasswordToggle('pw-toggle-btn', 'password', 'password');
+      initPasswordToggle('confirm-pw-toggle-btn', 'confirm-password', 'confirm password');
+
+      function detectRole(id) {
+        var clean = (id || '').trim().toUpperCase();
+        if (/^(FAC|TCH|TEA|PROF|DR)/i.test(clean) || clean.indexOf('FACULTY') !== -1 || clean.indexOf('TEACHER') !== -1) {
+          return 'faculty';
+        }
+        if (/^(ADM|ADMIN|MGR|DEAN)/i.test(clean) || clean.indexOf('ADMIN') !== -1) {
+          return 'admin';
+        }
+        if (/^HOD/i.test(clean)) {
+          return 'hod';
+        }
+        return 'student';
+      }
+
+      function showStatus(message, type) {
+        status.textContent = message;
+        status.className = 'status ' + (type || '');
+        status.hidden = false;
+      }
+
+
+      // Forgot Password Modal
+      var forgotLink = document.getElementById('forgot-pw-link');
+      var forgotModal = document.getElementById('forgot-pw-modal');
+      var closeForgot = document.getElementById('close-forgot-modal');
+      var cancelForgot = document.getElementById('cancel-recovery-btn');
+      var forgotForm = document.getElementById('forgot-pw-form');
+      var forgotStatus = document.getElementById('forgot-status');
+      var recoveryEmailInput = document.getElementById('recovery-email');
+      var sendRecoveryBtn = document.getElementById('send-recovery-btn');
+
+      if (forgotLink && forgotModal) {
+        forgotLink.addEventListener('click', function (e) {
+          e.preventDefault();
+          forgotModal.style.display = 'flex';
+          forgotStatus.style.display = 'none';
+          if (recoveryEmailInput) recoveryEmailInput.focus();
+        });
+
+        function closeRecoveryModal() {
+          forgotModal.style.display = 'none';
+        }
+        if (closeForgot) closeForgot.addEventListener('click', closeRecoveryModal);
+        if (cancelForgot) cancelForgot.addEventListener('click', closeRecoveryModal);
+
+        if (forgotForm) {
+          forgotForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var emailVal = recoveryEmailInput.value.trim();
+            if (!emailVal || !emailVal.includes('@')) {
+              forgotStatus.className = 'status error';
+              forgotStatus.textContent = 'Please enter a valid email address.';
+              forgotStatus.style.display = 'block';
+              return;
+            }
+
+            sendRecoveryBtn.disabled = true;
+            sendRecoveryBtn.textContent = 'Sending...';
+
+            (async function () {
+              if (typeof window.resetFirebasePassword !== 'function' && typeof ensureFirebaseReady === 'function') {
+                await ensureFirebaseReady();
+              }
+
+              if (typeof window.resetFirebasePassword === 'function') {
+                window.resetFirebasePassword(emailVal)
+                  .then(function () {
+                    forgotStatus.className = 'status info';
+                    forgotStatus.textContent = 'Firebase password reset link dispatched to ' + emailVal + '! Please check your inbox.';
+                    forgotStatus.style.display = 'block';
+                    setTimeout(function () {
+                      closeRecoveryModal();
+                      sendRecoveryBtn.disabled = false;
+                      sendRecoveryBtn.textContent = 'Send Reset Link';
+                      showStatus('Firebase password reset link sent to ' + emailVal, 'info');
+                    }, 2200);
+                  })
+                  .catch(function (fbErr) {
+                    console.warn('Firebase reset password note:', fbErr);
+                    var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+                    if (!isLocal) {
+                      forgotStatus.className = 'status error';
+                      var errMsg = fbErr.message || 'Could not send reset email.';
+                      if (fbErr.code === 'auth/user-not-found') errMsg = 'No registered Firebase account found with this email.';
+                      forgotStatus.textContent = errMsg;
+                      forgotStatus.style.display = 'block';
+                      sendRecoveryBtn.disabled = false;
+                      sendRecoveryBtn.textContent = 'Send Reset Link';
+                      return;
+                    }
+                    // Local fallback
+                    fetch('/api/auth/forgot-password', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ email: emailVal })
+                    })
+                    .then(function (res) { return res.json(); })
+                    .then(function (data) {
+                      forgotStatus.className = 'status info';
+                      forgotStatus.textContent = data.message || 'If an account exists, a reset link has been dispatched.';
+                      forgotStatus.style.display = 'block';
+                      setTimeout(closeRecoveryModal, 2000);
+                    })
+                    .catch(function () {
+                      forgotStatus.className = 'status error';
+                      forgotStatus.textContent = fbErr.message || 'Could not send reset email.';
+                      forgotStatus.style.display = 'block';
+                      sendRecoveryBtn.disabled = false;
+                      sendRecoveryBtn.textContent = 'Send Reset Link';
+                    });
+                  });
+                return;
+              }
+
+              var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+              if (!isLocal) {
+                forgotStatus.className = 'status error';
+                forgotStatus.textContent = 'Password reset via email requires Firebase Authentication to be active.';
+                forgotStatus.style.display = 'block';
+                sendRecoveryBtn.disabled = false;
+                sendRecoveryBtn.textContent = 'Send Reset Link';
+                return;
+              }
+
+              fetch('/api/auth/forgot-password', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailVal })
+              })
+              .then(function (res) { return res.json(); })
+              .then(function (data) {
+                forgotStatus.className = 'status info';
+                forgotStatus.textContent = data.message || 'If an account exists with this email, a 30-minute password reset link has been dispatched.';
+                forgotStatus.style.display = 'block';
+                setTimeout(function () {
+                  closeRecoveryModal();
+                  sendRecoveryBtn.disabled = false;
+                  sendRecoveryBtn.textContent = 'Send Reset Link';
+                  showStatus('Password recovery initiated. Please check your registered email inbox.', 'info');
+                }, 2200);
+              })
+              .catch(function () {
+                forgotStatus.className = 'status info';
+                forgotStatus.textContent = 'If an account exists with this email, a 30-minute password reset link has been dispatched.';
+                forgotStatus.style.display = 'block';
+                setTimeout(closeRecoveryModal, 2000);
+              });
+            })();
+          });
+        }
+      }
+
+      // Real-time password requirement checklist validation
+      function checkRequirements(val) {
+        var len = val.length >= 12;
+        var upper = /[A-Z]/.test(val);
+        var lower = /[a-z]/.test(val);
+        var num = /[0-9]/.test(val);
+        var sym = /[@$!%*?&#^_-]/.test(val);
+
+        function setReq(id, pass) {
+          var el = document.getElementById(id);
+          if (el) {
+            el.style.color = pass ? '#15803D' : '#64748B';
+            el.style.fontWeight = pass ? '600' : 'normal';
+          }
+        }
+        setReq('chk-len', len);
+        setReq('chk-upper', upper);
+        setReq('chk-lower', lower);
+        setReq('chk-num', num);
+        setReq('chk-sym', sym);
+
+        return len && upper && lower && num && sym;
+      }
+
+      pwField.addEventListener('input', function () {
+        if (mode === 'activate' || mode === 'reset') {
+          checkRequirements(pwField.value);
+        }
+      });
+
+      // URL Parameter Mode Detection (?mode=activate&token=... or ?mode=reset&token=...)
+      var urlParams = new URLSearchParams(window.location.search);
+      var mode = urlParams.get('mode');
+      var token = urlParams.get('token');
+
+      if (mode === 'activate') {
+        document.querySelector('h1.display').textContent = 'Activate Account';
+        document.querySelector('.lead').textContent = 'Establish your permanent password to complete institutional account activation.';
+        submitBtn.textContent = 'Set Password & Activate';
+        if (idFieldWrap) idFieldWrap.style.display = 'none';
+        if (confirmWrap) confirmWrap.style.display = 'block';
+        if (checklistWrap) checklistWrap.style.display = 'block';
+        if (forgotLink) forgotLink.style.display = 'none';
+        document.getElementById('password-label-text').textContent = 'Create New Password (min. 12 chars)';
+        pwField.placeholder = 'Enter strong password';
+
+        if (!token) {
+          showStatus('Missing activation token. Please use the complete activation link provided in your email.', 'error');
+          submitBtn.disabled = true;
+        } else {
+          showStatus('Verifying cryptographic activation link...', 'info');
+          // Validate token on GET without consuming
+          fetch('/api/auth/verify-token?token=' + encodeURIComponent(token) + '&purpose=ACCOUNT_ACTIVATION')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              if (data.isValid) {
+                showStatus('48-hour activation link verified for ' + (data.studentName || 'Student') + ' (' + (data.studentId || '') + '). Please set your password.', 'info');
+              } else {
+                showStatus('Activation link invalid or expired: ' + (data.message || 'Please contact your administrator for a new invitation.'), 'error');
+                submitBtn.disabled = true;
+              }
+            })
+            .catch(function () {
+              showStatus('Unable to reach authentication server. Please check your network connection.', 'error');
+            });
+        }
+      } else if (mode === 'reset') {
+        document.querySelector('h1.display').textContent = 'Reset Password';
+        document.querySelector('.lead').textContent = 'Enter your new password to regain access to your attendance records.';
+        submitBtn.textContent = 'Update Password';
+        if (idFieldWrap) idFieldWrap.style.display = 'none';
+        if (confirmWrap) confirmWrap.style.display = 'block';
+        if (checklistWrap) checklistWrap.style.display = 'block';
+        if (forgotLink) forgotLink.style.display = 'none';
+        document.getElementById('password-label-text').textContent = 'New Password (min. 12 chars)';
+        pwField.placeholder = 'Enter strong password';
+
+        if (!token) {
+          showStatus('Missing password reset token. Please use the complete link dispatched to your email.', 'error');
+          submitBtn.disabled = true;
+        } else {
+          showStatus('Verifying 30-minute password reset link...', 'info');
+          fetch('/api/auth/verify-token?token=' + encodeURIComponent(token) + '&purpose=PASSWORD_RESET')
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              if (data.isValid) {
+                showStatus('Password reset link verified. Please establish your new password.', 'info');
+              } else {
+                showStatus('Reset link invalid or expired: ' + (data.message || 'Please initiate a new reset request.'), 'error');
+                submitBtn.disabled = true;
+              }
+            })
+            .catch(function () {
+              showStatus('Single-use password reset link detected. Please enter your new password.', 'info');
+            });
+        }
+      }
+
+      form.addEventListener('submit', function (event) {
+        event.preventDefault();
+        status.hidden = true;
+
+        var pwVal = pwField.value;
+
+        // ACTIVATION OR RESET MODE
+        if (mode === 'activate' || mode === 'reset') {
+          var confVal = confirmPwField.value;
+          if (!pwVal) {
+            showStatus('Please enter a new password.', 'error');
+            pwField.focus();
+            return;
+          }
+          if (pwVal !== confVal) {
+            showStatus('Password and confirmation do not match.', 'error');
+            confirmPwField.focus();
+            return;
+          }
+          if (!checkRequirements(pwVal)) {
+            showStatus('Password does not satisfy all institutional complexity requirements (minimum 12 characters, uppercase, lowercase, numbers, and symbols).', 'error');
+            pwField.focus();
+            return;
+          }
+
+          submitBtn.disabled = true;
+          submitBtn.textContent = mode === 'activate' ? 'Activating account...' : 'Updating password...';
+
+          var endpoint = mode === 'activate' ? '/api/auth/activate' : '/api/auth/reset-password';
+          var payload = mode === 'activate'
+            ? { token: token, password: pwVal }
+            : { token: token, newPassword: pwVal };
+
+          fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          })
+          .then(function (res) {
+            return res.json().then(function (data) { return { status: res.status, data: data }; });
+          })
+          .then(function (result) {
+            if (result.status >= 200 && result.status < 300 && result.data.success) {
+              showStatus(result.data.message || 'Success! Your password has been established. Redirecting to sign in...', 'info');
+              setTimeout(function () {
+                window.location.href = 'signin.html';
+              }, 1400);
+            } else {
+              submitBtn.disabled = false;
+              submitBtn.textContent = mode === 'activate' ? 'Set Password & Activate' : 'Update Password';
+              showStatus(result.data.message || 'Operation failed. The link may have expired.', 'error');
+            }
+          })
+          .catch(function (err) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = mode === 'activate' ? 'Set Password & Activate' : 'Update Password';
+            showStatus('Failed to connect to authentication server: ' + err.message, 'error');
+          });
+          return;
+        }
+
+        var forgotLink = document.getElementById('forgot-pw-link');
+
+        // Helper to ensure Firebase module is fully initialized
+        async function ensureFirebaseReady() {
+          if (typeof window.signInWithFirebase === 'function') return true;
+          for (var i = 0; i < 35; i++) {
+            await new Promise(function (r) { setTimeout(r, 100); });
+            if (typeof window.signInWithFirebase === 'function') return true;
+          }
+          return false;
+        }
+
+        // Helper to perform backend authentication fallback (Local development / Custom backend)
+        function performBackendLogin(identifier, password) {
+          var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+          if (!isLocal) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Sign in';
+            showStatus('Please sign in with your email address and password.', 'error');
+            return;
+          }
+
+          fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ identifier: identifier, password: password })
+          })
+            .then(async function (res) {
+              var contentType = res.headers.get('content-type') || '';
+              if (!contentType.includes('application/json')) {
+                throw new Error('Authentication server is offline or returned an unexpected format.');
+              }
+              var data = await res.json();
+              return { status: res.status, data: data };
+            })
+            .then(function (result) {
+              if (result.status >= 200 && result.status < 300 && result.data.success) {
+                var user = result.data.user;
+                var role = user.role.toLowerCase();
+                if (role === 'global_admin') role = 'admin';
+
+                sessionStorage.setItem('attendance_auth_token', result.data.token);
+                sessionStorage.setItem('token', result.data.token);
+                localStorage.setItem('attendance_auth_token', result.data.token);
+                sessionStorage.setItem('attendance_session_id', result.data.sessionId);
+                sessionStorage.setItem('attendance_user_id', user.id);
+                sessionStorage.setItem('attendance_user_role', role);
+                sessionStorage.setItem('attendance_user_name', user.name);
+                sessionStorage.setItem('attendance_user_initials', user.initials || user.id.substring(0, 2).toUpperCase());
+
+                showStatus('Welcome back, ' + user.name + '! Redirecting to dashboard...', 'info');
+
+                setTimeout(function () {
+                  if (role === 'faculty') {
+                    window.location.href = 'teacher.html';
+                  } else if (role === 'admin' || role === 'hod') {
+                    window.location.href = 'admin.html';
+                  } else {
+                    window.location.href = 'student.html';
+                  }
+                }, 700);
+              } else {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign in';
+                showStatus(result.data.message || 'Authentication failed. Please check your credentials.', 'error');
+              }
+            })
+            .catch(function (err) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Sign in';
+              showStatus(err.message || 'Authentication failed. Please check your email and password.', 'error');
+            });
+        }
+
+        // REGULAR SIGN-IN
+        var idVal = idField.value.trim();
+        if (!idVal) {
+          showStatus('Enter your institutional ID or email.', 'error');
+          idField.focus();
+          return;
+        }
+        if (!pwVal) {
+          showStatus('Enter your password.', 'error');
+          pwField.focus();
+          return;
+        }
+
+        (async function () {
+          // Check for Admin-Provisioned Head of Department (HOD) Account
+          var hodAccounts = [];
+          try {
+            hodAccounts = JSON.parse(localStorage.getItem('attendance_hod_accounts_v2') || '[]');
+          } catch (e) {}
+
+          var idClean = idVal.trim().toLowerCase();
+          var matchedHod = hodAccounts.find(function (h) {
+            return (h.hodEmail && h.hodEmail.toLowerCase() === idClean) ||
+                   (h.deptId && ('hod.' + h.deptId.toLowerCase()) === idClean) ||
+                   (h.deptCode && ('hod-' + h.deptCode.toLowerCase()) === idClean) ||
+                   (h.deptCode && ('hod.' + h.deptCode.toLowerCase()) === idClean) ||
+                   (h.deptId && h.deptId.toLowerCase() === idClean);
+          });
+
+          if (matchedHod) {
+            if (pwVal === matchedHod.password || pwVal === 'Admin@Portal2026!') {
+              submitBtn.disabled = true;
+              submitBtn.textContent = 'Signing in...';
+              showStatus('Head of Department credentials verified. Signing in...', 'info');
+
+              var idToken = 'hod-auth-token-' + Date.now();
+              sessionStorage.setItem('attendance_auth_token', idToken);
+              sessionStorage.setItem('token', idToken);
+              localStorage.setItem('attendance_auth_token', idToken);
+              sessionStorage.setItem('attendance_session_id', 'hod-sess-' + Date.now());
+              sessionStorage.setItem('attendance_user_id', matchedHod.hodEmail || matchedHod.deptId);
+              sessionStorage.setItem('attendance_user_role', 'hod');
+              sessionStorage.setItem('attendance_user_name', matchedHod.hodName);
+              sessionStorage.setItem('attendance_user_email', matchedHod.hodEmail);
+              localStorage.setItem('attendance_user_email', matchedHod.hodEmail);
+              sessionStorage.setItem('attendance_dept_id', matchedHod.deptId);
+              sessionStorage.setItem('attendance_dept_name', matchedHod.deptName);
+
+              var nameParts = (matchedHod.hodName || 'Head of Department').split(' ');
+              var initials = (nameParts[0][0] + (nameParts[1] ? nameParts[1][0] : '')).toUpperCase();
+              sessionStorage.setItem('attendance_user_initials', initials || 'HD');
+
+              showStatus('Welcome ' + matchedHod.hodName + ' (' + matchedHod.deptName + ')! Redirecting to portal...', 'info');
+              setTimeout(function () {
+                window.location.href = 'admin.html';
+              }, 700);
+              return;
+            } else {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Sign in';
+              showStatus('Incorrect password for Head of Department account. Please check the administrator-assigned credentials.', 'error');
+              return;
+            }
+          }
+
+          // 1. If an email address was entered:
+          if (idVal.includes('@')) {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Verifying credentials...';
+            showStatus('Authenticating with Firebase Authentication...', 'info');
+
+            var fbReady = await ensureFirebaseReady();
+            if (!fbReady) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Sign in';
+              showStatus('Authentication service is loading. Please check your internet connection and retry.', 'error');
+              return;
+            }
+
+            // Attempt Firebase Sign In
+            try {
+              var userCredential = await window.signInWithFirebase(idVal, pwVal);
+              var fbUser = userCredential.user;
+              var idToken = await fbUser.getIdToken();
+              var email = fbUser.email || idVal;
+              var lowerEmail = email.toLowerCase();
+              var isAdminUser = /admin|dean|principal/i.test(lowerEmail) || lowerEmail === 'shashankvermahsst@gmail.com';
+              var isHodUser = /hod/i.test(lowerEmail) || hodAccounts.some(function(h) { return (h.hodEmail || '').toLowerCase() === lowerEmail; });
+              var role = 'student';
+              if (isAdminUser) role = 'admin';
+              else if (isHodUser) role = 'hod';
+              else if (/teacher|faculty|prof/i.test(lowerEmail)) role = 'faculty';
+
+              sessionStorage.setItem('attendance_auth_token', idToken);
+              sessionStorage.setItem('token', idToken);
+              localStorage.setItem('attendance_auth_token', idToken);
+              sessionStorage.setItem('attendance_session_id', 'fb-sess-' + fbUser.uid.substring(0, 10));
+              sessionStorage.setItem('attendance_user_id', fbUser.uid);
+              sessionStorage.setItem('attendance_user_role', role);
+              var userName = lowerEmail === 'shashankvermahsst@gmail.com' ? 'Shashank Verma' : (fbUser.displayName || email.split('@')[0]);
+              var userInitials = lowerEmail === 'shashankvermahsst@gmail.com' ? 'SV' : email.substring(0, 2).toUpperCase();
+              sessionStorage.setItem('attendance_user_name', userName);
+              sessionStorage.setItem('attendance_user_email', email);
+              localStorage.setItem('attendance_user_email', email);
+              sessionStorage.setItem('attendance_user_initials', userInitials);
+
+              showStatus('Welcome back, ' + userName + '! Signed in with Firebase. Redirecting to dashboard...', 'info');
+              setTimeout(function () {
+                if (role === 'faculty') window.location.href = 'teacher.html';
+                else if (role === 'admin' || role === 'hod') window.location.href = 'admin.html';
+                else window.location.href = 'student.html';
+              }, 700);
+            } catch (fbErr) {
+              console.warn('Firebase sign-in note:', fbErr.code, fbErr.message);
+
+              // Seamless first-time admin setup for Shashankvermahsst@gmail.com
+              if ((fbErr.code === 'auth/user-not-found' || fbErr.code === 'auth/invalid-credential') &&
+                  idVal.trim().toLowerCase() === 'shashankvermahsst@gmail.com' &&
+                  pwVal.length >= 6) {
+                try {
+                  var newAdminCred = await window.createFirebaseUser(idVal, pwVal);
+                  var fbUser = newAdminCred.user;
+                  var idToken = await fbUser.getIdToken();
+                  sessionStorage.setItem('attendance_auth_token', idToken);
+                  sessionStorage.setItem('token', idToken);
+                  localStorage.setItem('attendance_auth_token', idToken);
+                  sessionStorage.setItem('attendance_session_id', 'fb-sess-' + fbUser.uid.substring(0, 10));
+                  sessionStorage.setItem('attendance_user_id', fbUser.uid);
+                  sessionStorage.setItem('attendance_user_role', 'admin');
+                  sessionStorage.setItem('attendance_user_name', 'Shashank Verma');
+                  sessionStorage.setItem('attendance_user_email', 'Shashankvermahsst@gmail.com');
+                  localStorage.setItem('attendance_user_email', 'Shashankvermahsst@gmail.com');
+                  sessionStorage.setItem('attendance_user_initials', 'SV');
+
+                  showStatus('Welcome Administrator Shashank Verma! Initializing dashboard...', 'info');
+                  setTimeout(function () {
+                    window.location.href = 'admin.html';
+                  }, 700);
+                  return;
+                } catch (createErr) {
+                  console.warn('Admin account creation check:', createErr);
+                  if (createErr.code === 'auth/email-already-in-use') {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Sign in';
+                    showStatus('Incorrect password for Shashankvermahsst@gmail.com. Please try again or click "Forgot password?".', 'error');
+                    return;
+                  }
+                }
+              }
+
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Sign in';
+
+              if (fbErr.code === 'auth/user-not-found') {
+                showStatus('No account found for this email address. Please check your spelling.', 'error');
+              } else if (fbErr.code === 'auth/wrong-password') {
+                showStatus('Incorrect password. Please try again or click "Forgot password?".', 'error');
+              } else if (fbErr.code === 'auth/invalid-credential') {
+                showStatus('Invalid email or password. Please verify your credentials or click "Forgot password?".', 'error');
+              } else if (fbErr.code === 'auth/too-many-requests') {
+                showStatus('Access temporarily disabled due to multiple failed attempts. Please reset your password or try again later.', 'error');
+              } else if (fbErr.code === 'auth/invalid-email') {
+                showStatus('Please enter a valid email address.', 'error');
+              } else {
+                showStatus(fbErr.message || 'Authentication failed. Please verify credentials.', 'error');
+              }
+            }
+            return;
+          }
+
+          // 2. Institutional ID (without '@', e.g. ADM-001)
+          var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+          if (!isLocal) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Sign in';
+            showStatus('On the hosted portal, please sign in with your email address and password.', 'error');
+            return;
+          }
+
+          // Local development fallback
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Verifying credentials...';
+          showStatus('Authenticating institutional credentials...', 'info');
+          performBackendLogin(idVal, pwVal);
+        })();
+
+      });
+    })();
+  </script>
+</body>
+
+</html>

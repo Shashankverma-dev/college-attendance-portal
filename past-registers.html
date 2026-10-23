@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Past Submitted Registers | Teacher Portal</title>
+  <meta name="description" content="View and search historical submitted class attendance registers.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css?v=6">
+</head>
+
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-head">
+    <div class="wrap head-in">
+      <a class="wordmark" href="teacher.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="34" height="34">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+
+      <!-- Desktop Navigation Bar (No Profile link) -->
+      <nav class="head-nav" aria-label="Teacher navigation">
+        <a class="nav-link" href="teacher.html#active-register">Take attendance</a>
+        <a class="nav-link" href="teacher.html#assigned-classes">Assigned classes</a>
+        <a class="nav-link active" href="past-registers.html">Past registers</a>
+        <a class="nav-link" href="teacher-marks.html">Examination marks</a>
+        <a class="nav-link" href="calendar.html">Calendar</a>
+      </nav>
+
+      <div class="head-actions">
+        <!-- Circular User Avatar Menu -->
+        <div class="user-menu-wrap" id="user-menu-wrap">
+          <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">
+            <div class="user-avatar-circle" id="display-user-avatar">FM</div>
+            <div class="user-avatar-info">
+              <span class="user-avatar-name" id="display-user-name">Faculty Member</span>
+              <span class="user-avatar-role" id="display-user-id">ID: — (Faculty)</span>
+            </div>
+            <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">
+            <div class="user-dropdown-header">
+              <strong id="dropdown-user-name">Faculty Member</strong>
+              <span id="dropdown-user-id">ID: — • Faculty</span>
+            </div>
+            <a class="user-dropdown-item" href="profile.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>View Profile</span>
+            </a>
+            <div class="user-dropdown-divider"></div>
+            <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Sign Out</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Hamburger Button -->
+      <button type="button" class="nav-toggle-btn" id="nav-toggle-btn" aria-label="Open navigation menu"
+        aria-expanded="false" aria-controls="mobile-drawer" onclick="toggleNavDrawer()">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Side Navigation Drawer & Backdrop -->
+  <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" onclick="closeNavDrawer()"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile navigation" aria-hidden="true">
+    <div class="drawer-header">
+      <a class="wordmark" href="teacher.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="30" height="30">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+      <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close navigation"
+        onclick="closeNavDrawer()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="drawer-user-info">
+      <strong id="drawer-user-name">Faculty Member</strong>
+      <span id="drawer-user-id">ID: — (Faculty)</span>
+    </div>
+
+    <!-- Mobile Drawer Links (No Profile) -->
+    <nav class="drawer-nav">
+      <a class="drawer-nav-link" href="teacher.html#active-register" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 20h9"></path>
+          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+        </svg>
+        <span>Take Attendance</span>
+      </a>
+      <a class="drawer-nav-link" href="teacher.html#assigned-classes" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+        <span>Assigned Classes</span>
+      </a>
+      <a class="drawer-nav-link active" href="past-registers.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg>
+        <span>Past Registers</span>
+      </a>
+      <a class="drawer-nav-link" href="teacher-marks.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span>Examination Marks</span>
+      </a>
+      <a class="drawer-nav-link" href="calendar.html" onclick="closeNavDrawer()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Academic Calendar</span>
+      </a>
+    </nav>
+
+    <div class="drawer-footer">
+      <a class="btn btn-sm btn-outline" href="signin.html">Sign Out</a>
+      <div class="drawer-meta">
+        Autumn Term 2026 • Swami Rama Himalayan University<br>
+        portal-support@college.edu
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Wrap -->
+  <main class="wrap dash-wrap">
+    <!-- Header Title Area -->
+    <div class="dash-header">
+      <div class="dash-title-area">
+        <p class="label">Teacher portal • Historical Records</p>
+        <h1 class="display" style="font-size: clamp(28px, 4vw, 38px);">Past submitted registers</h1>
+        <p style="color: var(--muted); font-size: 15px; margin-top: 4px;">
+          Historical archive of conducted sessions, student attendance headcounts, and verified records for Autumn 2026.
+        </p>
+      </div>
+
+      <div class="dash-meta-badge" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+        <span class="tag tag-present" style="font-size: 13px; padding: 6px 12px;">Autumn 2026 Semester</span>
+        <button type="button" class="btn btn-sm btn-outline" id="export-csv-btn" onclick="alert('Exporting Autumn 2026 Past Registers CSV to downloads.');">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Export CSV
+        </button>
+      </div>
+    </div>
+
+    <!-- Summary KPI Stat Cards -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+      <div class="dash-card" style="padding: 18px;">
+        <span style="font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: 0.05em;">Total Sessions</span>
+        <div style="font-size: 32px; font-weight: 700; font-family: var(--font-display); margin-top: 6px;">24</div>
+        <span style="font-size: 13px; color: var(--muted);">100% Locked and Submitted</span>
+      </div>
+
+      <div class="dash-card" style="padding: 18px;">
+        <span style="font-size: 12px; font-weight: 700; color: #15803D; text-transform: uppercase; letter-spacing: 0.05em;">Average Attendance</span>
+        <div style="font-size: 32px; font-weight: 700; font-family: var(--font-display); color: #15803D; margin-top: 6px;">91.3%</div>
+        <span style="font-size: 13px; color: var(--card-muted);">Above 75% Minimum Threshold</span>
+      </div>
+
+      <div class="dash-card" style="padding: 18px;">
+        <span style="font-size: 12px; font-weight: 700; color: var(--card-muted); text-transform: uppercase; letter-spacing: 0.05em;">Student Records</span>
+        <div style="font-size: 32px; font-weight: 700; font-family: var(--font-display); margin-top: 6px; color: var(--card-ink);">240</div>
+        <span style="font-size: 13px; color: var(--card-muted);">219 Present • 15 Absent • 6 Leave</span>
+      </div>
+
+      <div class="dash-card" style="padding: 18px;">
+        <span style="font-size: 12px; font-weight: 700; color: #0284C7; text-transform: uppercase; letter-spacing: 0.05em;">Audit Status</span>
+        <div style="font-size: 32px; font-weight: 700; font-family: var(--font-display); color: #0284C7; margin-top: 6px;">Verified</div>
+        <span style="font-size: 13px; color: var(--card-muted);">0 Unresolved Discrepancies</span>
+      </div>
+    </div>
+
+    <!-- Filter and Search Bar -->
+    <section class="dash-card" style="margin-bottom: 24px; padding: 18px;">
+      <div style="display: flex; gap: 14px; flex-wrap: wrap; align-items: center; justify-content: space-between;">
+        <div style="flex: 1; min-width: 240px;">
+          <input type="text" id="filter-search" placeholder="Search by topic, room, or date..."
+            style="width: 100%; padding: 8px 12px; background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--radius); color: var(--card-ink); font-size: 14px;">
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <select id="filter-subject" style="padding: 8px 12px; background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--radius); color: var(--card-ink); font-size: 14px;">
+            <option value="ALL">All Subjects</option>
+            <option value="CS301">CS301 - Database Systems</option>
+            <option value="CS305">CS305 - Database Systems Lab</option>
+            <option value="CS303">CS303 - Computer Networks</option>
+          </select>
+
+          <select id="filter-section" style="padding: 8px 12px; background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--radius); color: var(--card-ink); font-size: 14px;">
+            <option value="ALL">All Sections</option>
+            <option value="Section A">Section A</option>
+            <option value="Section B">Section B</option>
+          </select>
+
+          <button type="button" class="btn btn-sm btn-outline" id="filter-reset-btn">Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Past Registers Table Card -->
+    <section class="dash-card">
+      <div class="dash-card-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <h2 style="font-size: 18px; margin: 0; color: var(--card-ink);">Archived Session Attendance Slips</h2>
+          <span style="font-size: 13px; color: var(--card-muted);">Showing <strong id="register-count" style="color: var(--card-ink);">10</strong> conducted class registers</span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" class="cal-filter-btn active" data-month="ALL">All</button>
+          <button type="button" class="cal-filter-btn" data-month="OCT">Oct 2026</button>
+          <button type="button" class="cal-filter-btn" data-month="SEP">Sep 2026</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="data-table" id="past-registers-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Subject &amp; Code</th>
+              <th>Section &amp; Room</th>
+              <th>Time Slot</th>
+              <th>Attendance Breakdown</th>
+              <th>Turnout %</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="past-registers-tbody">
+            <tr data-subject="CS301" data-section="Section A" data-month="OCT">
+              <td><strong style="color: var(--card-ink);">16 Oct 2026</strong></td>
+              <td style="color: var(--card-ink);">CS301 - Database Systems</td>
+              <td style="color: var(--card-muted);">Section A • Room 204</td>
+              <td style="color: var(--card-muted);">10:00 – 11:00</td>
+              <td><span style="color: #15803D; font-weight: 600;">9 Present</span> / <span style="color: #DC2626; font-weight: 600;">1 Absent</span></td>
+              <td><strong style="color: #059669;">90.0%</strong></td>
+              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
+              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('16 Oct 2026', 'CS301 - Database Systems', 'Section A', 'Room 204', '10:00 - 11:00', 9, 1, 0, 'Relational Algebra & Normalization')">View Slip</button></td>
+            </tr>
+            <tr data-subject="CS303" data-section="Section A" data-month="OCT">
+              <td><strong style="color: var(--card-ink);">15 Oct 2026</strong></td>
+              <td style="color: var(--card-ink);">CS303 - Computer Networks</td>
+              <td style="color: var(--card-muted);">Section A • Room 206</td>
+              <td style="color: var(--card-muted);">11:30 – 12:30</td>
+              <td><span style="color: #15803D; font-weight: 600;">10 Present</span> / <span style="color: #DC2626; font-weight: 600;">0 Absent</span></td>
+              <td><strong style="color: #059669;">100.0%</strong></td>
+              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
+              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('15 Oct 2026', 'CS303 - Computer Networks', 'Section A', 'Room 206', '11:30 - 12:30', 10, 0, 0, 'TCP/IP Model and OSI Architecture')">View Slip</button></td>
+            </tr>
+            <tr data-subject="CS305" data-section="Section B" data-month="OCT">
+              <td><strong style="color: var(--card-ink);">14 Oct 2026</strong></td>
+              <td style="color: var(--card-ink);">CS305 - Database Systems Lab</td>
+              <td style="color: var(--card-muted);">Section B • Turing Lab</td>
+              <td style="color: var(--card-muted);">14:00 – 16:00</td>
+              <td><span style="color: #15803D; font-weight: 600;">10 Present</span> / <span style="color: #DC2626; font-weight: 600;">0 Absent</span></td>
+              <td><strong style="color: #059669;">100.0%</strong></td>
+              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
+              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('14 Oct 2026', 'CS305 - Database Systems Lab', 'Section B', 'Turing Lab', '14:00 - 16:00', 10, 0, 0, 'Complex SQL Queries and Joins')">View Slip</button></td>
+            </tr>
+            <tr data-subject="CS301" data-section="Section A" data-month="OCT">
+              <td><strong style="color: var(--card-ink);">13 Oct 2026</strong></td>
+              <td style="color: var(--card-ink);">CS301 - Database Systems</td>
+              <td style="color: var(--card-muted);">Section A • Room 204</td>
+              <td style="color: var(--card-muted);">10:00 – 11:00</td>
+              <td><span style="color: #15803D; font-weight: 600;">8 Present</span> / <span style="color: #DC2626; font-weight: 600;">1 Absent</span> / <span style="color: #D97706; font-weight: 600;">1 Leave</span></td>
+              <td><strong style="color: #059669;">80.0%</strong></td>
+              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
+              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('13 Oct 2026', 'CS301 - Database Systems', 'Section A', 'Room 204', '10:00 - 11:00', 8, 1, 1, 'ER Diagrams and Cardinality Ratios')">View Slip</button></td>
+            </tr>
+            <tr data-subject="CS303" data-section="Section A" data-month="OCT">
+              <td><strong style="color: var(--card-ink);">12 Oct 2026</strong></td>
+              <td style="color: var(--card-ink);">CS303 - Computer Networks</td>
+              <td style="color: var(--card-muted);">Section A • Room 206</td>
+              <td style="color: var(--card-muted);">11:30 – 12:30</td>
+              <td><span style="color: #15803D; font-weight: 600;">9 Present</span> / <span style="color: #DC2626; font-weight: 600;">1 Absent</span></td>
+              <td><strong style="color: #059669;">90.0%</strong></td>
+              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
+              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('12 Oct 2026', 'CS303 - Computer Networks', 'Section A', 'Room 206', '11:30 - 12:30', 9, 1, 0, 'Data Link Layer and Framing')">View Slip</button></td>
+            </tr>
+            <tr data-subject="CS305" data-section="Section B" data-month="OCT">
+              <td><strong style="color: var(--card-ink);">10 Oct 2026</strong></td>
+              <td style="color: var(--card-ink);">CS305 - Database Systems Lab</td>
+              <td style="color: var(--card-muted);">Section B • Turing Lab</td>
+              <td style="color: var(--card-muted);">14:00 – 16:00</td>
+              <td><span style="color: #15803D; font-weight: 600;">9 Present</span> / <span style="color: #DC2626; font-weight: 600;">1 Absent</span></td>
+              <td><strong style="color: #059669;">90.0%</strong></td>
+              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
+              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('10 Oct 2026', 'CS305 - Database Systems Lab', 'Section B', 'Turing Lab', '14:00 - 16:00', 9, 1, 0, 'DDL Commands & Primary Key Constraints')">View Slip</button></td>
+            </tr>
+            <tr data-subject="CS301" data-section="Section A" data-month="OCT">
+              <td><strong style="color: var(--card-ink);">09 Oct 2026</strong></td>
+              <td style="color: var(--card-ink);">CS301 - Database Systems</td>
+              <td style="color: var(--card-muted);">Section A • Room 204</td>
+              <td style="color: var(--card-muted);">10:00 – 11:00</td>
+              <td><span style="color: #15803D; font-weight: 600;">10 Present</span> / <span style="color: #DC2626; font-weight: 600;">0 Absent</span></td>
+              <td><strong style="color: #059669;">100.0%</strong></td>
+              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
+              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('09 Oct 2026', 'CS301 - Database Systems', 'Section A', 'Room 204', '10:00 - 11:00', 10, 0, 0, 'Introduction to Relational Model')">View Slip</button></td>
+            </tr>
+            <tr data-subject="CS303" data-section="Section A" data-month="SEP">
+              <td><strong style="color: var(--card-ink);">30 Sep 2026</strong></td>
+              <td style="color: var(--card-ink);">CS303 - Computer Networks</td>
+              <td style="color: var(--card-muted);">Section A • Room 206</td>
+              <td style="color: var(--card-muted);">11:30 – 12:30</td>
+              <td><span style="color: #15803D; font-weight: 600;">8 Present</span> / <span style="color: #DC2626; font-weight: 600;">2 Absent</span></td>
+              <td><strong style="color: #059669;">80.0%</strong></td>
+              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
+              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('30 Sep 2026', 'CS303 - Computer Networks', 'Section A', 'Room 206', '11:30 - 12:30', 8, 2, 0, 'Network Topologies & Transmission Media')">View Slip</button></td>
+            </tr>
+            <tr data-subject="CS305" data-section="Section B" data-month="SEP">
+              <td><strong style="color: var(--card-ink);">28 Sep 2026</strong></td>
+              <td style="color: var(--card-ink);">CS305 - Database Systems Lab</td>
+              <td style="color: var(--card-muted);">Section B • Turing Lab</td>
+              <td style="color: var(--card-muted);">14:00 – 16:00</td>
+              <td><span style="color: #15803D; font-weight: 600;">10 Present</span> / <span style="color: #DC2626; font-weight: 600;">0 Absent</span></td>
+              <td><strong style="color: #059669;">100.0%</strong></td>
+              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
+              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('28 Sep 2026', 'CS305 - Database Systems Lab', 'Section B', 'Turing Lab', '14:00 - 16:00', 10, 0, 0, 'Database Installation and Configuration')">View Slip</button></td>
+            </tr>
+            <tr data-subject="CS301" data-section="Section A" data-month="SEP">
+              <td><strong style="color: var(--card-ink);">26 Sep 2026</strong></td>
+              <td style="color: var(--card-ink);">CS301 - Database Systems</td>
+              <td style="color: var(--card-muted);">Section A • Room 204</td>
+              <td style="color: var(--card-muted);">10:00 – 11:00</td>
+              <td><span style="color: #15803D; font-weight: 600;">9 Present</span> / <span style="color: #DC2626; font-weight: 600;">0 Absent</span> / <span style="color: #D97706; font-weight: 600;">1 Leave</span></td>
+              <td><strong style="color: #059669;">90.0%</strong></td>
+              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
+              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('26 Sep 2026', 'CS301 - Database Systems', 'Section A', 'Room 204', '10:00 - 11:00', 9, 0, 1, 'Course Syllabus and Database Concepts')">View Slip</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- Session Attendance Slip Modal -->
+  <div class="modal-backdrop" id="slip-modal" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1010; align-items: center; justify-content: center; padding: 20px;">
+    <div class="dash-card" style="max-width: 650px; width: 100%; max-height: 90vh; overflow-y: auto; background: var(--bg-card); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 24px;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--line); padding-bottom: 12px; margin-bottom: 16px;">
+        <div>
+          <span style="font-size: 11px; font-weight: 700; color: var(--accent); text-transform: uppercase;">Official Attendance Slip</span>
+          <h3 id="slip-title" style="margin: 4px 0 0 0; font-size: 20px;">CS301 - Database Systems</h3>
+          <p id="slip-meta" style="margin: 4px 0 0 0; font-size: 13px; color: var(--muted);">16 Oct 2026 • 10:00 - 11:00 • Section A (Room 204)</p>
+        </div>
+        <button type="button" class="drawer-close-btn" onclick="closeSlipModal()" aria-label="Close modal">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div style="background: #F8FAFC; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin-bottom: 16px; font-size: 13px; color: var(--card-ink);">
+        <p style="margin: 0 0 4px 0;"><strong>Curriculum Topic:</strong> <span id="slip-topic">Relational Algebra & Normalization</span></p>
+        <p style="margin: 0 0 4px 0;"><strong>Conducted by:</strong> Dr. Meenakshi Sundaram (Faculty ID: FAC-201)</p>
+        <p style="margin: 0;"><strong>Audit Hash:</strong> <code style="font-size: 11px; color: var(--accent);">0x9a8f4c2e11d0b384</code> • Status: <span class="tag tag-present" style="font-size: 11px; padding: 2px 6px;">Locked</span></p>
+      </div>
+
+      <div style="display: flex; gap: 12px; margin-bottom: 14px; font-size: 13px; color: var(--card-ink);">
+        <span>Present: <strong id="slip-p" style="color: #15803D;">9</strong></span>
+        <span>Absent: <strong id="slip-a" style="color: #DC2626;">1</strong></span>
+        <span>Approved Leave: <strong id="slip-l" style="color: #D97706;">0</strong></span>
+      </div>
+
+      <div class="table-wrap" style="max-height: 240px; overflow-y: auto;">
+        <table class="data-table" style="font-size: 13px;">
+          <thead>
+            <tr>
+              <th>Roll No</th>
+              <th>Student Name</th>
+              <th>Status</th>
+              <th>Remark</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>STU-101</td>
+              <td>Aarav Sharma</td>
+              <td><span class="tag tag-present">Present</span></td>
+              <td>Attended session</td>
+            </tr>
+            <tr>
+              <td>STU-102</td>
+              <td>Priya Sharma</td>
+              <td><span class="tag tag-present">Present</span></td>
+              <td>Attended session</td>
+            </tr>
+            <tr>
+              <td>STU-103</td>
+              <td>Marcus Brody</td>
+              <td><span class="tag" style="background: rgba(239, 68, 68, 0.2); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.4);">Absent</span></td>
+              <td>Unexcused absence</td>
+            </tr>
+            <tr>
+              <td>STU-104</td>
+              <td>Elena Rostova</td>
+              <td><span class="tag tag-present">Present</span></td>
+              <td>Attended session</td>
+            </tr>
+            <tr>
+              <td>STU-105</td>
+              <td>David Kim</td>
+              <td><span class="tag tag-present">Present</span></td>
+              <td>Attended session</td>
+            </tr>
+            <tr>
+              <td>STU-106</td>
+              <td>Ananya Roy</td>
+              <td><span class="tag tag-present">Present</span></td>
+              <td>Attended session</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid var(--line); padding-top: 14px;">
+        <button type="button" class="btn btn-sm btn-outline" onclick="window.print()">Print Slip</button>
+        <button type="button" class="btn btn-sm" onclick="closeSlipModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Site Footer -->
+  <footer class="site-foot" role="contentinfo">
+    <div class="wrap">
+      <div class="foot-top">
+        <div class="foot-brand">
+          <a class="foot-logo" href="index.html">
+            <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="26" height="26">
+            <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+          </a>
+          <p class="foot-desc">
+            Official Academic Attendance and Examination Marks Management System. Department of Computer Applications, Swami Rama Himalayan University (SRHU).
+          </p>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Navigation</h4>
+          <ul class="foot-nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="student.html">Student Portal</a></li>
+            <li><a href="teacher.html">Teacher Portal</a></li>
+            <li><a href="past-registers.html">Past Registers</a></li>
+            <li><a href="teacher-marks.html">Examination Marks</a></li>
+            <li><a href="calendar.html">Academic Calendar</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Academic Services</h4>
+          <ul class="foot-nav-list">
+            <li><a href="profile.html">Profile &amp; Security</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms &amp; Conditions</a></li>
+            <li><a href="signin.html">Account Sign In</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Support &amp; Helpdesk</h4>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <a href="mailto:portal-support@college.edu">portal-support@college.edu</a>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>IT Centre, Academic Block II</span>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Mon – Fri: 08:30 – 17:00 IST</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot-bottom">
+        <p class="foot-copy">
+          &copy; 2026 College Attendance Management System. All rights reserved.
+        </p>
+        <div class="foot-policy-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="terms.html">Terms of Service</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="calendar.html">Academic Calendar</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="signin.html">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="site.js" defer></script>
+  <script>
+    function openSlipModal(date, title, section, room, time, p, a, l, topic) {
+      document.getElementById('slip-title').textContent = title;
+      document.getElementById('slip-meta').textContent = date + ' • ' + time + ' • ' + section + ' (' + room + ')';
+      document.getElementById('slip-topic').textContent = topic || 'Standard Lecture Session';
+      document.getElementById('slip-p').textContent = p;
+      document.getElementById('slip-a').textContent = a;
+      document.getElementById('slip-l').textContent = l;
+      var modal = document.getElementById('slip-modal');
+      modal.style.display = 'flex';
+    }
+
+    function closeSlipModal() {
+      var modal = document.getElementById('slip-modal');
+      modal.style.display = 'none';
+    }
+
+    (function () {
+      'use strict';
+      var storedId = sessionStorage.getItem('attendance_user_id');
+      var storedName = sessionStorage.getItem('attendance_user_name');
+      if (storedName) {
+        var n1 = document.getElementById('display-user-name');
+        if (n1) n1.textContent = storedName;
+        var n2 = document.getElementById('dropdown-user-name');
+        if (n2) n2.textContent = storedName;
+        var n3 = document.getElementById('drawer-user-name');
+        if (n3) n3.textContent = storedName;
+      }
+      if (storedId) {
+        var el = document.getElementById('display-user-id');
+        if (el) el.textContent = 'ID: ' + storedId + ' (Teacher)';
+        var del = document.getElementById('drawer-user-id');
+        if (del) del.textContent = 'ID: ' + storedId + ' (Teacher)';
+      }
+      var searchInput = document.getElementById('filter-search');
+      var subjectSelect = document.getElementById('filter-subject');
+      var sectionSelect = document.getElementById('filter-section');
+      var resetBtn = document.getElementById('filter-reset-btn');
+      var monthButtons = document.querySelectorAll('.cal-filter-btn');
+      var activeMonth = 'ALL';
+      var rows = document.querySelectorAll('#past-registers-tbody tr');
+      var countEl = document.getElementById('register-count');
+
+      function filterRows() {
+        var q = (searchInput.value || '').toLowerCase().trim();
+        var sub = subjectSelect.value;
+        var sec = sectionSelect.value;
+        var visibleCount = 0;
+
+        rows.forEach(function (row) {
+          var rowSub = row.getAttribute('data-subject');
+          var rowSec = row.getAttribute('data-section');
+          var rowMonth = row.getAttribute('data-month');
+          var rowText = row.textContent.toLowerCase();
+
+          var matchSearch = !q || rowText.indexOf(q) !== -1;
+          var matchSub = sub === 'ALL' || rowSub === sub;
+          var matchSec = sec === 'ALL' || rowSec === sec;
+          var matchMonth = activeMonth === 'ALL' || rowMonth === activeMonth;
+
+          if (matchSearch && matchSub && matchSec && matchMonth) {
+            row.style.display = '';
+            visibleCount++;
+          } else {
+            row.style.display = 'none';
+          }
+        });
+
+        if (countEl) countEl.textContent = visibleCount;
+      }
+
+      if (searchInput) searchInput.addEventListener('input', filterRows);
+      if (subjectSelect) subjectSelect.addEventListener('change', filterRows);
+      if (sectionSelect) sectionSelect.addEventListener('change', filterRows);
+
+      if (resetBtn) {
+        resetBtn.addEventListener('click', function () {
+          searchInput.value = '';
+          subjectSelect.value = 'ALL';
+          sectionSelect.value = 'ALL';
+          activeMonth = 'ALL';
+          monthButtons.forEach(function (btn) {
+            btn.classList.toggle('active', btn.getAttribute('data-month') === 'ALL');
+          });
+          filterRows();
+        });
+      }
+
+      monthButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          monthButtons.forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          activeMonth = btn.getAttribute('data-month');
+          filterRows();
+        });
+      });
+    })();
+  </script>
+</body>
+
+</html>

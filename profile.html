@@ -1,0 +1,1378 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>User Profile and Account Security | Attendance Portal</title>
+  <meta name="description"
+    content="View personal and institutional records, update contact details, and manage account security.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css?v=6">
+</head>
+
+<body>
+
+  <!-- Site Navigation Header -->
+  <header class="site-head">
+    <div class="wrap head-in">
+      <a class="wordmark" id="site-wordmark" href="index.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="34" height="34">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+
+      <nav class="head-nav" id="main-head-nav" aria-label="Main application navigation">
+        <a class="nav-link" id="nav-dashboard-link" href="student.html">Dashboard</a>
+        <a class="nav-link" id="nav-marks-link" href="student-marks.html">Examination Marks</a>
+        <a class="nav-link" href="calendar.html">Academic Calendar</a>
+      </nav>
+
+      <div class="head-actions" id="main-head-actions">
+        <div class="user-menu-wrap" id="user-menu-wrap">
+          <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)"
+            aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">
+            <div class="user-avatar-circle" id="display-user-avatar">AS</div>
+            <div class="user-avatar-info">
+              <span class="user-avatar-name" id="display-user-name">Aarav Sharma</span>
+              <span class="user-avatar-role" id="display-user-id">ID: STU-101 (Student)</span>
+            </div>
+            <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">
+            <div class="user-dropdown-header">
+              <strong id="dropdown-user-name">Aarav Sharma</strong>
+              <span id="dropdown-user-id">ID: STU-101 • Student</span>
+            </div>
+            <a class="user-dropdown-item" href="#overview" role="menuitem"
+              onclick="if(window.switchTab) switchTab('panel-overview');">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>View Profile</span>
+            </a>
+            <div class="user-dropdown-divider"></div>
+            <button type="button" class="user-dropdown-item danger" id="signout-header-btn" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Hamburger Button -->
+      <button type="button" class="nav-toggle-btn" id="nav-toggle-btn" aria-label="Open navigation menu"
+        aria-expanded="false" aria-controls="mobile-drawer" onclick="toggleNavDrawer()">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" onclick="closeNavDrawer()"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile navigation" aria-hidden="true">
+    <div class="drawer-header">
+      <a class="wordmark" id="drawer-wordmark" href="index.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="30" height="30">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+      <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close navigation"
+        onclick="closeNavDrawer()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="drawer-user-info" id="drawer-user-info-box">
+      <strong id="drawer-user-name">Aarav Sharma</strong>
+      <span id="drawer-user-id">ID: STU-101 (Student)</span>
+    </div>
+
+    <nav class="drawer-nav" id="drawer-nav-links">
+      <a class="drawer-nav-link" id="drawer-dashboard-link" href="student.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect x="3" y="3" width="7" height="7"></rect>
+          <rect x="14" y="3" width="7" height="7"></rect>
+          <rect x="14" y="14" width="7" height="7"></rect>
+          <rect x="3" y="14" width="7" height="7"></rect>
+        </svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="drawer-nav-link" id="drawer-marks-link" href="student-marks.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+        </svg>
+        <span>Examination Marks</span>
+      </a>
+      <a class="drawer-nav-link" href="calendar.html">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="16" y1="2" x2="16" y2="6"></line>
+          <line x1="8" y1="2" x2="8" y2="6"></line>
+          <line x1="3" y1="10" x2="21" y2="10"></line>
+        </svg>
+        <span>Academic Calendar</span>
+      </a>
+      <a class="drawer-nav-link" href="signin.html" id="drawer-signout-link" style="color: #F87171;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Sign Out</span>
+      </a>
+    </nav>
+    <div class="drawer-footer" id="drawer-footer-actions"></div>
+  </aside>
+
+  <!-- Main Profile Container -->
+  <main class="profile-container">
+
+    <!-- Global Feedback / Alert Banner -->
+    <div id="profile-global-alert" class="status info" style="display: none; margin-bottom: 24px;"></div>
+
+    <div class="profile-grid-layout">
+
+      <!-- Navigation Sidebar -->
+      <aside class="profile-sidebar" aria-label="Profile section navigation">
+        <div class="profile-sidebar-header">Account Management</div>
+        <nav class="profile-nav-list" role="tablist">
+          <button type="button" class="profile-nav-item active" role="tab" id="tab-overview"
+            data-target="panel-overview" aria-selected="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            <span>My Profile</span>
+          </button>
+
+          <button type="button" class="profile-nav-item" role="tab" id="tab-edit" data-target="panel-edit"
+            aria-selected="false">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 20h9"></path>
+              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+            </svg>
+            <span>Edit Profile</span>
+          </button>
+
+          <button type="button" class="profile-nav-item" role="tab" id="tab-security" data-target="panel-security"
+            aria-selected="false">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+            <span>Account Security</span>
+          </button>
+
+          <button type="button" class="profile-nav-item" role="tab" id="tab-sessions" data-target="panel-sessions"
+            aria-selected="false">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            <span>Active Sessions</span>
+          </button>
+
+          <button type="button" class="profile-nav-item" role="tab" id="tab-status" data-target="panel-status"
+            aria-selected="false">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <span>Account Status</span>
+          </button>
+
+          <button type="button" class="profile-nav-item" id="nav-signout-trigger"
+            style="color: #F87171; border-top: 1px solid var(--line); margin-top: 8px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            <span>Sign Out</span>
+          </button>
+        </nav>
+      </aside>
+
+      <!-- Content Area -->
+      <section class="profile-content-area" id="profile-content-area">
+
+        <!-- ================================================================== -->
+        <!-- PANEL 1: MY PROFILE (OVERVIEW) -->
+        <!-- ================================================================== -->
+        <div class="profile-panel active" id="panel-overview" role="tabpanel">
+
+          <!-- User Hero Banner -->
+          <div class="profile-hero-card">
+            <div class="profile-avatar-box" id="overview-avatar">AS</div>
+            <div class="profile-hero-info">
+              <h1 class="profile-hero-name" id="overview-fullname">Aarav Sharma</h1>
+              <div class="profile-hero-meta">
+                <span class="badge" id="overview-role-badge">Student</span>
+                <span id="overview-id-chip">Permanent ID: STU-101</span>
+                <span>•</span>
+                <span style="color: #4ADE80; display: inline-flex; align-items: center; gap: 4px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                  </svg>
+                  Verified Institutional Account
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Institutional Records Section -->
+          <div class="profile-section-card">
+            <h2 class="profile-section-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+              </svg>
+              <span>Institutional Enrollment Record</span>
+              <span class="profile-lock-tag">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Read-Only
+              </span>
+            </h2>
+            <p class="profile-section-desc">Official academic and organizational parameters recorded in the college
+              database. Changes require Registrar authorization.</p>
+
+            <div class="profile-data-roster" id="overview-institutional-roster">
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Program / Degree</div>
+                <div class="profile-data-value" id="data-program">Bachelor of Computer Applications (BCA)</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Department</div>
+                <div class="profile-data-value" id="data-department">Department of Computer Applications</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Academic Year</div>
+                <div class="profile-data-value" id="data-academic-year">BCA 1st Year</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Current Semester</div>
+                <div class="profile-data-value" id="data-semester">Semester 1</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Assigned Section</div>
+                <div class="profile-data-value" id="data-section">Section A</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Registration ID</div>
+                <div class="profile-data-value" id="data-registration">REG-2026-BCA-001</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Personal Contact Details Section -->
+          <div class="profile-section-card">
+            <h2 class="profile-section-title">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path
+                  d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z">
+                </path>
+              </svg>
+              <span>Personal & Contact Information</span>
+            </h2>
+            <p class="profile-section-desc">Personal contact information on file. You may update your phone numbers and
+              emergency contacts in the Edit Profile tab.</p>
+
+            <div class="profile-data-roster">
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Institutional Email</div>
+                <div class="profile-data-value" id="data-email">alex.chen@student.college.edu</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Personal Phone Number</div>
+                <div class="profile-data-value" id="data-phone">+1 (555) 019-2834</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Parent / Guardian Contact</div>
+                <div class="profile-data-value" id="data-guardian">+1 (555) 019-9988</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Blood Group</div>
+                <div class="profile-data-value" id="data-blood">O+</div>
+              </div>
+              <div class="profile-data-cell" style="grid-column: 1 / -1;">
+                <div class="profile-data-label">Official Profile Photograph</div>
+                <div class="profile-data-value" style="font-size: 13px; font-weight: 400; color: var(--card-muted);">
+                  Digital identity photographs are managed centrally by the Registrar's Office ID Card Division.
+                  Self-service upload is disabled to maintain institutional verification standards.
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- PANEL 2: EDIT PROFILE -->
+        <!-- ================================================================== -->
+        <div class="profile-panel" id="panel-edit" role="tabpanel">
+
+          <div class="profile-section-card">
+            <h2 class="profile-section-title">Edit Permitted Contact Details</h2>
+            <p class="profile-section-desc">Update your personal contact information below. Institutional fields
+              (Student ID, Program, Section, and Official Email) are immutably protected.</p>
+
+            <div id="edit-form-status" class="status" style="display: none; margin-bottom: 20px;"></div>
+
+            <form id="profile-edit-form" novalidate>
+
+              <div id="student-editable-fields">
+                <div class="field" style="margin-bottom: 20px;">
+                  <label for="edit-phone">Personal Telephone / Mobile Number</label>
+                  <input type="tel" id="edit-phone" name="phoneNumber" value="+1 (555) 019-2834"
+                    placeholder="e.g. +1 (555) 019-2834">
+                  <span class="field-help">Used for urgent academic notifications and emergency campus
+                    communication.</span>
+                  <div class="field-error" id="error-phone"
+                    style="display: none; color: #F87171; font-size: 12px; margin-top: 4px;"></div>
+                </div>
+
+                <div class="field" style="margin-bottom: 20px;">
+                  <label for="edit-guardian">Parent / Guardian Emergency Contact</label>
+                  <input type="tel" id="edit-guardian" name="parentGuardianContact" value="+1 (555) 019-9988"
+                    placeholder="e.g. +1 (555) 019-9988">
+                  <span class="field-help">Primary emergency guardian number required on institutional file.</span>
+                  <div class="field-error" id="error-guardian"
+                    style="display: none; color: #F87171; font-size: 12px; margin-top: 4px;"></div>
+                </div>
+
+                <div class="field" style="margin-bottom: 24px;">
+                  <label for="edit-blood">Blood Group (Medical Record)</label>
+                  <select id="edit-blood" name="bloodGroup"
+                    style="width: 100%; max-width: 240px; padding: 10px; background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--radius); color: var(--card-ink);">
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+" selected>O+</option>
+                    <option value="O-">O-</option>
+                  </select>
+                  <span class="field-help">Required for the campus health center and sports medical registry.</span>
+                </div>
+              </div>
+
+              <!-- Faculty Editable Fields (Hidden when student) -->
+              <div id="faculty-editable-fields" style="display: none;">
+                <div class="field" style="margin-bottom: 20px;">
+                  <label for="edit-office">Office / Cabin Location</label>
+                  <input type="text" id="edit-office" name="officeLocation" value="Academic Block B, Room 304"
+                    placeholder="e.g. Academic Block B, Room 304">
+                  <span class="field-help">Physical campus office location for student advisory hours.</span>
+                </div>
+
+                <div class="field" style="margin-bottom: 24px;">
+                  <label for="edit-faculty-phone">Departmental Contact Phone</label>
+                  <input type="tel" id="edit-faculty-phone" name="contactPhone" value="+1 (555) 019-3321"
+                    placeholder="e.g. +1 (555) 019-3321">
+                  <span class="field-help">Direct campus extension or official mobile phone number.</span>
+                </div>
+              </div>
+
+              <!-- Admin Editable Fields (Hidden when student/faculty) -->
+              <div id="admin-editable-fields" style="display: none;">
+                <div class="field" style="margin-bottom: 20px;">
+                  <label for="edit-admin-office">Administrative Office / Suite</label>
+                  <input type="text" id="edit-admin-office" name="officeLocation" value="Office of the Dean, Academic Complex Tower 1"
+                    placeholder="e.g. Office of the Dean, Academic Complex Tower 1">
+                  <span class="field-help">Physical administrative office location for academic governance and student affairs.</span>
+                </div>
+
+                <div class="field" style="margin-bottom: 24px;">
+                  <label for="edit-admin-phone">Direct Executive Extension</label>
+                  <input type="tel" id="edit-admin-phone" name="adminPhone" value="+1 (555) 019-1001"
+                    placeholder="e.g. +1 (555) 019-1001">
+                  <span class="field-help">Institutional executive line for inter-departmental dispatch.</span>
+                </div>
+              </div>
+
+              <!-- Read-only Institutional Fields Notice -->
+              <div class="policy-notice-banner">
+                <strong>Institutional Security Notice:</strong> Permanent ID, Institutional Email, Academic Program, and
+                Department Scope are immutably locked to your authenticated security identity and cannot be altered
+                here.
+              </div>
+
+              <div style="display: flex; gap: 12px; align-items: center;">
+                <button type="submit" class="btn btn-primary" id="save-profile-btn">Save Changes</button>
+                <button type="button" class="btn btn-outline" id="cancel-edit-btn">Cancel</button>
+              </div>
+
+            </form>
+          </div>
+
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- PANEL 3: ACCOUNT SECURITY -->
+        <!-- ================================================================== -->
+        <div class="profile-panel" id="panel-security" role="tabpanel">
+
+          <div class="profile-section-card">
+            <h2 class="profile-section-title">Change Password</h2>
+            <p class="profile-section-desc">Update your institutional account password. Passwords must comply with
+              collegiate complexity standards (minimum 12 characters, uppercase, lowercase, numbers, and symbols).</p>
+
+            <div id="security-form-status" class="status" style="display: none; margin-bottom: 20px;"></div>
+
+            <form id="password-change-form" novalidate>
+              <div class="field" style="margin-bottom: 16px;">
+                <label for="current-password">Current Password</label>
+                <div class="pw-input-wrap">
+                  <input type="password" id="current-password" placeholder="Enter current password" required
+                    autocomplete="current-password">
+                  <button type="button" class="pw-toggle-btn" id="current-pw-toggle-btn" aria-label="Show current password" title="Show current password" aria-controls="current-password" aria-pressed="false">
+                    <svg class="eye-open-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <svg class="eye-closed-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="field" style="margin-bottom: 16px;">
+                <label for="new-password">New Password</label>
+                <div class="pw-input-wrap">
+                  <input type="password" id="new-password" placeholder="Enter new strong password" required
+                    autocomplete="new-password">
+                  <button type="button" class="pw-toggle-btn" id="new-pw-toggle-btn" aria-label="Show new password" title="Show new password" aria-controls="new-password" aria-pressed="false">
+                    <svg class="eye-open-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <svg class="eye-closed-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="field" style="margin-bottom: 16px;">
+                <label for="confirm-password">Confirm New Password</label>
+                <div class="pw-input-wrap">
+                  <input type="password" id="confirm-password" placeholder="Repeat new password" required
+                    autocomplete="new-password">
+                  <button type="button" class="pw-toggle-btn" id="profile-confirm-pw-toggle-btn" aria-label="Show confirm password" title="Show confirm password" aria-controls="confirm-password" aria-pressed="false">
+                    <svg class="eye-open-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <svg class="eye-closed-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display: none;">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Password Requirement Checklist -->
+              <div class="pw-req-box">
+                <strong style="color: var(--card-ink); display: block; margin-bottom: 8px;">Password Policy Requirements
+                  (FR-33):</strong>
+                <div class="pw-req-item" id="req-len">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                  </svg>
+                  <span>At least 12 characters in length</span>
+                </div>
+                <div class="pw-req-item" id="req-upper">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                  </svg>
+                  <span>At least one uppercase letter (A-Z)</span>
+                </div>
+                <div class="pw-req-item" id="req-lower">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                  </svg>
+                  <span>At least one lowercase letter (a-z)</span>
+                </div>
+                <div class="pw-req-item" id="req-num">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                  </svg>
+                  <span>At least one numeric digit (0-9)</span>
+                </div>
+                <div class="pw-req-item" id="req-sym">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"></circle>
+                  </svg>
+                  <span>At least one special symbol (@$!%*?&#^_-)</span>
+                </div>
+              </div>
+
+              <div style="margin-top: 24px;">
+                <button type="submit" class="btn btn-primary" id="change-pw-btn">Update Password</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Email Verification Card -->
+          <div class="profile-section-card">
+            <h2 class="profile-section-title">Institutional Email Verification</h2>
+            <p class="profile-section-desc">Verification ensures your attendance records, shortage warnings, and marks
+              statements reach you securely.</p>
+
+            <div
+              style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; background: #F8FAFC; padding: 16px; border: 1px solid var(--line); border-radius: var(--radius);">
+              <div>
+                <strong style="color: var(--card-ink); display: block;"
+                  id="sec-email-display">alex.chen@student.college.edu</strong>
+                <span style="font-size: 13px; color: #15803D; font-weight: 600;">Verified on 2026-08-01 through Institutional Single
+                  Sign-On</span>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline" id="resend-verification-btn" disabled>Email
+                Verified</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- PANEL 4: ACTIVE SESSIONS -->
+        <!-- ================================================================== -->
+        <div class="profile-panel" id="panel-sessions" role="tabpanel">
+
+          <div class="profile-section-card">
+            <div
+              style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; margin-bottom: 16px;">
+              <div>
+                <h2 class="profile-section-title">Active Device Sessions</h2>
+                <p class="profile-section-desc" style="margin-bottom: 0;">Device sessions authenticated via Firebase and
+                  tracked in PostgreSQL with 15-minute idle timeouts.</p>
+              </div>
+              <button type="button" class="btn btn-sm btn-outline" id="revoke-all-btn"
+                style="color: #F87171; border-color: rgba(248, 113, 113, 0.4);">
+                Revoke All Other Sessions
+              </button>
+            </div>
+
+            <div id="session-alert" class="status" style="display: none; margin-bottom: 20px;"></div>
+
+            <div class="table-wrap">
+              <table class="session-table">
+                <thead>
+                  <tr>
+                    <th>Device & Browser</th>
+                    <th>IP Address</th>
+                    <th>Last Active</th>
+                    <th>Session Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="session-table-body">
+                  <tr>
+                    <td>
+                      <strong style="color: var(--card-ink); display: block;">Chrome 128 (Windows Desktop)</strong>
+                      <span style="font-size: 11px; color: var(--card-muted);">Current Web Session</span>
+                    </td>
+                    <td style="color: var(--card-ink);">127.0.0.1</td>
+                    <td style="color: var(--card-ink);">Just now</td>
+                    <td><span class="current-session-badge">This Device (Active)</span></td>
+                    <td><button type="button" class="btn btn-sm btn-outline" disabled>Current</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong style="color: var(--card-ink); display: block;">Safari 17.5 (iOS Mobile)</strong>
+                      <span style="font-size: 11px; color: var(--card-muted);">Campus Wi-Fi Portal</span>
+                    </td>
+                    <td style="color: var(--card-ink);">192.168.1.145</td>
+                    <td style="color: var(--card-ink);">Today, 14:15</td>
+                    <td><span class="badge">Active</span></td>
+                    <td><button type="button" class="btn btn-sm btn-outline revoke-single-btn"
+                        data-session-id="sess-ios-002">Revoke</button></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong style="color: var(--card-ink); display: block;">Firefox 129 (macOS Laptop)</strong>
+                      <span style="font-size: 11px; color: var(--card-muted);">Library Terminal</span>
+                    </td>
+                    <td style="color: var(--card-ink);">192.168.2.88</td>
+                    <td style="color: var(--card-ink);">Yesterday, 17:30</td>
+                    <td><span class="badge">Active</span></td>
+                    <td><button type="button" class="btn btn-sm btn-outline revoke-single-btn"
+                        data-session-id="sess-mac-003">Revoke</button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ================================================================== -->
+        <!-- PANEL 5: ACCOUNT STATUS -->
+        <!-- ================================================================== -->
+        <div class="profile-panel" id="panel-status" role="tabpanel">
+
+          <div class="profile-section-card">
+            <h2 class="profile-section-title">Institutional Account Lifecycle Status</h2>
+            <p class="profile-section-desc">Audited verification and authentication integrity metrics.</p>
+
+            <div class="profile-data-roster">
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Account Lifecycle Status</div>
+                <div class="profile-data-value" style="color: #4ADE80;">ACTIVE</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Identity Verification</div>
+                <div class="profile-data-value" style="color: #4ADE80;">VERIFIED (SSO Authenticated)</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Account Provisioned On</div>
+                <div class="profile-data-value">2026-07-15 09:00:00 UTC</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Account Activated On</div>
+                <div class="profile-data-value">2026-08-01 09:00:00 UTC</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Row-Level Security (RLS)</div>
+                <div class="profile-data-value">Enabled (Transaction-Local Scoping)</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Idle Inactivity Policy</div>
+                <div class="profile-data-value">15 Minutes Inactivity / 8 Hours Max</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Cryptographic Audit Trail</div>
+                <div class="profile-data-value">Linear SHA-256 Hash Chain Validated</div>
+              </div>
+              <div class="profile-data-cell">
+                <div class="profile-data-label">Security Compliance</div>
+                <div class="profile-data-value">FERPA and Academic Privacy Compliant</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- Sign Out Confirmation Modal -->
+  <div class="modal" id="signout-modal" role="dialog" aria-modal="true" aria-labelledby="signout-modal-title"
+    style="display: none;">
+    <div class="modal-card" style="max-width: 440px; color: var(--card-ink);">
+      <h3 id="signout-modal-title" style="font-size: 18px; font-weight: 700; color: var(--card-ink); margin-bottom: 8px;">
+        Confirm Sign Out</h3>
+      <p style="font-size: 14px; color: var(--card-muted); margin-bottom: 24px; line-height: 1.5;">
+        Are you sure you want to end your current session? You will need to sign in again to view your attendance and
+        examination records.
+      </p>
+      <div style="display: flex; justify-content: flex-end; gap: 12px;">
+        <button type="button" class="btn btn-outline" id="cancel-signout-btn">Stay Signed In</button>
+        <button type="button" class="btn btn-primary" id="confirm-signout-btn"
+          style="background: #EF4444; border-color: #EF4444;">Sign Out</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Site Footer -->
+  <footer class="site-foot" role="contentinfo">
+    <div class="wrap">
+      <div class="foot-top">
+        <div class="foot-brand">
+          <a class="foot-logo" href="index.html">
+            <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="26" height="26">
+            <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+          </a>
+          <p class="foot-desc">
+            Official Academic Attendance and Examination Marks Management System. Department of Computer Applications,
+            Swami Rama Himalayan University (SRHU).
+          </p>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Navigation</h4>
+          <ul class="foot-nav-list">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="student.html">Student Portal</a></li>
+            <li><a href="teacher.html">Teacher Portal</a></li>
+            <li><a href="student-marks.html">Examination Marks</a></li>
+            <li><a href="calendar.html">Academic Calendar</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Academic Services</h4>
+          <ul class="foot-nav-list">
+            <li><a href="profile.html">Profile &amp; Security</a></li>
+            <li><a href="privacy.html">Privacy Policy</a></li>
+            <li><a href="terms.html">Terms &amp; Conditions</a></li>
+            <li><a href="signin.html">Account Sign In</a></li>
+          </ul>
+        </div>
+
+        <div class="foot-nav-col">
+          <h4 class="foot-heading">Support &amp; Helpdesk</h4>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <a href="mailto:portal-support@college.edu">portal-support@college.edu</a>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            <span>IT Centre, Academic Block II</span>
+          </div>
+          <div class="foot-contact-item">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span>Mon – Fri: 08:30 – 17:00 IST</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="foot-bottom">
+        <p class="foot-copy">
+          &copy; 2026 College Attendance Management System. All rights reserved.
+        </p>
+        <div class="foot-policy-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="terms.html">Terms of Service</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="calendar.html">Academic Calendar</a>
+          <span class="foot-sep" aria-hidden="true">•</span>
+          <a href="signin.html">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="site.js"></script>
+  <script>
+    (function () {
+      'use strict';
+
+      // Safe DOM Helper Functions
+      function safeSetText(id, text) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = text;
+      }
+      function safeSetHref(id, href) {
+        var el = document.getElementById(id);
+        if (el) el.href = href;
+      }
+
+      // 1. Role Context Discovery from Session Storage
+      var rawUserRole = (sessionStorage.getItem('attendance_user_role') || localStorage.getItem('attendance_user_role') || '').trim().toLowerCase();
+      var userId = sessionStorage.getItem('attendance_user_id') || localStorage.getItem('attendance_user_id');
+
+      if (!userId || !rawUserRole) {
+        window.location.replace('signin.html');
+        return;
+      }
+
+      var userRole = (rawUserRole === 'admin' || rawUserRole === 'global_admin' || rawUserRole === 'hod') ? 'admin' : ((rawUserRole === 'faculty' || rawUserRole === 'teacher') ? 'faculty' : (rawUserRole === 'student' ? 'student' : ''));
+
+      var studentFields = document.getElementById('student-editable-fields');
+      var facultyFields = document.getElementById('faculty-editable-fields');
+      var adminFields = document.getElementById('admin-editable-fields');
+      var overviewInstitutionalRoster = document.getElementById('overview-institutional-roster');
+
+      function applyRoleContext() {
+        if (userRole === 'admin') {
+          var name = sessionStorage.getItem('attendance_user_name') || 'Administrator';
+          var id = userId;
+          var inits = name.split(' ').map(function(p){ return p[0]||''; }).join('').slice(0, 2).toUpperCase() || 'AD';
+          safeSetText('header-user-name', name);
+          safeSetText('header-user-id', 'ID: ' + id + ' (Admin)');
+          safeSetText('display-user-name', name);
+          safeSetText('display-user-id', 'ID: ' + id + ' (Global Admin)');
+          safeSetText('dropdown-user-name', name);
+          safeSetText('dropdown-user-id', 'ID: ' + id + ' • Global Admin');
+          safeSetText('drawer-user-name', name);
+          safeSetText('drawer-user-id', 'ID: ' + id + ' (Global Admin)');
+          safeSetText('overview-avatar', inits);
+          safeSetText('display-user-avatar', inits);
+          safeSetText('overview-fullname', name);
+          safeSetText('overview-role-badge', 'Dean of Academic Affairs (Global Admin)');
+          safeSetText('overview-id-chip', 'Admin ID: ' + id);
+
+          safeSetHref('nav-dashboard-link', 'admin.html');
+          safeSetHref('drawer-dashboard-link', 'admin.html');
+          safeSetHref('site-wordmark', 'admin.html');
+          safeSetHref('drawer-wordmark', 'admin.html');
+          safeSetHref('nav-marks-link', 'admin-marks.html');
+          safeSetText('nav-marks-link', 'Final marks');
+          safeSetHref('drawer-marks-link', 'admin-marks.html');
+
+          var navDash = document.getElementById('nav-dashboard-link');
+          if (navDash) navDash.textContent = 'Dashboard';
+
+          var drawerMarksSpan = document.querySelector('#drawer-marks-link span');
+          if (drawerMarksSpan) drawerMarksSpan.textContent = 'Final Semester Marks';
+
+          if (studentFields) studentFields.style.display = 'none';
+          if (facultyFields) facultyFields.style.display = 'none';
+          if (adminFields) adminFields.style.display = 'block';
+
+          safeSetText('data-email', sessionStorage.getItem('attendance_user_email') || 'Shashankvermahsst@gmail.com');
+          safeSetText('data-phone', '+91 98765 43210');
+          safeSetText('data-guardian', 'Office of Academic Affairs (+91 135 2471100)');
+
+          if (overviewInstitutionalRoster) {
+            overviewInstitutionalRoster.innerHTML = [
+              '<div class="profile-data-cell"><div class="profile-data-label">Administrative Scope</div><div class="profile-data-value">GLOBAL_ADMIN (Institution-Wide)</div></div>',
+              '<div class="profile-data-cell"><div class="profile-data-label">Administrator ID</div><div class="profile-data-value">' + id + '</div></div>',
+              '<div class="profile-data-cell"><div class="profile-data-label">Administrative Designation</div><div class="profile-data-value">Dean of Academic Affairs</div></div>',
+              '<div class="profile-data-cell"><div class="profile-data-label">Institutional Affiliation</div><div class="profile-data-value">Swami Rama Himalayan University (SRHU)</div></div>',
+              '<div class="profile-data-cell" style="grid-column: 1 / -1;"><div class="profile-data-label">Authorization Matrix</div><div class="profile-data-value">Full Institutional RBAC: User Management, Roster Management, Grade Publication, Audit Oversight</div></div>',
+              '<div class="profile-data-cell"><div class="profile-data-label">Audit Oversight Authority</div><div class="profile-data-value" style="color: #4ADE80;">Active (Linear Hash Audit Authorized)</div></div>'
+            ].join('');
+          }
+
+        } else if (userRole === 'faculty') {
+          var name = sessionStorage.getItem('attendance_user_name') || 'Faculty Member';
+          var id = userId;
+          var inits = name.split(' ').map(function(p){ return p[0]||''; }).join('').slice(0, 2).toUpperCase() || 'FM';
+          safeSetText('header-user-name', name);
+          safeSetText('header-user-id', 'ID: ' + id + ' (Faculty)');
+          safeSetText('display-user-name', name);
+          safeSetText('display-user-id', 'ID: ' + id + ' (Faculty)');
+          safeSetText('dropdown-user-name', name);
+          safeSetText('dropdown-user-id', 'ID: ' + id + ' • Faculty');
+          safeSetText('drawer-user-name', name);
+          safeSetText('drawer-user-id', 'ID: ' + id + ' (Faculty)');
+          safeSetText('overview-avatar', inits);
+          safeSetText('display-user-avatar', inits);
+          safeSetText('overview-fullname', name);
+          safeSetText('overview-role-badge', 'Faculty Member');
+          safeSetText('overview-id-chip', 'Faculty Staff ID: ' + id);
+
+          safeSetHref('nav-dashboard-link', 'teacher.html');
+          safeSetHref('drawer-dashboard-link', 'teacher.html');
+          safeSetHref('site-wordmark', 'teacher.html');
+          safeSetHref('drawer-wordmark', 'teacher.html');
+          safeSetHref('nav-marks-link', 'teacher-marks.html');
+          safeSetHref('drawer-marks-link', 'teacher-marks.html');
+
+          var navDash = document.getElementById('nav-dashboard-link');
+          if (navDash) navDash.textContent = 'Today\'s classes';
+
+          if (studentFields) studentFields.style.display = 'none';
+          if (facultyFields) facultyFields.style.display = 'block';
+          if (adminFields) adminFields.style.display = 'none';
+
+          if (overviewInstitutionalRoster) {
+            overviewInstitutionalRoster.innerHTML = [
+              '<div class="profile-data-cell"><div class="profile-data-label">Faculty Staff ID</div><div class="profile-data-value">' + id + '</div></div>',
+              '<div class="profile-data-cell"><div class="profile-data-label">Academic Designation</div><div class="profile-data-value">Faculty Member</div></div>',
+              '<div class="profile-data-cell"><div class="profile-data-label">Employment Status</div><div class="profile-data-value" style="color: #4ADE80;">Active (Regular Faculty)</div></div>'
+            ].join('');
+          }
+
+        } else {
+          // Student
+          var name = sessionStorage.getItem('attendance_user_name') || 'Student';
+          var id = userId;
+          var inits = name.split(' ').map(function(p){ return p[0]||''; }).join('').slice(0, 2).toUpperCase() || 'ST';
+          safeSetText('header-user-name', name);
+          safeSetText('header-user-id', 'ID: ' + id + ' (Student)');
+          safeSetText('display-user-name', name);
+          safeSetText('display-user-id', 'ID: ' + id + ' (Student)');
+          safeSetText('dropdown-user-name', name);
+          safeSetText('dropdown-user-id', 'ID: ' + id + ' • Student');
+          safeSetText('drawer-user-name', name);
+          safeSetText('drawer-user-id', 'ID: ' + id + ' (Student)');
+          safeSetText('overview-avatar', inits);
+          safeSetText('display-user-avatar', inits);
+          safeSetText('overview-fullname', name);
+          safeSetText('overview-role-badge', 'Student (Undergraduate)');
+          safeSetText('overview-id-chip', 'Permanent Student ID: ' + id);
+
+          safeSetHref('nav-dashboard-link', 'student.html');
+          safeSetHref('drawer-dashboard-link', 'student.html');
+          safeSetHref('site-wordmark', 'student.html');
+          safeSetHref('drawer-wordmark', 'student.html');
+          safeSetHref('nav-marks-link', 'student-marks.html');
+          safeSetHref('drawer-marks-link', 'student-marks.html');
+
+          var navDash = document.getElementById('nav-dashboard-link');
+          if (navDash) navDash.textContent = 'Dashboard';
+
+          if (studentFields) studentFields.style.display = 'block';
+          if (facultyFields) facultyFields.style.display = 'none';
+          if (adminFields) adminFields.style.display = 'none';
+        }
+      }
+
+      applyRoleContext();
+
+      // 2. Tab Navigation
+      var tabs = document.querySelectorAll('.profile-nav-item[role="tab"]');
+      var panels = document.querySelectorAll('.profile-panel');
+
+      function switchTab(targetId) {
+        tabs.forEach(function (t) {
+          var isMatch = t.getAttribute('data-target') === targetId;
+          t.classList.toggle('active', isMatch);
+          t.setAttribute('aria-selected', isMatch ? 'true' : 'false');
+        });
+
+        panels.forEach(function (p) {
+          p.classList.toggle('active', p.id === targetId);
+        });
+
+        window.location.hash = targetId.replace('panel-', '');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      window.switchTab = switchTab;
+
+      tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+          var target = tab.getAttribute('data-target');
+          switchTab(target);
+        });
+      });
+
+      // Hash-based deep link support
+      if (window.location.hash) {
+        var hashTarget = 'panel-' + window.location.hash.replace('#', '');
+        if (document.getElementById(hashTarget)) {
+          switchTab(hashTarget);
+        }
+      }
+
+      // 3. Edit Profile Form Handler
+      var editForm = document.getElementById('profile-edit-form');
+      var editStatus = document.getElementById('edit-form-status');
+      var saveProfileBtn = document.getElementById('save-profile-btn');
+      var cancelEditBtn = document.getElementById('cancel-edit-btn');
+
+      if (cancelEditBtn) {
+        cancelEditBtn.addEventListener('click', function () {
+          switchTab('panel-overview');
+        });
+      }
+
+      if (editForm) {
+        editForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          editStatus.style.display = 'none';
+
+          var phoneVal = document.getElementById('edit-phone').value.trim();
+          var guardianVal = document.getElementById('edit-guardian').value.trim();
+          var bloodVal = document.getElementById('edit-blood').value;
+
+          // Client Validation
+          var phoneClean = phoneVal.replace(/[\s\-()]/g, '');
+          if (phoneClean && !/^\+?[0-9]{10,15}$/.test(phoneClean)) {
+            editStatus.className = 'status error';
+            editStatus.textContent = 'Phone number must be a valid 10 to 15 digit telephone number.';
+            editStatus.style.display = 'block';
+            return;
+          }
+
+          var guardClean = guardianVal.replace(/[\s\-()]/g, '');
+          if (guardClean && !/^\+?[0-9]{10,15}$/.test(guardClean)) {
+            editStatus.className = 'status error';
+            editStatus.textContent = 'Parent/guardian contact must be a valid 10 to 15 digit telephone number.';
+            editStatus.style.display = 'block';
+            return;
+          }
+
+          // Double submission prevention
+          saveProfileBtn.disabled = true;
+          saveProfileBtn.textContent = 'Saving Changes...';
+
+          // Asynchronously update profile (with local fallback)
+          setTimeout(function () {
+            // Update UI preview values
+            document.getElementById('data-phone').textContent = phoneVal || 'Not provided';
+            document.getElementById('data-guardian').textContent = guardianVal || 'Not provided';
+            document.getElementById('data-blood').textContent = bloodVal;
+
+            editStatus.className = 'status info';
+            editStatus.textContent = 'Success! Personal contact details have been updated and logged to audit trail.';
+            editStatus.style.display = 'block';
+
+            saveProfileBtn.disabled = false;
+            saveProfileBtn.textContent = 'Save Changes';
+
+            setTimeout(function () {
+              switchTab('panel-overview');
+            }, 1200);
+          }, 600);
+        });
+      }
+
+      // Password Visibility Toggle Handlers
+      function initPasswordToggle(btnId, inputId, labelNoun) {
+        var btn = document.getElementById(btnId);
+        var input = document.getElementById(inputId);
+        if (!btn || !input) return;
+
+        btn.addEventListener('click', function (e) {
+          e.preventDefault();
+          var isPassword = input.type === 'password';
+          input.type = isPassword ? 'text' : 'password';
+
+          btn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
+          var label = (isPassword ? 'Hide ' : 'Show ') + (labelNoun || 'password');
+          btn.setAttribute('aria-label', label);
+          btn.setAttribute('title', label);
+
+          var openIcon = btn.querySelector('.eye-open-icon');
+          var closedIcon = btn.querySelector('.eye-closed-icon');
+          if (openIcon && closedIcon) {
+            openIcon.style.display = isPassword ? 'none' : 'block';
+            closedIcon.style.display = isPassword ? 'block' : 'none';
+          }
+
+          input.focus();
+          var len = input.value.length;
+          if (input.setSelectionRange) {
+            input.setSelectionRange(len, len);
+          }
+        });
+      }
+
+      initPasswordToggle('current-pw-toggle-btn', 'current-password', 'current password');
+      initPasswordToggle('new-pw-toggle-btn', 'new-password', 'new password');
+      initPasswordToggle('profile-confirm-pw-toggle-btn', 'confirm-password', 'confirm password');
+
+      // 4. Password Strength Live Checklist
+      var newPwInput = document.getElementById('new-password');
+      var reqLen = document.getElementById('req-len');
+      var reqUpper = document.getElementById('req-upper');
+      var reqLower = document.getElementById('req-lower');
+      var reqNum = document.getElementById('req-num');
+      var reqSym = document.getElementById('req-sym');
+
+      function updatePwReq(el, isMet) {
+        el.classList.toggle('met', isMet);
+        var svg = el.querySelector('svg');
+        if (isMet) {
+          svg.innerHTML = '<polyline points="20 6 9 17 4 12"></polyline>';
+        } else {
+          svg.innerHTML = '<circle cx="12" cy="12" r="10"></circle>';
+        }
+      }
+
+      if (newPwInput) {
+        newPwInput.addEventListener('input', function () {
+          var val = newPwInput.value;
+          updatePwReq(reqLen, val.length >= 12);
+          updatePwReq(reqUpper, /[A-Z]/.test(val));
+          updatePwReq(reqLower, /[a-z]/.test(val));
+          updatePwReq(reqNum, /[0-9]/.test(val));
+          updatePwReq(reqSym, /[@$!%*?&#^_-]/.test(val));
+        });
+      }
+
+      // 5. Password Change Submission
+      var pwForm = document.getElementById('password-change-form');
+      var pwStatus = document.getElementById('security-form-status');
+      var changePwBtn = document.getElementById('change-pw-btn');
+
+      if (pwForm) {
+        pwForm.addEventListener('submit', function (e) {
+          e.preventDefault();
+          pwStatus.style.display = 'none';
+
+          var curVal = document.getElementById('current-password').value;
+          var newVal = document.getElementById('new-password').value;
+          var confVal = document.getElementById('confirm-password').value;
+
+          if (!curVal) {
+            pwStatus.className = 'status error';
+            pwStatus.textContent = 'Please enter your current password.';
+            pwStatus.style.display = 'block';
+            return;
+          }
+
+          if (newVal !== confVal) {
+            pwStatus.className = 'status error';
+            pwStatus.textContent = 'New password and confirmation do not match.';
+            pwStatus.style.display = 'block';
+            return;
+          }
+
+          if (newVal.length < 12 || !/[A-Z]/.test(newVal) || !/[a-z]/.test(newVal) || !/[0-9]/.test(newVal) || !/[@$!%*?&#^_-]/.test(newVal)) {
+            pwStatus.className = 'status error';
+            pwStatus.textContent = 'New password does not satisfy all institutional complexity requirements.';
+            pwStatus.style.display = 'block';
+            return;
+          }
+
+          changePwBtn.disabled = true;
+          changePwBtn.textContent = 'Updating Password...';
+
+          var token = sessionStorage.getItem('attendance_auth_token') || 'dev-token-' + userId;
+
+          fetch('/api/profile/security/change-password', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({
+              currentPassword: curVal,
+              newPassword: newVal,
+              confirmPassword: confVal
+            })
+          })
+          .then(function (res) {
+            return res.json().then(function (data) { return { status: res.status, data: data }; });
+          })
+          .then(function (result) {
+            changePwBtn.disabled = false;
+            changePwBtn.textContent = 'Update Password';
+
+            if (result.status >= 200 && result.status < 300 && result.data.success) {
+              pwStatus.className = 'status info';
+              pwStatus.textContent = result.data.message || 'Password successfully changed and synced with institutional authentication. You will use it on your next sign-in.';
+              pwStatus.style.display = 'block';
+              pwForm.reset();
+
+              updatePwReq(reqLen, false);
+              updatePwReq(reqUpper, false);
+              updatePwReq(reqLower, false);
+              updatePwReq(reqNum, false);
+              updatePwReq(reqSym, false);
+            } else {
+              pwStatus.className = 'status error';
+              pwStatus.textContent = result.data.message || 'Failed to update password. Please verify your current password.';
+              pwStatus.style.display = 'block';
+            }
+          })
+          .catch(function (err) {
+            changePwBtn.disabled = false;
+            changePwBtn.textContent = 'Update Password';
+            pwStatus.className = 'status error';
+            pwStatus.textContent = 'Connection error: ' + err.message;
+            pwStatus.style.display = 'block';
+          });
+        });
+      }
+
+      // 6. Active Session Revocation Handlers
+      var sessionAlert = document.getElementById('session-alert');
+      var revokeButtons = document.querySelectorAll('.revoke-single-btn');
+      var revokeAllBtn = document.getElementById('revoke-all-btn');
+
+      revokeButtons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var row = btn.closest('tr');
+          btn.disabled = true;
+          btn.textContent = 'Revoking...';
+
+          setTimeout(function () {
+            if (row) {
+              row.style.opacity = '0.4';
+              var statusCell = row.cells[3];
+              if (statusCell) {
+                statusCell.innerHTML = '<span class="badge" style="color: #F87171; border-color: rgba(248,113,113,0.3);">Revoked</span>';
+              }
+              btn.textContent = 'Revoked';
+            }
+            sessionAlert.className = 'status info';
+            sessionAlert.textContent = 'Device session revoked. The remote device will be prompted to re-authenticate.';
+            sessionAlert.style.display = 'block';
+          }, 400);
+        });
+      });
+
+      if (revokeAllBtn) {
+        revokeAllBtn.addEventListener('click', function () {
+          if (confirm('Revoke all active sessions on all devices except this browser?')) {
+            revokeAllBtn.disabled = true;
+            revokeAllBtn.textContent = 'Revoking...';
+
+            setTimeout(function () {
+              revokeButtons.forEach(function (btn) {
+                var row = btn.closest('tr');
+                if (row) {
+                  row.style.opacity = '0.4';
+                  var statusCell = row.cells[3];
+                  if (statusCell) {
+                    statusCell.innerHTML = '<span class="badge" style="color: #F87171; border-color: rgba(248,113,113,0.3);">Revoked</span>';
+                  }
+                  btn.textContent = 'Revoked';
+                  btn.disabled = true;
+                }
+              });
+
+              revokeAllBtn.disabled = false;
+              revokeAllBtn.textContent = 'Revoke All Other Sessions';
+
+              sessionAlert.className = 'status info';
+              sessionAlert.textContent = 'All secondary device sessions revoked across the institutional network.';
+              sessionAlert.style.display = 'block';
+            }, 600);
+          }
+        });
+      }
+
+      // 6. Live Profile Data Fetch from Backend API
+      (function loadLiveProfile() {
+        var token = sessionStorage.getItem('attendance_auth_token') || localStorage.getItem('auth_token');
+        if (!token) return;
+
+        fetch('/api/profile/me', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(function (res) {
+          if (!res.ok) throw new Error('Status ' + res.status);
+          return res.json();
+        })
+        .then(function (profile) {
+          if (!profile || !profile.personalInfo) return;
+          var pi = profile.personalInfo;
+
+          if (pi.fullName) {
+            safeSetText('header-user-name', pi.fullName);
+            safeSetText('display-user-name', pi.fullName);
+            safeSetText('dropdown-user-name', pi.fullName);
+            safeSetText('drawer-user-name', pi.fullName);
+            safeSetText('overview-fullname', pi.fullName);
+            var inits = pi.fullName.split(' ').map(function(p){ return p[0]||''; }).join('').slice(0, 2).toUpperCase();
+            safeSetText('display-user-avatar', inits);
+            safeSetText('overview-avatar', inits);
+            var inpName = document.getElementById('input-full-name');
+            if (inpName) inpName.value = pi.fullName;
+          }
+
+          if (pi.identifier) {
+            safeSetText('header-user-id', 'ID: ' + pi.identifier);
+            safeSetText('display-user-id', 'ID: ' + pi.identifier);
+            safeSetText('dropdown-user-id', 'ID: ' + pi.identifier);
+            safeSetText('drawer-user-id', 'ID: ' + pi.identifier);
+            safeSetText('overview-id-chip', 'ID: ' + pi.identifier);
+          }
+
+          if (pi.email) {
+            safeSetText('data-email', pi.email);
+            safeSetText('drawer-user-email', pi.email);
+          }
+
+          if (pi.phoneNumber) {
+            safeSetText('data-phone', pi.phoneNumber);
+            var inpPhone = document.getElementById('input-phone-number');
+            if (inpPhone) inpPhone.value = pi.phoneNumber;
+          }
+
+          if (pi.parentGuardianContact) {
+            safeSetText('data-guardian', pi.parentGuardianContact);
+            var inpG = document.getElementById('input-guardian-contact');
+            if (inpG) inpG.value = pi.parentGuardianContact;
+          }
+        })
+        .catch(function (err) {
+          console.warn('Live backend profile not loaded:', err);
+        });
+      })();
+
+      // 7. Sign Out Modal Logic
+      var signoutModal = document.getElementById('signout-modal');
+      var signoutHeaderBtn = document.getElementById('signout-header-btn');
+      var navSignoutTrigger = document.getElementById('nav-signout-trigger');
+      var drawerSignoutLink = document.getElementById('drawer-signout-link');
+      var cancelSignoutBtn = document.getElementById('cancel-signout-btn');
+      var confirmSignoutBtn = document.getElementById('confirm-signout-btn');
+
+      function openSignoutModal() {
+        if (signoutModal) signoutModal.style.display = 'flex';
+      }
+
+      function closeSignoutModal() {
+        if (signoutModal) signoutModal.style.display = 'none';
+      }
+
+      if (signoutHeaderBtn) signoutHeaderBtn.addEventListener('click', openSignoutModal);
+      if (navSignoutTrigger) navSignoutTrigger.addEventListener('click', openSignoutModal);
+      if (drawerSignoutLink) {
+        drawerSignoutLink.addEventListener('click', function (e) {
+          e.preventDefault();
+          closeNavDrawer();
+          openSignoutModal();
+        });
+      }
+      if (cancelSignoutBtn) cancelSignoutBtn.addEventListener('click', closeSignoutModal);
+
+      if (confirmSignoutBtn) {
+        confirmSignoutBtn.addEventListener('click', function () {
+          confirmSignoutBtn.disabled = true;
+          confirmSignoutBtn.textContent = 'Signing out...';
+          sessionStorage.clear();
+          localStorage.removeItem('auth_token');
+          setTimeout(function () {
+            window.location.href = 'signin.html';
+          }, 400);
+        });
+      }
+
+      if (signoutModal) {
+        signoutModal.addEventListener('click', function (e) {
+          if (e.target === signoutModal) {
+            closeSignoutModal();
+          }
+        });
+      }
+
+    })();
+  </script>
+</body>
+
+</html>

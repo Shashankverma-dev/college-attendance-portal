@@ -1,0 +1,26 @@
+{
+  "auth": {
+    "providers": {
+      "emailPassword": true
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      "**/.*",
+      "**/node_modules/**",
+      "backend/**",
+      "documentation/**",
+      "*.zip",
+      "*.docx",
+      "*.xlsx"
+    ],
+    "cleanUrls": false
+  }
+}

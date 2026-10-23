@@ -1,0 +1,110 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Authentication helpers
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isUser(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function getUserRole() {
+      return request.auth.token.role != null ? request.auth.token.role : 'student';
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        getUserRole() == 'admin' || 
+        getUserRole() == 'global_admin' || 
+        getUserRole() == 'hod' ||
+        request.auth.token.email == 'shashankvermahsst@gmail.com'
+      );
+    }
+    
+    function isFaculty() {
+      return isAuthenticated() && (
+        getUserRole() == 'faculty' || 
+        getUserRole() == 'teacher' || 
+        isAdmin()
+      );
+    }
+
+    // User profiles & auth mappings
+    match /users/{userId} {
+      allow read: if isAuthenticated();
+      allow write: if isUser(userId) || isAdmin();
+    }
+
+    // Student roster and enrollment records
+    match /students/{studentId} {
+      allow read: if isAuthenticated();
+      allow write: if isFaculty() || isAdmin();
+    }
+
+    // Faculty directory & teaching assignments
+    match /teachers/{teacherId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Live Attendance Sessions & QR registers
+    match /attendance_sessions/{sessionId} {
+      allow read: if isAuthenticated();
+      allow write: if isFaculty() || isAdmin();
+      
+      // Attendance scans inside a session
+      match /scans/{scanId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated();
+        allow update, delete: if isFaculty() || isAdmin();
+      }
+    }
+
+    // Individual attendance marks
+    match /attendance_records/{recordId} {
+      allow read: if isAuthenticated();
+      allow create, update: if isAuthenticated();
+      allow delete: if isAdmin();
+    }
+
+    // Academic structure (Departments, Courses, Semesters, Sections)
+    match /academic/{docId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin();
+    }
+
+    // Timetable & schedules
+    match /timetable/{slotId} {
+      allow read: if isAuthenticated();
+      allow write: if isAdmin() || isFaculty();
+    }
+
+    // Internal & Final Examination marks
+    match /marks/{markId} {
+      allow read: if isAuthenticated();
+      allow write: if isFaculty() || isAdmin();
+    }
+
+    // Attendance correction requests
+    match /corrections/{correctionId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update, delete: if isFaculty() || isAdmin();
+    }
+
+    // Immutable Audit Logs (Append-only)
+    match /audit_logs/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAuthenticated();
+      allow update, delete: if false; // strictly immutable
+    }
+
+    // Catch-all authenticated access for application operational collections
+    match /{document=**} {
+      allow read, write: if isAuthenticated();
+    }
+  }
+}

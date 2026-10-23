@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: attendance-backend
+    runtime: node
+    plan: free
+    region: singapore # or oregon / frankfurt
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GOOGLE_CLOUD_PROJECT
+        value: attendace-d3b3e
+      - key: FIREBASE_STORAGE_BUCKET
+        value: attendace-d3b3e.firebasestorage.app
+      - key: ALLOWED_ORIGINS
+        value: https://attendace-d3b3e.web.app,https://attendace-d3b3e.firebaseapp.com

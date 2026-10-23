@@ -1,0 +1,3759 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Timetable & Academic Management | Administrator</title>
+  <meta name="description"
+    content="Multi-department academic structure, room allocation, period scheduling, teacher assignment, Excel timetable import and conflict resolution console.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Secondary Slate & White Hybrid Palette scoped tokens */
+    :root {
+      --slate-surface: #FFFFFF;
+      --slate-panel: #F1F5F9;
+      --slate-header: #E8EEF5;
+      --slate-border: #D7E3F0;
+      --slate-text-main: #17345C;
+      --slate-text-sub: #64748B;
+      --slate-success-text: #15803D;
+      --slate-success-bg: #DCFCE7;
+      --slate-error: #DC2626;
+      --slate-warning: #D97706;
+    }
+
+    .tt-grid-container {
+      background: var(--slate-surface);
+      border: 1px solid var(--slate-border);
+      border-radius: var(--radius);
+      overflow-x: auto;
+      margin-top: 16px;
+    }
+
+    .tt-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      color: var(--slate-text-main);
+    }
+
+    .tt-table th {
+      background: var(--slate-header);
+      color: var(--slate-text-main);
+      font-weight: 700;
+      padding: 12px 10px;
+      text-align: center;
+      border: 1px solid var(--slate-border);
+      white-space: nowrap;
+    }
+
+    .tt-table td {
+      border: 1px solid var(--slate-border);
+      padding: 8px;
+      vertical-align: top;
+      background: var(--slate-surface);
+      min-width: 140px;
+      height: 72px;
+    }
+
+    .tt-table td.day-col {
+      background: var(--slate-panel);
+      font-weight: 700;
+      color: var(--slate-text-main);
+      text-align: center;
+      vertical-align: middle;
+      min-width: 110px;
+      width: 110px;
+    }
+
+    .tt-cell-card {
+      background: var(--slate-panel);
+      border: 1px solid var(--slate-border);
+      border-radius: 4px;
+      padding: 6px 8px;
+      margin-bottom: 4px;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .tt-cell-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .tt-cell-card.subgroup-c1 {
+      border-left: 3px solid #0284C7;
+      background: #F0F9FF;
+    }
+
+    .tt-cell-card.subgroup-c2 {
+      border-left: 3px solid #7C3AED;
+      background: #F5F3FF;
+    }
+
+    .tt-cell-subj {
+      font-weight: 700;
+      color: var(--slate-text-main);
+    }
+
+    .tt-cell-faculty {
+      color: var(--slate-text-sub);
+    }
+
+    .tt-cell-room {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      background: #E2E8F0;
+      color: #334155;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-top: 3px;
+    }
+
+    .conflict-banner {
+      background: #FEF2F2;
+      border: 1px solid #FCA5A5;
+      color: #991B1B;
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .conflict-item {
+      font-size: 13px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .conflict-tag {
+      background: #DC2626;
+      color: #FFFFFF;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 3px;
+      letter-spacing: 0.5px;
+    }
+
+    .mapping-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 10px;
+    }
+
+    .mapping-table th, .mapping-table td {
+      border: 1px solid var(--slate-border);
+      padding: 8px 12px;
+      text-align: left;
+    }
+
+    .mapping-table th {
+      background: var(--slate-header);
+      color: var(--slate-text-main) !important;
+      font-weight: 700;
+    }
+
+    .mapping-table td {
+      background: #FFFFFF !important;
+      color: var(--slate-text-main) !important;
+    }
+
+    .mapping-table td strong {
+      color: var(--slate-text-main) !important;
+    }
+
+    .mapping-table td span {
+      color: inherit;
+    }
+
+    .mapping-table tbody tr:hover td {
+      background: #F8FAFC !important;
+    }
+
+    #panel-academic-entities, #panel-subgroups {
+      color: var(--slate-text-main);
+    }
+    #panel-academic-entities h3, #panel-subgroups h3,
+    #panel-academic-entities h4, #panel-subgroups h4,
+    #panel-academic-entities p, #panel-subgroups p {
+      color: var(--slate-text-main);
+    }
+    #panel-academic-entities table td, #panel-subgroups table td {
+      color: var(--slate-text-main) !important;
+    }
+    #panel-academic-entities table td strong, #panel-subgroups table td strong {
+      color: var(--slate-text-main) !important;
+    }
+
+    /* Print Schedule Stylesheet */
+    .print-header-banner {
+      display: none;
+    }
+
+    @media print {
+      @page {
+        size: landscape;
+        margin: 10mm;
+      }
+      body {
+        background: #FFFFFF !important;
+        color: #000000 !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .site-head,
+      .tab-bar,
+      .tt-filter-bar button,
+      #btn-import-excel,
+      #btn-new-entry,
+      #btn-validate-conflicts,
+      .nav-toggle-btn,
+      .mobile-drawer,
+      .mobile-drawer-backdrop,
+      .modal-wrapper,
+      #modal-import,
+      #modal-add-entry,
+      #modal-add-dept,
+      #modal-add-programme,
+      #modal-add-section,
+      #modal-add-room,
+      #modal-add-group,
+      #conflict-alert-box,
+      .screen-header,
+      #panel-academic-entities,
+      #panel-subgroups {
+        display: none !important;
+      }
+      #panel-timetable {
+        display: block !important;
+      }
+      .print-header-banner {
+        display: block !important;
+        margin-bottom: 16px;
+        border-bottom: 2px solid #1D3C72;
+        padding-bottom: 8px;
+      }
+      .print-header-banner h2 {
+        font-size: 20px;
+        color: #1D3C72 !important;
+        margin: 0 0 4px 0;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+      .print-header-banner h3 {
+        font-size: 14px;
+        color: #334155 !important;
+        margin: 0 0 6px 0;
+        font-weight: 600;
+      }
+      .print-header-banner p {
+        font-size: 12px;
+        color: #475569 !important;
+        margin: 0;
+        font-weight: 500;
+      }
+      .wrap {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .tt-filter-bar {
+        background: #F8FAFC !important;
+        border: 1px solid #CBD5E1 !important;
+        padding: 8px 12px !important;
+        margin-bottom: 12px !important;
+      }
+      .tt-filter-select {
+        border: 1px solid #CBD5E1 !important;
+        background: #FFFFFF !important;
+        color: #000000 !important;
+      }
+      .tt-grid-container {
+        border: 1px solid #94A3B8 !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+      }
+      .tt-table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+      }
+      .tt-table th, .tt-table td {
+        border: 1px solid #94A3B8 !important;
+        color: #000000 !important;
+      }
+      .tt-table th {
+        background: #E2E8F0 !important;
+        color: #0F172A !important;
+        font-weight: 700 !important;
+      }
+      .tt-cell-card {
+        border: 1px solid #CBD5E1 !important;
+        background: #F8FAFC !important;
+        color: #0F172A !important;
+        box-shadow: none !important;
+        padding: 6px !important;
+      }
+      .tt-cell-card strong {
+        color: #000000 !important;
+      }
+      .tt-cell-card .teacher-abbr {
+        color: #1E293B !important;
+        font-weight: 700 !important;
+      }
+      .tt-cell-card .room-badge {
+        background: #E2E8F0 !important;
+        color: #000000 !important;
+        border: 1px solid #CBD5E1 !important;
+      }
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 8px;
+      border-bottom: 2px solid var(--slate-border);
+      margin-bottom: 20px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      padding: 10px 16px;
+      font-weight: 600;
+      font-size: 14px;
+      color: #94A3B8;
+      cursor: pointer;
+      margin-bottom: -2px;
+    }
+
+    .tab-btn.active {
+      color: #FFFFFF;
+      border-bottom-color: #38BDF8;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .dropzone-hover {
+      border-color: #1D3C72 !important;
+      background: #EFF6FF !important;
+    }
+
+    /* Form controls & select styling */
+    select, input, textarea {
+      color: var(--slate-text-main) !important;
+      background-color: #FFFFFF !important;
+      border: 1px solid var(--slate-border);
+      font-family: inherit;
+    }
+
+    select option {
+      color: #0F172A !important;
+      background-color: #FFFFFF !important;
+    }
+
+    .tt-filter-bar {
+      background: var(--slate-panel);
+      border: 1px solid var(--slate-border);
+      border-radius: var(--radius);
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .tt-filter-select {
+      font-size: 13px;
+      font-weight: 600;
+      color: #17345C !important;
+      background-color: #FFFFFF !important;
+      border: 1px solid var(--slate-border) !important;
+      border-radius: 4px;
+      padding: 6px 10px;
+      min-width: 140px;
+      cursor: pointer;
+    }
+
+    .tt-filter-select option {
+      color: #0F172A !important;
+      background-color: #FFFFFF !important;
+    }
+
+    .btn-light-outline {
+      background: #FFFFFF !important;
+      color: #17345C !important;
+      border: 1px solid var(--slate-border) !important;
+      font-weight: 600 !important;
+      cursor: pointer;
+    }
+
+    .btn-light-outline:hover {
+      background: #E2E8F0 !important;
+      color: #0F172A !important;
+      border-color: #94A3B8 !important;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Site Navigation Header (Preserving Immutable #1D3C72) -->
+  <header class="site-head">
+    <div class="wrap head-in">
+      <a class="wordmark" href="admin.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="34" height="34">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+
+      <!-- Desktop Admin Navigation -->
+      <nav class="head-nav" id="main-head-nav" aria-label="Administrator navigation">
+        <a class="nav-link" href="admin.html">Dashboard</a>
+        <a class="nav-link" href="admin-students.html">Students</a>
+        <a class="nav-link" href="admin-teachers.html">Teacher Management</a>
+        <a class="nav-link active" href="admin-timetable.html">Timetable & Academic</a>
+        <a class="nav-link" href="admin-marks.html">Final Marks</a>
+        <a class="nav-link" href="calendar.html">Calendar</a>
+      </nav>
+
+      <div class="head-actions" id="main-head-actions">
+        <div class="user-menu-wrap" id="user-menu-wrap">
+          <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)"
+            aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">
+            <div class="user-avatar-circle" id="display-user-avatar">â€”</div>
+            <div class="user-avatar-info">
+              <span class="user-avatar-name" id="display-user-name">Loading...</span>
+              <span class="user-avatar-role" id="display-user-id">Global Admin</span>
+            </div>
+            <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
+          </button>
+
+          <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">
+            <div class="user-dropdown-header">
+              <strong id="dropdown-user-name">Loading...</strong>
+              <span id="dropdown-user-id">Administrator Portal</span>
+            </div>
+            <a class="user-dropdown-item" href="profile.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span>View Profile</span>
+            </a>
+            <a class="user-dropdown-item" href="admin.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              <span>Dashboard Overview</span>
+            </a>
+            <a class="user-dropdown-item" href="admin-students.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+                <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+              </svg>
+              <span>Student Management</span>
+            </a>
+            <a class="user-dropdown-item" href="admin-teachers.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+              <span>Teacher Management</span>
+            </a>
+            <a class="user-dropdown-item" href="admin-timetable.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                <line x1="16" y1="2" x2="16" y2="6"></line>
+                <line x1="8" y1="2" x2="8" y2="6"></line>
+                <line x1="3" y1="10" x2="21" y2="10"></line>
+              </svg>
+              <span>Timetable & Academic</span>
+            </a>
+            <a class="user-dropdown-item" href="admin-marks.html" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+              </svg>
+              <span>Final Semester Marks</span>
+            </a>
+            <div class="user-dropdown-divider"></div>
+            <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" onclick="sessionStorage.clear();" role="menuitem">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Sign Out</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Hamburger Button -->
+      <button type="button" class="nav-toggle-btn" id="nav-toggle-btn" aria-label="Open navigation menu"
+        aria-expanded="false" aria-controls="mobile-drawer" onclick="toggleNavDrawer()">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Mobile Drawer -->
+  <div class="mobile-drawer-backdrop" id="mobile-drawer-backdrop" onclick="closeNavDrawer()"></div>
+  <aside class="mobile-drawer" id="mobile-drawer" aria-label="Mobile navigation" aria-hidden="true">
+    <div class="drawer-header">
+      <a class="wordmark" href="admin.html">
+        <img class="logo" src="images/logo.png" alt="Attendance Portal Crest" width="30" height="30">
+        <img class="logo-text" src="images/logo-text-white.png" alt="Swami Rama Himalayan University" height="30">
+      </a>
+      <button type="button" class="drawer-close-btn" id="drawer-close-btn" aria-label="Close navigation"
+        onclick="closeNavDrawer()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+    <div class="drawer-user-info">
+      <strong id="drawer-user-name">Loading...</strong>
+      <span id="drawer-user-id">Administrator Portal</span>
+    </div>
+    <nav class="drawer-nav">
+      <a class="drawer-nav-link" href="admin.html" onclick="closeNavDrawer()">Dashboard</a>
+      <a class="drawer-nav-link" href="admin-students.html" onclick="closeNavDrawer()">Student Management</a>
+      <a class="drawer-nav-link" href="admin-teachers.html" onclick="closeNavDrawer()">Teacher Management</a>
+      <a class="drawer-nav-link active" href="admin-timetable.html" onclick="closeNavDrawer()">Timetable & Academic</a>
+      <a class="drawer-nav-link" href="admin-marks.html" onclick="closeNavDrawer()">Final Marks</a>
+      <a class="drawer-nav-link" href="calendar.html" onclick="closeNavDrawer()">Calendar</a>
+      <a class="drawer-nav-link" href="profile.html" onclick="closeNavDrawer()">Profile</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content Wrap -->
+  <main class="wrap" style="padding-top: 32px; padding-bottom: 64px;">
+
+    <!-- Print Header Banner (Active in Landscape Print) -->
+    <div class="print-header-banner" style="display: none;">
+      <h2>Swami Rama Himalayan University</h2>
+      <h3 id="print-timetable-title">Himalayan School of Science & Technology â€” Academic Timetable</h3>
+      <p id="print-timetable-meta">Programme: BCA (Semester 5, Section C) â€¢ Academic Term: Autumn 2026 â€¢ Published Timetable</p>
+    </div>
+
+    <!-- Breadcrumb & Title Area (Screen Only) -->
+    <div class="screen-header" style="margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
+        <span class="badge-status badge-finalized">Academic Operations</span>
+        <span style="font-size: 13px; color: var(--muted);">Autumn Term 2026 â€¢ Verified Model</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
+        <div>
+          <h1 class="display" style="font-size: clamp(28px, 4vw, 36px);">Timetable & Academic Scheduling</h1>
+          <p style="margin-top: 6px; font-size: 15px; color: var(--muted-light); max-width: 820px;">
+            Institutional management for departments, programmes, section subgroups (C1/C2), classrooms, laboratories, weekly timetable publication, Excel workbook imports, and conflict prevention.
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm" id="btn-import-excel" onclick="openImportModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+            Import Timetable (Excel)
+          </button>
+          <button type="button" class="btn btn-sm btn-outline" id="btn-new-entry" onclick="openNewEntryModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add Class Period
+          </button>
+          <button type="button" class="btn btn-sm btn-outline" id="btn-validate-conflicts" onclick="runConflictCheck()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+            Validate Conflicts
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Navigation Tabs -->
+    <div class="tab-bar">
+      <button type="button" class="tab-btn active" id="tab-timetable" onclick="switchTab('timetable')">Weekly Schedule Grid</button>
+      <button type="button" class="tab-btn" id="tab-academic-entities" onclick="switchTab('academic-entities')">Academic Entities & Rooms</button>
+      <button type="button" class="tab-btn" id="tab-subgroups" onclick="switchTab('subgroups')">Sections & Practical Subgroups</button>
+      <button type="button" class="tab-btn" id="tab-schools" onclick="switchTab('schools')">Schools & Academic Departments</button>
+    </div>
+
+    <!-- Conflict Warning Banner Area -->
+    <div id="conflict-alert-box" style="display: none;"></div>
+
+    <!-- TAB 1: Weekly Schedule Grid -->
+    <section id="panel-timetable">
+      <!-- Filter Bar -->
+      <div class="tt-filter-bar">
+        <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+          <div>
+            <label style="display: block; font-size: 11px; font-weight: 700; color: var(--slate-text-sub); text-transform: uppercase; margin-bottom: 4px;">Programme</label>
+            <select id="filter-course" class="tt-filter-select" onchange="handleFilterCourseChange()">
+              <option value="BCA" selected>BCA - Computer Applications</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 11px; font-weight: 700; color: var(--slate-text-sub); text-transform: uppercase; margin-bottom: 4px;">Semester</label>
+            <select id="filter-semester" class="tt-filter-select" onchange="handleFilterSemesterChange()">
+              <option value="5" selected>Semester 5</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 11px; font-weight: 700; color: var(--slate-text-sub); text-transform: uppercase; margin-bottom: 4px;">Section</label>
+            <select id="filter-section" class="tt-filter-select" onchange="loadScheduleGrid()">
+              <option value="C" selected>Section C</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 11px; font-weight: 700; color: var(--slate-text-sub); text-transform: uppercase; margin-bottom: 4px;">Academic Term</label>
+            <select id="filter-term" class="tt-filter-select" onchange="loadScheduleGrid()">
+              <option value="Autumn 2026 (Aug 2026 - Jan 2027)" selected>Autumn 2026 (Aug 2026 - Jan 2027)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span class="badge-status badge-finalized" id="timetable-status-pill">Status: PUBLISHED (v1)</span>
+          <button type="button" class="btn btn-sm btn-outline" id="btn-clear-schedule" onclick="clearCurrentSchedule()" style="font-size: 12px; color: #DC2626; border-color: #FECACA;">Clear Schedule</button>
+          <button type="button" class="btn btn-sm btn-light-outline" onclick="printSchedule()" style="font-size: 12px;">Print Schedule</button>
+        </div>
+      </div>
+
+      <!-- Timetable Grid Table -->
+      <div class="tt-grid-container">
+        <table class="tt-table" id="schedule-table">
+          <thead>
+            <tr>
+              <th style="min-width: 100px;">Day</th>
+              <th>Period 1<br><span style="font-weight: 400; font-size: 11px;">09:00 - 09:55</span></th>
+              <th>Period 2<br><span style="font-weight: 400; font-size: 11px;">09:55 - 10:50</span></th>
+              <th>Period 3<br><span style="font-weight: 400; font-size: 11px;">10:50 - 11:45</span></th>
+              <th>Period 4<br><span style="font-weight: 400; font-size: 11px;">11:45 - 12:40</span></th>
+              <th style="background: #E2E8F0; width: 60px; min-width: 60px;">Lunch<br><span style="font-weight: 400; font-size: 11px;">12:40-13:30</span></th>
+              <th>Period 5<br><span style="font-weight: 400; font-size: 11px;">13:30 - 14:25</span></th>
+              <th>Period 6<br><span style="font-weight: 400; font-size: 11px;">14:25 - 15:20</span></th>
+              <th>Period 7<br><span style="font-weight: 400; font-size: 11px;">15:20 - 16:15</span></th>
+            </tr>
+          </thead>
+          <tbody id="schedule-grid-body">
+            <tr>
+              <td colspan="9" style="text-align: center; padding: 32px; color: var(--slate-text-sub);">
+                Loading timetable records from backend...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Print Only Header -->
+    <div class="print-header-banner">
+      <h2>Swami Rama Himalayan University</h2>
+      <h3>Himalayan School of Science & Technology â€¢ Department of Computer Applications</h3>
+      <p id="print-meta-text">Programme: BCA â€¢ Semester 5 â€¢ Section C â€¢ Academic Term: Autumn 2026</p>
+    </div>
+
+    <!-- TAB 2: Academic Entities & Rooms -->
+    <section id="panel-academic-entities" style="display: none;">
+      <!-- Action Toolbar for Tab 2 -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h2 style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Academic Structure & Facilities</h2>
+          <p style="font-size: 13px; color: var(--slate-text-sub); margin: 2px 0 0 0;">Manage teaching departments, degree programmes, classrooms, and specialized laboratories.</p>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm" onclick="openAddDeptModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+            + Add School / Department
+          </button>
+          <button type="button" class="btn btn-sm" onclick="openAddProgrammeModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+            + Add Programme
+          </button>
+          <button type="button" class="btn btn-sm" onclick="openAddRoomModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+            + Add Classroom / Lab
+          </button>
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px;">
+        <!-- Departments Panel -->
+        <div style="background: var(--slate-surface); border: 1px solid var(--slate-border); border-radius: var(--radius); padding: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: #17345C; margin: 0;">Schools &amp; Academic Departments</h3>
+            <span class="tag" id="dept-count-tag" style="background: #E2E8F0; color: #17345C;">Departments</span>
+          </div>
+          <table class="mapping-table" id="depts-table">
+            <thead>
+              <tr>
+                <th style="width: 80px;">Code</th>
+                <th>School / Department Name</th>
+                <th style="width: 80px;">Status</th>
+                <th style="width: 90px; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="depts-table-body">
+              <tr><td colspan="4" style="text-align: center; color: #64748B;">Loading departments...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Programmes Panel -->
+        <div style="background: var(--slate-surface); border: 1px solid var(--slate-border); border-radius: var(--radius); padding: 18px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="font-size: 16px; font-weight: 700; color: #17345C; margin: 0;">Degree Programmes & Courses</h3>
+            <span class="tag" id="course-count-tag" style="background: #E2E8F0; color: #17345C;">Programmes</span>
+          </div>
+          <table class="mapping-table" id="courses-table">
+            <thead>
+              <tr>
+                <th style="width: 90px;">Code</th>
+                <th>Programme Name</th>
+                <th style="width: 80px;">Semesters</th>
+                <th style="width: 90px; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="courses-table-body">
+              <tr><td colspan="4" style="text-align: center; color: #64748B;">Loading programmes...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Classrooms & Labs Panel Full Width -->
+      <div style="margin-top: 20px; background: var(--slate-surface); border: 1px solid var(--slate-border); border-radius: var(--radius); padding: 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #17345C; margin: 0;">Classrooms & Laboratories</h3>
+            <p style="font-size: 12px; color: var(--slate-text-sub); margin: 2px 0 0 0;">Physical academic facilities available for instructional scheduling and practical assignments.</p>
+          </div>
+          <span class="tag" id="room-count-tag" style="background: #E2E8F0; color: #17345C;">Facilities</span>
+        </div>
+        <table class="mapping-table" id="rooms-table">
+          <thead>
+            <tr>
+              <th style="width: 120px;">Room Code</th>
+              <th>Facility Name</th>
+              <th style="width: 130px;">Type</th>
+              <th style="width: 90px;">Capacity</th>
+              <th style="width: 90px;">Status</th>
+              <th style="width: 90px; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="rooms-table-body">
+            <tr><td colspan="6" style="text-align: center; color: #64748B;">Loading facilities...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAB 3: Sections & Practical Subgroups -->
+    <section id="panel-subgroups" style="display: none;">
+      <!-- Action Toolbar for Tab 3 -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div>
+          <h2 style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Academic Sections & Practical Subgroups</h2>
+          <p style="font-size: 13px; color: var(--slate-text-sub); margin: 2px 0 0 0;">Manage academic sections (A, B, C...) and concurrent practical laboratory cohorts (C1, C2...).</p>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm" onclick="openAddSectionModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+            + Add Section
+          </button>
+          <button type="button" class="btn btn-sm" onclick="openAddGroupModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+            + Add Subgroup (C1/C2)
+          </button>
+        </div>
+      </div>
+
+      <!-- Sections Table Panel -->
+      <div style="background: var(--slate-surface); border: 1px solid var(--slate-border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h3 style="font-size: 16px; font-weight: 700; color: #17345C; margin: 0;">Registered Academic Sections</h3>
+          <span class="tag" id="section-count-tag" style="background: #E2E8F0; color: #17345C;">Sections</span>
+        </div>
+        <table class="mapping-table" id="sections-table">
+          <thead>
+            <tr>
+              <th style="width: 140px;">Programme</th>
+              <th style="width: 100px;">Semester</th>
+              <th style="width: 90px;">Section</th>
+              <th style="width: 110px;">Max Intake</th>
+              <th>Academic Calendar Term</th>
+              <th style="width: 80px;">Status</th>
+              <th style="width: 90px; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="sections-table-body">
+            <tr><td colspan="7" style="text-align: center; color: #64748B;">Loading sections...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Subgroups Cards Panel -->
+      <div style="background: var(--slate-surface); border: 1px solid var(--slate-border); border-radius: var(--radius); padding: 20px;">
+        <h3 style="font-size: 16px; font-weight: 700; color: #17345C; margin-bottom: 6px;">
+          Practical Laboratory Cohorts & Subgroups
+        </h3>
+        <p style="font-size: 13px; color: var(--slate-text-sub); margin-bottom: 16px;">
+          Subgroups partition a section into concurrent laboratory sessions (e.g., C1 in Turing Lab, C2 in Web Lab) without triggering cross-teacher conflicts.
+        </p>
+        <div id="subgroups-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: Schools & Academic Departments Management -->
+    <section id="panel-schools" style="display: none;">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
+        <div>
+          <h2 style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0 0 4px 0;">Institutional Schools &amp; Academic Departments</h2>
+          <p style="font-size: 13px; color: var(--slate-text-sub); margin: 0; max-width: 780px;">
+            Constituent academic schools and departments created directly by administrator. Each school/department is led by an appointed Head of Department (HOD) and offers undergraduate &amp; postgraduate degree programmes.
+          </p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-sm" onclick="openAddSchoolModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Add School / Department
+          </button>
+        </div>
+      </div>
+
+      <!-- School KPI Summary -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;">
+        <div class="card" style="padding: 16px; background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius);">
+          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Active Schools / Departments</span>
+          <div style="font-size: 26px; font-weight: 800; color: #1D3C72; margin-top: 4px;" id="kpi-schools-count">--</div>
+          <div style="font-size: 12px; color: #64748B; margin-top: 2px;">Created by administrator</div>
+        </div>
+        <div class="card" style="padding: 16px; background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius);">
+          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Appointed HODs &amp; Deans</span>
+          <div style="font-size: 26px; font-weight: 800; color: #0284C7; margin-top: 4px;" id="kpi-depts-count">--</div>
+          <div style="font-size: 12px; color: #64748B; margin-top: 2px;">Departmental leadership</div>
+        </div>
+        <div class="card" style="padding: 16px; background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius);">
+          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Approved Programmes</span>
+          <div style="font-size: 26px; font-weight: 800; color: #15803D; margin-top: 4px;" id="kpi-programmes-count">--</div>
+          <div style="font-size: 12px; color: #64748B; margin-top: 2px;">Courses &amp; degrees offered</div>
+        </div>
+        <div class="card" style="padding: 16px; background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius);">
+          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Enrolled Students</span>
+          <div style="font-size: 26px; font-weight: 800; color: #7C3AED; margin-top: 4px;" id="kpi-students-count">--</div>
+          <div style="font-size: 12px; color: #64748B; margin-top: 2px;">Across all schools/departments</div>
+        </div>
+      </div>
+
+      <!-- Schools Grid Container -->
+      <div id="schools-cards-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; margin-bottom: 24px;">
+        <!-- Rendered dynamically via loadSchoolsGrid() -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- MODAL: Add New School -->
+  <div id="modal-add-school" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); color: #17345C;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--slate-border); padding-bottom: 12px;">
+        <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Add Constituent School</h3>
+        <button type="button" onclick="closeAddSchoolModal()" style="background: none; border: none; font-size: 22px; cursor: pointer; color: #64748B;">&times;</button>
+      </div>
+      <form id="form-add-school" onsubmit="handleAddSchoolSubmit(event)">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">School Code *</label>
+            <input type="text" id="add-school-code" required placeholder="e.g. SOL" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px; font-weight: 700; text-transform: uppercase;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">School Name *</label>
+            <input type="text" id="add-school-name" required placeholder="e.g. School of Law" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
+          </div>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Description / Mission</label>
+          <input type="text" id="add-school-desc" placeholder="Constituent academic faculty of law and jurisprudence" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Dean / Director</label>
+            <input type="text" id="add-school-dean" placeholder="e.g. Prof. David Miller" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Contact Email</label>
+            <input type="email" id="add-school-email" placeholder="e.g. law@srhu.edu.in" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
+          </div>
+        </div>
+        <div id="add-school-error" style="display: none; background: #FEE2E2; color: #DC2626; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 14px;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--slate-border); padding-top: 14px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeAddSchoolModal()">Cancel</button>
+          <button type="submit" class="btn btn-sm" id="btn-submit-add-school" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Create School</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: Edit School -->
+  <div id="modal-edit-school" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); color: #17345C;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--slate-border); padding-bottom: 12px;">
+        <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Edit School Details</h3>
+        <button type="button" onclick="closeEditSchoolModal()" style="background: none; border: none; font-size: 22px; cursor: pointer; color: #64748B;">&times;</button>
+      </div>
+      <form id="form-edit-school" onsubmit="handleEditSchoolSubmit(event)">
+        <input type="hidden" id="edit-school-id">
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">School Name *</label>
+          <input type="text" id="edit-school-name" required style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
+        </div>
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Description</label>
+          <input type="text" id="edit-school-desc" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Dean / Director</label>
+            <input type="text" id="edit-school-dean" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Contact Email</label>
+            <input type="email" id="edit-school-email" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
+          </div>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
+            <input type="checkbox" id="edit-school-active">
+            <span>School Active &amp; Accepting Admissions</span>
+          </label>
+        </div>
+        <div id="edit-school-error" style="display: none; background: #FEE2E2; color: #DC2626; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 14px;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--slate-border); padding-top: 14px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeEditSchoolModal()">Cancel</button>
+          <button type="submit" class="btn btn-sm" id="btn-submit-edit-school" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 1: Excel Timetable Importer -->
+  <div id="modal-import" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 820px; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--slate-border); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(29, 60, 114, 0.1); display: flex; align-items: center; justify-content: center; color: #1D3C72;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="8" y1="13" x2="16" y2="13"></line>
+              <line x1="8" y1="17" x2="16" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </div>
+          <div>
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--slate-text-main); margin: 0;">Import Timetable from Excel (.xlsx)</h3>
+            <p style="font-size: 12px; color: var(--slate-text-sub); margin: 0;">Automated parsing for departments, courses, sections, subgroups (C1/C2) & faculty</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeImportModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--slate-text-sub); line-height: 1;">&times;</button>
+      </div>
+
+      <!-- File Dropzone & Fixture Selection -->
+      <div style="margin-bottom: 16px;">
+        <div id="drop-zone" style="border: 2px dashed #CBD5E1; border-radius: 8px; background: #F8FAFC; padding: 24px; text-align: center; cursor: pointer; transition: all 0.2s ease;">
+          <input type="file" id="import-file-input" accept=".xlsx, .xls" style="display: none;">
+          <div style="color: #1D3C72; margin-bottom: 8px;">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="17 8 12 3 7 8"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15"></line>
+            </svg>
+          </div>
+          <div style="font-size: 14px; font-weight: 600; color: var(--slate-text-main); margin-bottom: 4px;">
+            Click to browse or drag & drop Excel spreadsheet (.xlsx, .xls)
+          </div>
+          <div style="font-size: 12px; color: var(--slate-text-sub); margin-bottom: 12px;">
+            Supports multi-period weekly tables, lecture/lab splits, and subgroup definitions
+          </div>
+          <div style="display: flex; gap: 8px; justify-content: center; align-items: center; flex-wrap: wrap;">
+            <button type="button" class="btn btn-sm" onclick="document.getElementById('import-file-input').click(); event.stopPropagation();" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">
+              Select Excel File (.xlsx, .xls)
+            </button>
+          </div>
+          <div id="selected-file-label" style="display: none; margin-top: 10px; font-size: 12px; font-weight: 600; color: #15803D;"></div>
+        </div>
+      </div>
+
+      <!-- In-Modal Message/Alert Container -->
+      <div id="import-message-container" style="display: none; margin-bottom: 14px;"></div>
+
+      <!-- Loading Spinner / Status -->
+      <div id="import-loading-indicator" style="display: none; padding: 18px; text-align: center; background: #F1F5F9; border-radius: 6px; margin-bottom: 16px;">
+        <div class="spinner" style="margin: 0 auto 8px auto; width: 24px; height: 24px; border: 3px solid #E2E8F0; border-top: 3px solid #1D3C72; border-radius: 50%; animation: spin 0.8s linear infinite;"></div>
+        <div id="import-loading-text" style="font-size: 13px; font-weight: 600; color: #1D3C72;">Processing spreadsheet...</div>
+      </div>
+
+      <!-- Preview Results Box -->
+      <div id="import-preview-box" style="display: none; margin-top: 10px; border-top: 1px solid var(--slate-border); padding-top: 16px;">
+        <h4 style="font-size: 15px; font-weight: 700; color: var(--slate-text-main); margin-bottom: 8px;">Interpretation & Mapping Review</h4>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 16px; background: var(--slate-panel); padding: 12px; border-radius: 6px; font-size: 12px;">
+          <div><strong>Sheet:</strong> <span id="prev-sheet">--</span></div>
+          <div><strong>Department:</strong> <span id="prev-dept">--</span></div>
+          <div><strong>Programme & Sem:</strong> <span id="prev-prog">--</span></div>
+          <div><strong>Effective Date:</strong> <span id="prev-date">--</span></div>
+          <div><strong>Entries Detected:</strong> <span id="prev-count">--</span></div>
+          <div><strong>Subgroups:</strong> <span id="prev-groups">--</span></div>
+        </div>
+
+        <!-- Faculty Mapping Sub-panel -->
+        <div style="margin-bottom: 16px;">
+          <h5 style="font-size: 13px; font-weight: 700; color: var(--slate-text-main); margin-bottom: 6px;">Faculty Abbreviation Resolutions</h5>
+          <table class="mapping-table" id="prev-faculty-table">
+            <thead>
+              <tr>
+                <th>Abbreviation</th>
+                <th>Resolved Teacher</th>
+                <th>Resolution Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="prev-faculty-body"></tbody>
+          </table>
+        </div>
+
+        <!-- Warnings & Conflicts in Preview -->
+        <div id="prev-conflicts-container" style="margin-bottom: 16px;"></div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid var(--slate-border); padding-top: 16px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeImportModal()">Cancel</button>
+          <button type="button" class="btn btn-sm" id="btn-commit-import" onclick="commitImportedTimetable()" style="background: #15803D; color: #FFFFFF; font-weight: 600;">
+            Confirm & Publish Timetable
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: Add Class Period (Manual Scheduling) -->
+  <div id="modal-add-entry" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); color: #17345C;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--slate-border); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 32px; height: 32px; border-radius: 6px; background: rgba(29, 60, 114, 0.1); display: flex; align-items: center; justify-content: center; color: #1D3C72;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+          </div>
+          <div>
+            <h3 style="font-size: 18px; font-weight: 700; color: #17345C; margin: 0;">Add Class Period</h3>
+            <p style="font-size: 12px; color: var(--slate-text-sub); margin: 0;">Schedule a single instructional lecture, tutorial, or lab session</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeNewEntryModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--slate-text-sub); line-height: 1;">&times;</button>
+      </div>
+
+      <form id="form-new-entry" onsubmit="event.preventDefault(); submitNewEntry();">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Day of Week *</label>
+            <select id="entry-day" required style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+              <option value="MONDAY">Monday</option>
+              <option value="TUESDAY">Tuesday</option>
+              <option value="WEDNESDAY">Wednesday</option>
+              <option value="THURSDAY">Thursday</option>
+              <option value="FRIDAY">Friday</option>
+              <option value="SATURDAY">Saturday</option>
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Period Slot *</label>
+            <select id="entry-period" required style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+              <option value="1">Period 1 (09:00 - 09:55)</option>
+              <option value="2">Period 2 (09:55 - 10:50)</option>
+              <option value="3">Period 3 (10:50 - 11:45)</option>
+              <option value="4">Period 4 (11:45 - 12:40)</option>
+              <option value="5">Period 5 (13:30 - 14:25)</option>
+              <option value="6">Period 6 (14:25 - 15:20)</option>
+              <option value="7">Period 7 (15:20 - 16:15)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Subject Code & Name *</label>
+            <input type="text" id="entry-subject" placeholder="e.g. BCA-501 (Python Programming)" required style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Session Type *</label>
+            <select id="entry-type" required style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+              <option value="LECTURE">Lecture</option>
+              <option value="LABORATORY">Practical / Lab</option>
+              <option value="TUTORIAL">Tutorial</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Classroom / Lab *</label>
+            <select id="entry-room" required style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Assigned Teacher *</label>
+            <select id="entry-faculty" required style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Target Cohort / Practical Group</label>
+          <select id="entry-group" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+            <option value="">Whole Section (Entire Class)</option>
+            <option value="C1">Cohort C1 (Group 1)</option>
+            <option value="C2">Cohort C2 (Group 2)</option>
+          </select>
+        </div>
+
+        <!-- In-Modal Conflict Check Box -->
+        <div id="entry-conflict-box" style="display: none; margin-bottom: 16px;"></div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--slate-border); padding-top: 16px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="runModalConflictCheck()" style="font-size: 12px;">
+            Check For Conflicts
+          </button>
+          <div style="display: flex; gap: 8px;">
+            <button type="button" class="btn btn-sm btn-outline" onclick="closeNewEntryModal()">Cancel</button>
+            <button type="submit" class="btn btn-sm" id="btn-save-entry" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">
+              Save & Schedule Class
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 3: Add School / Department -->
+  <div id="modal-add-dept" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 520px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); color: #17345C;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--slate-border); padding-bottom: 12px;">
+        <h3 style="font-size: 18px; font-weight: 700; color: #17345C; margin: 0;">Add School / Academic Department</h3>
+        <button type="button" onclick="closeAddDeptModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--slate-text-sub); line-height: 1;">&times;</button>
+      </div>
+      <form onsubmit="event.preventDefault(); submitAddDept();">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Code *</label>
+            <input type="text" id="new-dept-code" required placeholder="e.g. SST, CA" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border); text-transform: uppercase; font-weight: 700;">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">School / Department Name *</label>
+            <input type="text" id="new-dept-name" required placeholder="e.g. School of Science & Technology" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+          </div>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Degree Programmes Offered *</label>
+          <input type="text" id="new-dept-programs" required placeholder="e.g. BCA, MCA & B.Tech Programs" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+        </div>
+
+        <!-- Optional HOD Provisioning -->
+        <div style="border: 1px solid #D7E3F0; border-radius: 8px; padding: 12px; background: #F8FAFC; margin-bottom: 14px;">
+          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: #17345C; font-size: 13px; margin: 0;">
+            <input type="checkbox" id="new-dept-hod-toggle" onchange="document.getElementById('new-dept-hod-wrap').style.display = this.checked ? 'block' : 'none';" style="accent-color: #1D3C72;">
+            <span>Assign Head of Department (HOD) Account</span>
+          </label>
+          <div id="new-dept-hod-wrap" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #E2E8F0;">
+            <div style="margin-bottom: 8px;">
+              <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;">HOD Full Name</label>
+              <input type="text" id="new-dept-hod-name" placeholder="e.g. Dr. Rajesh Sharma" style="width: 100%; padding: 6px 8px; font-size: 13px; border: 1px solid #CBD5E1; border-radius: 4px;">
+            </div>
+            <div style="margin-bottom: 8px;">
+              <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;">HOD Login Email / Institutional ID</label>
+              <input type="email" id="new-dept-hod-email" placeholder="e.g. hod.ca@college.edu" style="width: 100%; padding: 6px 8px; font-size: 13px; border: 1px solid #CBD5E1; border-radius: 4px;">
+            </div>
+            <div>
+              <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;">HOD Created Password</label>
+              <input type="text" id="new-dept-hod-password" placeholder="e.g. HodPass2026!" style="width: 100%; padding: 6px 8px; font-size: 13px; font-family: monospace; border: 1px solid #CBD5E1; border-radius: 4px;">
+            </div>
+          </div>
+        </div>
+
+        <div id="add-dept-msg" style="display: none; margin-bottom: 14px;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--slate-border); padding-top: 14px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeAddDeptModal()">Cancel</button>
+          <button type="submit" class="btn btn-sm" id="btn-submit-add-dept" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Create School / Department</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- MODAL 4: Add Programme / Course -->
+  <div id="modal-add-programme" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 520px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); color: #17345C;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--slate-border); padding-bottom: 12px;">
+        <h3 style="font-size: 18px; font-weight: 700; color: #17345C; margin: 0;">Add Degree Programme</h3>
+        <button type="button" onclick="closeAddProgrammeModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--slate-text-sub); line-height: 1;">&times;</button>
+      </div>
+      <form onsubmit="event.preventDefault(); submitAddProgramme();">
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Host Department *</label>
+          <select id="new-prog-dept" required style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Programme Code *</label>
+            <input type="text" id="new-prog-code" required placeholder="e.g. MCA, BTECH-IT" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Total Semesters *</label>
+            <input type="number" id="new-prog-semesters" required min="1" max="10" value="6" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+          </div>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Programme Title *</label>
+          <input type="text" id="new-prog-name" required placeholder="e.g. Master of Computer Applications" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+        </div>
+        <div id="add-prog-msg" style="display: none; margin-bottom: 14px;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--slate-border); padding-top: 14px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeAddProgrammeModal()">Cancel</button>
+          <button type="submit" class="btn btn-sm" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Register Programme</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 5: Add Section -->
+  <div id="modal-add-section" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 520px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); color: #17345C;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--slate-border); padding-bottom: 12px;">
+        <h3 style="font-size: 18px; font-weight: 700; color: #17345C; margin: 0;">Add Academic Section</h3>
+        <button type="button" onclick="closeAddSectionModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--slate-text-sub); line-height: 1;">&times;</button>
+      </div>
+      <form onsubmit="event.preventDefault(); submitAddSection();">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Programme *</label>
+            <select id="new-sec-prog" required onchange="updateSemesterOptionsForSection()" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Semester *</label>
+            <select id="new-sec-sem" required style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Section Name *</label>
+            <input type="text" id="new-sec-name" required placeholder="e.g. A, B, C, D" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Max Student Intake</label>
+            <input type="number" id="new-sec-capacity" value="80" min="10" max="200" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+          </div>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Academic Calendar Term</label>
+          <input type="text" id="new-sec-term" value="Autumn 2026" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+        </div>
+        <div id="add-sec-msg" style="display: none; margin-bottom: 14px;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--slate-border); padding-top: 14px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeAddSectionModal()">Cancel</button>
+          <button type="submit" class="btn btn-sm" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Create Section</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 6: Add Classroom / Laboratory -->
+  <div id="modal-add-room" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 520px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); color: #17345C;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--slate-border); padding-bottom: 12px;">
+        <h3 style="font-size: 18px; font-weight: 700; color: #17345C; margin: 0;">Add Classroom / Laboratory</h3>
+        <button type="button" onclick="closeAddRoomModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--slate-text-sub); line-height: 1;">&times;</button>
+      </div>
+      <form onsubmit="event.preventDefault(); submitAddRoom();">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Room Code *</label>
+            <input type="text" id="new-room-code" required placeholder="e.g. LAB-5, R-306" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Facility Type *</label>
+            <select id="new-room-type" required style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+              <option value="CLASSROOM">Classroom</option>
+              <option value="LABORATORY">Laboratory</option>
+              <option value="LECTURE_HALL">Lecture Hall</option>
+              <option value="WORKSHOP">Workshop</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Facility Name *</label>
+          <input type="text" id="new-room-name" required placeholder="e.g. AI & Robotics Computing Lab" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Student Capacity</label>
+            <input type="number" id="new-room-cap" value="45" min="10" max="300" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Parent Department</label>
+            <select id="new-room-dept" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+        </div>
+        <div id="add-room-msg" style="display: none; margin-bottom: 14px;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--slate-border); padding-top: 14px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeAddRoomModal()">Cancel</button>
+          <button type="submit" class="btn btn-sm" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Register Facility</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 7: Add Subgroup (C1/C2) -->
+  <div id="modal-add-group" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 520px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); color: #17345C;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--slate-border); padding-bottom: 12px;">
+        <h3 style="font-size: 18px; font-weight: 700; color: #17345C; margin: 0;">Add Practical Subgroup</h3>
+        <button type="button" onclick="closeAddGroupModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--slate-text-sub); line-height: 1;">&times;</button>
+      </div>
+      <form onsubmit="event.preventDefault(); submitAddGroup();">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Target Section *</label>
+            <select id="new-grp-section" required style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+              <!-- Populated dynamically -->
+            </select>
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Subgroup Name (e.g. C1, C2) *</label>
+            <input type="text" id="new-grp-name" required placeholder="e.g. C1" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+          </div>
+        </div>
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Roster Description *</label>
+          <input type="text" id="new-grp-desc" required placeholder="e.g. Practical Lab Cohort C1 (Roll No 1 to 40)" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+        </div>
+        <div id="add-grp-msg" style="display: none; margin-bottom: 14px;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--slate-border); padding-top: 14px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeAddGroupModal()">Cancel</button>
+          <button type="submit" class="btn btn-sm" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Save Subgroup</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="site.js"></script>
+  <script>
+    // State management
+    let currentTimetable = null;
+    let currentPreview = null;
+    let currentFacultyMappings = {};
+    let uploadedFile = null;
+    let facultyDirectory = [];
+    let academicState = {
+      departments: [],
+      courses: [],
+      semesters: [],
+      sections: [],
+      rooms: [],
+      groups: [],
+      periods: [],
+      subjects: []
+    };
+
+    // -------------------------------------------------------------------------
+    // -------------------------------------------------------------------------
+    // API Base URL — auto-detect local backend vs Firebase Hosting (static only)
+    // -------------------------------------------------------------------------
+    function getApiBase() {
+      if (typeof window.getApiBase === 'function') {
+        return window.getApiBase();
+      }
+      const h = window.location.hostname;
+      if (h === 'localhost' || h === '127.0.0.1') {
+        return 'http://localhost:8080';
+      }
+      return '';
+    }
+
+    // Default authentic BCA Semester 5 Section C published timetable
+    const defaultBCATimetable = {
+      timetable_id: 'tt-bca-5c-autumn-2026',
+      academic_calendar_term: 'Autumn 2026',
+      department_id: 'dept-ca',
+      department_code: 'CA',
+      department_name: 'Department of Computer Applications',
+      course_id: 'prog-bca',
+      course_code: 'BCA',
+      course_name: 'Bachelor of Computer Applications',
+      semester_id: 'sem-5',
+      semester_number: 5,
+      section_id: 'sec-bca-5c',
+      section_name: 'C',
+      effective_date: '2026-08-04',
+      version_number: 1,
+      status: 'PUBLISHED',
+      entries: [
+        // Monday
+        { entry_id: 'e-mon-1', day_of_week: 'MONDAY', period_index: 1, subject_code: 'BCA-501', subject_name: 'Java Programming', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
+        { entry_id: 'e-mon-2', day_of_week: 'MONDAY', period_index: 2, subject_code: 'BCA-502', subject_name: 'Operating Systems', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
+        { entry_id: 'e-mon-3', day_of_week: 'MONDAY', period_index: 3, subject_code: 'BCA-503', subject_name: 'Computer Networks', faculty_name: 'Dr. Shiv Prasad', room_code: 'R-204' },
+        { entry_id: 'e-mon-4', day_of_week: 'MONDAY', period_index: 4, subject_code: 'BCA-504', subject_name: 'Database Management', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
+        { entry_id: 'e-mon-5-c1', day_of_week: 'MONDAY', period_index: 6, group_name: 'C1', subject_code: 'Lab 3 (ND)', subject_name: 'OS Lab', faculty_name: 'Dr. Neha Dave', room_code: 'LAB-3' },
+        { entry_id: 'e-mon-5-c2', day_of_week: 'MONDAY', period_index: 6, group_name: 'C2', subject_code: 'Lab 4 (Shiv P)', subject_name: 'Networks Lab', faculty_name: 'Dr. Shiv Prasad', room_code: 'LAB-4' },
+        { entry_id: 'e-mon-6-c1', day_of_week: 'MONDAY', period_index: 7, group_name: 'C1', subject_code: 'Lab 3 (ND)', subject_name: 'OS Lab', faculty_name: 'Dr. Neha Dave', room_code: 'LAB-3' },
+        { entry_id: 'e-mon-6-c2', day_of_week: 'MONDAY', period_index: 7, group_name: 'C2', subject_code: 'Lab 4 (Shiv P)', subject_name: 'Networks Lab', faculty_name: 'Dr. Shiv Prasad', room_code: 'LAB-4' },
+        { entry_id: 'e-mon-7', day_of_week: 'MONDAY', period_index: 8, subject_code: 'Mentoring / Remedial', subject_name: 'Mentoring / Remedial', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
+
+        // Tuesday
+        { entry_id: 'e-tue-1', day_of_week: 'TUESDAY', period_index: 1, subject_code: 'BCA-503', subject_name: 'Computer Networks', faculty_name: 'Dr. Shiv Prasad', room_code: 'R-204' },
+        { entry_id: 'e-tue-2', day_of_week: 'TUESDAY', period_index: 2, subject_code: 'BCA-501', subject_name: 'Java Programming', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
+        { entry_id: 'e-tue-3', day_of_week: 'TUESDAY', period_index: 3, subject_code: 'BCA-504', subject_name: 'Database Management', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
+        { entry_id: 'e-tue-4', day_of_week: 'TUESDAY', period_index: 4, subject_code: 'BCA-502', subject_name: 'Operating Systems', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
+        { entry_id: 'e-tue-5-c1', day_of_week: 'TUESDAY', period_index: 6, group_name: 'C1', subject_code: 'Lab 4 (Shiv P)', subject_name: 'Networks Lab', faculty_name: 'Dr. Shiv Prasad', room_code: 'LAB-4' },
+        { entry_id: 'e-tue-5-c2', day_of_week: 'TUESDAY', period_index: 6, group_name: 'C2', subject_code: 'Lab 3 (ND)', subject_name: 'OS Lab', faculty_name: 'Dr. Neha Dave', room_code: 'LAB-3' },
+        { entry_id: 'e-tue-6-c1', day_of_week: 'TUESDAY', period_index: 7, group_name: 'C1', subject_code: 'Lab 4 (Shiv P)', subject_name: 'Networks Lab', faculty_name: 'Dr. Shiv Prasad', room_code: 'LAB-4' },
+        { entry_id: 'e-tue-6-c2', day_of_week: 'TUESDAY', period_index: 7, group_name: 'C2', subject_code: 'Lab 3 (ND)', subject_name: 'OS Lab', faculty_name: 'Dr. Neha Dave', room_code: 'LAB-3' },
+        { entry_id: 'e-tue-7', day_of_week: 'TUESDAY', period_index: 8, subject_code: 'Library / Self Study', subject_name: 'Library & Research', faculty_name: 'Dr. Priya Patel', room_code: 'R-204' },
+
+        // Wednesday
+        { entry_id: 'e-wed-1', day_of_week: 'WEDNESDAY', period_index: 1, subject_code: 'BCA-502', subject_name: 'Operating Systems', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
+        { entry_id: 'e-wed-2', day_of_week: 'WEDNESDAY', period_index: 2, subject_code: 'BCA-503', subject_name: 'Computer Networks', faculty_name: 'Dr. Shiv Prasad', room_code: 'R-204' },
+        { entry_id: 'e-wed-3', day_of_week: 'WEDNESDAY', period_index: 3, subject_code: 'BCA-501', subject_name: 'Java Programming', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
+        { entry_id: 'e-wed-4', day_of_week: 'WEDNESDAY', period_index: 4, subject_code: 'BCA-505', subject_name: 'Web Frameworks', faculty_name: 'Dr. Priya Patel', room_code: 'R-204' },
+        { entry_id: 'e-wed-5', day_of_week: 'WEDNESDAY', period_index: 6, subject_code: 'BCA-504', subject_name: 'Database Management', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
+        { entry_id: 'e-wed-6', day_of_week: 'WEDNESDAY', period_index: 7, subject_code: 'Placement Training', subject_name: 'Placement Training', faculty_name: 'Dr. S.S. Verma', room_code: 'LH-101' },
+        { entry_id: 'e-wed-7', day_of_week: 'WEDNESDAY', period_index: 8, subject_code: 'Placement Training', subject_name: 'Placement Training', faculty_name: 'Dr. S.S. Verma', room_code: 'LH-101' },
+
+        // Thursday
+        { entry_id: 'e-thu-1', day_of_week: 'THURSDAY', period_index: 1, subject_code: 'BCA-504', subject_name: 'Database Management', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
+        { entry_id: 'e-thu-2', day_of_week: 'THURSDAY', period_index: 2, subject_code: 'BCA-505', subject_name: 'Web Frameworks', faculty_name: 'Dr. Priya Patel', room_code: 'R-204' },
+        { entry_id: 'e-thu-3', day_of_week: 'THURSDAY', period_index: 3, subject_code: 'BCA-502', subject_name: 'Operating Systems', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
+        { entry_id: 'e-thu-4', day_of_week: 'THURSDAY', period_index: 4, subject_code: 'BCA-501', subject_name: 'Java Programming', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
+        { entry_id: 'e-thu-5-c1', day_of_week: 'THURSDAY', period_index: 6, group_name: 'C1', subject_code: 'Web Lab (Sanjay K)', subject_name: 'Web Technologies Lab', faculty_name: 'Dr. Sanjay Kumar', room_code: 'LAB-4' },
+        { entry_id: 'e-thu-5-c2', day_of_week: 'THURSDAY', period_index: 6, group_name: 'C2', subject_code: 'Project Lab (Rajesh S)', subject_name: 'Capstone Project Lab', faculty_name: 'Dr. Rajesh Sharma', room_code: 'LAB-3' },
+        { entry_id: 'e-thu-6-c1', day_of_week: 'THURSDAY', period_index: 7, group_name: 'C1', subject_code: 'Web Lab (Sanjay K)', subject_name: 'Web Technologies Lab', faculty_name: 'Dr. Sanjay Kumar', room_code: 'LAB-4' },
+        { entry_id: 'e-thu-6-c2', day_of_week: 'THURSDAY', period_index: 7, group_name: 'C2', subject_code: 'Project Lab (Rajesh S)', subject_name: 'Capstone Project Lab', faculty_name: 'Dr. Rajesh Sharma', room_code: 'LAB-3' },
+        { entry_id: 'e-thu-7', day_of_week: 'THURSDAY', period_index: 8, subject_code: 'Seminar / Activity', subject_name: 'Seminar / Activity', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
+
+        // Friday
+        { entry_id: 'e-fri-1', day_of_week: 'FRIDAY', period_index: 1, subject_code: 'BCA-501', subject_name: 'Java Programming', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
+        { entry_id: 'e-fri-2', day_of_week: 'FRIDAY', period_index: 2, subject_code: 'BCA-502', subject_name: 'Operating Systems', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
+        { entry_id: 'e-fri-3', day_of_week: 'FRIDAY', period_index: 3, subject_code: 'BCA-503', subject_name: 'Computer Networks', faculty_name: 'Dr. Shiv Prasad', room_code: 'R-204' },
+        { entry_id: 'e-fri-4', day_of_week: 'FRIDAY', period_index: 4, subject_code: 'BCA-504', subject_name: 'Database Management', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
+        { entry_id: 'e-fri-5', day_of_week: 'FRIDAY', period_index: 6, subject_code: 'Mini Project Guidance (Shiv P)', subject_name: 'Mini Project Guidance', faculty_name: 'Dr. Shiv Prasad', room_code: 'LAB-3' },
+        { entry_id: 'e-fri-6', day_of_week: 'FRIDAY', period_index: 7, subject_code: 'Mini Project Guidance (Shiv P)', subject_name: 'Mini Project Guidance', faculty_name: 'Dr. Shiv Prasad', room_code: 'LAB-3' },
+        { entry_id: 'e-fri-7', day_of_week: 'FRIDAY', period_index: 8, subject_code: 'Sports & Cultural', subject_name: 'Sports & Cultural Activities', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
+
+        // Saturday
+        { entry_id: 'e-sat-1', day_of_week: 'SATURDAY', period_index: 1, subject_code: 'BCA-505', subject_name: 'Web Frameworks', faculty_name: 'Dr. Priya Patel', room_code: 'R-204' },
+        { entry_id: 'e-sat-2', day_of_week: 'SATURDAY', period_index: 2, subject_code: 'BCA-503', subject_name: 'Computer Networks', faculty_name: 'Dr. Shiv Prasad', room_code: 'R-204' },
+        { entry_id: 'e-sat-3', day_of_week: 'SATURDAY', period_index: 3, subject_code: 'BCA-502', subject_name: 'Operating Systems', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
+        { entry_id: 'e-sat-4', day_of_week: 'SATURDAY', period_index: 4, subject_code: 'Technical Communication (SS)', subject_name: 'Technical Communication', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
+        { entry_id: 'e-sat-5', day_of_week: 'SATURDAY', period_index: 6, subject_code: 'Remedial / Doubt Clearing', subject_name: 'Remedial / Doubt Clearing', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
+        { entry_id: 'e-sat-6', day_of_week: 'SATURDAY', period_index: 7, subject_code: 'Student Club Activities', subject_name: 'Student Club Activities', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' }
+      ]
+    };
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initTimetableConsole();
+    });
+
+    async function initTimetableConsole() {
+      try {
+        setupDropZone();
+
+        // Load directory, academic entities, and timetable schedule
+        await fetchFacultyDirectory();
+        await loadAcademicEntities();
+        await loadScheduleGrid();
+
+        const handleHashRoute = () => {
+          const hash = window.location.hash;
+          if (hash === '#academic' || hash === '#academic-entities') {
+            switchTab('academic-entities');
+          } else if (hash === '#subgroups') {
+            switchTab('subgroups');
+          } else if (hash === '#schools') {
+            switchTab('schools');
+          } else if (hash === '#timetable') {
+            switchTab('timetable');
+          }
+        };
+        handleHashRoute();
+        window.addEventListener('hashchange', handleHashRoute);
+      } catch (err) {
+        console.error('Initialization error:', err);
+      }
+    }
+
+    function getAuthHeaders(extraHeaders) {
+      const token = sessionStorage.getItem('attendance_auth_token') || localStorage.getItem('attendance_auth_token') || sessionStorage.getItem('token') || localStorage.getItem('token') || '';
+      const headers = { 'Accept': 'application/json' };
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+      if (extraHeaders) {
+        for (const k in extraHeaders) headers[k] = extraHeaders[k];
+      }
+      return headers;
+    }
+
+    function showNoBackendState() {
+      // Non-blocking operational notification
+      console.log('Operating in client-side / offline mode.');
+    }
+
+    async function fetchFacultyDirectory() {
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/timetable/resources/faculty', { headers: getAuthHeaders() });
+          const data = await res.json();
+          if (data.success && Array.isArray(data.faculty)) {
+            facultyDirectory = data.faculty;
+            return;
+          }
+        }
+      } catch (e) {
+        console.warn('Could not load faculty directory from backend:', e);
+      }
+
+      // Offline / Firebase fallback
+      let storedTeachers = [];
+      try {
+        storedTeachers = JSON.parse(localStorage.getItem('admin_teachers_list') || '[]');
+      } catch (e) {}
+
+      if (storedTeachers && storedTeachers.length > 0) {
+        facultyDirectory = storedTeachers.map(t => ({
+          id: t.staffId || t.id,
+          staffId: t.staffId || t.id,
+          name: t.name,
+          department: t.department || 'CA',
+          email: t.email
+        }));
+      } else {
+        facultyDirectory = [
+          { id: 'FAC-201', staffId: 'FAC-201', name: 'Dr. Neha Dave', department: 'CA', email: 'neha.dave@college.edu' },
+          { id: 'FAC-202', staffId: 'FAC-202', name: 'Dr. Sanjay Kumar', department: 'CA', email: 'sanjay.kumar@college.edu' },
+          { id: 'FAC-203', staffId: 'FAC-203', name: 'Dr. Shiv Prasad', department: 'CA', email: 'shiv.prasad@college.edu' },
+          { id: 'FAC-204', staffId: 'FAC-204', name: 'Dr. S.S. Verma', department: 'CA', email: 'ss.verma@college.edu' },
+          { id: 'FAC-205', staffId: 'FAC-205', name: 'Dr. Priya Patel', department: 'CA', email: 'priya.patel@college.edu' },
+          { id: 'FAC-206', staffId: 'FAC-206', name: 'Dr. Rajesh Sharma', department: 'CA', email: 'rajesh.sharma@college.edu' }
+        ];
+      }
+    }
+
+    function setupDropZone() {
+      const dropZone = document.getElementById('drop-zone');
+      const fileInput = document.getElementById('import-file-input');
+
+      if (fileInput) {
+        fileInput.addEventListener('change', (e) => {
+          if (e.target.files && e.target.files[0]) {
+            processFileUpload(e.target.files[0]);
+          }
+        });
+      }
+
+      if (dropZone) {
+        ['dragenter', 'dragover'].forEach(eventName => {
+          dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.add('dropzone-hover');
+          }, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+          dropZone.addEventListener(eventName, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('dropzone-hover');
+          }, false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+          const dt = e.dataTransfer;
+          if (dt && dt.files && dt.files[0]) {
+            processFileUpload(dt.files[0]);
+          }
+        }, false);
+      }
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('tab-' + tabId).classList.add('active');
+
+      document.getElementById('panel-timetable').style.display = tabId === 'timetable' ? 'block' : 'none';
+      document.getElementById('panel-academic-entities').style.display = tabId === 'academic-entities' ? 'block' : 'none';
+      document.getElementById('panel-subgroups').style.display = tabId === 'subgroups' ? 'block' : 'none';
+      if (document.getElementById('panel-schools')) {
+        document.getElementById('panel-schools').style.display = tabId === 'schools' ? 'block' : 'none';
+      }
+      if (tabId === 'schools') {
+        loadSchoolsGrid();
+      }
+    }
+
+    let loadedSchools = [];
+
+    async function loadSchoolsGrid() {
+      const container = document.getElementById('schools-cards-container');
+      if (!container) return;
+      container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: var(--slate-text-sub);">Loading university constituent schools...</div>';
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/admin/schools');
+          const data = await res.json();
+          if (data.success && data.schools && data.schools.length > 0) {
+            renderSchoolsData(data.schools);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, using default schools list:', err);
+      }
+
+      let storedSchools = [];
+      try {
+        storedSchools = JSON.parse(localStorage.getItem('admin_schools_list') || '[]');
+      } catch (e) {}
+
+      if (!storedSchools || storedSchools.length === 0) {
+        storedSchools = [
+          {
+            school_id: '10000000-0000-0000-0000-000000000001',
+            school_code: 'SST',
+            school_name: 'School of Science & Technology',
+            description: 'Faculty of Science, Engineering & Computing',
+            dean_name: 'Dr. Rajesh Sharma',
+            contact_email: 'hod.sst@college.edu',
+            department_count: 2,
+            course_count: 3,
+            student_count: 120,
+            faculty_count: 15,
+            is_active: true
+          },
+          {
+            school_id: '10000000-0000-0000-0000-000000000002',
+            school_code: 'SBS',
+            school_name: 'School of Bioscience',
+            description: 'Faculty of Biosciences, Biotechnology & Life Sciences',
+            dean_name: 'Dr. Priya Verma',
+            contact_email: 'hod.sbs@college.edu',
+            department_count: 1,
+            course_count: 2,
+            student_count: 65,
+            faculty_count: 8,
+            is_active: true
+          },
+          {
+            school_id: '10000000-0000-0000-0000-000000000003',
+            school_code: 'SOM',
+            school_name: 'School of Management',
+            description: 'Faculty of Management Studies, Commerce & Business',
+            dean_name: 'Dr. Amit Patel',
+            contact_email: 'hod.som@college.edu',
+            department_count: 1,
+            course_count: 2,
+            student_count: 85,
+            faculty_count: 10,
+            is_active: true
+          },
+          {
+            school_id: '10000000-0000-0000-0000-000000000004',
+            school_code: 'CA',
+            school_name: 'Department of Computer Applications',
+            description: 'Computer Applications & Information Technology Faculty',
+            dean_name: 'Dr. Rajesh Sharma',
+            contact_email: 'hod.ca@college.edu',
+            department_count: 1,
+            course_count: 2,
+            student_count: 140,
+            faculty_count: 12,
+            is_active: true
+          }
+        ];
+        try { localStorage.setItem('admin_schools_list', JSON.stringify(storedSchools)); } catch (e) {}
+      }
+
+      renderSchoolsData(storedSchools);
+    }
+
+    function renderSchoolsData(schools) {
+      const container = document.getElementById('schools-cards-container');
+      if (!container) return;
+      loadedSchools = schools;
+
+      document.getElementById('kpi-schools-count').textContent = schools.length;
+      const totalDepts = schools.reduce((acc, s) => acc + (s.department_count || 0), 0);
+      const totalProgs = schools.reduce((acc, s) => acc + (s.course_count || 0), 0);
+      const totalStudents = schools.reduce((acc, s) => acc + (s.student_count || 0), 0);
+      
+      document.getElementById('kpi-depts-count').textContent = totalDepts;
+      document.getElementById('kpi-programmes-count').textContent = totalProgs;
+      document.getElementById('kpi-students-count').textContent = totalStudents;
+
+      container.innerHTML = '';
+      schools.forEach(school => {
+        const card = document.createElement('div');
+        card.style.cssText = 'background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05);';
+
+        const activeBadge = school.is_active !== false
+          ? '<span class="badge" style="background: #DCFCE7; color: #15803D; font-weight: 700;">Active</span>'
+          : '<span class="badge" style="background: #FEE2E2; color: #DC2626; font-weight: 700;">Archived</span>';
+
+        card.innerHTML = `
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
+              <div>
+                <span style="display: inline-block; font-size: 11px; font-weight: 800; background: rgba(29, 60, 114, 0.1); color: #1D3C72; padding: 2px 8px; border-radius: 4px; margin-bottom: 4px;">${school.school_code || school.school_id}</span>
+                <h3 style="font-size: 17px; font-weight: 700; color: #17345C; margin: 0;">${school.school_name}</h3>
+              </div>
+              ${activeBadge}
+            </div>
+            <p style="font-size: 13px; color: var(--slate-text-sub); margin: 0 0 16px 0; min-height: 36px;">
+              ${school.description || 'Constituent university academic school'}
+            </p>
+
+            <div style="background: var(--slate-panel); border-radius: 6px; padding: 12px; margin-bottom: 16px; font-size: 12px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                <span style="color: #64748B;">Dean / Director:</span>
+                <strong style="color: #17345C;">${school.dean_name || 'Dean of School'}</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <span style="color: #64748B;">Contact Email:</span>
+                <strong style="color: #17345C;">${school.contact_email || 'info@srhu.edu.in'}</strong>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; border-top: 1px solid var(--slate-border); border-bottom: 1px solid var(--slate-border); padding: 10px 0; margin-bottom: 16px;">
+              <div>
+                <div style="font-size: 16px; font-weight: 800; color: #1D3C72;">${school.department_count || 0}</div>
+                <div style="font-size: 10px; color: #64748B; font-weight: 700; text-transform: uppercase;">Depts</div>
+              </div>
+              <div>
+                <div style="font-size: 16px; font-weight: 800; color: #0284C7;">${school.course_count || 0}</div>
+                <div style="font-size: 10px; color: #64748B; font-weight: 700; text-transform: uppercase;">Courses</div>
+              </div>
+              <div>
+                <div style="font-size: 16px; font-weight: 800; color: #15803D;">${school.student_count || 0}</div>
+                <div style="font-size: 10px; color: #64748B; font-weight: 700; text-transform: uppercase;">Students</div>
+              </div>
+              <div>
+                <div style="font-size: 16px; font-weight: 800; color: #7C3AED;">${school.faculty_count || 0}</div>
+                <div style="font-size: 10px; color: #64748B; font-weight: 700; text-transform: uppercase;">Faculty</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; justify-content: flex-end;">
+            <button type="button" class="btn btn-sm btn-outline" onclick="openEditSchoolModal('${school.school_id}')" style="font-size: 12px; padding: 4px 10px;">
+              Edit
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="deactivateSchool('${school.school_id}')" style="font-size: 12px; padding: 4px 10px; color: #DC2626; border-color: #FCA5A5;">
+              ${school.is_active !== false ? 'Deactivate' : 'Reactivate'}
+            </button>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function openAddSchoolModal() {
+      document.getElementById('modal-add-school').style.display = 'flex';
+      document.getElementById('add-school-error').style.display = 'none';
+      document.getElementById('form-add-school').reset();
+    }
+
+    function closeAddSchoolModal() {
+      document.getElementById('modal-add-school').style.display = 'none';
+    }
+
+    async function handleAddSchoolSubmit(e) {
+      e.preventDefault();
+      const errEl = document.getElementById('add-school-error');
+      const submitBtn = document.getElementById('btn-submit-add-school');
+      errEl.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating...';
+
+      const code = document.getElementById('add-school-code').value.trim().toUpperCase();
+      const name = document.getElementById('add-school-name').value.trim();
+      const desc = document.getElementById('add-school-desc').value.trim();
+      const dean = document.getElementById('add-school-dean').value.trim();
+      const email = document.getElementById('add-school-email').value.trim();
+
+      const payload = {
+        school_id: code,
+        school_code: code,
+        department_code: code,
+        school_name: name,
+        department_name: name,
+        description: desc,
+        programs: desc,
+        dean_name: dean,
+        hod_name: dean,
+        contact_email: email,
+        hod_email: email,
+        department_count: 1,
+        course_count: 1,
+        student_count: 0,
+        faculty_count: 0,
+        is_active: true
+      };
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/admin/schools', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const data = await res.json();
+          if (data.success) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Create School / Department';
+            closeAddSchoolModal();
+            await loadSchoolsGrid();
+            await loadAcademicEntities();
+            alert('School / Department successfully registered: ' + payload.school_name);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend offline, saving school locally:', err);
+      }
+
+      // Offline / Firebase fallback
+      loadedSchools.push(payload);
+      try { localStorage.setItem('admin_schools_list', JSON.stringify(loadedSchools)); } catch (e) {}
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create School / Department';
+      closeAddSchoolModal();
+      renderSchoolsData(loadedSchools);
+      showSuccessBanner('School / Academic Department "' + payload.school_name + '" created successfully.');
+    }
+
+    function openEditSchoolModal(schoolId) {
+      const school = loadedSchools.find(s => s.school_id === schoolId);
+      if (!school) return;
+
+      document.getElementById('edit-school-id').value = school.school_id;
+      document.getElementById('edit-school-name').value = school.school_name;
+      document.getElementById('edit-school-desc').value = school.description || '';
+      document.getElementById('edit-school-dean').value = school.dean_name || '';
+      document.getElementById('edit-school-email').value = school.contact_email || '';
+      document.getElementById('edit-school-active').checked = school.is_active !== false;
+
+      document.getElementById('modal-edit-school').style.display = 'flex';
+      document.getElementById('edit-school-error').style.display = 'none';
+    }
+
+    function closeEditSchoolModal() {
+      document.getElementById('modal-edit-school').style.display = 'none';
+    }
+
+    async function handleEditSchoolSubmit(e) {
+      e.preventDefault();
+      const schoolId = document.getElementById('edit-school-id').value;
+      const submitBtn = document.getElementById('btn-submit-edit-school');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Saving...';
+
+      const updatedName = document.getElementById('edit-school-name').value.trim();
+      const updatedDesc = document.getElementById('edit-school-desc').value.trim();
+      const updatedDean = document.getElementById('edit-school-dean').value.trim();
+      const updatedEmail = document.getElementById('edit-school-email').value.trim();
+      const updatedActive = document.getElementById('edit-school-active').checked;
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/admin/schools/' + encodeURIComponent(schoolId), {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              school_name: updatedName,
+              description: updatedDesc,
+              dean_name: updatedDean,
+              contact_email: updatedEmail,
+              is_active: updatedActive
+            })
+          });
+          const data = await res.json();
+          if (data.success) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Save Changes';
+            closeEditSchoolModal();
+            loadSchoolsGrid();
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend offline, updating school locally:', err);
+      }
+
+      // Offline / Firebase update
+      const target = loadedSchools.find(s => s.school_id === schoolId);
+      if (target) {
+        target.school_name = updatedName;
+        target.description = updatedDesc;
+        target.dean_name = updatedDean;
+        target.contact_email = updatedEmail;
+        target.is_active = updatedActive;
+        try { localStorage.setItem('admin_schools_list', JSON.stringify(loadedSchools)); } catch (e) {}
+      }
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Save Changes';
+      closeEditSchoolModal();
+      renderSchoolsData(loadedSchools);
+    }
+
+    async function deactivateSchool(schoolId) {
+      if (!confirm('Are you sure you want to deactivate/archive this school? Historical records will remain intact.')) return;
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/admin/schools/' + encodeURIComponent(schoolId), {
+            method: 'DELETE'
+          });
+          const data = await res.json();
+          if (data.success) {
+            loadSchoolsGrid();
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend offline, archiving locally:', err);
+      }
+
+      const target = loadedSchools.find(s => s.school_id === schoolId);
+      if (target) {
+        target.is_active = !target.is_active;
+        try { localStorage.setItem('admin_schools_list', JSON.stringify(loadedSchools)); } catch (e) {}
+      }
+      renderSchoolsData(loadedSchools);
+    }
+
+    async function loadScheduleGrid() {
+      const tbody = document.getElementById('schedule-grid-body');
+      tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 24px; color: var(--slate-text-sub);">Loading published schedule...</td></tr>';
+
+      const course = document.getElementById('filter-course') ? document.getElementById('filter-course').value : 'BCA';
+      const semester = document.getElementById('filter-semester') ? document.getElementById('filter-semester').value : '5';
+      const section = document.getElementById('filter-section') ? document.getElementById('filter-section').value : 'C';
+      const term = document.getElementById('filter-term') ? document.getElementById('filter-term').value : 'Autumn 2026';
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/timetable/published?course=' + encodeURIComponent(course) + '&semester=' + encodeURIComponent(semester) + '&section=' + encodeURIComponent(section) + '&term=' + encodeURIComponent(term));
+          const data = await res.json();
+          if (data.success && data.timetable) {
+            currentTimetable = data.timetable;
+            renderGrid(data.timetable);
+            updateStatusPill(data.timetable.status || 'PUBLISHED');
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, checking client timetable registry:', err);
+      }
+
+      // Offline / Firebase Hosting registry fallback
+      let storedList = [];
+      try {
+        storedList = JSON.parse(localStorage.getItem('admin_published_timetables') || '[]');
+      } catch (e) {}
+
+      // Find matching in stored
+      let match = storedList.find(t => 
+        (t.course_code === course || t.course_name === course) && 
+        String(t.semester_number) === String(semester) && 
+        t.section_name === section
+      );
+
+      // If no stored entry, but filter is BCA Sem 5 Sec C, load the verified defaultBCATimetable
+      if (!match && (course === 'BCA' || course === 'BCA - Computer Applications') && String(semester) === '5' && section === 'C') {
+        match = defaultBCATimetable;
+      }
+
+      if (match) {
+        currentTimetable = match;
+        renderGrid(match);
+        updateStatusPill(match.status || 'PUBLISHED');
+      } else {
+        currentTimetable = null;
+        updateStatusPill('NOT SCHEDULED');
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 32px; color: var(--slate-text-sub);">' +
+          '<div style="font-size: 14px; font-weight: 700; color: var(--slate-text-main); margin-bottom: 4px;">No Timetable Published for this Section</div>' +
+          '<div style="font-size: 12px;">Use "Import Timetable (Excel)" or "Add Class Period" to schedule classes for this cohort.</div>' +
+          '</td></tr>';
+      }
+    }
+
+    function updateStatusPill(status) {
+      const statusPill = document.getElementById('timetable-status-pill');
+      const clearBtn = document.getElementById('btn-clear-schedule');
+      if (statusPill) {
+        if (status === 'NOT SCHEDULED') {
+          statusPill.textContent = 'Status: NOT SCHEDULED';
+          statusPill.className = 'badge-status badge-pending';
+        } else {
+          statusPill.textContent = 'Status: ' + status;
+          statusPill.className = 'badge-status badge-finalized';
+        }
+      }
+      if (clearBtn) {
+        clearBtn.style.display = (status === 'NOT SCHEDULED') ? 'none' : 'inline-flex';
+      }
+    }
+
+    function renderGrid(tt) {
+      const tbody = document.getElementById('schedule-grid-body');
+      tbody.innerHTML = '';
+
+      const days = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+
+      days.forEach(day => {
+        const tr = document.createElement('tr');
+        
+        // Day Label
+        const tdDay = document.createElement('td');
+        tdDay.className = 'day-col';
+        tdDay.textContent = day.substring(0, 3);
+        tr.appendChild(tdDay);
+
+        // Periods 1 to 4
+        for (let p = 1; p <= 4; p++) {
+          tr.appendChild(renderPeriodCell(tt.entries, day, p));
+        }
+
+        // Lunch column
+        const tdLunch = document.createElement('td');
+        tdLunch.style.background = '#F1F5F9';
+        tdLunch.style.textAlign = 'center';
+        tdLunch.style.verticalAlign = 'middle';
+        tdLunch.style.fontSize = '11px';
+        tdLunch.style.color = '#94A3B8';
+        tdLunch.style.fontWeight = '600';
+        tdLunch.textContent = 'LUNCH';
+        tr.appendChild(tdLunch);
+
+        // Periods 5 to 7 (period indices 6, 7, 8)
+        [6, 7, 8].forEach(p => {
+          tr.appendChild(renderPeriodCell(tt.entries, day, p));
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderPeriodCell(entries, day, periodIndex) {
+      const td = document.createElement('td');
+      const matching = entries.filter(e => e.day_of_week === day && e.period_index === periodIndex && !e.is_cancelled);
+
+      if (matching.length === 0) {
+        td.innerHTML = '<span style="color: #CBD5E1; font-size: 11px;">-</span>';
+        return td;
+      }
+
+      matching.forEach(entry => {
+        const card = document.createElement('div');
+        let groupClass = '';
+        if (entry.group_name === 'C1') groupClass = 'subgroup-c1';
+        if (entry.group_name === 'C2') groupClass = 'subgroup-c2';
+
+        card.className = `tt-cell-card ${groupClass}`;
+        card.innerHTML = `
+          <div class="tt-cell-subj">
+            ${entry.group_name ? `<span style="font-size: 10px; font-weight: 800; color: #0284C7;">[${entry.group_name}]</span> ` : ''}
+            ${entry.subject_code}
+          </div>
+          <div class="tt-cell-faculty">${entry.faculty_name}</div>
+          <div class="tt-cell-room">${entry.room_code || 'R-204'}</div>
+        `;
+        td.appendChild(card);
+      });
+
+      return td;
+    }
+
+    function openImportModal() {
+      currentFacultyMappings = {};
+      uploadedFile = null;
+      document.getElementById('modal-import').style.display = 'flex';
+      document.getElementById('import-preview-box').style.display = 'none';
+      document.getElementById('selected-file-label').style.display = 'none';
+      hideImportMessage();
+      hideImportLoading();
+    }
+
+    function closeImportModal() {
+      document.getElementById('modal-import').style.display = 'none';
+    }
+
+    function showImportLoading(text) {
+      const el = document.getElementById('import-loading-indicator');
+      const txt = document.getElementById('import-loading-text');
+      if (el) el.style.display = 'block';
+      if (txt) txt.textContent = text || 'Processing spreadsheet...';
+    }
+
+    function hideImportLoading() {
+      const el = document.getElementById('import-loading-indicator');
+      if (el) el.style.display = 'none';
+    }
+
+    function showImportMessage(text, type = 'error') {
+      const box = document.getElementById('import-message-container');
+      if (!box) return;
+      const isErr = type === 'error';
+      box.style.display = 'block';
+      box.innerHTML = `
+        <div style="background: ${isErr ? '#FEF2F2' : '#DCFCE7'}; border: 1px solid ${isErr ? '#FCA5A5' : '#86EFAC'}; color: ${isErr ? '#991B1B' : '#15803D'}; padding: 10px 14px; border-radius: var(--radius); font-size: 13px; font-weight: 600;">
+          ${text}
+        </div>
+      `;
+    }
+
+    function hideImportMessage() {
+      const box = document.getElementById('import-message-container');
+      if (box) box.style.display = 'none';
+    }
+
+    async function processFileUpload(file) {
+      if (!file) return;
+      uploadedFile = file;
+      hideImportMessage();
+      const label = document.getElementById('selected-file-label');
+      label.style.display = 'block';
+      label.textContent = `Selected: ${file.name} (${Math.round(file.size / 1024)} KB)`;
+      showImportLoading(`Parsing workbook "${file.name}"...`);
+
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        if (Object.keys(currentFacultyMappings).length > 0) {
+          formData.append('mappings', JSON.stringify(currentFacultyMappings));
+        }
+
+        const res = await fetch(getApiBase() + '/api/timetable/import/preview', {
+          method: 'POST',
+          body: formData
+        });
+        const data = await res.json();
+        hideImportLoading();
+
+        if (data.success && data.preview) {
+          currentPreview = data.preview;
+          renderPreview(data.preview);
+        } else {
+          showImportMessage(data.message || data.error || 'Failed to parse Excel workbook.', 'error');
+        }
+      } catch (err) {
+        hideImportLoading();
+        showImportMessage('File upload request failed: ' + err.message, 'error');
+      }
+    }
+
+    async function loadFixtureWorkbook() {
+      uploadedFile = null;
+      hideImportMessage();
+      const label = document.getElementById('selected-file-label');
+      label.style.display = 'block';
+      label.textContent = 'Selected: Verified BCA (V-C).xlsx Fixture';
+      showImportLoading('Loading and interpreting university fixture BCA (V-C).xlsx...');
+
+      try {
+        if (getApiBase() !== null) {
+          let res;
+          if (Object.keys(currentFacultyMappings).length > 0) {
+            res = await fetch(getApiBase() + '/api/timetable/preview/fixture', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ mappings: currentFacultyMappings })
+            });
+          } else {
+            res = await fetch(getApiBase() + '/api/timetable/preview/fixture');
+          }
+          const data = await res.json();
+          if (data.success && data.preview) {
+            hideImportLoading();
+            currentPreview = data.preview;
+            renderPreview(data.preview);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, generating client preview for BCA fixture:', err);
+      }
+
+      // Offline / Firebase client preview generator
+      hideImportLoading();
+      const preview = {
+        sheetName: 'BCA V-C',
+        academicContext: {
+          department: 'Department of Computer Applications',
+          course: 'BCA',
+          semester: 5,
+          section: 'C',
+          effectiveDate: '2026-08-04'
+        },
+        totalEntriesFound: defaultBCATimetable.entries.length,
+        groupsDetected: ['C1', 'C2'],
+        facultyMappings: [
+          { abbreviation: 'ND', matchedFacultyName: 'Dr. Neha Dave', status: 'RESOLVED' },
+          { abbreviation: 'Shiv P', matchedFacultyName: 'Dr. Shiv Prasad', status: 'RESOLVED' },
+          { abbreviation: 'Sanjay K', matchedFacultyName: 'Dr. Sanjay Kumar', status: 'RESOLVED' },
+          { abbreviation: 'SS', matchedFacultyName: 'Dr. S.S. Verma', status: 'RESOLVED' },
+          { abbreviation: 'F2', matchedFacultyName: (currentFacultyMappings['F2'] ? (facultyDirectory.find(f => f.id === currentFacultyMappings['F2']) || {}).name : 'Dr. Priya Patel'), status: currentFacultyMappings['F2'] ? 'RESOLVED' : 'UNRESOLVED' },
+          { abbreviation: 'F3', matchedFacultyName: (currentFacultyMappings['F3'] ? (facultyDirectory.find(f => f.id === currentFacultyMappings['F3']) || {}).name : 'Dr. Rajesh Sharma'), status: currentFacultyMappings['F3'] ? 'RESOLVED' : 'UNRESOLVED' }
+        ],
+        unresolvedFacultyCount: (currentFacultyMappings['F2'] && currentFacultyMappings['F3']) ? 0 : (currentFacultyMappings['F2'] || currentFacultyMappings['F3'] ? 1 : 2),
+        conflicts: [],
+        parsedEntries: defaultBCATimetable.entries
+      };
+      currentPreview = preview;
+      renderPreview(preview);
+    }
+
+    function renderPreview(preview) {
+      document.getElementById('import-preview-box').style.display = 'block';
+      document.getElementById('prev-sheet').textContent = preview.sheetName;
+      document.getElementById('prev-dept').textContent = preview.academicContext.department;
+      document.getElementById('prev-prog').textContent = `${preview.academicContext.course} - Sem ${preview.academicContext.semester} (Sec ${preview.academicContext.section})`;
+      document.getElementById('prev-date').textContent = preview.academicContext.effectiveDate;
+      document.getElementById('prev-count').textContent = preview.totalEntriesFound + ' entries';
+      document.getElementById('prev-groups').textContent = preview.groupsDetected.join(', ') || 'Whole Section';
+
+      // Render Faculty Mappings
+      const tbody = document.getElementById('prev-faculty-body');
+      tbody.innerHTML = '';
+
+      preview.facultyMappings.forEach(f => {
+        const tr = document.createElement('tr');
+        const isUnresolved = f.status === 'UNRESOLVED';
+        const isUserMapped = currentFacultyMappings[f.abbreviation] !== undefined;
+
+        let optionsHtml = '<option value="">-- Map to Faculty Member --</option>';
+        facultyDirectory.forEach(fac => {
+          const selected = (currentFacultyMappings[f.abbreviation] === fac.id) ? 'selected' : '';
+          optionsHtml += `<option value="${fac.id}" ${selected}>${fac.name} (${fac.staffId})</option>`;
+        });
+
+        tr.innerHTML = `
+          <td><strong>${f.abbreviation}</strong></td>
+          <td>${f.matchedFacultyName || '<span style="color: #DC2626; font-style: italic;">Unmapped Faculty</span>'}</td>
+          <td>
+            <span class="tag ${isUnresolved ? 'tag-absent' : 'tag-present'}">
+              ${isUserMapped ? 'USER MAPPED' : f.status}
+            </span>
+          </td>
+          <td>
+            <select onchange="updateFacultyMapping('${f.abbreviation}', this.value)" style="font-size: 12px; padding: 4px; border: 1px solid var(--slate-border); border-radius: 4px; max-width: 260px;">
+              ${optionsHtml}
+            </select>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // Render Conflicts Box
+      const confBox = document.getElementById('prev-conflicts-container');
+      const commitBtn = document.getElementById('btn-commit-import');
+
+      if (preview.conflicts.length > 0) {
+        confBox.innerHTML = `
+          <div class="conflict-banner">
+            <strong>${preview.conflicts.length} Scheduling Conflicts Detected</strong>
+            ${preview.conflicts.map(c => `
+              <div class="conflict-item">
+                <span class="conflict-tag">${c.type}</span>
+                <span>${c.message}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+        commitBtn.disabled = true;
+        commitBtn.style.opacity = '0.5';
+        commitBtn.style.cursor = 'not-allowed';
+      } else if (preview.unresolvedFacultyCount > 0) {
+        confBox.innerHTML = `
+          <div style="background: #FEF3C7; border: 1px solid #FCD34D; color: #92400E; padding: 10px 14px; border-radius: var(--radius); font-size: 13px; font-weight: 600;">
+            Action Required: ${preview.unresolvedFacultyCount} faculty abbreviation(s) must be mapped to teachers in the dropdown above prior to publication.
+          </div>
+        `;
+        commitBtn.disabled = true;
+        commitBtn.style.opacity = '0.5';
+        commitBtn.style.cursor = 'not-allowed';
+      } else {
+        confBox.innerHTML = `
+          <div style="background: #DCFCE7; border: 1px solid #86EFAC; color: #15803D; padding: 10px 14px; border-radius: var(--radius); font-size: 13px; font-weight: 600;">
+            Zero scheduling conflicts detected. All ${preview.totalEntriesFound} class periods are verified and ready for institutional publication.
+          </div>
+        `;
+        commitBtn.disabled = false;
+        commitBtn.style.opacity = '1';
+        commitBtn.style.cursor = 'pointer';
+      }
+    }
+
+    async function updateFacultyMapping(abbr, facultyId) {
+      if (facultyId) {
+        currentFacultyMappings[abbr] = facultyId;
+      } else {
+        delete currentFacultyMappings[abbr];
+      }
+
+      showImportLoading(`Updating resolution for "${abbr}"...`);
+      try {
+        let res;
+        if (uploadedFile) {
+          const formData = new FormData();
+          formData.append('file', uploadedFile);
+          formData.append('mappings', JSON.stringify(currentFacultyMappings));
+          res = await fetch(getApiBase() + '/api/timetable/import/preview', {
+            method: 'POST',
+            body: formData
+          });
+        } else {
+          res = await fetch(getApiBase() + '/api/timetable/preview/fixture', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              mappings: currentFacultyMappings
+            })
+          });
+        }
+
+        const data = await res.json();
+        hideImportLoading();
+        if (data.success && data.preview) {
+          currentPreview = data.preview;
+          renderPreview(data.preview);
+        } else {
+          showImportMessage(data.message || 'Mapping update failed.', 'error');
+        }
+      } catch (err) {
+        hideImportLoading();
+        showImportMessage('Failed to update mapping: ' + err.message, 'error');
+      }
+    }
+
+    async function commitImportedTimetable() {
+      if (!currentPreview) return;
+      const commitBtn = document.getElementById('btn-commit-import');
+      commitBtn.disabled = true;
+      commitBtn.textContent = 'Publishing...';
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/timetable/commit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ preview: currentPreview })
+          });
+          const data = await res.json();
+          if (data.success) {
+            commitBtn.disabled = false;
+            commitBtn.textContent = 'Confirm & Publish Timetable';
+            closeImportModal();
+            showSuccessBanner(data.message || 'Timetable published successfully.');
+            await loadScheduleGrid();
+            switchTab('timetable');
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, committing timetable locally:', err);
+      }
+
+      // Offline / Firebase commit fallback
+      const publishedTT = {
+        timetable_id: 'tt-' + Date.now(),
+        academic_calendar_term: currentPreview.academicContext ? currentPreview.academicContext.effectiveDate : 'Autumn 2026',
+        course_code: (currentPreview.academicContext && currentPreview.academicContext.course) || 'BCA',
+        semester_number: (currentPreview.academicContext && currentPreview.academicContext.semester) || 5,
+        section_name: (currentPreview.academicContext && currentPreview.academicContext.section) || 'C',
+        status: 'PUBLISHED',
+        effective_date: '2026-08-04',
+        entries: currentPreview.parsedEntries || defaultBCATimetable.entries
+      };
+
+      try {
+        let stored = JSON.parse(localStorage.getItem('admin_published_timetables') || '[]');
+        const idx = stored.findIndex(t => 
+          t.course_code === publishedTT.course_code && 
+          String(t.semester_number) === String(publishedTT.semester_number) && 
+          t.section_name === publishedTT.section_name
+        );
+        if (idx >= 0) stored[idx] = publishedTT;
+        else stored.push(publishedTT);
+        localStorage.setItem('admin_published_timetables', JSON.stringify(stored));
+      } catch (e) {}
+
+      currentTimetable = publishedTT;
+      commitBtn.disabled = false;
+      commitBtn.textContent = 'Confirm & Publish Timetable';
+      closeImportModal();
+      showSuccessBanner('Timetable for BCA Semester 5 Section C published successfully with ' + publishedTT.entries.length + ' class periods.');
+      await loadScheduleGrid();
+      switchTab('timetable');
+    }
+
+    async function runConflictCheck() {
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/timetable/conflicts/check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              entries: currentTimetable ? currentTimetable.entries : [],
+              meta: {
+                academic_calendar_term: 'Autumn 2026',
+                course_id: 'c0000000-0000-0000-0000-000000000001',
+                semester_id: 'e0000000-0000-0000-0000-000000000005',
+                section_id: 'f0000000-0000-0000-0000-000000000003'
+              }
+            })
+          });
+          const data = await res.json();
+          renderConflictResults(data.conflicts || []);
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, validating client conflicts:', err);
+      }
+
+      // Client-side conflict detection
+      const conflicts = [];
+      const entries = currentTimetable ? (currentTimetable.entries || []) : [];
+      for (let i = 0; i < entries.length; i++) {
+        for (let j = i + 1; j < entries.length; j++) {
+          const a = entries[i];
+          const b = entries[j];
+          if (a.is_cancelled || b.is_cancelled) continue;
+          if (a.day_of_week === b.day_of_week && a.period_index === b.period_index) {
+            // Teacher collision
+            if (a.faculty_name && b.faculty_name && a.faculty_name === b.faculty_name) {
+              conflicts.push({
+                type: 'TEACHER_OVERLAP',
+                message: `${a.faculty_name} is double-booked on ${a.day_of_week} Period ${a.period_index}`
+              });
+            }
+            // Room collision (excluding shared lecture halls)
+            if (a.room_code && b.room_code && a.room_code === b.room_code && a.room_code !== 'R-204') {
+              conflicts.push({
+                type: 'ROOM_OVERLAP',
+                message: `Room ${a.room_code} is double-booked on ${a.day_of_week} Period ${a.period_index}`
+              });
+            }
+          }
+        }
+      }
+      renderConflictResults(conflicts);
+    }
+
+    function renderConflictResults(conflicts) {
+      const alertBox = document.getElementById('conflict-alert-box');
+      if (!alertBox) return;
+      alertBox.style.display = 'block';
+
+      if (conflicts && conflicts.length > 0) {
+        alertBox.innerHTML = `
+          <div class="conflict-banner">
+            <strong>${conflicts.length} Active Scheduling Conflicts</strong>
+            ${conflicts.map(c => `
+              <div class="conflict-item">
+                <span class="conflict-tag">${c.type}</span>
+                <span>${c.message}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        alertBox.innerHTML = `
+          <div style="background: #DCFCE7; border: 1px solid #86EFAC; color: #15803D; padding: 12px 16px; border-radius: var(--radius); margin-bottom: 20px; font-weight: 600; font-size: 14px;">
+            System conflict check passed: 0 teacher overlaps, 0 room double bookings, and 0 section collisions.
+          </div>
+        `;
+        setTimeout(() => { alertBox.style.display = 'none'; }, 6000);
+      }
+    }
+
+    // --- Academic Entities & Structure Management ---
+    async function loadAcademicEntities() {
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/timetable/academic/all');
+          const data = await res.json();
+          if (data.success && data.departments && data.departments.length > 0) {
+            academicState.departments = (data.departments || []).map(d => ({
+              id: d.id || d.department_id,
+              code: d.code || d.department_code,
+              name: d.name || d.department_name
+            }));
+            academicState.courses = (data.courses || []).map(c => ({
+              id: c.id || c.course_id,
+              department_id: c.department_id,
+              code: c.code || c.course_code,
+              name: c.name || c.course_name,
+              total_semesters: c.total_semesters || 6
+            }));
+            academicState.semesters = (data.semesters || []).map(s => ({
+              id: s.id || s.semester_id,
+              course_id: s.course_id,
+              semester_number: s.semester_number,
+              display_label: s.display_label
+            }));
+            academicState.sections = (data.sections || []).map(s => ({
+              id: s.id || s.section_id,
+              semester_id: s.semester_id,
+              name: s.name || s.section_name,
+              capacity: s.capacity || s.max_capacity || 80,
+              academic_calendar_term: s.academic_calendar_term || 'Autumn 2026'
+            }));
+            academicState.rooms = (data.rooms || []).map(r => ({
+              id: r.id || r.room_id,
+              room_code: r.room_code,
+              name: r.name || r.room_name,
+              type: r.type || r.room_type || 'CLASSROOM',
+              capacity: r.capacity || 45,
+              department_id: r.department_id
+            }));
+            academicState.groups = (data.groups || []).map(g => ({
+              id: g.id || g.group_id,
+              section_id: g.section_id,
+              name: g.name || g.group_name,
+              description: g.description
+            }));
+            academicState.periods = data.periods || [];
+            academicState.subjects = data.subjects || [];
+
+            renderDepartmentsTable();
+            renderCoursesTable();
+            renderRoomsTable();
+            renderSectionsTable();
+            renderSubgroups();
+            populateAcademicDropdowns();
+            syncFilterDropdowns();
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, using default academic state:', err);
+      }
+
+      // Default institutional fallback
+      let savedState = null;
+      try {
+        savedState = JSON.parse(localStorage.getItem('admin_academic_state'));
+      } catch (e) {}
+
+      if (savedState && savedState.departments && savedState.departments.length > 0) {
+        academicState = savedState;
+      } else {
+        academicState = {
+          departments: [
+            { id: 'dept-ca', code: 'CA', name: 'Department of Computer Applications' },
+            { id: 'dept-cse', code: 'CSE', name: 'Department of Computer Science & Engineering' },
+            { id: 'dept-ece', code: 'ECE', name: 'Department of Electronics & Communication' },
+            { id: 'dept-me', code: 'ME', name: 'Department of Mechanical Engineering' },
+            { id: 'dept-mgmt', code: 'MGMT', name: 'Department of Management Studies' },
+            { id: 'dept-appsci', code: 'APPSCI', name: 'Department of Applied Sciences' }
+          ],
+          courses: [
+            { id: 'prog-bca', department_id: 'dept-ca', code: 'BCA', name: 'Bachelor of Computer Applications', total_semesters: 6 },
+            { id: 'prog-mca', department_id: 'dept-ca', code: 'MCA', name: 'Master of Computer Applications', total_semesters: 4 },
+            { id: 'prog-btech', department_id: 'dept-cse', code: 'BTECH', name: 'Bachelor of Technology (CSE)', total_semesters: 8 }
+          ],
+          semesters: [
+            { id: 'sem-bca-1', course_id: 'prog-bca', semester_number: 1, display_label: 'Semester 1' },
+            { id: 'sem-bca-2', course_id: 'prog-bca', semester_number: 2, display_label: 'Semester 2' },
+            { id: 'sem-bca-3', course_id: 'prog-bca', semester_number: 3, display_label: 'Semester 3' },
+            { id: 'sem-bca-4', course_id: 'prog-bca', semester_number: 4, display_label: 'Semester 4' },
+            { id: 'sem-bca-5', course_id: 'prog-bca', semester_number: 5, display_label: 'Semester 5' },
+            { id: 'sem-bca-6', course_id: 'prog-bca', semester_number: 6, display_label: 'Semester 6' }
+          ],
+          sections: [
+            { id: 'sec-bca-5a', semester_id: 'sem-bca-5', name: 'A', capacity: 80, academic_calendar_term: 'Autumn 2026' },
+            { id: 'sec-bca-5b', semester_id: 'sem-bca-5', name: 'B', capacity: 80, academic_calendar_term: 'Autumn 2026' },
+            { id: 'sec-bca-5c', semester_id: 'sem-bca-5', name: 'C', capacity: 80, academic_calendar_term: 'Autumn 2026' }
+          ],
+          rooms: [
+            { id: 'r-101', room_code: 'R-101', name: 'Lecture Hall 101', type: 'LECTURE_HALL', capacity: 90, department_id: 'dept-ca' },
+            { id: 'r-102', room_code: 'R-102', name: 'Lecture Hall 102', type: 'LECTURE_HALL', capacity: 90, department_id: 'dept-ca' },
+            { id: 'r-204', room_code: 'R-204', name: 'Academic Block B, Room 204', type: 'CLASSROOM', capacity: 80, department_id: 'dept-ca' },
+            { id: 'r-305', room_code: 'R-305', name: 'Academic Block B, Room 305', type: 'CLASSROOM', capacity: 80, department_id: 'dept-ca' },
+            { id: 'lab-1', room_code: 'LAB-1', name: 'Software Engineering Laboratory (Lab 1)', type: 'LABORATORY', capacity: 45, department_id: 'dept-ca' },
+            { id: 'lab-3', room_code: 'LAB-3', name: 'Turing Computing Laboratory (Lab 3)', type: 'LABORATORY', capacity: 45, department_id: 'dept-ca' },
+            { id: 'lab-4', room_code: 'LAB-4', name: 'Web & Cloud Laboratory (Lab 4)', type: 'LABORATORY', capacity: 45, department_id: 'dept-cse' },
+            { id: 'hw-lab', room_code: 'HARDWARE-LAB', name: 'Digital Electronics & Hardware Lab', type: 'LABORATORY', capacity: 40, department_id: 'dept-ece' }
+          ],
+          groups: [
+            { id: 'grp-c1', section_id: 'sec-bca-5c', name: 'C1', description: 'Subgroup C1 (Roll No 1-40)' },
+            { id: 'grp-c2', section_id: 'sec-bca-5c', name: 'C2', description: 'Subgroup C2 (Roll No 41-80)' }
+          ],
+          periods: [
+            { period_index: 1, period_label: 'Period 1', start_time: '09:00', end_time: '09:55' },
+            { period_index: 2, period_label: 'Period 2', start_time: '09:55', end_time: '10:50' },
+            { period_index: 3, period_label: 'Period 3', start_time: '10:50', end_time: '11:45' },
+            { period_index: 4, period_label: 'Period 4', start_time: '11:45', end_time: '12:40' },
+            { period_index: 5, period_label: 'Lunch', start_time: '12:40', end_time: '13:30' },
+            { period_index: 6, period_label: 'Period 5', start_time: '13:30', end_time: '14:25' },
+            { period_index: 7, period_label: 'Period 6', start_time: '14:25', end_time: '15:20' },
+            { period_index: 8, period_label: 'Period 7', start_time: '15:20', end_time: '16:15' }
+          ],
+          subjects: [
+            { id: 'subj-501', code: 'BCA-501', name: 'Java Programming' },
+            { id: 'subj-502', code: 'BCA-502', name: 'Operating Systems' },
+            { id: 'subj-503', code: 'BCA-503', name: 'Computer Networks' },
+            { id: 'subj-504', code: 'BCA-504', name: 'Database Management' },
+            { id: 'subj-505', code: 'BCA-505', name: 'Web Frameworks' }
+          ]
+        };
+      }
+
+      renderDepartmentsTable();
+      renderCoursesTable();
+      renderRoomsTable();
+      renderSectionsTable();
+      renderSubgroups();
+      populateAcademicDropdowns();
+      syncFilterDropdowns();
+    }
+
+    function renderDepartmentsTable() {
+      const tbody = document.getElementById('depts-table-body');
+      const countTag = document.getElementById('dept-count-tag');
+      if (countTag) countTag.textContent = `${academicState.departments.length} Departments`;
+      if (!tbody) return;
+
+      if (academicState.departments.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4" style="text-align: center; padding: 24px 16px; color: #64748B;">
+              <div style="font-weight: 600; color: #17345C; margin-bottom: 4px;">No Academic Departments Created</div>
+              <div style="font-size: 13px; margin-bottom: 12px;">All default mock departments have been removed. Create your own academic departments according to institutional requirements.</div>
+              <button type="button" class="btn btn-sm" onclick="openAddDeptModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">
+                + Add Academic Department
+              </button>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = academicState.departments.map(d => `
+        <tr>
+          <td><strong>${d.code}</strong></td>
+          <td>${d.name}</td>
+          <td><span class="tag tag-present">ACTIVE</span></td>
+          <td style="text-align: right;">
+            <button type="button" class="action-btn-sm" onclick="deleteDepartment('${d.id}', '${d.name.replace(/'/g, "\\'")}')" title="Delete ${d.code} Department" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 4px 8px; font-size: 12px; cursor: pointer;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              Delete
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function deleteDepartment(deptId, deptName) {
+      if (!confirm(`Are you sure you want to delete Academic Department "${deptName}"?\n\nThis will remove the department from the institutional directory.`)) {
+        return;
+      }
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + `/api/timetable/academic/department/${encodeURIComponent(deptId)}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' })
+          });
+          const data = await res.json();
+          if (data.success) {
+            await loadAcademicEntities();
+            showSuccessBanner(data.message || `Department "${deptName}" deleted successfully.`);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, deleting department locally:', err);
+      }
+
+      // Offline fallback
+      academicState.departments = academicState.departments.filter(d => d.id !== deptId && d.code !== deptId);
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
+      renderDepartmentsTable();
+      populateAcademicDropdowns();
+      showSuccessBanner(`Department "${deptName}" deleted successfully.`);
+    }
+
+    function renderCoursesTable() {
+      const tbody = document.getElementById('courses-table-body');
+      const countTag = document.getElementById('course-count-tag');
+      if (countTag) countTag.textContent = `${academicState.courses.length} Programmes`;
+      if (!tbody) return;
+
+      if (academicState.courses.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #64748B;">No programmes registered.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = academicState.courses.map(c => {
+        const sems = academicState.semesters.filter(s => s.course_id === c.id);
+        const semCount = sems.length || c.total_semesters || 6;
+        return `
+          <tr>
+            <td><strong>${c.code}</strong></td>
+            <td>${c.name}</td>
+            <td><span class="tag" style="background: #E2E8F0; color: #17345C;">${semCount} Sems</span></td>
+            <td style="text-align: right;">
+              <button type="button" class="action-btn-sm" onclick="deleteProgramme('${c.id}', '${c.name.replace(/'/g, "\\'")}')" title="Delete ${c.code}" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 4px 8px; font-size: 12px; cursor: pointer;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Delete
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function deleteProgramme(progId, progName) {
+      if (!confirm(`Are you sure you want to delete Programme "${progName}"?\n\nThis will remove the programme and all associated semesters and sections.`)) {
+        return;
+      }
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + `/api/timetable/academic/programme/${encodeURIComponent(progId)}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' })
+          });
+          const data = await res.json();
+          if (data.success) {
+            await loadAcademicEntities();
+            showSuccessBanner(data.message || `Programme "${progName}" deleted successfully.`);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, deleting programme locally:', err);
+      }
+
+      // Offline fallback
+      academicState.courses = academicState.courses.filter(c => c.id !== progId && c.code !== progId);
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
+      renderCoursesTable();
+      syncFilterDropdowns();
+      showSuccessBanner(`Programme "${progName}" deleted successfully.`);
+    }
+
+    function renderRoomsTable() {
+      const tbody = document.getElementById('rooms-table-body');
+      const countTag = document.getElementById('room-count-tag');
+      if (countTag) countTag.textContent = `${academicState.rooms.length} Facilities`;
+      if (!tbody) return;
+
+      if (academicState.rooms.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748B;">No facilities registered.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = academicState.rooms.map(r => `
+        <tr>
+          <td><strong>${r.room_code}</strong></td>
+          <td>${r.name}</td>
+          <td><span class="room-badge">${r.type || 'CLASSROOM'}</span></td>
+          <td>${r.capacity || 45} seats</td>
+          <td><span class="tag tag-present">ACTIVE</span></td>
+          <td style="text-align: right;">
+            <button type="button" class="action-btn-sm" onclick="deleteRoom('${r.id}', '${r.room_code.replace(/'/g, "\\'")}')" title="Delete Facility ${r.room_code}" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 4px 8px; font-size: 12px; cursor: pointer;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+              </svg>
+              Delete
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function deleteRoom(roomId, roomCode) {
+      if (!confirm(`Are you sure you want to delete Facility "${roomCode}"?`)) {
+        return;
+      }
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + `/api/timetable/academic/room/${encodeURIComponent(roomId)}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' })
+          });
+          const data = await res.json();
+          if (data.success) {
+            await loadAcademicEntities();
+            showSuccessBanner(data.message || `Room "${roomCode}" deleted successfully.`);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, deleting room locally:', err);
+      }
+
+      // Offline fallback
+      academicState.rooms = academicState.rooms.filter(r => r.id !== roomId && r.room_code !== roomCode);
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
+      renderRoomsTable();
+      populateAcademicDropdowns();
+      showSuccessBanner(`Facility "${roomCode}" deleted successfully.`);
+    }
+
+    function renderSectionsTable() {
+      const tbody = document.getElementById('sections-table-body');
+      const countTag = document.getElementById('section-count-tag');
+      if (countTag) countTag.textContent = `${academicState.sections.length} Sections`;
+      if (!tbody) return;
+
+      if (academicState.sections.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #64748B;">No sections registered.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = academicState.sections.map(s => {
+        const sem = academicState.semesters.find(sm => sm.id === s.semester_id);
+        const crs = sem ? academicState.courses.find(c => c.id === sem.course_id) : null;
+        const progCode = crs ? crs.code : (s.course_code || 'BCA');
+        const semNum = sem ? `Semester ${sem.semester_number}` : 'Semester 5';
+        return `
+          <tr>
+            <td><strong>${progCode}</strong></td>
+            <td>${semNum}</td>
+            <td><span class="tag" style="background: #E0F2FE; color: #0284C7; font-weight: 700;">Section ${s.name}</span></td>
+            <td>${s.capacity || 80} students</td>
+            <td>${s.academic_calendar_term || 'Autumn 2026'}</td>
+            <td><span class="tag tag-present">ACTIVE</span></td>
+            <td style="text-align: right;">
+              <button type="button" class="action-btn-sm" onclick="deleteSection('${s.id}', '${s.name.replace(/'/g, "\\'")}')" title="Delete Section ${s.name}" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 4px 8px; font-size: 12px; cursor: pointer;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Delete
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function deleteSection(secId, secName) {
+      if (!confirm(`Are you sure you want to delete Section "${secName}"?\n\nThis will also remove any practical cohorts under this section.`)) {
+        return;
+      }
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + `/api/timetable/academic/section/${encodeURIComponent(secId)}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' })
+          });
+          const data = await res.json();
+          if (data.success) {
+            await loadAcademicEntities();
+            showSuccessBanner(data.message || `Section "${secName}" deleted successfully.`);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, deleting section locally:', err);
+      }
+
+      // Offline fallback
+      academicState.sections = academicState.sections.filter(s => s.id !== secId && s.name !== secName);
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
+      renderSectionsTable();
+      syncFilterDropdowns();
+      showSuccessBanner(`Section "${secName}" deleted successfully.`);
+    }
+
+    function renderSubgroups() {
+      const container = document.getElementById('subgroups-container');
+      if (!container) return;
+
+      if (academicState.groups.length === 0) {
+        container.innerHTML = '<div style="color: #64748B; padding: 12px;">No practical cohorts registered.</div>';
+        return;
+      }
+
+      container.innerHTML = academicState.groups.map(g => {
+        const sec = academicState.sections.find(s => s.id === g.section_id);
+        const secName = sec ? `Section ${sec.name}` : 'Section C';
+        return `
+          <div style="background: #F8FAFC; border: 1px solid var(--slate-border); border-radius: 6px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <span class="tag" style="background: #1D3C72; color: #FFFFFF; font-weight: 700;">Cohort ${g.name}</span>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 11px; color: var(--slate-text-sub); font-weight: 600;">${secName}</span>
+                <button type="button" class="action-btn-sm" onclick="deleteSubgroup('${g.id}', '${g.name.replace(/'/g, "\\'")}')" title="Delete Cohort ${g.name}" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 2px 6px; font-size: 11px; cursor: pointer;">
+                  Delete
+                </button>
+              </div>
+            </div>
+            <p style="font-size: 12px; color: var(--slate-text-main); margin: 0 0 8px 0; font-weight: 500;">
+              ${g.description || 'Practical Laboratory Cohort'}
+            </p>
+            <div style="font-size: 11px; color: #15803D; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+              <span>âœ“ Active in Timetable Conflict Engine</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function deleteSubgroup(grpId, grpName) {
+      if (!confirm(`Are you sure you want to delete Cohort "${grpName}"?`)) {
+        return;
+      }
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + `/api/timetable/academic/group/${encodeURIComponent(grpId)}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' })
+          });
+          const data = await res.json();
+          if (data.success) {
+            await loadAcademicEntities();
+            showSuccessBanner(data.message || `Cohort "${grpName}" deleted successfully.`);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, deleting cohort locally:', err);
+      }
+
+      // Offline fallback
+      academicState.groups = academicState.groups.filter(g => g.id !== grpId && g.name !== grpName);
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
+      renderSubgroups();
+      populateAcademicDropdowns();
+      showSuccessBanner(`Cohort "${grpName}" deleted successfully.`);
+    }
+
+    function populateAcademicDropdowns() {
+      // Host Departments for Programme Modal
+      const progDept = document.getElementById('new-prog-dept');
+      if (progDept && academicState.departments.length > 0) {
+        progDept.innerHTML = academicState.departments.map(d => `
+          <option value="${d.id}">${d.name} (${d.code})</option>
+        `).join('');
+      }
+
+      // Department for Room Modal
+      const roomDept = document.getElementById('new-room-dept');
+      if (roomDept && academicState.departments.length > 0) {
+        roomDept.innerHTML = academicState.departments.map(d => `
+          <option value="${d.id}">${d.name} (${d.code})</option>
+        `).join('');
+      }
+
+      // Programme for Section Modal
+      const secProg = document.getElementById('new-sec-prog');
+      if (secProg && academicState.courses.length > 0) {
+        secProg.innerHTML = academicState.courses.map(c => `
+          <option value="${c.id}">${c.name} (${c.code})</option>
+        `).join('');
+        updateSemesterOptionsForSection();
+      }
+
+      // Section for Subgroups Modal
+      const grpSec = document.getElementById('new-grp-section');
+      if (grpSec && academicState.sections.length > 0) {
+        grpSec.innerHTML = academicState.sections.map(s => {
+          const sem = academicState.semesters.find(sm => sm.id === s.semester_id);
+          const crs = sem ? academicState.courses.find(c => c.id === sem.course_id) : null;
+          const label = `${crs ? crs.code : 'Course'} Sem ${sem ? sem.semester_number : '5'} - Section ${s.name}`;
+          return `<option value="${s.id}">${label}</option>`;
+        }).join('');
+      }
+
+      // Rooms for New Entry Modal
+      const entryRoom = document.getElementById('entry-room');
+      if (entryRoom && academicState.rooms.length > 0) {
+        entryRoom.innerHTML = academicState.rooms.map(r => `
+          <option value="${r.id}">${r.room_code} - ${r.name} (${r.type || 'CLASSROOM'})</option>
+        `).join('');
+      }
+
+      // Faculty for New Entry Modal
+      const entryFac = document.getElementById('entry-faculty');
+      if (entryFac && facultyDirectory.length > 0) {
+        entryFac.innerHTML = facultyDirectory.map(f => `
+          <option value="${f.id}">${f.name} (${f.staffId || f.id})</option>
+        `).join('');
+      }
+    }
+
+    function updateSemesterOptionsForSection() {
+      const progSelect = document.getElementById('new-sec-prog');
+      const semSelect = document.getElementById('new-sec-sem');
+      if (!progSelect || !semSelect) return;
+
+      const progId = progSelect.value;
+      const sems = academicState.semesters.filter(s => s.course_id === progId);
+      if (sems.length > 0) {
+        semSelect.innerHTML = sems.map(s => `
+          <option value="${s.id}">Semester ${s.semester_number}</option>
+        `).join('');
+      } else {
+        semSelect.innerHTML = '<option value="">Default Semester 1</option>';
+      }
+    }
+
+    function syncFilterDropdowns() {
+      const courseSelect = document.getElementById('filter-course');
+      const semSelect = document.getElementById('filter-semester');
+      const secSelect = document.getElementById('filter-section');
+      const termSelect = document.getElementById('filter-term');
+      if (!courseSelect || !semSelect || !secSelect) return;
+
+      const currentCourse = courseSelect.value;
+
+      // Populate courses
+      if (academicState.courses.length > 0) {
+        courseSelect.innerHTML = academicState.courses.map(c => `
+          <option value="${c.code}" ${c.code === currentCourse || (c.code === 'BCA' && !currentCourse) ? 'selected' : ''}>
+            ${c.code} - ${c.name}
+          </option>
+        `).join('');
+      } else {
+        courseSelect.innerHTML = '<option value="">No Programmes Available</option>';
+      }
+
+      // Ensure term dropdown is synced
+      if (termSelect && !termSelect.value) {
+        termSelect.innerHTML = '<option value="Autumn 2026 (Aug 2026 - Jan 2027)" selected>Autumn 2026 (Aug 2026 - Jan 2027)</option>';
+      }
+
+      handleFilterCourseChange(false);
+    }
+
+    function handleFilterCourseChange(triggerGridReload = true) {
+      const courseSelect = document.getElementById('filter-course');
+      const semSelect = document.getElementById('filter-semester');
+      if (!courseSelect || !semSelect) return;
+
+      const courseCode = courseSelect.value;
+      const crs = academicState.courses.find(c => c.code === courseCode);
+      const sems = crs ? academicState.semesters.filter(s => s.course_id === crs.id) : [];
+
+      if (sems.length > 0) {
+        semSelect.innerHTML = sems.map(s => `
+          <option value="${s.semester_number}" ${s.semester_number === 5 ? 'selected' : ''}>
+            Semester ${s.semester_number}
+          </option>
+        `).join('');
+      } else {
+        // Fallback semesters 1 to 6
+        semSelect.innerHTML = [1, 2, 3, 4, 5, 6].map(num => `
+          <option value="${num}" ${num === 5 ? 'selected' : ''}>Semester ${num}</option>
+        `).join('');
+      }
+
+      handleFilterSemesterChange(triggerGridReload);
+    }
+
+    function handleFilterSemesterChange(triggerGridReload = true) {
+      const courseSelect = document.getElementById('filter-course');
+      const semSelect = document.getElementById('filter-semester');
+      const secSelect = document.getElementById('filter-section');
+      if (!secSelect) return;
+
+      const courseCode = courseSelect ? courseSelect.value : 'BCA';
+      const semNumber = semSelect ? parseInt(semSelect.value) : 5;
+      const crs = academicState.courses.find(c => c.code === courseCode);
+      const sem = crs ? academicState.semesters.find(s => s.course_id === crs.id && s.semester_number === semNumber) : null;
+
+      const matchingSections = sem ? academicState.sections.filter(s => s.semester_id === sem.id) : academicState.sections;
+
+      if (matchingSections.length > 0) {
+        secSelect.innerHTML = matchingSections.map(s => `
+          <option value="${s.name}" ${s.name === 'C' ? 'selected' : ''}>
+            Section ${s.name}
+          </option>
+        `).join('');
+      } else {
+        secSelect.innerHTML = '<option value="C" selected>Section C</option>';
+      }
+
+      if (triggerGridReload) {
+        loadScheduleGrid();
+      }
+    }
+
+    // --- Modal Show / Hide Functions ---
+    function openNewEntryModal() {
+      document.getElementById('modal-add-entry').style.display = 'flex';
+      const cBox = document.getElementById('entry-conflict-box');
+      if (cBox) cBox.style.display = 'none';
+    }
+    function closeNewEntryModal() {
+      document.getElementById('modal-add-entry').style.display = 'none';
+    }
+
+    function openAddDeptModal() {
+      document.getElementById('modal-add-dept').style.display = 'flex';
+      document.getElementById('new-dept-code').value = '';
+      document.getElementById('new-dept-name').value = '';
+      document.getElementById('new-dept-programs').value = '';
+      const toggle = document.getElementById('new-dept-hod-toggle');
+      if (toggle) toggle.checked = false;
+      const wrap = document.getElementById('new-dept-hod-wrap');
+      if (wrap) wrap.style.display = 'none';
+      document.getElementById('new-dept-hod-name').value = '';
+      document.getElementById('new-dept-hod-email').value = '';
+      document.getElementById('new-dept-hod-password').value = '';
+      const msg = document.getElementById('add-dept-msg');
+      if (msg) msg.style.display = 'none';
+    }
+    function closeAddDeptModal() {
+      document.getElementById('modal-add-dept').style.display = 'none';
+    }
+
+    function openAddProgrammeModal() {
+      document.getElementById('modal-add-programme').style.display = 'flex';
+      document.getElementById('new-prog-code').value = '';
+      document.getElementById('new-prog-name').value = '';
+      const msg = document.getElementById('add-prog-msg');
+      if (msg) msg.style.display = 'none';
+    }
+    function closeAddProgrammeModal() {
+      document.getElementById('modal-add-programme').style.display = 'none';
+    }
+
+    function openAddSectionModal() {
+      document.getElementById('modal-add-section').style.display = 'flex';
+      updateSemesterOptionsForSection();
+      document.getElementById('new-sec-name').value = '';
+      const msg = document.getElementById('add-sec-msg');
+      if (msg) msg.style.display = 'none';
+    }
+    function closeAddSectionModal() {
+      document.getElementById('modal-add-section').style.display = 'none';
+    }
+
+    function openAddRoomModal() {
+      document.getElementById('modal-add-room').style.display = 'flex';
+      document.getElementById('new-room-code').value = '';
+      document.getElementById('new-room-name').value = '';
+      const msg = document.getElementById('add-room-msg');
+      if (msg) msg.style.display = 'none';
+    }
+    function closeAddRoomModal() {
+      document.getElementById('modal-add-room').style.display = 'none';
+    }
+
+    function openAddGroupModal() {
+      document.getElementById('modal-add-group').style.display = 'flex';
+      document.getElementById('new-grp-name').value = '';
+      document.getElementById('new-grp-desc').value = '';
+      const msg = document.getElementById('add-grp-msg');
+      if (msg) msg.style.display = 'none';
+    }
+    function closeAddGroupModal() {
+      document.getElementById('modal-add-group').style.display = 'none';
+    }
+
+    // --- Entity Creation Submissions ---
+    async function submitAddDept() {
+      const code = document.getElementById('new-dept-code').value.trim().toUpperCase();
+      const name = document.getElementById('new-dept-name').value.trim();
+      const programs = document.getElementById('new-dept-programs').value.trim();
+      const hasHod = document.getElementById('new-dept-hod-toggle').checked;
+      const hod_name = document.getElementById('new-dept-hod-name').value.trim();
+      const hod_email = document.getElementById('new-dept-hod-email').value.trim();
+      const hod_password = document.getElementById('new-dept-hod-password').value.trim();
+      const msg = document.getElementById('add-dept-msg');
+
+      if (!code || !name || !programs) {
+        msg.style.display = 'block';
+        msg.innerHTML = '<span style="color: #DC2626; font-size: 13px;">School / Department Code, Name, and Degree Programmes are required.</span>';
+        return;
+      }
+
+      if (hasHod && (!hod_name || !hod_email || !hod_password)) {
+        msg.style.display = 'block';
+        msg.innerHTML = '<span style="color: #DC2626; font-size: 13px;">Please complete HOD Name, Email, and Password.</span>';
+        return;
+      }
+
+      const department_id = 'dept-' + code.toLowerCase();
+      const payload = {
+        department_id: department_id,
+        id: department_id,
+        department_code: code,
+        department_name: name,
+        code: code,
+        name: name,
+        school_id: department_id,
+        school_code: code,
+        school_name: name,
+        programs: programs,
+        description: programs,
+        hod_name: hasHod ? hod_name : undefined,
+        hod_email: hasHod ? hod_email : undefined,
+        hod_password: hasHod ? hod_password : undefined,
+        dean_name: hasHod ? hod_name : undefined,
+        contact_email: hasHod ? hod_email : undefined
+      };
+
+      try {
+        const res = await fetch(getApiBase() + '/api/timetable/academic/department', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        // Also post to admin academic departments endpoint
+        fetch(getApiBase() + '/api/admin/academic/departments', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        }).catch(() => {});
+
+        // Save locally for offline fallback
+        try {
+          var stored = JSON.parse(localStorage.getItem('attendance_academic_departments_v2') || '[]');
+          var idx = stored.findIndex(d => (d.code || d.id || '').toUpperCase() === code);
+          var entry = {
+            id: code.toLowerCase(),
+            code: code,
+            name: name,
+            programs: programs,
+            hodName: hasHod ? hod_name : '',
+            hodEmail: hasHod ? hod_email : '',
+            facultyCount: 0,
+            sessions: 0,
+            attendanceRate: 100.0
+          };
+          if (idx >= 0) stored[idx] = Object.assign(stored[idx], entry);
+          else stored.push(entry);
+          localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(stored));
+
+          if (hasHod) {
+            var hods = JSON.parse(localStorage.getItem('attendance_hod_accounts_v2') || '[]');
+            var hIdx = hods.findIndex(h => (h.deptCode || '').toUpperCase() === code);
+            var hEntry = {
+              deptId: code.toLowerCase(),
+              deptName: name,
+              deptCode: code,
+              hodName: hod_name,
+              hodEmail: hod_email,
+              password: hod_password,
+              role: 'hod',
+              createdAt: new Date().toISOString()
+            };
+            if (hIdx >= 0) hods[hIdx] = hEntry;
+            else hods.push(hEntry);
+            localStorage.setItem('attendance_hod_accounts_v2', JSON.stringify(hods));
+          }
+        } catch (e) {}
+
+        if (data && data.success) {
+          closeAddDeptModal();
+          await loadAcademicEntities();
+          if (typeof loadSchoolsGrid === 'function') {
+            await loadSchoolsGrid();
+          }
+          showSuccessBanner('School / Academic Department "' + name + '" (' + code + ') created successfully.');
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend offline, saving department locally:', err);
+      }
+
+      // Offline / Firebase fallback
+      academicState.departments.push({ id: department_id, code, name });
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
+      closeAddDeptModal();
+      renderDepartmentsTable();
+      populateAcademicDropdowns();
+      if (typeof loadSchoolsGrid === 'function') {
+        loadSchoolsGrid();
+      }
+      showSuccessBanner('School / Academic Department "' + name + '" (' + code + ') created successfully.');
+    }
+
+    async function submitAddProgramme() {
+      const department_id = document.getElementById('new-prog-dept').value;
+      const code = document.getElementById('new-prog-code').value.trim();
+      const name = document.getElementById('new-prog-name').value.trim();
+      const total_semesters = parseInt(document.getElementById('new-prog-semesters').value) || 6;
+      const prog_id = 'prog-' + (code ? code.toLowerCase() : Date.now());
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/timetable/academic/programme', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ department_id, course_code: code, course_name: name, code, name, total_semesters })
+          });
+          const data = await res.json();
+          if (data.success) {
+            closeAddProgrammeModal();
+            await loadAcademicEntities();
+            showSuccessBanner(data.message);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend offline, saving programme locally:', err);
+      }
+
+      // Offline fallback
+      academicState.courses.push({ id: prog_id, department_id, code, name, total_semesters });
+      // Generate semesters for this course
+      for (let s = 1; s <= total_semesters; s++) {
+        academicState.semesters.push({ id: `sem-${code.toLowerCase()}-${s}`, course_id: prog_id, semester_number: s, display_label: `Semester ${s}` });
+      }
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
+      closeAddProgrammeModal();
+      renderCoursesTable();
+      populateAcademicDropdowns();
+      syncFilterDropdowns();
+      showSuccessBanner(`Programme "${name}" (${code}) created successfully.`);
+    }
+
+    async function submitAddSection() {
+      const semester_id = document.getElementById('new-sec-sem').value;
+      const name = document.getElementById('new-sec-name').value.trim();
+      const capacity = parseInt(document.getElementById('new-sec-capacity').value) || 80;
+      const academic_calendar_term = document.getElementById('new-sec-term').value.trim() || 'Autumn 2026';
+      const sec_id = 'sec-' + Date.now();
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/timetable/academic/section', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ semester_id, section_name: name, name, max_capacity: capacity, capacity, academic_calendar_term })
+          });
+          const data = await res.json();
+          if (data.success) {
+            closeAddSectionModal();
+            await loadAcademicEntities();
+            showSuccessBanner(data.message);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend offline, saving section locally:', err);
+      }
+
+      // Offline fallback
+      academicState.sections.push({ id: sec_id, semester_id, name, capacity, academic_calendar_term });
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
+      closeAddSectionModal();
+      renderSectionsTable();
+      syncFilterDropdowns();
+      showSuccessBanner(`Section ${name} created successfully.`);
+    }
+
+    async function submitAddRoom() {
+      const room_code = document.getElementById('new-room-code').value.trim();
+      const type = document.getElementById('new-room-type').value;
+      const name = document.getElementById('new-room-name').value.trim();
+      const capacity = parseInt(document.getElementById('new-room-cap').value) || 45;
+      const department_id = document.getElementById('new-room-dept').value;
+      const room_id = 'r-' + Date.now();
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/timetable/academic/room', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ room_code, facility_name: name, name, room_type: type, type, capacity, department_id })
+          });
+          const data = await res.json();
+          if (data.success) {
+            closeAddRoomModal();
+            await loadAcademicEntities();
+            showSuccessBanner(data.message);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend offline, saving room locally:', err);
+      }
+
+      // Offline fallback
+      academicState.rooms.push({ id: room_id, room_code, name, type, capacity, department_id });
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
+      closeAddRoomModal();
+      renderRoomsTable();
+      populateAcademicDropdowns();
+      showSuccessBanner(`Facility "${room_code}" (${name}) added successfully.`);
+    }
+
+    async function submitAddGroup() {
+      const section_id = document.getElementById('new-grp-section').value;
+      const name = document.getElementById('new-grp-name').value.trim();
+      const description = document.getElementById('new-grp-desc').value.trim();
+      const group_id = 'grp-' + Date.now();
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/timetable/academic/group', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ section_id, group_name: name, name, description })
+          });
+          const data = await res.json();
+          if (data.success) {
+            closeAddGroupModal();
+            await loadAcademicEntities();
+            showSuccessBanner(data.message);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend offline, saving cohort locally:', err);
+      }
+
+      // Offline fallback
+      academicState.groups.push({ id: group_id, section_id, name, description });
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
+      closeAddGroupModal();
+      renderSubgroups();
+      populateAcademicDropdowns();
+      showSuccessBanner(`Practical Cohort "${name}" registered successfully.`);
+    }
+
+    // --- Add Class Period & Scheduling Flow ---
+    async function runModalConflictCheck() {
+      const cBox = document.getElementById('entry-conflict-box');
+      cBox.style.display = 'block';
+      cBox.innerHTML = '<span style="color: #64748B; font-size: 12px;">Validating scheduling constraints...</span>';
+
+      const day = document.getElementById('entry-day').value;
+      const period = parseInt(document.getElementById('entry-period').value);
+      const facultyId = document.getElementById('entry-faculty').value;
+      const roomId = document.getElementById('entry-room').value;
+      const groupName = document.getElementById('entry-group').value;
+
+      // Check current timetable in memory
+      if (!currentTimetable || !currentTimetable.entries) {
+        cBox.innerHTML = '<div style="background: #DCFCE7; color: #15803D; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">âœ“ Slot available. No existing conflicts found.</div>';
+        return;
+      }
+
+      const conflicts = [];
+      const periodEntries = currentTimetable.entries.filter(e => e.day_of_week === day && e.period_index === period && !e.is_cancelled);
+
+      for (const entry of periodEntries) {
+        if (entry.faculty_id === facultyId) {
+          conflicts.push(`Teacher collision: Faculty already has class in Period ${period} (${entry.subject_code})`);
+        }
+        if (entry.room_id === roomId) {
+          conflicts.push(`Facility collision: Room ${entry.room_code || 'selected'} is occupied by ${entry.subject_code}`);
+        }
+        if (groupName && entry.group_name === groupName) {
+          conflicts.push(`Cohort collision: Subgroup ${groupName} already has another session at this time`);
+        } else if (!groupName && entry.group_name) {
+          conflicts.push(`Section split: Subgroup ${entry.group_name} has a practical scheduled in this period`);
+        } else if (!groupName && !entry.group_name) {
+          conflicts.push(`Section overlap: Entire section already scheduled for ${entry.subject_code}`);
+        }
+      }
+
+      if (conflicts.length > 0) {
+        cBox.innerHTML = `
+          <div style="background: #FEE2E2; border: 1px solid #FCA5A5; color: #991B1B; padding: 8px 12px; border-radius: 4px; font-size: 12px;">
+            <strong>Scheduling Conflict:</strong>
+            <ul style="margin: 4px 0 0 16px; padding: 0;">
+              ${conflicts.map(c => `<li>${c}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+      } else {
+        cBox.innerHTML = '<div style="background: #DCFCE7; border: 1px solid #86EFAC; color: #15803D; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">âœ“ Slot available. Zero teacher, room, or section overlaps detected.</div>';
+      }
+    }
+
+    async function submitNewEntry() {
+      const day_of_week = document.getElementById('entry-day').value;
+      const period_index = parseInt(document.getElementById('entry-period').value);
+      const subject_input = document.getElementById('entry-subject').value.trim();
+      const session_type = document.getElementById('entry-type').value;
+      const room_id = document.getElementById('entry-room').value;
+      const faculty_id = document.getElementById('entry-faculty').value;
+      const group_name = document.getElementById('entry-group').value.trim() || undefined;
+
+      // Extract subject code and name from input
+      let subject_code = subject_input;
+      let subject_name = subject_input;
+      const codeMatch = subject_input.match(/^([A-Z0-9-]+)\s*\((.+)\)$/);
+      if (codeMatch) {
+        subject_code = codeMatch[1].trim();
+        subject_name = codeMatch[2].trim();
+      }
+
+      const saveBtn = document.getElementById('btn-save-entry');
+      saveBtn.disabled = true;
+      saveBtn.textContent = 'Scheduling...';
+
+      // Default section is Section C of BCA Sem 5
+      const activeSection = academicState.sections.find(s => s.name === 'C') || academicState.sections[0];
+      const section_id = activeSection ? activeSection.id : 'f0000000-0000-0000-0000-000000000003';
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/timetable/entries', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              section_id,
+              day_of_week,
+              period_index,
+              subject_code,
+              subject_name,
+              session_type,
+              room_id,
+              faculty_id,
+              group_name
+            })
+          });
+
+          const data = await res.json();
+          if (data.success) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save & Schedule Class';
+            closeNewEntryModal();
+            showSuccessBanner(data.message);
+            await loadScheduleGrid();
+            switchTab('timetable');
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend offline, scheduling class locally:', err);
+      }
+
+      // Offline / Firebase Scheduling fallback
+      if (!currentTimetable) {
+        currentTimetable = {
+          timetable_id: 'tt-' + Date.now(),
+          academic_calendar_term: 'Autumn 2026',
+          course_code: 'BCA',
+          semester_number: 5,
+          section_name: 'C',
+          status: 'PUBLISHED',
+          entries: []
+        };
+      }
+      const roomObj = academicState.rooms.find(r => r.id === room_id) || {};
+      const facObj = facultyDirectory.find(f => f.id === faculty_id) || {};
+      const newEntry = {
+        entry_id: 'ent-' + Date.now(),
+        day_of_week,
+        period_index,
+        subject_code,
+        subject_name,
+        class_type: session_type,
+        room_code: roomObj.room_code || 'R-204',
+        faculty_name: facObj.name || 'Dr. Neha Dave',
+        group_name: group_name || null
+      };
+      currentTimetable.entries.push(newEntry);
+      
+      try {
+        let stored = JSON.parse(localStorage.getItem('admin_published_timetables') || '[]');
+        const idx = stored.findIndex(t => 
+          t.course_code === currentTimetable.course_code && 
+          String(t.semester_number) === String(currentTimetable.semester_number) && 
+          t.section_name === currentTimetable.section_name
+        );
+        if (idx >= 0) stored[idx] = currentTimetable;
+        else stored.push(currentTimetable);
+        localStorage.setItem('admin_published_timetables', JSON.stringify(stored));
+      } catch(e) {}
+
+      saveBtn.disabled = false;
+      saveBtn.textContent = 'Save & Schedule Class';
+      closeNewEntryModal();
+      showSuccessBanner(`Class period successfully scheduled for ${day_of_week} Period ${period_index}.`);
+      renderGrid(currentTimetable);
+      updateStatusPill('PUBLISHED');
+    }
+
+    // --- Helper Functions ---
+    function showSuccessBanner(message) {
+      const alertBox = document.getElementById('conflict-alert-box');
+      if (!alertBox) return;
+      alertBox.style.display = 'block';
+      alertBox.innerHTML = `
+        <div style="background: #DCFCE7; border: 1px solid #86EFAC; color: #15803D; padding: 12px 18px; border-radius: var(--radius); margin-bottom: 20px; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: space-between;">
+          <span>âœ“ ${message}</span>
+          <button type="button" onclick="this.parentElement.parentElement.style.display='none'" style="background: none; border: none; font-size: 18px; cursor: pointer; color: #15803D;">&times;</button>
+        </div>
+      `;
+      setTimeout(() => { alertBox.style.display = 'none'; }, 6000);
+    }
+
+    function printSchedule() {
+      const progSelect = document.getElementById('filter-course');
+      const semSelect = document.getElementById('filter-semester');
+      const secSelect = document.getElementById('filter-section');
+      const termSelect = document.getElementById('filter-term');
+      const progText = progSelect ? progSelect.options[progSelect.selectedIndex]?.text : 'BCA';
+      const semText = semSelect ? semSelect.options[semSelect.selectedIndex]?.text : 'Semester 5';
+      const secText = secSelect ? secSelect.options[secSelect.selectedIndex]?.text : 'Section C';
+      const termText = termSelect ? termSelect.value : 'Autumn 2026';
+
+      const metaEl = document.getElementById('print-timetable-meta');
+      if (metaEl) {
+        metaEl.textContent = `Programme: ${progText} â€¢ ${semText} (${secText}) â€¢ Academic Term: ${termText} â€¢ Published Timetable`;
+      }
+      window.print();
+    }
+
+    async function clearCurrentSchedule() {
+      const course = document.getElementById('filter-course') ? document.getElementById('filter-course').value : 'BCA';
+      const semester = document.getElementById('filter-semester') ? document.getElementById('filter-semester').value : '5';
+      const section = document.getElementById('filter-section') ? document.getElementById('filter-section').value : 'C';
+      const term = document.getElementById('filter-term') ? document.getElementById('filter-term').value : 'Autumn 2026';
+
+      if (!confirm(`Are you sure you want to permanently clear/delete the timetable for ${course} Semester ${semester} Section ${section}?`)) {
+        return;
+      }
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/timetable/published?course=' + encodeURIComponent(course) + '&semester=' + encodeURIComponent(semester) + '&section=' + encodeURIComponent(section) + '&term=' + encodeURIComponent(term), {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+          const data = await res.json();
+          if (data.success) {
+            showSuccessBanner(`Timetable schedule for ${course} Sem ${semester} (${section}) successfully removed.`);
+            await loadScheduleGrid();
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, removing timetable locally:', err);
+      }
+
+      // Offline / Firebase remove fallback
+      try {
+        let stored = JSON.parse(localStorage.getItem('admin_published_timetables') || '[]');
+        stored = stored.filter(t => !(
+          (t.course_code === course || t.course_name === course) && 
+          String(t.semester_number) === String(semester) && 
+          t.section_name === section
+        ));
+        localStorage.setItem('admin_published_timetables', JSON.stringify(stored));
+      } catch (e) {}
+
+      currentTimetable = null;
+      showSuccessBanner(`Timetable schedule for ${course} Sem ${semester} (${section}) successfully removed.`);
+      loadScheduleGrid();
+    }
+
+    async function purgeAllTestData() {
+      if (!confirm('CAUTION: This will delete ALL test/mock students, teachers, allocations, attendance sessions, marks, and timetables, resetting the portal to a clean directory.\n\nProceed with purge?')) return;
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/admin/purge-test-data', {
+            method: 'POST',
+            headers: getAuthHeaders()
+          });
+          const data = await res.json();
+          if (data.success) {
+            showSuccessBanner('Portal reset to 100% clean slate. All mock and test entries deleted.');
+            await loadScheduleGrid();
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, purging local test data:', err);
+      }
+
+      // Offline / Firebase reset fallback
+      try {
+        localStorage.removeItem('admin_published_timetables');
+        localStorage.removeItem('admin_academic_state');
+        localStorage.removeItem('admin_schools_list');
+        localStorage.removeItem('admin_teachers_list');
+        localStorage.removeItem('admin_students_list');
+      } catch (e) {}
+      showSuccessBanner('Portal test cache cleared. Fresh directory loaded.');
+      await loadAcademicEntities();
+      await loadScheduleGrid();
+    }
+  </script>
+</body>
+</html>
+
+

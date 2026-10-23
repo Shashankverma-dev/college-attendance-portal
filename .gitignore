@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment and Secrets
+.env
+*.env
+**/.env
+.env.local
+.env.*.local
+
+# Build outputs
+dist/
+**/dist/
+
+# Firebase cache
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Large docs / archives
+*.zip
+*.docx
