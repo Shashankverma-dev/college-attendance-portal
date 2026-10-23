@@ -3738,6 +3738,15 @@
             await loadAcademicEntities();
             showSuccessBanner(data.message);
             return;
+          } else {
+            const msg = document.getElementById('add-prog-msg');
+            if (msg) {
+              msg.style.display = 'block';
+              msg.innerHTML = `<span style="color: #DC2626; font-size: 13px; font-weight: 600;">${data.message || 'Failed to create programme.'}</span>`;
+            } else {
+              showSuccessBanner(data.message || 'Failed to create programme.', true);
+            }
+            return;
           }
         }
       } catch (err) {
@@ -3781,7 +3790,9 @@
           } else {
             if (msg) {
               msg.style.display = 'block';
-              msg.innerHTML = `<span style="color: #DC2626; font-size: 13px;">${data.message || 'Failed to create semester.'}</span>`;
+              msg.innerHTML = `<span style="color: #DC2626; font-size: 13px; font-weight: 600;">${data.message || 'Failed to create semester.'}</span>`;
+            } else {
+              showSuccessBanner(data.message || 'Failed to create semester.', true);
             }
             return;
           }
@@ -3815,6 +3826,7 @@
       const capacity = parseInt(document.getElementById('new-sec-capacity').value) || 80;
       const academic_calendar_term = document.getElementById('new-sec-term').value.trim() || 'Autumn 2026';
       const sec_id = 'sec-' + Date.now();
+      const msg = document.getElementById('add-sec-msg');
 
       try {
         if (getApiBase() !== null) {
@@ -3828,6 +3840,14 @@
             closeAddSectionModal();
             await loadAcademicEntities();
             showSuccessBanner(data.message);
+            return;
+          } else {
+            if (msg) {
+              msg.style.display = 'block';
+              msg.innerHTML = `<span style="color: #DC2626; font-size: 13px; font-weight: 600;">${data.message || 'Failed to create section.'}</span>`;
+            } else {
+              showSuccessBanner(data.message || 'Failed to create section.', true);
+            }
             return;
           }
         }
@@ -3851,6 +3871,7 @@
       const capacity = parseInt(document.getElementById('new-room-cap').value) || 45;
       const department_id = document.getElementById('new-room-dept').value;
       const room_id = 'r-' + Date.now();
+      const msg = document.getElementById('add-room-msg');
 
       try {
         if (getApiBase() !== null) {
@@ -3864,6 +3885,14 @@
             closeAddRoomModal();
             await loadAcademicEntities();
             showSuccessBanner(data.message);
+            return;
+          } else {
+            if (msg) {
+              msg.style.display = 'block';
+              msg.innerHTML = `<span style="color: #DC2626; font-size: 13px; font-weight: 600;">${data.message || 'Failed to create room.'}</span>`;
+            } else {
+              showSuccessBanner(data.message || 'Failed to create room.', true);
+            }
             return;
           }
         }
@@ -3885,6 +3914,7 @@
       const name = document.getElementById('new-grp-name').value.trim();
       const description = document.getElementById('new-grp-desc').value.trim();
       const group_id = 'grp-' + Date.now();
+      const msg = document.getElementById('add-grp-msg');
 
       try {
         if (getApiBase() !== null) {
@@ -3898,6 +3928,14 @@
             closeAddGroupModal();
             await loadAcademicEntities();
             showSuccessBanner(data.message);
+            return;
+          } else {
+            if (msg) {
+              msg.style.display = 'block';
+              msg.innerHTML = `<span style="color: #DC2626; font-size: 13px; font-weight: 600;">${data.message || 'Failed to register practical cohort.'}</span>`;
+            } else {
+              showSuccessBanner(data.message || 'Failed to register practical cohort.', true);
+            }
             return;
           }
         }

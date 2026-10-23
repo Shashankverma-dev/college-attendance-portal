@@ -1746,7 +1746,24 @@
     }
 
     function downloadRosterTemplate() {
-      window.location.href = '/api/admin/students/export/template';
+      var base = typeof getApiBase === 'function' ? getApiBase() : (window.getApiBase ? window.getApiBase() : '');
+      if (base) {
+        window.location.href = base + '/api/admin/students/export/template';
+        return;
+      }
+      var templateCsv = [
+        'Enrollment Number,Registration Number,Full Name,Gmail,School,Course,Semester,Section,Roll No,Phone,Parent Contact,DOB,Blood Group,Category',
+        'SRHU238990,dd241104301172,Aarav Sharma,aarav.sharma@college.edu,SST,BCA,1,A,01,+91 98765 43210,+91 98765 43211,2005-06-15,O+,GENERAL',
+        'SRHU238991,dd241104301173,Ananya Verma,ananya.verma@college.edu,SST,BCA,1,A,02,+91 98765 43212,+91 98765 43213,2005-08-22,B+,OBC',
+        'SRHU238992,dd241104301174,Rohan Mehta,rohan.mehta@college.edu,SST,BTECH-CSE,1,A,01,+91 98765 43214,+91 98765 43215,2004-11-03,A+,GENERAL'
+      ].join('\n');
+      var blob = new Blob([templateCsv], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.setAttribute('download', 'students_roster_template.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
 
     function exportStudentCSV() {
