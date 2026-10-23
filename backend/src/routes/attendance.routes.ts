@@ -345,18 +345,43 @@ router.post(
       }
 
       // In-Memory Mode
+      const targetSectionId = sectionId || 'f0000000-0000-0000-0000-000000000001';
+      const targetSubjectId = subjectId || '10000000-0000-0000-0000-000000000001';
+      const targetSessionDate = sessionDate || new Date().toISOString().split('T')[0];
+      const targetStartTime = startTime || '10:00';
+
+      // Idempotency / Double-submission protection: reuse existing session if created concurrently
+      const existingSession = localAttendanceSessions.find(
+        (s) =>
+          s.section_id === targetSectionId &&
+          s.subject_id === targetSubjectId &&
+          s.session_date === targetSessionDate &&
+          s.start_time === targetStartTime
+      );
+
+      if (existingSession) {
+        const roster = localAttendanceRecords.filter((r) => r.session_id === existingSession.session_id);
+        res.status(200).json({
+          success: true,
+          isExisting: true,
+          session: existingSession,
+          roster,
+        });
+        return;
+      }
+
       const newSessionId = `sess-${Date.now()}`;
       const newSession: InMemAttendanceSession = {
         session_id: newSessionId,
-        section_id: sectionId || 'f0000000-0000-0000-0000-000000000001',
+        section_id: targetSectionId,
         section_name: 'A',
-        subject_id: subjectId || '10000000-0000-0000-0000-000000000001',
+        subject_id: targetSubjectId,
         subject_code: 'BCA-101',
         subject_name: 'Programming Fundamentals using C',
         conducting_faculty_id: '30000000-0000-0000-0000-000000000001',
         conducting_faculty_name: 'Dr. Meenakshi Sundaram',
-        session_date: sessionDate || new Date().toISOString().split('T')[0],
-        start_time: startTime || '10:00',
+        session_date: targetSessionDate,
+        start_time: targetStartTime,
         end_time: endTime || '11:00',
         instructional_hours: instructionalHours || 1.0,
         submission_status: 'DRAFT',

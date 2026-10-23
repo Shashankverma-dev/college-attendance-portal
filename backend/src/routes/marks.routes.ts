@@ -388,6 +388,19 @@ router.post(
         facultyAssignmentId = match?.assignment_id || null;
       }
 
+      // Idempotency / Double-click prevention: return existing draft assessment if identical one exists
+      const existingAssess = localAssessments.find(
+        (a) =>
+          a.section_id === sectionId &&
+          a.subject_id === subjectId &&
+          a.assessment_title.trim().toLowerCase() === assessmentTitle.trim().toLowerCase() &&
+          a.academic_calendar_term === academicCalendarTerm
+      );
+      if (existingAssess) {
+        res.status(200).json({ success: true, isExisting: true, assessment: existingAssess });
+        return;
+      }
+
       const newId = `a1000000-0000-0000-0000-${String(localAssessments.length + 10).padStart(12, '0')}`;
       const newAssessment: InMemAssessment = {
         assessment_id: newId,
