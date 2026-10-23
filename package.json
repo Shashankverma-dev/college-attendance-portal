@@ -1,0 +1,13 @@
+{
+  "name": "college-attendance-portal-root",
+  "version": "1.8.0",
+  "private": true,
+  "description": "Root wrapper ensuring automated Render and Cloud builds work seamlessly",
+  "scripts": {
+    "build": "cd backend && npm install --include=dev && npm run build",
+    "start": "cd backend && npm start"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

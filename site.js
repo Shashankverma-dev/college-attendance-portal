@@ -643,8 +643,8 @@
     }
   }
 
-  // Default Render Web Service URL (Can be changed via UI widget or localStorage)
-  window.DEFAULT_RENDER_URL = window.DEFAULT_RENDER_URL || 'https://attendance-backend.onrender.com';
+  // Default Render Web Service URL (Configured for college-attendance-backend)
+  window.DEFAULT_RENDER_URL = window.DEFAULT_RENDER_URL || 'https://college-attendance-backend-ib8i.onrender.com';
 
   window.getApiBase = function () {
     if (window._apiBase !== undefined && window._apiBase !== null) return window._apiBase;
