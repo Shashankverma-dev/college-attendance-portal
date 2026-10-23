@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 
 <head>
@@ -37,7 +37,7 @@
         <div class="user-menu-wrap" id="user-menu-wrap">
           <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)"
             aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">
-            <div class="user-avatar-circle" id="display-user-avatar">â€”</div>
+            <div class="user-avatar-circle" id="display-user-avatar">—</div>
             <div class="user-avatar-info">
               <span class="user-avatar-name" id="display-user-name">Loading...</span>
               <span class="user-avatar-role" id="display-user-id">Global Admin</span>
@@ -340,7 +340,7 @@
         <div class="marks-card">
           <div class="marks-card-title">Cohort Completion</div>
           <div class="marks-card-value" id="admin-meta-completion">5 / 5</div>
-          <div class="marks-card-sub" id="admin-meta-completion-sub">100% verified entries â€¢ Class Avg: 82.5%</div>
+          <div class="marks-card-sub" id="admin-meta-completion-sub">100% verified entries • Class Avg: 82.5%</div>
         </div>
       </div>
 
@@ -534,7 +534,7 @@
           </svg>
           <h3 style="color: var(--card-ink);">Finalize &amp; Publish Results</h3>
         </div>
-        <button type="button" class="btn-modal-cancel" style="padding: 4px 10px; font-size: 16px; color: var(--card-muted);" onclick="closeFinalizeModal()" aria-label="Close dialog">âœ•</button>
+        <button type="button" class="btn-modal-cancel" style="padding: 4px 10px; font-size: 16px; color: var(--card-muted);" onclick="closeFinalizeModal()" aria-label="Close dialog">✕</button>
       </div>
 
       <div class="modal-body" style="padding: 20px 24px;">
@@ -579,7 +579,7 @@
           </svg>
           <h3>Authorized Marks Correction</h3>
         </div>
-        <button type="button" class="btn-modal-cancel" style="padding: 4px 10px; font-size: 16px;" onclick="closeCorrectionModal()" aria-label="Close dialog">âœ•</button>
+        <button type="button" class="btn-modal-cancel" style="padding: 4px 10px; font-size: 16px;" onclick="closeCorrectionModal()" aria-label="Close dialog">✕</button>
       </div>
 
       <form id="form-correction" onsubmit="handleCorrectionSubmit(event)">
@@ -688,7 +688,7 @@
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            <span>Mon â€“ Fri: 08:30 â€“ 17:00 IST</span>
+            <span>Mon – Fri: 08:30 – 17:00 IST</span>
           </div>
         </div>
       </div>
@@ -699,11 +699,11 @@
         </p>
         <div class="foot-policy-links">
           <a href="privacy.html">Privacy Policy</a>
-          <span class="foot-sep" aria-hidden="true">â€¢</span>
+          <span class="foot-sep" aria-hidden="true">•</span>
           <a href="terms.html">Terms of Service</a>
-          <span class="foot-sep" aria-hidden="true">â€¢</span>
+          <span class="foot-sep" aria-hidden="true">•</span>
           <a href="calendar.html">Academic Calendar</a>
-          <span class="foot-sep" aria-hidden="true">â€¢</span>
+          <span class="foot-sep" aria-hidden="true">•</span>
           <a href="signin.html">Sign In</a>
         </div>
       </div>
@@ -864,7 +864,7 @@
             ? (validMarks.reduce(function (a, b) { return a + b; }, 0) / validMarks.length).toFixed(1)
             : '0.0';
           var top = validMarks.length > 0 ? Math.max.apply(null, validMarks).toFixed(1) : '0.0';
-          compSubEl.textContent = 'Avg: ' + avg + '% â€¢ Top: ' + top;
+          compSubEl.textContent = 'Avg: ' + avg + '% • Top: ' + top;
         }
 
         var finalizeLabel = document.getElementById('finalize-target-label');
@@ -1157,7 +1157,7 @@
         cohort.students.forEach(function (s) {
           var opt = document.createElement('option');
           opt.value = s.id;
-          opt.textContent = s.name + ' (' + s.id + ') â€¢ Current: ' + (s.status === 'PRESENT' ? s.marks + ' pts' : s.status);
+          opt.textContent = s.name + ' (' + s.id + ') • Current: ' + (s.status === 'PRESENT' ? s.marks + ' pts' : s.status);
           correctStudentSelect.appendChild(opt);
         });
 
@@ -1233,7 +1233,7 @@
           timestamp: now,
           action: 'Marks Correction: ' + student.name + ' (' + student.id + ')',
           admin: storedName + ' (' + storedId + ')',
-          details: oldMarksText + ' â†’ ' + newMarksText + ' [' + reason + ']',
+          details: oldMarksText + ' → ' + newMarksText + ' [' + reason + ']',
           status: 'AUDITED',
           checksum: randomHash + '...7e1'
         };

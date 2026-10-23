@@ -150,16 +150,49 @@
 
   <main class="wrap" style="padding-top: 32px; padding-bottom: 64px;">
 
-    <!-- Breadcrumb & Header -->
-    <div style="margin-bottom: 24px;">
-      <p class="label" style="margin-bottom: 6px;">Academic Standing & Evaluations</p>
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px;">
-        <div>
-          <h1 class="display" style="font-size: clamp(28px, 4vw, 38px);">My Examination Results</h1>
-          <p style="margin-top: 6px; font-size: 16px; color: var(--muted-light);">
-            BCA Semester 1 - Section A (Autumn 2026 Academic Session). Authenticated student view.
-          </p>
+    <!-- Student Examination Results Hero Banner -->
+    <div class="dash-hero-banner">
+      <div class="dash-hero-main">
+        <div class="dash-meta-badge-row">
+          <span class="dash-live-badge">
+            <span class="live-dot"></span>
+            Student Examination Workspace
+          </span>
+          <span class="dash-term-badge">BCA Semester 1 &bull; Autumn Term 2026</span>
         </div>
+        <h1 class="dash-hero-title">My Examination Results</h1>
+        <p class="dash-hero-sub">
+          Continuous internal assessment scores, sessional evaluations, and institutional end-semester grades.
+        </p>
+      </div>
+
+      <!-- Cohesive Action Toolbar -->
+      <div class="dash-hero-actions">
+        <a href="student.html" class="dash-action-btn primary">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="7" height="7"></rect>
+            <rect x="14" y="3" width="7" height="7"></rect>
+            <rect x="14" y="14" width="7" height="7"></rect>
+            <rect x="3" y="14" width="7" height="7"></rect>
+          </svg>
+          Attendance Dashboard
+        </a>
+        <a href="calendar.html" class="dash-action-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          Academic Calendar
+        </a>
+        <a href="profile.html" class="dash-action-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          Student Profile
+        </a>
       </div>
     </div>
 
@@ -168,32 +201,68 @@
       <strong>Grading Policy Notice:</strong> Raw marks and percentage evaluations are displayed as published by the respective academic departments. The institution's composite grade point average (GPA) weighting scheme is pending formal configuration by the Academic Council.
     </div>
 
-    <!-- KPI Summary Grid -->
-    <div class="marks-summary-grid">
-      <div class="marks-card">
-        <div class="marks-card-title">Enrolled Program</div>
-        <div class="marks-card-value" style="font-size: 20px;">BCA (3-Year)</div>
-        <div class="marks-card-sub">Semester 1 - Section A</div>
-      </div>
-
-      <div class="marks-card">
-        <div class="marks-card-title">Published Assessments</div>
-        <div class="marks-card-value">2</div>
-        <div class="marks-card-sub">Out of 4 configured cycles</div>
-      </div>
-
-      <div class="marks-card">
-        <div class="marks-card-title">Internal Score (BCA-101)</div>
-        <div class="marks-card-value" style="color: #059669;">45.5 / 50.0</div>
-        <div class="marks-card-sub">Assignment 1 (18.5) + Sessional 1 (27.0)</div>
-      </div>
-
-      <div class="marks-card">
-        <div class="marks-card-title">Final Semester Status</div>
-        <div style="margin-top: 4px;">
-          <span class="badge-status badge-finalized">FINALIZED (UNPUBLISHED)</span>
+    <!-- KPI Summary Grid (Harmonized) -->
+    <div class="admin-kpi-grid">
+      <!-- 1. Enrolled Program -->
+      <div class="admin-kpi-card accent-blue">
+        <div class="admin-kpi-header">
+          <span class="admin-kpi-label">Enrolled Program</span>
+          <div class="admin-kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+              <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
+            </svg>
+          </div>
         </div>
-        <div class="marks-card-sub">Official release pending dean clearance</div>
+        <div class="admin-kpi-val" style="font-size: 22px;">BCA (3-Year)</div>
+        <div class="admin-kpi-sub">Semester 1 &bull; Section A</div>
+      </div>
+
+      <!-- 2. Published Assessments -->
+      <div class="admin-kpi-card accent-green">
+        <div class="admin-kpi-header">
+          <span class="admin-kpi-label">Published Assessments</span>
+          <div class="admin-kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="admin-kpi-val">2 Evaluations</div>
+        <div class="admin-kpi-sub">Out of 4 configured cycles</div>
+      </div>
+
+      <!-- 3. Internal Score -->
+      <div class="admin-kpi-card accent-amber">
+        <div class="admin-kpi-header">
+          <span class="admin-kpi-label">Internal Score (BCA-101)</span>
+          <div class="admin-kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="18" y1="20" x2="18" y2="10"></line>
+              <line x1="12" y1="20" x2="12" y2="4"></line>
+              <line x1="6" y1="20" x2="6" y2="14"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="admin-kpi-val" style="color: #059669;">45.5 / 50.0</div>
+        <div class="admin-kpi-sub">Assignment 1 (18.5) + Sessional 1 (27.0)</div>
+      </div>
+
+      <!-- 4. Final Semester Status -->
+      <div class="admin-kpi-card accent-cyan">
+        <div class="admin-kpi-header">
+          <span class="admin-kpi-label">Final Semester Status</span>
+          <div class="admin-kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="admin-kpi-val" style="color: #0284C7; font-size: 20px;">Pending Release</div>
+        <div class="admin-kpi-sub">Dean verification in progress</div>
       </div>
     </div>
 

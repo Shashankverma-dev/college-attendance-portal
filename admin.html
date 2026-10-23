@@ -39,7 +39,7 @@
         <div class="user-menu-wrap" id="user-menu-wrap">
           <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)"
             aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">
-            <div class="user-avatar-circle" id="display-user-avatar">â€”</div>
+            <div class="user-avatar-circle" id="display-user-avatar">—</div>
             <div class="user-avatar-info">
               <span class="user-avatar-name" id="display-user-name">Loading...</span>
               <span class="user-avatar-role" id="display-user-id">Global Admin</span>
@@ -725,7 +725,7 @@
             Academic Calendar Term
           </label>
           <select id="onboard-term-select" style="width: 100%; padding: 10px 12px; border: 1px solid #D7E3F0; border-radius: 6px; font-size: 14px; color: #17345C; background: #FFFFFF;">
-            <option value="" selected disabled>â€” Select Academic Term â€”</option>
+            <option value="" selected disabled>— Select Academic Term —</option>
           </select>
         </div>
 
@@ -742,7 +742,7 @@
             Click to upload or drag & drop student roster
           </div>
           <span style="font-size: 12px; color: #64748B; margin-top: 4px; display: block;">
-            Supported formats: CSV (.csv) or Microsoft Excel (.xlsx) â€¢ Up to 10 MB (5,000 students/batch)
+            Supported formats: CSV (.csv) or Microsoft Excel (.xlsx) • Up to 10 MB (5,000 students/batch)
           </span>
         </div>
 
@@ -1020,10 +1020,10 @@
       </div>
     </div>
     <div class="wrap foot-bottom">
-      <p class="foot-copy">Â© 2026 Swami Rama Himalayan University. All rights reserved.</p>
+      <p class="foot-copy">&copy; 2026 Swami Rama Himalayan University. All rights reserved.</p>
       <div class="foot-policy-links">
         <a href="privacy.html">Privacy Policy</a>
-        <span class="foot-sep">â€¢</span>
+        <span class="foot-sep">•</span>
         <a href="terms.html">Terms of Service</a>
       </div>
     </div>
@@ -1085,7 +1085,7 @@
       if (dateIndicator) {
         var termStr = data.academicTerm || 'Autumn Term 2026 (Week 10)';
         var dateStr = data.todayDate || new Date().toISOString().split('T')[0];
-        dateIndicator.textContent = termStr + ' â€¢ ' + dateStr;
+        dateIndicator.textContent = termStr + ' • ' + dateStr;
       }
 
       // 2. Enrolled Students KPI
@@ -1110,13 +1110,13 @@
         facultyEl.textContent = totalFaculty;
       }
       if (facultySubEl) {
-        facultySubEl.innerHTML = '<span style="color: #34D399; font-weight: 700;">' + activeFaculty + ' Active</span> â€¢ ' + pendingFaculty + ' Pending Activation';
+        facultySubEl.innerHTML = '<span style="color: #34D399; font-weight: 700;">' + activeFaculty + ' Active</span> • ' + pendingFaculty + ' Pending Activation';
       }
 
       // Hub Teacher Stat
       var hubTeacherStat = document.getElementById('hub-teacher-stat');
       if (hubTeacherStat) {
-        hubTeacherStat.textContent = totalFaculty + ' Appointed Faculty â€¢ ' + pendingFaculty + ' Pending';
+        hubTeacherStat.textContent = totalFaculty + ' Appointed Faculty • ' + pendingFaculty + ' Pending';
       }
 
       // 4. Today's Registers KPI
@@ -1141,7 +1141,7 @@
       }
       if (examSubEl) {
         if (data.examCycles) {
-          examSubEl.innerHTML = '<span style="color: #38BDF8; font-weight: 700;">' + data.examCycles.finalized + ' Finalized</span> â€¢ ' + data.examCycles.underVerification + ' Under Verification';
+          examSubEl.innerHTML = '<span style="color: #38BDF8; font-weight: 700;">' + data.examCycles.finalized + ' Finalized</span> • ' + data.examCycles.underVerification + ' Under Verification';
         } else {
           examSubEl.innerHTML = '<span style="color: #38BDF8; font-weight: 700;">Active Examination Cycles</span>';
         }

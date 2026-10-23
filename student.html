@@ -34,7 +34,7 @@
       <div class="head-actions">
         <div class="user-menu-wrap" id="user-menu-wrap">
           <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">
-            <div class="user-avatar-circle" id="display-user-avatar">â€”</div>
+            <div class="user-avatar-circle" id="display-user-avatar">—</div>
             <div class="user-avatar-info">
               <span class="user-avatar-name" id="display-user-name">Loading...</span>
               <span class="user-avatar-role" id="display-user-id">Student Portal</span>
@@ -154,26 +154,149 @@
     <div class="drawer-footer">
       <a class="btn btn-sm btn-outline" href="signin.html">Sign Out</a>
       <div class="drawer-meta">
-        Autumn Term 2026 â€¢ Swami Rama Himalayan University<br>
+        Autumn Term 2026 • Swami Rama Himalayan University<br>
         portal-support@college.edu
       </div>
     </div>
   </aside>
 
-  <main class="wrap dash-wrap">
-    <!-- Header Title Area -->
-    <div class="dash-header">
-      <div class="dash-title-area">
-        <p class="label">Student portal</p>
-        <h1 class="display" style="font-size: clamp(28px, 4vw, 38px);">Attendance record</h1>
-        <p style="color: var(--muted); font-size: 15px; margin-top: 4px;">
-          Term: Autumn 2026 | Enrolled Cohort: Computer Science (Year 3)
+  <main class="wrap" style="padding-top: 32px; padding-bottom: 64px;">
+
+    <!-- Student Attendance & Academic Records Hero -->
+    <div class="dash-hero-banner">
+      <div class="dash-hero-main">
+        <div class="dash-meta-badge-row">
+          <span class="dash-live-badge">
+            <span class="live-dot"></span>
+            Student Academic Workspace
+          </span>
+          <span class="dash-term-badge">Autumn Term 2026 • BCA Semester 5 (Section C)</span>
+        </div>
+        <h1 class="dash-hero-title">Student Attendance & Academic Records</h1>
+        <p class="dash-hero-sub">
+          Live session check-in, real-time subject-wise percentage calculations, shortage alerts, and official continuous internal assessment records.
         </p>
       </div>
-      <div>
-        <a class="btn btn-sm btn-outline" href="calendar.html">View academic calendar</a>
+
+      <!-- Cohesive Action Toolbar -->
+      <div class="dash-hero-actions">
+        <button type="button" class="dash-action-btn primary" onclick="openStudentScannerModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+            <circle cx="12" cy="13" r="4"></circle>
+          </svg>
+          Scan Classroom QR
+        </button>
+        <button type="button" class="dash-action-btn" onclick="openStudentCodeModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          Enter 6-Digit Code
+        </button>
+        <a href="#subjects" class="dash-action-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          Subjects
+        </a>
+        <a href="#history" class="dash-action-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          Session History
+        </a>
+        <a href="student-marks.html" class="dash-action-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+          </svg>
+          Exam Marks
+        </a>
+        <a href="calendar.html" class="dash-action-btn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+          Calendar
+        </a>
       </div>
     </div>
+
+    <!-- Student Key Performance Indicators (KPIs) -->
+    <section class="admin-kpi-grid" id="overview" aria-label="Student attendance summary metrics" style="margin-bottom: 28px;">
+      <!-- 1. Overall Term Percentage -->
+      <div class="admin-kpi-card accent-blue">
+        <div class="admin-kpi-header">
+          <span class="admin-kpi-label">Aggregate Attendance</span>
+          <div class="admin-kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="admin-kpi-val" id="total-percentage">87.5%</div>
+        <div class="admin-kpi-sub">
+          <span class="tag tag-present" id="overall-status-text" style="font-size: 11px; padding: 2px 8px;">Meets 75% Threshold</span>
+        </div>
+      </div>
+
+      <!-- 2. Conducted Hours -->
+      <div class="admin-kpi-card accent-green">
+        <div class="admin-kpi-header">
+          <span class="admin-kpi-label">Conducted Hours</span>
+          <div class="admin-kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="admin-kpi-val" id="total-conducted">84</div>
+        <div class="admin-kpi-sub">Verified scheduled lectures</div>
+      </div>
+
+      <!-- 3. Attended Sessions -->
+      <div class="admin-kpi-card accent-cyan">
+        <div class="admin-kpi-header">
+          <span class="admin-kpi-label">Hours Attended</span>
+          <div class="admin-kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <polyline points="16 11 18 13 22 9"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="admin-kpi-val" id="total-present" style="color: #0284C7;">70</div>
+        <div class="admin-kpi-sub">Present and logged in registry</div>
+      </div>
+
+      <!-- 4. Absences and Approved Leave -->
+      <div class="admin-kpi-card accent-amber">
+        <div class="admin-kpi-header">
+          <span class="admin-kpi-label">Absences & Approved Leave</span>
+          <div class="admin-kpi-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="8" x2="12" y2="12"></line>
+              <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+          </div>
+        </div>
+        <div class="admin-kpi-val">
+          <span id="total-absent" style="color: #DC2626;">10</span> <span style="font-size: 15px; color: var(--card-muted); font-weight: 500;">absent</span>
+        </div>
+        <div class="admin-kpi-sub">
+          <span id="total-leave">4</span> Approved Medical/Duty Leaves
+        </div>
+      </div>
+    </section>
 
     <!-- Live QR Attendance Check-In Card -->
     <section class="dash-card" style="margin-bottom: 28px; background: linear-gradient(135deg, #1D3C72 0%, #0F244A 100%); color: #FFFFFF; border: none; box-shadow: 0 10px 25px -5px rgba(29, 60, 114, 0.4);">
@@ -205,42 +328,6 @@
           </button>
         </div>
       </div>
-    </section>
-
-    <!-- Overall Summary Metrics -->
-    <section class="dash-card" id="overview" style="margin-bottom: 28px;">
-      <div class="dash-card-header">
-        <h2>Overall term attendance</h2>
-        <span class="threshold-indicator" id="overall-status-text">Meets 75% attendance threshold</span>
-      </div>
-
-      <div class="register-stats" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); padding: 16px;">
-        <div class="stat-box">
-          <span>Conducted hours</span>
-          <strong id="total-conducted">84</strong>
-        </div>
-        <div class="stat-box">
-          <span>Attended (Present)</span>
-          <strong id="total-present" style="color: #4ADE80;">70</strong>
-        </div>
-        <div class="stat-box">
-          <span>Absences</span>
-          <strong id="total-absent" style="color: #F87171;">10</strong>
-        </div>
-        <div class="stat-box">
-          <span>Approved leave</span>
-          <strong id="total-leave" style="color: #FBBF24;">4</strong>
-        </div>
-        <div class="stat-box">
-          <span>Aggregate percentage</span>
-          <strong id="total-percentage" style="color: var(--accent); font-size: 24px;">87.5%</strong>
-        </div>
-      </div>
-
-      <p style="font-size: 13px; color: var(--muted);">
-        Policy reminder: Minimum 75% aggregate attendance is mandatory for end-term examination admit card issuance.
-        Leave is excluded from the calculation denominator.
-      </p>
     </section>
 
     <!-- Subject-wise Breakdown Table -->
@@ -544,7 +631,7 @@
           <p style="font-size: 13px; color: #64748B; margin-bottom: 12px;">
             Enter the 6-digit challenge code displayed below the QR code on the classroom projector.
           </p>
-          <input type="text" id="student-manual-code" maxlength="6" placeholder="â€¢ â€¢ â€¢ â€¢ â€¢ â€¢" style="width: 220px; height: 48px; font-size: 24px; font-weight: 800; text-align: center; letter-spacing: 0.25em; font-family: monospace; border: 2px solid #CBD5E1; border-radius: 8px; color: #1D3C72; text-transform: uppercase;">
+          <input type="text" id="student-manual-code" maxlength="6" placeholder="• • • • • •" style="width: 220px; height: 48px; font-size: 24px; font-weight: 800; text-align: center; letter-spacing: 0.25em; font-family: monospace; border: 2px solid #CBD5E1; border-radius: 8px; color: #1D3C72; text-transform: uppercase;">
         </div>
         <div style="display: flex; justify-content: center; margin-bottom: 14px;">
           <button type="button" class="btn btn-sm" id="btn-submit-student-code" onclick="submitManualCodeAttendance()" style="background: #1D3C72; color: #FFFFFF; font-weight: 700; padding: 8px 24px; font-size: 14px;">
@@ -614,7 +701,7 @@
               <circle cx="12" cy="12" r="10"></circle>
               <polyline points="12 6 12 12 16 14"></polyline>
             </svg>
-            <span>Mon â€“ Fri: 08:30 â€“ 17:00 IST</span>
+            <span>Mon – Fri: 08:30 – 17:00 IST</span>
           </div>
         </div>
       </div>
@@ -625,11 +712,11 @@
         </p>
         <div class="foot-policy-links">
           <a href="privacy.html">Privacy Policy</a>
-          <span class="foot-sep" aria-hidden="true">â€¢</span>
+          <span class="foot-sep" aria-hidden="true">•</span>
           <a href="terms.html">Terms of Service</a>
-          <span class="foot-sep" aria-hidden="true">â€¢</span>
+          <span class="foot-sep" aria-hidden="true">•</span>
           <a href="calendar.html">Academic Calendar</a>
-          <span class="foot-sep" aria-hidden="true">â€¢</span>
+          <span class="foot-sep" aria-hidden="true">•</span>
           <a href="signin.html">Sign In</a>
         </div>
       </div>
@@ -1071,11 +1158,11 @@
         fb.style.border = '1px solid #86EFAC';
         fb.style.color = '#15803D';
         fb.innerHTML = '<div style="display: flex; gap: 8px; align-items: flex-start;">' +
-          '<span style="font-size: 18px; line-height: 1;">âœ“</span>' +
+          '<span style="font-size: 18px; line-height: 1;">✓</span>' +
           '<div>' +
             '<strong>Attendance Confirmed!</strong>' +
             '<div style="margin-top: 2px;">' + message + '</div>' +
-            '<div style="font-size: 11px; color: #166534; margin-top: 4px;">Verified at ' + new Date().toLocaleTimeString() + ' â€¢ Synced with university registry</div>' +
+            '<div style="font-size: 11px; color: #166534; margin-top: 4px;">Verified at ' + new Date().toLocaleTimeString() + ' • Synced with university registry</div>' +
           '</div>' +
         '</div>';
       } else {
@@ -1083,7 +1170,7 @@
         fb.style.border = '1px solid #FCA5A5';
         fb.style.color = '#DC2626';
         fb.innerHTML = '<div style="display: flex; gap: 8px; align-items: flex-start;">' +
-          '<span style="font-size: 18px; line-height: 1;">âœ•</span>' +
+          '<span style="font-size: 18px; line-height: 1;">✕</span>' +
           '<div>' +
             '<strong>Attendance Not Recorded</strong>' +
             '<div style="margin-top: 2px;">' + message + '</div>' +

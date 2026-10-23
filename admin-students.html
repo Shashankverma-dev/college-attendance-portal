@@ -39,7 +39,7 @@
         <div class="user-menu-wrap" id="user-menu-wrap">
           <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)"
             aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">
-            <div class="user-avatar-circle" id="display-user-avatar">â€”</div>
+            <div class="user-avatar-circle" id="display-user-avatar">—</div>
             <div class="user-avatar-info">
               <span class="user-avatar-name" id="display-user-name">Loading...</span>
               <span class="user-avatar-role" id="display-user-id">Global Admin</span>
@@ -492,7 +492,7 @@
           <h3 id="create-modal-title" style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Create Student Profile</h3>
           <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0 0;">Provisions student identity, assigns academic section, and dispatches 48-hour activation email.</p>
         </div>
-        <button type="button" onclick="closeCreateStudentModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">âœ•</button>
+        <button type="button" onclick="closeCreateStudentModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">✕</button>
       </div>
 
       <form id="form-create-student" onsubmit="handleCreateStudentSubmit(event)">
@@ -575,7 +575,7 @@
             <span id="view-student-badges" style="display: inline-flex; gap: 6px; margin-top: 4px;"></span>
           </div>
         </div>
-        <button type="button" onclick="closeViewStudentModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">âœ•</button>
+        <button type="button" onclick="closeViewStudentModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">✕</button>
       </div>
 
       <!-- Profile Overview Grid -->
@@ -658,7 +658,7 @@
           <h3 id="transfer-modal-title" style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Transfer Student Section</h3>
           <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0 0;">Reallocates future classes to a new section while preserving past attendance.</p>
         </div>
-        <button type="button" onclick="closeTransferStudentModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">âœ•</button>
+        <button type="button" onclick="closeTransferStudentModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">✕</button>
       </div>
 
       <form id="form-transfer-student" onsubmit="handleTransferSubmit(event)">
@@ -722,7 +722,7 @@
           <h3 id="bulk-modal-title" style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Bulk Student Roster Onboarding</h3>
           <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0 0;">Upload cohort spreadsheet (.xlsx, .csv). Validates academic structure, detects duplicates, and provisions accounts.</p>
         </div>
-        <button type="button" onclick="closeBulkImportModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">âœ•</button>
+        <button type="button" onclick="closeBulkImportModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">✕</button>
       </div>
 
       <!-- File Upload Zone -->
@@ -733,7 +733,7 @@
           <line x1="12" y1="3" x2="12" y2="15"></line>
         </svg>
         <div style="font-size: 15px; font-weight: 700; color: #17345C;">Click to upload or drag & drop student roster</div>
-        <div style="font-size: 13px; color: var(--muted); margin-top: 4px;">Supported formats: CSV (.csv) or Excel (.xlsx) â€¢ Up to 10 MB (5,000 students/batch)</div>
+        <div style="font-size: 13px; color: var(--muted); margin-top: 4px;">Supported formats: CSV (.csv) or Excel (.xlsx) • Up to 10 MB (5,000 students/batch)</div>
         <input type="file" id="bulk-file-input" accept=".csv, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, text/csv" style="display: none;" onchange="handleBulkFileSelect(event)">
       </div>
 
@@ -1166,7 +1166,7 @@
             '<div style="font-size: 11px; color: var(--card-muted);">' + schoolLabel + '</div>' +
           '</td>' +
           '<td style="padding: 12px 16px;">' +
-            '<span style="font-weight: 600; color: #17345C;">Sem ' + s.semester_number + ' â€¢ Sec ' + s.section_name + '</span>' +
+            '<span style="font-weight: 600; color: #17345C;">Sem ' + s.semester_number + ' • Sec ' + s.section_name + '</span>' +
           '</td>' +
           '<td style="padding: 12px 16px; font-weight: 600; color: #17345C;">' + s.roll_number + '</td>' +
           '<td style="padding: 12px 16px;">' + statusBadge + '</td>' +
@@ -1401,7 +1401,7 @@
 
             document.getElementById('view-email').textContent = s.student_gmail;
             document.getElementById('view-programme').textContent = (s.course_name || s.course_code) + ' (' + s.course_code + ')';
-            document.getElementById('view-allocation').textContent = 'Semester ' + s.semester_number + ' â€¢ Section ' + s.section_name;
+            document.getElementById('view-allocation').textContent = 'Semester ' + s.semester_number + ' • Section ' + s.section_name;
             document.getElementById('view-roll').textContent = s.roll_number;
             document.getElementById('view-adm-year').textContent = s.admission_academic_year || '2026-2027';
 
@@ -1426,7 +1426,7 @@
                 '<button type="button" class="btn btn-sm btn-outline" onclick="resendActivation(\'' + s.student_profile_id + '\')">Reissue Token</button>' +
               '</div>';
             } else {
-              tokenBox.innerHTML = '<div style="color: #15803D; font-weight: 600;">âœ“ Account password established. No outstanding activation tokens.</div>';
+              tokenBox.innerHTML = '<div style="color: #15803D; font-weight: 600;">✓ Account password established. No outstanding activation tokens.</div>';
             }
 
             // Enrollment History Table
@@ -1470,7 +1470,7 @@
 
       document.getElementById('transfer-student-id').value = student.student_profile_id;
       document.getElementById('transfer-current-allocation').textContent =
-        student.full_name + ' (' + student.student_id + ') â€¢ ' + student.course_code + ' Sem ' + student.semester_number + ' Section ' + student.section_name;
+        student.full_name + ' (' + student.student_id + ') • ' + student.course_code + ' Sem ' + student.semester_number + ' Section ' + student.section_name;
       document.getElementById('transfer-effective-date').value = new Date().toISOString().split('T')[0];
       document.getElementById('transfer-student-error').style.display = 'none';
 
@@ -1639,7 +1639,7 @@
                 '<td style="padding: 6px 10px;">' + r.courseCode + ' Sem ' + r.semesterNumber + '</td>' +
                 '<td style="padding: 6px 10px;">' + r.sectionName + '</td>' +
                 '<td style="padding: 6px 10px;">' + r.rollNumber + '</td>' +
-                '<td style="padding: 6px 10px; color: #15803D; font-weight: bold;">âœ“ Ready</td>' +
+                '<td style="padding: 6px 10px; color: #15803D; font-weight: bold;">✓ Ready</td>' +
               '</tr>';
             });
 

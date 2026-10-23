@@ -335,23 +335,30 @@
       </div>
     </div>
 
-    <!-- Header Title Area -->
-    <div class="dash-header">
-      <div class="dash-title-area">
-        <p class="label">Schedules & Milestones</p>
-        <h1 class="display" style="font-size: clamp(28px, 4vw, 38px);">Academic calendar</h1>
-        <p style="color: var(--muted); font-size: 15px; margin-top: 4px;">
-          Autumn Term 2026 official schedule of examinations, academic deadlines, and statutory holidays.
+    <!-- Academic Calendar Hero Banner -->
+    <div class="dash-hero-banner">
+      <div class="dash-hero-main">
+        <div class="dash-meta-badge-row">
+          <span class="dash-live-badge">
+            <span class="live-dot"></span>
+            Institutional Schedules &amp; Milestones
+          </span>
+          <span class="dash-term-badge">Autumn Term 2026 &bull; Official Calendar</span>
+        </div>
+        <h1 class="dash-hero-title">Academic Calendar &amp; Milestones</h1>
+        <p class="dash-hero-sub">
+          Official institutional schedule of sessional examinations, statutory holidays, academic council deadlines, and semester milestones.
         </p>
       </div>
 
-      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-        <button type="button" class="btn btn-sm" id="btn-admin-add-header" style="display: none; background: var(--bg); color: #FFFFFF; font-weight: 700; margin-right: 4px;" onclick="openCalendarEventModal()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="margin-right: 4px;">
+      <!-- Cohesive Action Toolbar -->
+      <div class="dash-hero-actions">
+        <button type="button" class="dash-action-btn primary" id="btn-admin-add-header" style="display: none;" onclick="openCalendarEventModal()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"></line>
             <line x1="5" y1="12" x2="19" y2="12"></line>
           </svg>
-          Add academic event
+          Add Academic Event
         </button>
         <button type="button" class="cal-filter-btn active" id="btn-view-month">Month view</button>
         <button type="button" class="cal-filter-btn" id="btn-view-agenda">Agenda view</button>

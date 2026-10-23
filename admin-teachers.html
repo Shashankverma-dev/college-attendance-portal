@@ -39,7 +39,7 @@
         <div class="user-menu-wrap" id="user-menu-wrap">
           <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)"
             aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">
-            <div class="user-avatar-circle" id="display-user-avatar">â€”</div>
+            <div class="user-avatar-circle" id="display-user-avatar">—</div>
             <div class="user-avatar-info">
               <span class="user-avatar-name" id="display-user-name">Loading...</span>
               <span class="user-avatar-role" id="display-user-id">Global Admin</span>
@@ -885,10 +885,10 @@
       </div>
     </div>
     <div class="wrap foot-bottom">
-      <p class="foot-copy">Â© 2026 Swami Rama Himalayan University. All rights reserved.</p>
+      <p class="foot-copy">&copy; 2026 Swami Rama Himalayan University. All rights reserved.</p>
       <div class="foot-policy-links">
         <a href="privacy.html">Privacy Policy</a>
-        <span class="foot-sep">â€¢</span>
+        <span class="foot-sep">•</span>
         <a href="terms.html">Terms of Service</a>
       </div>
     </div>
@@ -915,7 +915,7 @@
       var dropName = document.getElementById('dropdown-user-name');
       if (dropName) dropName.textContent = storedName;
       var dropId = document.getElementById('dropdown-user-id');
-      if (dropId) dropId.textContent = 'ID: ' + storedId + ' â€¢ Global Admin';
+      if (dropId) dropId.textContent = 'ID: ' + storedId + ' • Global Admin';
 
       // =========================================================================
       // 2. STATE & CONFIGURATION
@@ -1329,7 +1329,7 @@
           matchingSems.forEach(function (s) {
             var opt = document.createElement('option');
             opt.value = p.course_id + '|' + s.semester_id;
-            opt.textContent = p.course_code + ' â€¢ Semester ' + s.semester_number + ' (' + p.course_name + ')';
+            opt.textContent = p.course_code + ' • Semester ' + s.semester_number + ' (' + p.course_name + ')';
             cohortSelect.appendChild(opt);
           });
         });
@@ -1388,7 +1388,7 @@
         if (!teacher) return;
 
         document.getElementById('modal-alloc-title').textContent = 'Teaching Allocations: ' + teacher.name;
-        document.getElementById('alloc-modal-faculty-subtitle').textContent = 'Staff ID: ' + (teacher.staffId || teacher.id) + ' â€¢ ' + (teacher.departmentName || deptNameMap[teacher.departmentId] || 'Computer Applications');
+        document.getElementById('alloc-modal-faculty-subtitle').textContent = 'Staff ID: ' + (teacher.staffId || teacher.id) + ' • ' + (teacher.departmentName || deptNameMap[teacher.departmentId] || 'Computer Applications');
 
         // Immediate initial render from cache
         renderAllocationChips(teacher.assignments || []);
@@ -1470,7 +1470,7 @@
           var code = a.subjectCode || a.subject_code || a.subjectId || 'Subject';
           var name = a.subjectName || a.subject_name || '';
           var sec = a.sectionCode || (a.section_name ? ('Section ' + a.section_name) : 'Section A');
-          var crs = a.courseCode ? (a.courseCode + ' â€¢ Sem ' + (a.semesterNumber || 1)) : 'BCA Sem 1';
+          var crs = a.courseCode ? (a.courseCode + ' • Sem ' + (a.semesterNumber || 1)) : 'BCA Sem 1';
           var term = a.term || a.academic_calendar_term || 'Autumn 2026';
 
           var card = document.createElement('div');
@@ -1482,15 +1482,15 @@
           var slots = a.timetableSlots || a.timetable_slots || [];
           if (slots.length > 0) {
             var slotLabels = slots.map(function (s) {
-              return '<strong>' + s.day_of_week.slice(0, 3) + ' P' + s.period_index + '</strong> (' + s.start_time + 'â€“' + s.end_time + (s.room_code ? ', Room ' + s.room_code : '') + ')';
-            }).join(' â€¢ ');
+              return '<strong>' + s.day_of_week.slice(0, 3) + ' P' + s.period_index + '</strong> (' + s.start_time + '–' + s.end_time + (s.room_code ? ', Room ' + s.room_code : '') + ')';
+            }).join(' • ');
             slotsHtml = '<div style="margin-top: 8px; font-size: 12px; color: #1E3A8A; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 4px; padding: 5px 8px; display: flex; align-items: center; gap: 6px;">' +
               '<span style="font-weight: 700; color: #1D4ED8;">ðŸ“… Synchronized Timetable Slots:</span> ' +
               '<span>' + slotLabels + '</span>' +
               '</div>';
           } else {
             slotsHtml = '<div style="margin-top: 8px; font-size: 11px; color: var(--card-muted); font-style: italic;">' +
-              'â„¹ï¸ Class cohort authorized. No scheduled period slots in published Master Timetable yet.' +
+              'ℹ️ Class cohort authorized. No scheduled period slots in published Master Timetable yet.' +
               '</div>';
           }
 
@@ -1500,7 +1500,7 @@
             '    <div style="font-size: 14px; font-weight: 700; color: var(--card-ink);">' + code + (name ? ': ' + name : '') + '</div>',
             '    <div style="display: flex; align-items: center; gap: 8px; margin-top: 3px;">',
             '      <span style="background: #F1F5F9; color: #1D3C72; font-weight: 700; font-size: 11px; padding: 2px 6px; border-radius: 3px; border: 1px solid var(--line);">' + sec + '</span>',
-            '      <span style="font-size: 12px; color: var(--card-muted);">' + crs + ' â€¢ ' + term + '</span>',
+            '      <span style="font-size: 12px; color: var(--card-muted);">' + crs + ' • ' + term + '</span>',
             '    </div>',
             '  </div>',
             '  <div id="alloc-action-cell-' + allocId + '">',
@@ -1520,7 +1520,7 @@
           actionCell.innerHTML = [
             '<div style="display: flex; align-items: center; gap: 4px;">',
             '  <button type="button" class="action-btn-sm danger" style="padding: 3px 8px; font-size: 11px; font-weight: 700; background: #DC2626; color: #fff;" onclick="executeRemoveAllocation(\'' + assignmentId + '\', \'' + (subjectCode || '') + '\')">Confirm</button>',
-            '  <button type="button" class="action-btn-sm" style="padding: 3px 6px; font-size: 11px;" onclick="cancelRemoveAllocation(\'' + assignmentId + '\', \'' + (subjectCode || '') + '\')" title="Cancel">âœ•</button>',
+            '  <button type="button" class="action-btn-sm" style="padding: 3px 6px; font-size: 11px;" onclick="cancelRemoveAllocation(\'' + assignmentId + '\', \'' + (subjectCode || '') + '\')" title="Cancel">✕</button>',
             '</div>'
           ].join('');
           return;
@@ -1966,7 +1966,7 @@
               var code = a.subject_code || a.subjectCode || a.subjectId || 'Subject';
               var sec = a.section_name ? ('Section ' + a.section_name) : (a.section_code || a.sectionCode || a.sectionId || 'Section');
               var term = a.academic_calendar_term || a.academicTerm || 'Autumn 2026';
-              div.textContent = code + ' (' + sec + ') â€¢ ' + term;
+              div.textContent = code + ' (' + sec + ') • ' + term;
               allocContainer.appendChild(div);
             });
           }
