@@ -709,6 +709,12 @@
           <button type="button" class="btn btn-sm" onclick="openAddProgrammeModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
             + Add Programme
           </button>
+          <button type="button" class="btn btn-sm" onclick="openAddSemesterModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+            + Add Semester
+          </button>
+          <button type="button" class="btn btn-sm" onclick="openAddSectionModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+            + Add Section
+          </button>
           <button type="button" class="btn btn-sm" onclick="openAddRoomModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
             + Add Classroom / Lab
           </button>
@@ -786,15 +792,18 @@
       </div>
     </section>
 
-    <!-- TAB 3: Sections & Practical Subgroups -->
+    <!-- TAB 3: Semesters, Sections & Practical Subgroups -->
     <section id="panel-subgroups" style="display: none;">
       <!-- Action Toolbar for Tab 3 -->
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
         <div>
-          <h2 style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Academic Sections & Practical Subgroups</h2>
-          <p style="font-size: 13px; color: var(--slate-text-sub); margin: 2px 0 0 0;">Manage academic sections (A, B, C...) and concurrent practical laboratory cohorts (C1, C2...).</p>
+          <h2 style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Academic Semesters, Sections & Practical Subgroups</h2>
+          <p style="font-size: 13px; color: var(--slate-text-sub); margin: 2px 0 0 0;">Create and manage semesters, academic sections (A, B, C...) and concurrent practical laboratory cohorts (C1, C2...).</p>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm" onclick="openAddSemesterModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+            + Add Semester
+          </button>
           <button type="button" class="btn btn-sm" onclick="openAddSectionModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
             + Add Section
           </button>
@@ -802,6 +811,36 @@
             + Add Subgroup (C1/C2)
           </button>
         </div>
+      </div>
+
+      <!-- Semesters Table Panel -->
+      <div style="background: var(--slate-surface); border: 1px solid var(--slate-border); border-radius: var(--radius); padding: 18px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <div>
+            <h3 style="font-size: 16px; font-weight: 700; color: #17345C; margin: 0;">Registered Academic Semesters</h3>
+            <p style="font-size: 12px; color: var(--slate-text-sub); margin: 2px 0 0 0;">Degree programme semesters created and administered by administrator.</p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="tag" id="sem-count-tag" style="background: #E2E8F0; color: #17345C;">Semesters</span>
+            <button type="button" class="btn btn-sm" onclick="openAddSemesterModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 12px; padding: 4px 10px;">
+              + Add Semester
+            </button>
+          </div>
+        </div>
+        <table class="mapping-table" id="semesters-table">
+          <thead>
+            <tr>
+              <th style="width: 140px;">Programme</th>
+              <th style="width: 110px;">Semester</th>
+              <th>Display Label</th>
+              <th style="width: 110px;">Sections</th>
+              <th style="width: 160px; text-align: right;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="semesters-table-body">
+            <tr><td colspan="5" style="text-align: center; color: #64748B;">Loading semesters...</td></tr>
+          </tbody>
+        </table>
       </div>
 
       <!-- Sections Table Panel -->
@@ -1271,6 +1310,39 @@
     </div>
   </div>
 
+  <!-- MODAL 4B: Add Academic Semester -->
+  <div id="modal-add-semester" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 520px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); color: #17345C;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--slate-border); padding-bottom: 12px;">
+        <h3 style="font-size: 18px; font-weight: 700; color: #17345C; margin: 0;">Add Academic Semester</h3>
+        <button type="button" onclick="closeAddSemesterModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--slate-text-sub); line-height: 1;">&times;</button>
+      </div>
+      <form onsubmit="event.preventDefault(); submitAddSemester();">
+        <div style="margin-bottom: 14px;">
+          <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Degree Programme *</label>
+          <select id="new-sem-prog" required style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px;">
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Semester Number *</label>
+            <input type="number" id="new-sem-number" required min="1" max="12" value="1" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);" oninput="document.getElementById('new-sem-label').value = 'Semester ' + this.value">
+          </div>
+          <div>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Display Label</label>
+            <input type="text" id="new-sem-label" value="Semester 1" placeholder="e.g. Semester 1, Semester 5 (Autumn)" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+          </div>
+        </div>
+        <div id="add-sem-msg" style="display: none; margin-bottom: 14px;"></div>
+        <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--slate-border); padding-top: 14px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeAddSemesterModal()">Cancel</button>
+          <button type="submit" class="btn btn-sm" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Create Semester</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- MODAL 5: Add Section -->
   <div id="modal-add-section" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
     <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 520px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); color: #17345C;">
@@ -1525,11 +1597,20 @@
 
         const handleHashRoute = () => {
           const hash = window.location.hash;
-          if (hash === '#academic' || hash === '#academic-entities') {
-            switchTab('academic-entities');
-          } else if (hash === '#subgroups') {
+          const urlParams = new URLSearchParams(window.location.search);
+          const tabParam = urlParams.get('tab');
+          const actionParam = urlParams.get('action');
+
+          if (tabParam === 'subgroups' || hash === '#subgroups') {
             switchTab('subgroups');
-          } else if (hash === '#schools') {
+            if (actionParam === 'add-semester') {
+              setTimeout(openAddSemesterModal, 250);
+            } else if (actionParam === 'add-section') {
+              setTimeout(openAddSectionModal, 250);
+            }
+          } else if (tabParam === 'academic' || hash === '#academic' || hash === '#academic-entities') {
+            switchTab('academic-entities');
+          } else if (tabParam === 'schools' || hash === '#schools') {
             switchTab('schools');
           } else if (hash === '#timetable') {
             switchTab('timetable');
@@ -2693,6 +2774,7 @@
             renderDepartmentsTable();
             renderCoursesTable();
             renderRoomsTable();
+            renderSemestersTable();
             renderSectionsTable();
             renderSubgroups();
             populateAcademicDropdowns();
@@ -2778,6 +2860,7 @@
       renderDepartmentsTable();
       renderCoursesTable();
       renderRoomsTable();
+      renderSemestersTable();
       renderSectionsTable();
       renderSubgroups();
       populateAcademicDropdowns();
@@ -2974,6 +3057,93 @@
       showSuccessBanner(`Facility "${roomCode}" deleted successfully.`);
     }
 
+    function renderSemestersTable() {
+      const tbody = document.getElementById('semesters-table-body');
+      const countTag = document.getElementById('sem-count-tag');
+      if (countTag) countTag.textContent = `${academicState.semesters.length} Semesters`;
+      if (!tbody) return;
+
+      if (academicState.semesters.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: #64748B;">No academic semesters registered.</td></tr>';
+        return;
+      }
+
+      // Sort semesters by programme then semester number
+      const sortedSems = [...academicState.semesters].sort((a, b) => {
+        const crsA = academicState.courses.find(c => c.id === a.course_id);
+        const crsB = academicState.courses.find(c => c.id === b.course_id);
+        const codeA = crsA ? crsA.code : '';
+        const codeB = crsB ? crsB.code : '';
+        if (codeA !== codeB) return codeA.localeCompare(codeB);
+        return (a.semester_number || 0) - (b.semester_number || 0);
+      });
+
+      tbody.innerHTML = sortedSems.map(s => {
+        const crs = academicState.courses.find(c => c.id === s.course_id);
+        const progCode = crs ? crs.code : (s.course_code || 'BCA');
+        const progName = crs ? crs.name : 'Degree Programme';
+        const secCount = academicState.sections.filter(sec => sec.semester_id === s.id).length;
+        const displayLabel = s.display_label || `Semester ${s.semester_number}`;
+
+        return `
+          <tr>
+            <td><strong>${progCode}</strong> <span style="font-size: 11px; color: #64748B;">(${progName})</span></td>
+            <td><span class="tag" style="background: #E2E8F0; color: #17345C; font-weight: 700;">Sem ${s.semester_number}</span></td>
+            <td>${displayLabel}</td>
+            <td><span class="badge" style="background: rgba(29, 60, 114, 0.1); color: #1D3C72; font-weight: 700;">${secCount} Sections</span></td>
+            <td style="text-align: right; white-space: nowrap;">
+              <button type="button" class="btn btn-sm btn-outline" onclick="openAddSectionModalWithSemester('${s.id}', '${s.course_id}')" style="padding: 3px 8px; font-size: 11px; margin-right: 6px;">
+                + Section
+              </button>
+              <button type="button" class="action-btn-sm" onclick="deleteSemester('${s.id}', '${displayLabel.replace(/'/g, "\\'")}')" title="Delete ${displayLabel}" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 3px 8px; font-size: 11px; cursor: pointer;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 2px;">
+                  <polyline points="3 6 5 6 21 6"></polyline>
+                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+                Delete
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    async function deleteSemester(semId, semLabel) {
+      if (!confirm(`Are you sure you want to delete "${semLabel}"?\n\nThis will also cascade delete any sections and practical subgroups assigned to this semester.`)) {
+        return;
+      }
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + `/api/timetable/academic/semester/${encodeURIComponent(semId)}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' })
+          });
+          const data = await res.json();
+          if (data.success) {
+            await loadAcademicEntities();
+            showSuccessBanner(data.message || `Semester "${semLabel}" deleted successfully.`);
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, deleting semester locally:', err);
+      }
+
+      // Offline fallback
+      academicState.semesters = academicState.semesters.filter(s => s.id !== semId);
+      const removedSecIds = academicState.sections.filter(sec => sec.semester_id === semId).map(sec => sec.id);
+      academicState.sections = academicState.sections.filter(sec => sec.semester_id !== semId);
+      academicState.groups = academicState.groups.filter(grp => !removedSecIds.includes(grp.section_id));
+
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
+      renderSemestersTable();
+      renderSectionsTable();
+      renderSubgroups();
+      populateAcademicDropdowns();
+      syncFilterDropdowns();
+      showSuccessBanner(`Semester "${semLabel}" deleted successfully.`);
+    }
+
     function renderSectionsTable() {
       const tbody = document.getElementById('sections-table-body');
       const countTag = document.getElementById('section-count-tag');
@@ -3110,6 +3280,14 @@
       if (progDept && academicState.departments.length > 0) {
         progDept.innerHTML = academicState.departments.map(d => `
           <option value="${d.id}">${d.name} (${d.code})</option>
+        `).join('');
+      }
+
+      // Programme for Semester Modal
+      const semProg = document.getElementById('new-sem-prog');
+      if (semProg && academicState.courses.length > 0) {
+        semProg.innerHTML = academicState.courses.map(c => `
+          <option value="${c.id}">${c.name} (${c.code})</option>
         `).join('');
       }
 
@@ -3295,6 +3473,19 @@
       document.getElementById('modal-add-programme').style.display = 'none';
     }
 
+    function openAddSemesterModal(progId) {
+      document.getElementById('modal-add-semester').style.display = 'flex';
+      const semProg = document.getElementById('new-sem-prog');
+      if (semProg && progId) semProg.value = progId;
+      document.getElementById('new-sem-number').value = '1';
+      document.getElementById('new-sem-label').value = 'Semester 1';
+      const msg = document.getElementById('add-sem-msg');
+      if (msg) msg.style.display = 'none';
+    }
+    function closeAddSemesterModal() {
+      document.getElementById('modal-add-semester').style.display = 'none';
+    }
+
     function openAddSectionModal() {
       document.getElementById('modal-add-section').style.display = 'flex';
       updateSemesterOptionsForSection();
@@ -3304,6 +3495,21 @@
     }
     function closeAddSectionModal() {
       document.getElementById('modal-add-section').style.display = 'none';
+    }
+
+    function openAddSectionModalWithSemester(semId, courseId) {
+      openAddSectionModal();
+      if (courseId) {
+        const secProg = document.getElementById('new-sec-prog');
+        if (secProg) {
+          secProg.value = courseId;
+          updateSemesterOptionsForSection();
+        }
+      }
+      if (semId) {
+        const secSem = document.getElementById('new-sec-sem');
+        if (secSem) secSem.value = semId;
+      }
     }
 
     function openAddRoomModal() {
@@ -3500,6 +3706,57 @@
       populateAcademicDropdowns();
       syncFilterDropdowns();
       showSuccessBanner(`Programme "${name}" (${code}) created successfully.`);
+    }
+
+    async function submitAddSemester() {
+      const course_id = document.getElementById('new-sem-prog').value;
+      const semester_number = parseInt(document.getElementById('new-sem-number').value) || 1;
+      const display_label = document.getElementById('new-sem-label').value.trim() || `Semester ${semester_number}`;
+      const sem_id = 'sem-' + Date.now();
+      const msg = document.getElementById('add-sem-msg');
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + '/api/timetable/academic/semester', {
+            method: 'POST',
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ course_id, semester_number, display_label })
+          });
+          const data = await res.json();
+          if (data.success) {
+            closeAddSemesterModal();
+            await loadAcademicEntities();
+            showSuccessBanner(data.message || `Semester ${semester_number} created successfully.`);
+            return;
+          } else {
+            if (msg) {
+              msg.style.display = 'block';
+              msg.innerHTML = `<span style="color: #DC2626; font-size: 13px;">${data.message || 'Failed to create semester.'}</span>`;
+            }
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('Backend offline, saving semester locally:', err);
+      }
+
+      // Offline fallback
+      const exists = academicState.semesters.find(s => s.course_id === course_id && s.semester_number === semester_number);
+      if (exists) {
+        if (msg) {
+          msg.style.display = 'block';
+          msg.innerHTML = `<span style="color: #DC2626; font-size: 13px;">Semester ${semester_number} already exists for this programme.</span>`;
+        }
+        return;
+      }
+
+      academicState.semesters.push({ id: sem_id, course_id, semester_number, display_label });
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
+      closeAddSemesterModal();
+      renderSemestersTable();
+      populateAcademicDropdowns();
+      syncFilterDropdowns();
+      showSuccessBanner(`Semester "${display_label}" added successfully.`);
     }
 
     async function submitAddSection() {

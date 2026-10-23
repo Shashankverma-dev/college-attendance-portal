@@ -278,21 +278,46 @@ router.post('/academic/semester', adminAuth, async (req: Request, res: Response)
     res.status(400).json({ success: false, message: 'Programme ID and semester number are required.' });
     return;
   }
+  const targetCourse = localCourses.find((c) => c.course_id === course_id || c.course_code.toUpperCase() === String(course_id).toUpperCase());
+  const resolvedCourseId = targetCourse ? targetCourse.course_id : course_id;
   const semNum = Number(semester_number);
-  const exists = localSemesters.find((s) => s.course_id === course_id && s.semester_number === semNum);
+  const exists = localSemesters.find((s) => (s.course_id === resolvedCourseId || (targetCourse && s.course_id === targetCourse.course_id)) && s.semester_number === semNum);
   if (exists) {
-    res.status(400).json({ success: false, message: `Semester ${semNum} already exists for this programme.` });
+    res.status(200).json({ success: true, message: `Semester ${semNum} already exists for this programme.`, semester: exists });
     return;
   }
 
   const newSem = {
     semester_id: `e0000000-0000-0000-9999-${String(localSemesters.length + 1).padStart(12, '0')}`,
-    course_id,
+    course_id: resolvedCourseId,
     semester_number: semNum,
     display_label: display_label || `Semester ${semNum}`,
   };
   localSemesters.push(newSem);
   res.json({ success: true, message: `Semester ${semNum} added successfully.`, semester: newSem });
+});
+
+// Admin Deletion: Semester
+router.delete('/academic/semester/:id', adminAuth, async (req: Request, res: Response): Promise<void> => {
+  const targetId = req.params.id;
+  const idx = localSemesters.findIndex((s) => s.semester_id === targetId);
+  if (idx === -1) {
+    res.status(404).json({ success: false, message: 'Semester not found.' });
+    return;
+  }
+  const removed = localSemesters.splice(idx, 1)[0];
+  // Cascade remove sections and groups
+  for (let i = localSections.length - 1; i >= 0; i--) {
+    if (localSections[i].semester_id === removed.semester_id) {
+      const removedSec = localSections.splice(i, 1)[0];
+      for (let g = localSectionGroups.length - 1; g >= 0; g--) {
+        if (localSectionGroups[g].section_id === removedSec.section_id) {
+          localSectionGroups.splice(g, 1);
+        }
+      }
+    }
+  }
+  res.json({ success: true, message: `Semester "${removed.display_label || removed.semester_number}" deleted successfully.` });
 });
 
 // Admin Creation: Section
