@@ -185,14 +185,36 @@ router.post('/academic/department', adminAuth, async (req: Request, res: Respons
 // Admin Deletion: Department
 router.delete('/academic/department/:id', adminAuth, async (req: Request, res: Response): Promise<void> => {
   const targetId = req.params.id;
+  const targetUpper = targetId.toUpperCase();
   const idx = localDepartments.findIndex(
-    (d) => d.department_id === targetId || d.department_code.toUpperCase() === targetId.toUpperCase()
+    (d) =>
+      d.department_id === targetId ||
+      d.department_code.toUpperCase() === targetUpper ||
+      targetUpper.includes(d.department_code.toUpperCase()) ||
+      d.department_code.toUpperCase().includes(targetUpper) ||
+      d.department_name.toLowerCase().trim() === targetId.toLowerCase().trim()
   );
   if (idx === -1) {
+    // Check if target matches in localSchools
+    const schoolIdx = localSchools.findIndex(
+      (s) => s.school_id === targetId || s.school_code.toUpperCase() === targetUpper || targetUpper.includes(s.school_code.toUpperCase())
+    );
+    if (schoolIdx !== -1) {
+      const removedSchool = localSchools.splice(schoolIdx, 1)[0];
+      res.json({ success: true, message: `School / Department "${removedSchool.school_name}" deleted successfully.` });
+      return;
+    }
     res.status(404).json({ success: false, message: 'Department not found.' });
     return;
   }
   const removed = localDepartments.splice(idx, 1)[0];
+  // Synchronize removal from localSchools
+  const schoolIdx = localSchools.findIndex(
+    (s) => s.school_id === removed.department_id || s.school_code.toUpperCase() === removed.department_code.toUpperCase()
+  );
+  if (schoolIdx !== -1) {
+    localSchools.splice(schoolIdx, 1);
+  }
   res.json({ success: true, message: `Department "${removed.department_name}" (${removed.department_code}) deleted successfully.` });
 });
 
@@ -248,8 +270,14 @@ router.post('/academic/programme', adminAuth, async (req: Request, res: Response
 // Admin Deletion: Programme / Course
 router.delete('/academic/programme/:id', adminAuth, async (req: Request, res: Response): Promise<void> => {
   const targetId = req.params.id;
+  const targetUpper = targetId.toUpperCase();
   const idx = localCourses.findIndex(
-    (c) => c.course_id === targetId || c.course_code.toUpperCase() === targetId.toUpperCase()
+    (c) =>
+      c.course_id === targetId ||
+      c.course_code.toUpperCase() === targetUpper ||
+      targetUpper.includes(c.course_code.toUpperCase()) ||
+      c.course_code.toUpperCase().includes(targetUpper) ||
+      c.course_name.toLowerCase().trim() === targetId.toLowerCase().trim()
   );
   if (idx === -1) {
     res.status(404).json({ success: false, message: 'Programme not found.' });
@@ -300,7 +328,14 @@ router.post('/academic/semester', adminAuth, async (req: Request, res: Response)
 // Admin Deletion: Semester
 router.delete('/academic/semester/:id', adminAuth, async (req: Request, res: Response): Promise<void> => {
   const targetId = req.params.id;
-  const idx = localSemesters.findIndex((s) => s.semester_id === targetId);
+  const idx = localSemesters.findIndex((s) => {
+    if (s.semester_id === targetId) return true;
+    const semNumMatch = targetId.match(/\d+$/);
+    if (semNumMatch && s.semester_number === Number(semNumMatch[0])) {
+      return true;
+    }
+    return false;
+  });
   if (idx === -1) {
     res.status(404).json({ success: false, message: 'Semester not found.' });
     return;
@@ -356,8 +391,13 @@ router.post('/academic/section', adminAuth, async (req: Request, res: Response):
 // Admin Deletion: Section
 router.delete('/academic/section/:id', adminAuth, async (req: Request, res: Response): Promise<void> => {
   const targetId = req.params.id;
+  const targetUpper = targetId.toUpperCase();
   const idx = localSections.findIndex(
-    (s) => s.section_id === targetId || s.section_name.toUpperCase() === targetId.toUpperCase()
+    (s) =>
+      s.section_id === targetId ||
+      s.section_name.toUpperCase() === targetUpper ||
+      targetUpper.endsWith(s.section_name.toUpperCase()) ||
+      targetUpper.includes(`-${s.section_name.toUpperCase()}`)
   );
   if (idx === -1) {
     res.status(404).json({ success: false, message: 'Section not found.' });
@@ -409,8 +449,13 @@ router.post('/academic/room', adminAuth, async (req: Request, res: Response): Pr
 // Admin Deletion: Classroom / Lab
 router.delete('/academic/room/:id', adminAuth, async (req: Request, res: Response): Promise<void> => {
   const targetId = req.params.id;
+  const targetNorm = targetId.toLowerCase().replace(/[^a-z0-9]/g, '');
   const idx = localClassrooms.findIndex(
-    (r) => r.room_id === targetId || r.room_code.toUpperCase() === targetId.toUpperCase()
+    (r) =>
+      r.room_id === targetId ||
+      r.room_code.toUpperCase() === targetId.toUpperCase() ||
+      r.room_code.toLowerCase().replace(/[^a-z0-9]/g, '') === targetNorm ||
+      targetNorm.includes(r.room_code.toLowerCase().replace(/[^a-z0-9]/g, ''))
   );
   if (idx === -1) {
     res.status(404).json({ success: false, message: 'Room/facility not found.' });
@@ -455,8 +500,13 @@ router.post('/academic/group', adminAuth, async (req: Request, res: Response): P
 // Admin Deletion: Practical Subgroup
 router.delete('/academic/group/:id', adminAuth, async (req: Request, res: Response): Promise<void> => {
   const targetId = req.params.id;
+  const targetUpper = targetId.toUpperCase();
   const idx = localSectionGroups.findIndex(
-    (g) => g.group_id === targetId || g.group_name.toUpperCase() === targetId.toUpperCase()
+    (g) =>
+      g.group_id === targetId ||
+      g.group_name.toUpperCase() === targetUpper ||
+      targetUpper.endsWith(g.group_name.toUpperCase()) ||
+      targetUpper.includes(`-${g.group_name.toUpperCase()}`)
   );
   if (idx === -1) {
     res.status(404).json({ success: false, message: 'Subgroup not found.' });
@@ -668,13 +718,28 @@ router.get('/published', async (req: Request, res: Response): Promise<void> => {
 router.delete('/published', adminAuth, async (req: Request, res: Response): Promise<void> => {
   const { course, semester, section, term } = req.query;
   const initialCount = localTimetables.length;
+  const courseStr = course ? String(course).trim().toLowerCase() : '';
+  const termStr = term ? String(term).trim().toLowerCase() : '';
+  const secStr = section ? String(section).trim().toUpperCase() : '';
 
   for (let i = localTimetables.length - 1; i >= 0; i--) {
     const t = localTimetables[i];
-    const matchCourse = !course || t.course_code === course;
-    const matchSem = !semester || t.semester_number === Number(semester);
-    const matchSec = !section || t.section_name === section;
-    const matchTerm = !term || t.academic_calendar_term === term;
+    const matchCourse =
+      !courseStr ||
+      t.course_code.toLowerCase() === courseStr ||
+      t.course_name.toLowerCase() === courseStr ||
+      courseStr.includes(t.course_code.toLowerCase()) ||
+      t.course_code.toLowerCase().includes(courseStr);
+
+    const matchSem = !semester || t.semester_number === Number(semester) || String(t.semester_number) === String(semester);
+    const matchSec = !secStr || t.section_name.toUpperCase() === secStr;
+
+    const matchTerm =
+      !termStr ||
+      t.academic_calendar_term.toLowerCase() === termStr ||
+      t.academic_calendar_term.toLowerCase().includes(termStr.slice(0, 11)) ||
+      termStr.includes(t.academic_calendar_term.toLowerCase().slice(0, 11)) ||
+      (t.academic_calendar_term.toLowerCase().startsWith('autumn 2026') && termStr.startsWith('autumn 2026'));
 
     if (matchCourse && matchSem && matchSec && matchTerm) {
       localTimetables.splice(i, 1);

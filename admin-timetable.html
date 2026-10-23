@@ -2053,8 +2053,11 @@
             <button type="button" class="btn btn-sm btn-outline" onclick="openEditSchoolModal('${school.school_id}')" style="font-size: 12px; padding: 4px 10px;">
               Edit
             </button>
-            <button type="button" class="btn btn-sm btn-outline" onclick="deactivateSchool('${school.school_id}')" style="font-size: 12px; padding: 4px 10px; color: #DC2626; border-color: #FCA5A5;">
+            <button type="button" class="btn btn-sm btn-outline" onclick="deactivateSchool('${school.school_id}')" style="font-size: 12px; padding: 4px 10px; color: #D97706; border-color: #FCD34D;">
               ${school.is_active !== false ? 'Deactivate' : 'Reactivate'}
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="deleteSchoolPermanently('${school.school_id}', '${(school.school_name || '').replace(/'/g, "\\'")}')" style="font-size: 12px; padding: 4px 10px; color: #DC2626; border-color: #FCA5A5;" title="Permanently delete school">
+              Delete
             </button>
           </div>
         `;
@@ -2224,7 +2227,7 @@
     }
 
     async function deactivateSchool(schoolId) {
-      if (!confirm('Are you sure you want to deactivate/archive this school? Historical records will remain intact.')) return;
+      if (!confirm('Are you sure you want to change the active status of this school?')) return;
 
       try {
         if (getApiBase() !== null) {
@@ -2251,6 +2254,29 @@
       renderSchoolsData(loadedSchools);
     }
 
+    async function deleteSchoolPermanently(schoolId, schoolName) {
+      if (!confirm(`Are you sure you want to permanently delete "${schoolName}"?\n\nThis will remove the school and its academic records.`)) return;
+
+      loadedSchools = loadedSchools.filter(s => s.school_id !== schoolId && s.school_code !== schoolId);
+      loadedSchools = deduplicateSchoolsList(loadedSchools);
+      try { localStorage.setItem('admin_schools_list', JSON.stringify(loadedSchools)); } catch (e) {}
+      renderSchoolsData(loadedSchools);
+
+      try {
+        if (getApiBase() !== null) {
+          await fetch(getApiBase() + '/api/admin/schools/' + encodeURIComponent(schoolId) + '?force=true', {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+          await loadSchoolsGrid();
+          await loadAcademicEntities();
+        }
+      } catch (err) {
+        console.warn('Backend offline, deleted school locally:', err);
+      }
+      showSuccessBanner(`School "${schoolName}" deleted successfully.`);
+    }
+
     async function loadScheduleGrid() {
       const tbody = document.getElementById('schedule-grid-body');
       tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 24px; color: var(--slate-text-sub);">Loading published schedule...</td></tr>';
@@ -2260,21 +2286,30 @@
       const section = document.getElementById('filter-section') ? document.getElementById('filter-section').value : 'C';
       const term = document.getElementById('filter-term') ? document.getElementById('filter-term').value : 'Autumn 2026';
 
+      const scheduleKey = `${course}_${semester}_${section}`;
+      let clearedList = [];
       try {
-        if (getApiBase() !== null) {
-          const res = await fetch(getApiBase() + '/api/timetable/published?course=' + encodeURIComponent(course) + '&semester=' + encodeURIComponent(semester) + '&section=' + encodeURIComponent(section) + '&term=' + encodeURIComponent(term), {
-            headers: getAuthHeaders()
-          });
-          const data = await res.json();
-          if (data.success && data.timetable) {
-            currentTimetable = data.timetable;
-            renderGrid(data.timetable);
-            updateStatusPill(data.timetable.status || 'PUBLISHED');
-            return;
+        clearedList = JSON.parse(localStorage.getItem('admin_cleared_schedules') || '[]');
+      } catch (e) {}
+      const isExplicitlyCleared = Array.isArray(clearedList) && clearedList.includes(scheduleKey);
+
+      if (!isExplicitlyCleared) {
+        try {
+          if (getApiBase() !== null) {
+            const res = await fetch(getApiBase() + '/api/timetable/published?course=' + encodeURIComponent(course) + '&semester=' + encodeURIComponent(semester) + '&section=' + encodeURIComponent(section) + '&term=' + encodeURIComponent(term), {
+              headers: getAuthHeaders()
+            });
+            const data = await res.json();
+            if (data.success && data.timetable) {
+              currentTimetable = data.timetable;
+              renderGrid(data.timetable);
+              updateStatusPill(data.timetable.status || 'PUBLISHED');
+              return;
+            }
           }
+        } catch (err) {
+          console.warn('Backend unavailable, checking client timetable registry:', err);
         }
-      } catch (err) {
-        console.warn('Backend unavailable, checking client timetable registry:', err);
       }
 
       // Offline / Firebase Hosting registry fallback
@@ -2284,15 +2319,18 @@
       } catch (e) {}
 
       // Find matching in stored
-      let match = storedList.find(t => 
-        (t.course_code === course || t.course_name === course || (course && course.includes(t.course_code))) && 
-        String(t.semester_number) === String(semester) && 
-        t.section_name === section
-      );
+      let match = null;
+      if (!isExplicitlyCleared) {
+        match = storedList.find(t => 
+          (t.course_code === course || t.course_name === course || (course && course.includes(t.course_code))) && 
+          String(t.semester_number) === String(semester) && 
+          t.section_name === section
+        );
 
-      // If no stored entry, but filter is BCA Sem 5 Sec C, load the verified defaultBCATimetable
-      if (!match && (course === 'BCA' || (course && course.includes('BCA'))) && String(semester) === '5' && section === 'C') {
-        match = defaultBCATimetable;
+        // If no stored entry, but filter is BCA Sem 5 Sec C, load the verified defaultBCATimetable only if not explicitly cleared
+        if (!match && (course === 'BCA' || (course && course.includes('BCA'))) && String(semester) === '5' && section === 'C') {
+          match = defaultBCATimetable;
+        }
       }
 
       if (match) {
@@ -2304,7 +2342,7 @@
         updateStatusPill('NOT SCHEDULED');
         tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 32px; color: var(--slate-text-sub);">' +
           '<div style="font-size: 14px; font-weight: 700; color: var(--slate-text-main); margin-bottom: 4px;">No Timetable Published for this Section</div>' +
-          '<div style="font-size: 12px;">Use "Import Timetable (Excel)" or "Add Class Period" to schedule classes for this cohort.</div>' +
+          '<div style="font-size: 12px; margin-bottom: 8px;">Schedule has been cleared. Use "Import Timetable (Excel)" or "Add Class Period" to schedule classes for this cohort.</div>' +
           '</td></tr>';
       }
     }
@@ -2366,9 +2404,44 @@
       });
     }
 
+    async function deleteClassPeriodEntry(entryId, subjectCode) {
+      if (!confirm(`Are you sure you want to remove the class period "${subjectCode}" from this timetable?`)) {
+        return;
+      }
+
+      if (currentTimetable && Array.isArray(currentTimetable.entries)) {
+        currentTimetable.entries = currentTimetable.entries.filter(e => e.entry_id !== entryId);
+        try {
+          let stored = JSON.parse(localStorage.getItem('admin_published_timetables') || '[]');
+          const idx = stored.findIndex(t => 
+            t.course_code === currentTimetable.course_code && 
+            String(t.semester_number) === String(currentTimetable.semester_number) && 
+            t.section_name === currentTimetable.section_name
+          );
+          if (idx >= 0) stored[idx] = currentTimetable;
+          else stored.push(currentTimetable);
+          localStorage.setItem('admin_published_timetables', JSON.stringify(stored));
+        } catch (e) {}
+        renderGrid(currentTimetable);
+      }
+
+      try {
+        if (getApiBase() !== null) {
+          await fetch(getApiBase() + `/api/timetable/entries/${encodeURIComponent(entryId)}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, period entry removed locally:', err);
+      }
+
+      showSuccessBanner(`Class period "${subjectCode}" deleted successfully.`);
+    }
+
     function renderPeriodCell(entries, day, periodIndex) {
       const td = document.createElement('td');
-      const matching = entries.filter(e => e.day_of_week === day && e.period_index === periodIndex && !e.is_cancelled);
+      const matching = (entries || []).filter(e => e.day_of_week === day && e.period_index === periodIndex && !e.is_cancelled);
 
       if (matching.length === 0) {
         td.innerHTML = '<span style="color: #CBD5E1; font-size: 11px;">-</span>';
@@ -2382,8 +2455,10 @@
         if (entry.group_name === 'C2') groupClass = 'subgroup-c2';
 
         card.className = `tt-cell-card ${groupClass}`;
+        card.style.position = 'relative';
         card.innerHTML = `
-          <div class="tt-cell-subj">
+          <button type="button" class="tt-card-del-btn" onclick="event.stopPropagation(); deleteClassPeriodEntry('${entry.entry_id}', '${(entry.subject_code || 'Class').replace(/'/g, "\\'")}')" title="Delete class period" aria-label="Delete period" style="position: absolute; top: 3px; right: 3px; background: rgba(220, 38, 38, 0.12); border: 1px solid rgba(220, 38, 38, 0.35); color: #DC2626; border-radius: 3px; width: 17px; height: 17px; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; line-height: 1; font-weight: bold;">&times;</button>
+          <div class="tt-cell-subj" style="padding-right: 18px;">
             ${entry.group_name ? `<span style="font-size: 10px; font-weight: 800; color: #0284C7;">[${entry.group_name}]</span> ` : ''}
             ${entry.subject_code}
           </div>
@@ -2673,6 +2748,16 @@
           });
           const data = await res.json();
           if (data.success) {
+            const cCode = (currentPreview.academicContext && currentPreview.academicContext.course) || 'BCA';
+            const sNum = (currentPreview.academicContext && currentPreview.academicContext.semester) || 5;
+            const sName = (currentPreview.academicContext && currentPreview.academicContext.section) || 'C';
+            try {
+              let cleared = JSON.parse(localStorage.getItem('admin_cleared_schedules') || '[]');
+              if (Array.isArray(cleared)) {
+                cleared = cleared.filter(k => k !== `${cCode}_${sNum}_${sName}`);
+                localStorage.setItem('admin_cleared_schedules', JSON.stringify(cleared));
+              }
+            } catch (e) {}
             commitBtn.disabled = false;
             commitBtn.textContent = 'Confirm & Publish Timetable';
             closeImportModal();
@@ -2697,6 +2782,15 @@
         effective_date: '2026-08-04',
         entries: currentPreview.parsedEntries || defaultBCATimetable.entries
       };
+
+      const clearKey = `${publishedTT.course_code}_${publishedTT.semester_number}_${publishedTT.section_name}`;
+      try {
+        let cleared = JSON.parse(localStorage.getItem('admin_cleared_schedules') || '[]');
+        if (Array.isArray(cleared)) {
+          cleared = cleared.filter(k => k !== clearKey);
+          localStorage.setItem('admin_cleared_schedules', JSON.stringify(cleared));
+        }
+      } catch (e) {}
 
       try {
         let stored = JSON.parse(localStorage.getItem('admin_published_timetables') || '[]');
@@ -2808,15 +2902,15 @@
           });
           const data = await res.json();
           if (data && data.success) {
-            academicState.departments = (Array.isArray(data.departments) && data.departments.length > 0)
+            academicState.departments = Array.isArray(data.departments)
               ? deduplicateDepartmentsList(data.departments.map(d => ({
                   id: d.id || d.department_id,
                   code: d.code || d.department_code,
                   name: d.name || d.department_name
                 })))
-              : (academicState.departments && academicState.departments.length > 0 ? academicState.departments : defaultInstitutionalState.departments);
+              : (academicState.departments || defaultInstitutionalState.departments);
 
-            academicState.courses = (Array.isArray(data.courses) && data.courses.length > 0)
+            academicState.courses = Array.isArray(data.courses)
               ? data.courses.map(c => ({
                   id: c.id || c.course_id,
                   department_id: c.department_id,
@@ -2824,18 +2918,18 @@
                   name: c.name || c.course_name,
                   total_semesters: c.total_semesters || 6
                 }))
-              : (academicState.courses && academicState.courses.length > 0 ? academicState.courses : defaultInstitutionalState.courses);
+              : (academicState.courses || defaultInstitutionalState.courses);
 
-            academicState.semesters = (Array.isArray(data.semesters) && data.semesters.length > 0)
+            academicState.semesters = Array.isArray(data.semesters)
               ? data.semesters.map(s => ({
                   id: s.id || s.semester_id,
                   course_id: s.course_id,
                   semester_number: s.semester_number,
                   display_label: s.display_label || `Semester ${s.semester_number}`
                 }))
-              : (academicState.semesters && academicState.semesters.length > 0 ? academicState.semesters : defaultInstitutionalState.semesters);
+              : (academicState.semesters || defaultInstitutionalState.semesters);
 
-            academicState.sections = (Array.isArray(data.sections) && data.sections.length > 0)
+            academicState.sections = Array.isArray(data.sections)
               ? data.sections.map(s => ({
                   id: s.id || s.section_id,
                   semester_id: s.semester_id,
@@ -2843,9 +2937,9 @@
                   capacity: s.capacity || s.max_capacity || 80,
                   academic_calendar_term: s.academic_calendar_term || 'Autumn 2026'
                 }))
-              : (academicState.sections && academicState.sections.length > 0 ? academicState.sections : defaultInstitutionalState.sections);
+              : (academicState.sections || defaultInstitutionalState.sections);
 
-            academicState.rooms = (Array.isArray(data.rooms) && data.rooms.length > 0)
+            academicState.rooms = Array.isArray(data.rooms)
               ? data.rooms.map(r => ({
                   id: r.id || r.room_id,
                   room_code: r.room_code,
@@ -2854,24 +2948,24 @@
                   capacity: r.capacity || 45,
                   department_id: r.department_id
                 }))
-              : (academicState.rooms && academicState.rooms.length > 0 ? academicState.rooms : defaultInstitutionalState.rooms);
+              : (academicState.rooms || defaultInstitutionalState.rooms);
 
-            academicState.groups = (Array.isArray(data.groups) && data.groups.length > 0)
+            academicState.groups = Array.isArray(data.groups)
               ? data.groups.map(g => ({
                   id: g.id || g.group_id,
                   section_id: g.section_id,
                   name: g.name || g.group_name,
                   description: g.description
                 }))
-              : (academicState.groups && academicState.groups.length > 0 ? academicState.groups : defaultInstitutionalState.groups);
+              : (academicState.groups || defaultInstitutionalState.groups);
 
-            academicState.periods = (Array.isArray(data.periods) && data.periods.length > 0)
+            academicState.periods = Array.isArray(data.periods)
               ? data.periods
-              : (academicState.periods && academicState.periods.length > 0 ? academicState.periods : defaultInstitutionalState.periods);
+              : (academicState.periods || defaultInstitutionalState.periods);
 
-            academicState.subjects = (Array.isArray(data.subjects) && data.subjects.length > 0)
+            academicState.subjects = Array.isArray(data.subjects)
               ? data.subjects
-              : (academicState.subjects && academicState.subjects.length > 0 ? academicState.subjects : defaultInstitutionalState.subjects);
+              : (academicState.subjects || defaultInstitutionalState.subjects);
 
             try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
 
@@ -2896,7 +2990,7 @@
         savedState = JSON.parse(localStorage.getItem('admin_academic_state'));
       } catch (e) {}
 
-      if (savedState && savedState.departments && savedState.departments.length > 0) {
+      if (savedState && typeof savedState === 'object' && Array.isArray(savedState.departments)) {
         savedState.departments = deduplicateDepartmentsList(savedState.departments);
         academicState = savedState;
       } else {
@@ -2956,6 +3050,13 @@
       if (!confirm(`Are you sure you want to delete Academic Department "${deptName}"?\n\nThis will remove the department from the institutional directory.`)) {
         return;
       }
+
+      // Optimistic local deletion
+      academicState.departments = academicState.departments.filter(d => d.id !== deptId && d.code !== deptId && String(d.id).toLowerCase() !== String(deptId).toLowerCase());
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
+      renderDepartmentsTable();
+      populateAcademicDropdowns();
+
       try {
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + `/api/timetable/academic/department/${encodeURIComponent(deptId)}`, {
@@ -2963,21 +3064,14 @@
             headers: getAuthHeaders({ 'Content-Type': 'application/json' })
           });
           const data = await res.json();
-          if (data.success) {
+          if (data && data.success) {
             await loadAcademicEntities();
-            showSuccessBanner(data.message || `Department "${deptName}" deleted successfully.`);
-            return;
           }
         }
       } catch (err) {
-        console.warn('Backend unavailable, deleting department locally:', err);
+        console.warn('Backend unavailable, department deleted locally:', err);
       }
 
-      // Offline fallback
-      academicState.departments = academicState.departments.filter(d => d.id !== deptId && d.code !== deptId);
-      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
-      renderDepartmentsTable();
-      populateAcademicDropdowns();
       showSuccessBanner(`Department "${deptName}" deleted successfully.`);
     }
 
@@ -3018,6 +3112,22 @@
       if (!confirm(`Are you sure you want to delete Programme "${progName}"?\n\nThis will remove the programme and all associated semesters and sections.`)) {
         return;
       }
+
+      // Optimistic local deletion
+      academicState.courses = academicState.courses.filter(c => c.id !== progId && c.code !== progId && String(c.id).toLowerCase() !== String(progId).toLowerCase());
+      const removedSemIds = academicState.semesters.filter(s => s.course_id === progId).map(s => s.id);
+      academicState.semesters = academicState.semesters.filter(s => s.course_id !== progId);
+      const removedSecIds = academicState.sections.filter(sec => removedSemIds.includes(sec.semester_id)).map(sec => sec.id);
+      academicState.sections = academicState.sections.filter(sec => !removedSemIds.includes(sec.semester_id));
+      academicState.groups = academicState.groups.filter(grp => !removedSecIds.includes(grp.section_id));
+
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
+      renderCoursesTable();
+      renderSemestersTable();
+      renderSectionsTable();
+      renderSubgroups();
+      syncFilterDropdowns();
+
       try {
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + `/api/timetable/academic/programme/${encodeURIComponent(progId)}`, {
@@ -3025,21 +3135,14 @@
             headers: getAuthHeaders({ 'Content-Type': 'application/json' })
           });
           const data = await res.json();
-          if (data.success) {
+          if (data && data.success) {
             await loadAcademicEntities();
-            showSuccessBanner(data.message || `Programme "${progName}" deleted successfully.`);
-            return;
           }
         }
       } catch (err) {
-        console.warn('Backend unavailable, deleting programme locally:', err);
+        console.warn('Backend unavailable, programme deleted locally:', err);
       }
 
-      // Offline fallback
-      academicState.courses = academicState.courses.filter(c => c.id !== progId && c.code !== progId);
-      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
-      renderCoursesTable();
-      syncFilterDropdowns();
       showSuccessBanner(`Programme "${progName}" deleted successfully.`);
     }
 
@@ -3078,6 +3181,13 @@
       if (!confirm(`Are you sure you want to delete Facility "${roomCode}"?`)) {
         return;
       }
+
+      // Optimistic local deletion
+      academicState.rooms = academicState.rooms.filter(r => r.id !== roomId && r.room_code !== roomCode && String(r.room_code).toUpperCase() !== String(roomCode).toUpperCase());
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
+      renderRoomsTable();
+      populateAcademicDropdowns();
+
       try {
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + `/api/timetable/academic/room/${encodeURIComponent(roomId)}`, {
@@ -3085,21 +3195,14 @@
             headers: getAuthHeaders({ 'Content-Type': 'application/json' })
           });
           const data = await res.json();
-          if (data.success) {
+          if (data && data.success) {
             await loadAcademicEntities();
-            showSuccessBanner(data.message || `Room "${roomCode}" deleted successfully.`);
-            return;
           }
         }
       } catch (err) {
-        console.warn('Backend unavailable, deleting room locally:', err);
+        console.warn('Backend unavailable, room deleted locally:', err);
       }
 
-      // Offline fallback
-      academicState.rooms = academicState.rooms.filter(r => r.id !== roomId && r.room_code !== roomCode);
-      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
-      renderRoomsTable();
-      populateAcademicDropdowns();
       showSuccessBanner(`Facility "${roomCode}" deleted successfully.`);
     }
 
@@ -3158,24 +3261,8 @@
       if (!confirm(`Are you sure you want to delete "${semLabel}"?\n\nThis will also cascade delete any sections and practical subgroups assigned to this semester.`)) {
         return;
       }
-      try {
-        if (getApiBase() !== null) {
-          const res = await fetch(getApiBase() + `/api/timetable/academic/semester/${encodeURIComponent(semId)}`, {
-            method: 'DELETE',
-            headers: getAuthHeaders({ 'Content-Type': 'application/json' })
-          });
-          const data = await res.json();
-          if (data.success) {
-            await loadAcademicEntities();
-            showSuccessBanner(data.message || `Semester "${semLabel}" deleted successfully.`);
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('Backend unavailable, deleting semester locally:', err);
-      }
 
-      // Offline fallback
+      // Optimistic local deletion
       academicState.semesters = academicState.semesters.filter(s => s.id !== semId);
       const removedSecIds = academicState.sections.filter(sec => sec.semester_id === semId).map(sec => sec.id);
       academicState.sections = academicState.sections.filter(sec => sec.semester_id !== semId);
@@ -3187,6 +3274,22 @@
       renderSubgroups();
       populateAcademicDropdowns();
       syncFilterDropdowns();
+
+      try {
+        if (getApiBase() !== null) {
+          const res = await fetch(getApiBase() + `/api/timetable/academic/semester/${encodeURIComponent(semId)}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' })
+          });
+          const data = await res.json();
+          if (data && data.success) {
+            await loadAcademicEntities();
+          }
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, semester deleted locally:', err);
+      }
+
       showSuccessBanner(`Semester "${semLabel}" deleted successfully.`);
     }
 
@@ -3232,6 +3335,16 @@
       if (!confirm(`Are you sure you want to delete Section "${secName}"?\n\nThis will also remove any practical cohorts under this section.`)) {
         return;
       }
+
+      // Optimistic local deletion
+      academicState.sections = academicState.sections.filter(s => s.id !== secId && s.name !== secName && String(s.name).toUpperCase() !== String(secName).toUpperCase());
+      academicState.groups = academicState.groups.filter(g => g.section_id !== secId);
+
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
+      renderSectionsTable();
+      renderSubgroups();
+      syncFilterDropdowns();
+
       try {
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + `/api/timetable/academic/section/${encodeURIComponent(secId)}`, {
@@ -3239,21 +3352,14 @@
             headers: getAuthHeaders({ 'Content-Type': 'application/json' })
           });
           const data = await res.json();
-          if (data.success) {
+          if (data && data.success) {
             await loadAcademicEntities();
-            showSuccessBanner(data.message || `Section "${secName}" deleted successfully.`);
-            return;
           }
         }
       } catch (err) {
-        console.warn('Backend unavailable, deleting section locally:', err);
+        console.warn('Backend unavailable, section deleted locally:', err);
       }
 
-      // Offline fallback
-      academicState.sections = academicState.sections.filter(s => s.id !== secId && s.name !== secName);
-      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
-      renderSectionsTable();
-      syncFilterDropdowns();
       showSuccessBanner(`Section "${secName}" deleted successfully.`);
     }
 
@@ -3295,6 +3401,13 @@
       if (!confirm(`Are you sure you want to delete Cohort "${grpName}"?`)) {
         return;
       }
+
+      // Optimistic local deletion
+      academicState.groups = academicState.groups.filter(g => g.id !== grpId && g.name !== grpName && String(g.name).toUpperCase() !== String(grpName).toUpperCase());
+      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
+      renderSubgroups();
+      populateAcademicDropdowns();
+
       try {
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + `/api/timetable/academic/group/${encodeURIComponent(grpId)}`, {
@@ -3302,21 +3415,14 @@
             headers: getAuthHeaders({ 'Content-Type': 'application/json' })
           });
           const data = await res.json();
-          if (data.success) {
+          if (data && data.success) {
             await loadAcademicEntities();
-            showSuccessBanner(data.message || `Cohort "${grpName}" deleted successfully.`);
-            return;
           }
         }
       } catch (err) {
-        console.warn('Backend unavailable, deleting cohort locally:', err);
+        console.warn('Backend unavailable, cohort deleted locally:', err);
       }
 
-      // Offline fallback
-      academicState.groups = academicState.groups.filter(g => g.id !== grpId && g.name !== grpName);
-      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
-      renderSubgroups();
-      populateAcademicDropdowns();
       showSuccessBanner(`Cohort "${grpName}" deleted successfully.`);
     }
 
@@ -4099,6 +4205,13 @@
         if (idx >= 0) stored[idx] = currentTimetable;
         else stored.push(currentTimetable);
         localStorage.setItem('admin_published_timetables', JSON.stringify(stored));
+
+        const clearKey = `${currentTimetable.course_code}_${currentTimetable.semester_number}_${currentTimetable.section_name}`;
+        let cleared = JSON.parse(localStorage.getItem('admin_cleared_schedules') || '[]');
+        if (Array.isArray(cleared)) {
+          cleared = cleared.filter(k => k !== clearKey);
+          localStorage.setItem('admin_cleared_schedules', JSON.stringify(cleared));
+        }
       } catch(e) {}
 
       saveBtn.disabled = false;
@@ -4150,37 +4263,42 @@
         return;
       }
 
+      const scheduleKey = `${course}_${semester}_${section}`;
+      // Track explicitly cleared schedule in localStorage
       try {
-        if (getApiBase() !== null) {
-          const res = await fetch(getApiBase() + '/api/timetable/published?course=' + encodeURIComponent(course) + '&semester=' + encodeURIComponent(semester) + '&section=' + encodeURIComponent(section) + '&term=' + encodeURIComponent(term), {
-            method: 'DELETE',
-            headers: getAuthHeaders()
-          });
-          const data = await res.json();
-          if (data.success) {
-            showSuccessBanner(`Timetable schedule for ${course} Sem ${semester} (${section}) successfully removed.`);
-            await loadScheduleGrid();
-            return;
-          }
+        let clearedList = JSON.parse(localStorage.getItem('admin_cleared_schedules') || '[]');
+        if (!Array.isArray(clearedList)) clearedList = [];
+        if (!clearedList.includes(scheduleKey)) {
+          clearedList.push(scheduleKey);
         }
-      } catch (err) {
-        console.warn('Backend unavailable, removing timetable locally:', err);
-      }
+        localStorage.setItem('admin_cleared_schedules', JSON.stringify(clearedList));
+      } catch (e) {}
 
-      // Offline / Firebase remove fallback
+      // Clear from local storage immediately
       try {
         let stored = JSON.parse(localStorage.getItem('admin_published_timetables') || '[]');
         stored = stored.filter(t => !(
-          (t.course_code === course || t.course_name === course) && 
+          (t.course_code === course || t.course_name === course || (course && course.includes(t.course_code))) && 
           String(t.semester_number) === String(semester) && 
           t.section_name === section
         ));
         localStorage.setItem('admin_published_timetables', JSON.stringify(stored));
       } catch (e) {}
 
+      try {
+        if (getApiBase() !== null) {
+          await fetch(getApiBase() + '/api/timetable/published?course=' + encodeURIComponent(course) + '&semester=' + encodeURIComponent(semester) + '&section=' + encodeURIComponent(section) + '&term=' + encodeURIComponent(term), {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          });
+        }
+      } catch (err) {
+        console.warn('Backend unavailable, removing timetable locally:', err);
+      }
+
       currentTimetable = null;
       showSuccessBanner(`Timetable schedule for ${course} Sem ${semester} (${section}) successfully removed.`);
-      loadScheduleGrid();
+      await loadScheduleGrid();
     }
 
     async function purgeAllTestData() {

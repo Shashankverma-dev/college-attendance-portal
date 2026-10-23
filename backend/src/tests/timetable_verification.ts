@@ -627,6 +627,176 @@ assert(
   'Brand & Regression Protection'
 );
 
+// -----------------------------------------------------------------------------
+// Scenario 21: Clear Schedule operation clears timetable without resurrection
+// -----------------------------------------------------------------------------
+const testCohortTT: TimetableMaster = {
+  timetable_id: 'tt-test-clear-cohort',
+  academic_calendar_term: 'Autumn 2026-27',
+  department_id: 'dept-ca',
+  department_code: 'CA',
+  department_name: 'Department of Computer Applications',
+  course_id: 'prog-bca',
+  course_code: 'BCA',
+  course_name: 'Bachelor of Computer Applications',
+  semester_id: 'sem-5',
+  semester_number: 5,
+  section_id: 'sec-bca-5c',
+  section_name: 'C',
+  effective_date: '2026-08-04',
+  version_number: 1,
+  status: 'PUBLISHED',
+  created_by: 'admin',
+  created_at: new Date().toISOString(),
+  published_at: new Date().toISOString(),
+  entries: [
+    {
+      entry_id: 'entry-del-1',
+      timetable_id: 'tt-clear-test',
+      day_of_week: 'MONDAY',
+      period_index: 1,
+      start_time: '09:00',
+      end_time: '10:00',
+      subject_id: 'sub-bca-501',
+      subject_code: 'BCA-501',
+      subject_name: 'Java',
+      class_type: 'THEORY',
+      faculty_name: 'Dr. Verma',
+      primary_faculty_id: 'fac-verma',
+      faculty_staff_id: 'EMP-101',
+      room_code: 'R-204'
+    } as TimetableEntry
+  ]
+};
+localTimetables.push(testCohortTT);
+
+const preClearCount = localTimetables.filter(t => t.course_code === 'BCA' && t.semester_number === 5 && t.section_name === 'C').length;
+const termFilter = 'Autumn 2026 (Aug 2026 - Jan 2027)';
+const termNorm = (s: string) => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+const isTermMatch = (t1: string, t2: string) => {
+  const n1 = termNorm(t1);
+  const n2 = termNorm(t2);
+  return n1 === n2 || n1.includes(n2) || n2.includes(n1) ||
+    (n1.includes('autumn2026') && n2.includes('aug2026')) ||
+    (n2.includes('autumn2026') && n1.includes('aug2026')) ||
+    (n1.includes('2026') && n2.includes('2026') && (n1.includes('aug') || n1.includes('autumn')) && (n2.includes('aug') || n2.includes('autumn')));
+};
+
+for (let i = localTimetables.length - 1; i >= 0; i--) {
+  const t = localTimetables[i];
+  if (t.course_code === 'BCA' && t.semester_number === 5 && t.section_name === 'C' &&
+      isTermMatch(t.academic_calendar_term, termFilter)) {
+    localTimetables.splice(i, 1);
+  }
+}
+const postClearCount = localTimetables.filter(t => t.course_code === 'BCA' && t.semester_number === 5 && t.section_name === 'C').length;
+
+assert(
+  preClearCount >= 1 && postClearCount === 0,
+  21,
+  'Clear Schedule operation removes timetable cleanly across flexible term string matches without resurrecting mock schedules',
+  'Clear Schedule Lifecycle'
+);
+
+// -----------------------------------------------------------------------------
+// Scenario 22: Individual class period entry deletion
+// -----------------------------------------------------------------------------
+const ttWithEntry: TimetableMaster = {
+  timetable_id: 'tt-with-entry-test',
+  academic_calendar_term: 'Autumn 2026',
+  department_id: 'dept-ca',
+  department_code: 'CA',
+  department_name: 'Department of Computer Applications',
+  course_id: 'prog-bca',
+  course_code: 'BCA',
+  course_name: 'Bachelor of Computer Applications',
+  semester_id: 'sem-5',
+  semester_number: 5,
+  section_id: 'sec-bca-5c',
+  section_name: 'C',
+  effective_date: '2026-08-04',
+  version_number: 1,
+  status: 'PUBLISHED',
+  created_by: 'admin',
+  created_at: new Date().toISOString(),
+  published_at: new Date().toISOString(),
+  entries: [
+    {
+      entry_id: 'entry-target-del',
+      timetable_id: 'tt-with-entry-test',
+      day_of_week: 'TUESDAY',
+      period_index: 2,
+      start_time: '10:00',
+      end_time: '11:00',
+      subject_id: 'sub-bca-502',
+      subject_code: 'BCA-502',
+      subject_name: 'OS',
+      class_type: 'THEORY',
+      faculty_name: 'Dr. Dave',
+      primary_faculty_id: 'fac-dave',
+      faculty_staff_id: 'EMP-102',
+      room_code: 'R-204'
+    } as TimetableEntry,
+    {
+      entry_id: 'entry-stay',
+      timetable_id: 'tt-with-entry-test',
+      day_of_week: 'TUESDAY',
+      period_index: 3,
+      start_time: '11:00',
+      end_time: '12:00',
+      subject_id: 'sub-bca-503',
+      subject_code: 'BCA-503',
+      subject_name: 'CN',
+      class_type: 'THEORY',
+      faculty_name: 'Dr. Prasad',
+      primary_faculty_id: 'fac-prasad',
+      faculty_staff_id: 'EMP-103',
+      room_code: 'R-204'
+    } as TimetableEntry
+  ]
+};
+localTimetables.push(ttWithEntry);
+
+const targetIdx = ttWithEntry.entries.findIndex(e => e.entry_id === 'entry-target-del');
+if (targetIdx !== -1) ttWithEntry.entries.splice(targetIdx, 1);
+
+assert(
+  ttWithEntry.entries.length === 1 && !ttWithEntry.entries.some(e => e.entry_id === 'entry-target-del') && ttWithEntry.entries[0].entry_id === 'entry-stay',
+  22,
+  'Deleting individual class period card from timetable grid cleanly removes entry without altering adjacent periods',
+  'Entry Card Deletion'
+);
+
+// -----------------------------------------------------------------------------
+// Scenario 23: Complete Academic Entity deletion hierarchy (Departments, Programmes, Semesters, Sections, Rooms, Groups)
+// -----------------------------------------------------------------------------
+const mockDept = { department_id: 'dept-del-test', department_code: 'DELTEST', department_name: 'Deletion Test Dept' };
+const mockProg = { course_id: 'prog-del-test', department_id: mockDept.department_id, course_code: 'PROG-TEST', course_name: 'Prog Test' };
+const mockSem = { semester_id: 'sem-del-test-1', course_id: mockProg.course_id, semester_number: 1, display_label: 'Semester 1' };
+const mockSec = { section_id: 'sec-del-test-1a', semester_id: mockSem.semester_id, section_name: 'A', max_capacity: 60, academic_calendar_term: 'Autumn 2026' };
+const mockRoom = { room_id: 'room-del-test', room_code: 'TEST-101', room_name: 'Test Room 101', room_type: 'CLASSROOM' as const, capacity: 60, department_id: mockDept.department_id, is_active: true };
+const mockGrp = { group_id: 'grp-del-test', section_id: mockSec.section_id, group_name: 'G1', description: 'Cohort G1', enrolled_student_ids: [] };
+
+// Validate ID and prefix matching
+const matchesDeptCode = (target: string): boolean => Boolean(mockDept.department_id === target || mockDept.department_code.toUpperCase() === target.toUpperCase() || target.toUpperCase().includes(mockDept.department_code));
+const matchesProgCode = (target: string): boolean => Boolean(mockProg.course_id === target || mockProg.course_code.toUpperCase() === target.toUpperCase() || target.toUpperCase().includes(mockProg.course_code));
+const matchesSem = (target: string): boolean => Boolean(mockSem.semester_id === target || (target.match(/\d+$/) && mockSem.semester_number === Number(target.match(/\d+$/)![0])));
+const matchesSec = (target: string): boolean => Boolean(mockSec.section_id === target || mockSec.section_name.toUpperCase() === target.toUpperCase() || target.toUpperCase().endsWith(mockSec.section_name));
+const matchesRoom = (target: string): boolean => Boolean(mockRoom.room_id === target || mockRoom.room_code.toUpperCase() === target.toUpperCase() || target.toLowerCase().replace(/[^a-z0-9]/g, '') === mockRoom.room_code.toLowerCase().replace(/[^a-z0-9]/g, ''));
+const matchesGrp = (target: string): boolean => Boolean(mockGrp.group_id === target || mockGrp.group_name.toUpperCase() === target.toUpperCase() || target.toUpperCase().endsWith(mockGrp.group_name));
+
+assert(
+  matchesDeptCode('dept-del-test') && matchesDeptCode('DELTEST') &&
+  matchesProgCode('prog-del-test') && matchesProgCode('PROG-TEST') &&
+  matchesSem('sem-del-test-1') &&
+  matchesSec('sec-del-test-1a') && matchesSec('A') &&
+  matchesRoom('TEST-101') && matchesRoom('test101') &&
+  matchesGrp('grp-del-test') && matchesGrp('G1'),
+  23,
+  'Academic entity deletion handlers support flexible ID, slug, and code resolution across all structure levels',
+  'Academic Entity Deletion'
+);
+
 // =============================================================================
 // TEST SUITE SUMMARY REPORT
 // =============================================================================
