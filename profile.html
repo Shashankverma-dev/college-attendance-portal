@@ -1161,7 +1161,8 @@
 
           var token = sessionStorage.getItem('attendance_auth_token') || 'dev-token-' + userId;
 
-          fetch('/api/profile/security/change-password', {
+          var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+          fetch(apiBase + '/api/profile/security/change-password', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1270,7 +1271,8 @@
         var token = sessionStorage.getItem('attendance_auth_token') || localStorage.getItem('auth_token');
         if (!token) return;
 
-        fetch('/api/profile/me', {
+        var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+        fetch(apiBase + '/api/profile/me', {
           headers: { 'Authorization': 'Bearer ' + token }
         })
         .then(function (res) {

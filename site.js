@@ -643,6 +643,9 @@
     }
   }
 
+  // Default Render Web Service URL (Can be changed via UI widget or localStorage)
+  window.DEFAULT_RENDER_URL = window.DEFAULT_RENDER_URL || 'https://attendance-backend.onrender.com';
+
   window.getApiBase = function () {
     if (window._apiBase !== undefined && window._apiBase !== null) return window._apiBase;
     var custom = localStorage.getItem('attendance_api_url') || window.APP_API_URL;
@@ -654,11 +657,25 @@
     if (h === 'localhost' || h === '127.0.0.1') {
       window._apiBase = 'http://localhost:8080';
     } else {
-      // In production on Firebase Hosting, API requests route relatively ('')
-      // and are seamlessly proxied to Google Cloud Run via Firebase Hosting /api/** rewrites.
-      window._apiBase = '';
+      // In production on Firebase Hosting, connect to Render backend
+      window._apiBase = (window.DEFAULT_RENDER_URL || '').replace(/\/$/, '');
     }
     return window._apiBase;
+  };
+
+  window.setApiBase = function (url) {
+    if (!url) {
+      localStorage.removeItem('attendance_api_url');
+      window._apiBase = null;
+    } else {
+      var clean = url.trim().replace(/\/$/, '');
+      localStorage.setItem('attendance_api_url', clean);
+      window._apiBase = clean;
+    }
+    if (typeof window.checkBackendHealth === 'function') {
+      window.checkBackendHealth();
+    }
+    return window.getApiBase();
   };
 
   window.getApiUrl = function (path) {
@@ -667,12 +684,116 @@
     return (base ? base : '') + p;
   };
 
+  // Render Backend Status & Configuration Widget
+  function initRenderStatusWidget() {
+    // Only mount widget once DOM is ready
+    var widgetId = 'render-status-indicator';
+    if (document.getElementById(widgetId)) return;
+
+    var container = document.createElement('div');
+    container.id = widgetId;
+    container.style.cssText =
+      'position:fixed;bottom:16px;right:16px;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:12px;transition:all 0.3s ease;';
+    
+    var pill = document.createElement('div');
+    pill.id = 'render-status-pill';
+    pill.style.cssText =
+      'display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:#1e293b;color:#f8fafc;border:1px solid #334155;border-radius:9999px;box-shadow:0 4px 12px rgba(0,0,0,0.15);cursor:pointer;user-select:none;';
+    pill.innerHTML =
+      '<span id="render-dot" style="width:8px;height:8px;border-radius:50%;background:#eab308;display:inline-block;"></span>' +
+      '<span id="render-msg" style="font-weight:500;">Checking Backend...</span>';
+
+    pill.title = 'Click to configure or view backend URL';
+    pill.addEventListener('click', function () {
+      openBackendModal();
+    });
+
+    container.appendChild(pill);
+    document.body.appendChild(container);
+
+    window.checkBackendHealth = function () {
+      var dot = document.getElementById('render-dot');
+      var msg = document.getElementById('render-msg');
+      if (!dot || !msg) return;
+
+      var base = window.getApiBase();
+      if (!base) {
+        dot.style.background = '#ef4444';
+        msg.textContent = 'Backend: Unconfigured';
+        return;
+      }
+
+      msg.textContent = 'Connecting...';
+      dot.style.background = '#eab308';
+
+      var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
+      var timeout = setTimeout(function () {
+        if (controller) controller.abort();
+      }, 7000);
+
+      fetch(base + '/health', { signal: controller ? controller.signal : undefined })
+        .then(function (res) {
+          clearTimeout(timeout);
+          return res.json();
+        })
+        .then(function (data) {
+          if (data && data.status === 'HEALTHY') {
+            dot.style.background = '#22c55e';
+            msg.textContent = 'Backend Online';
+            // Auto-minimize after 4 seconds to avoid distraction
+            setTimeout(function () {
+              if (msg && dot && msg.textContent === 'Backend Online') {
+                msg.textContent = 'Render';
+              }
+            }, 4000);
+          } else {
+            throw new Error('Unexpected status');
+          }
+        })
+        .catch(function () {
+          clearTimeout(timeout);
+          dot.style.background = '#f59e0b';
+          msg.textContent = 'Backend Waking Up...';
+          // Retry every 8 seconds if waking up from Render free tier sleep
+          setTimeout(function () {
+            if (document.getElementById(widgetId)) {
+              window.checkBackendHealth();
+            }
+          }, 8000);
+        });
+    };
+
+    function openBackendModal() {
+      var currentUrl = localStorage.getItem('attendance_api_url') || window.getApiBase() || '';
+      var input = prompt(
+        'Configure Render Backend Service URL:\n\n' +
+        'Enter your deployed Render Web Service URL (e.g. https://attendance-backend-xxxx.onrender.com or http://localhost:8080):',
+        currentUrl
+      );
+      if (input !== null) {
+        var clean = input.trim();
+        window.setApiBase(clean);
+        alert('Backend URL saved: ' + (clean || 'Default') + '\nTesting connection now...');
+        window.checkBackendHealth();
+      }
+    }
+
+    // Run health check initially
+    setTimeout(window.checkBackendHealth, 800);
+  }
+
   window.syncRoleNavigation = syncRoleNavigation;
   window.enforceRouteGuards = enforceRouteGuards;
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', syncRoleNavigation);
-  } else {
+
+  function initAll() {
     syncRoleNavigation();
+    initRenderStatusWidget();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAll);
+  } else {
+    initAll();
   }
 
 })();

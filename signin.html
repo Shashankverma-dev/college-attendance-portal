@@ -378,8 +378,9 @@
                       sendRecoveryBtn.textContent = 'Send Reset Link';
                       return;
                     }
-                    // Local fallback
-                    fetch('/api/auth/forgot-password', {
+                    // Backend fallback
+                    var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+                    fetch(apiBase + '/api/auth/forgot-password', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ email: emailVal })
@@ -402,17 +403,8 @@
                 return;
               }
 
-              var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-              if (!isLocal) {
-                forgotStatus.className = 'status error';
-                forgotStatus.textContent = 'Password reset via email requires Firebase Authentication to be active.';
-                forgotStatus.style.display = 'block';
-                sendRecoveryBtn.disabled = false;
-                sendRecoveryBtn.textContent = 'Send Reset Link';
-                return;
-              }
-
-              fetch('/api/auth/forgot-password', {
+              var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+              fetch(apiBase + '/api/auth/forgot-password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: emailVal })
@@ -492,7 +484,8 @@
         } else {
           showStatus('Verifying cryptographic activation link...', 'info');
           // Validate token on GET without consuming
-          fetch('/api/auth/verify-token?token=' + encodeURIComponent(token) + '&purpose=ACCOUNT_ACTIVATION')
+          var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+          fetch(apiBase + '/api/auth/verify-token?token=' + encodeURIComponent(token) + '&purpose=ACCOUNT_ACTIVATION')
             .then(function (r) { return r.json(); })
             .then(function (data) {
               if (data.isValid) {
@@ -522,7 +515,8 @@
           submitBtn.disabled = true;
         } else {
           showStatus('Verifying 30-minute password reset link...', 'info');
-          fetch('/api/auth/verify-token?token=' + encodeURIComponent(token) + '&purpose=PASSWORD_RESET')
+          var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+          fetch(apiBase + '/api/auth/verify-token?token=' + encodeURIComponent(token) + '&purpose=PASSWORD_RESET')
             .then(function (r) { return r.json(); })
             .then(function (data) {
               if (data.isValid) {
@@ -566,7 +560,8 @@
           submitBtn.disabled = true;
           submitBtn.textContent = mode === 'activate' ? 'Activating account...' : 'Updating password...';
 
-          var endpoint = mode === 'activate' ? '/api/auth/activate' : '/api/auth/reset-password';
+          var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+          var endpoint = apiBase + (mode === 'activate' ? '/api/auth/activate' : '/api/auth/reset-password');
           var payload = mode === 'activate'
             ? { token: token, password: pwVal }
             : { token: token, newPassword: pwVal };
@@ -611,17 +606,10 @@
           return false;
         }
 
-        // Helper to perform backend authentication fallback (Local development / Custom backend)
+        // Helper to perform backend authentication (Render / PostgreSQL / In-Memory backend)
         function performBackendLogin(identifier, password) {
-          var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-          if (!isLocal) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Sign in';
-            showStatus('Please sign in with your email address and password.', 'error');
-            return;
-          }
-
-          fetch('/api/auth/login', {
+          var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+          fetch(apiBase + '/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ identifier: identifier, password: password })
@@ -826,12 +814,18 @@
               submitBtn.disabled = false;
               submitBtn.textContent = 'Sign in';
 
-              if (fbErr.code === 'auth/user-not-found') {
-                showStatus('No account found for this email address. Please check your spelling.', 'error');
-              } else if (fbErr.code === 'auth/wrong-password') {
+              // If Firebase sign in fails, attempt authentication against Render backend (supporting institutional accounts)
+              if (fbErr.code === 'auth/user-not-found' || fbErr.code === 'auth/invalid-credential') {
+                showStatus('Verifying credentials with institutional directory...', 'info');
+                performBackendLogin(idVal, pwVal);
+                return;
+              }
+
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Sign in';
+
+              if (fbErr.code === 'auth/wrong-password') {
                 showStatus('Incorrect password. Please try again or click "Forgot password?".', 'error');
-              } else if (fbErr.code === 'auth/invalid-credential') {
-                showStatus('Invalid email or password. Please verify your credentials or click "Forgot password?".', 'error');
               } else if (fbErr.code === 'auth/too-many-requests') {
                 showStatus('Access temporarily disabled due to multiple failed attempts. Please reset your password or try again later.', 'error');
               } else if (fbErr.code === 'auth/invalid-email') {
@@ -843,16 +837,7 @@
             return;
           }
 
-          // 2. Institutional ID (without '@', e.g. ADM-001)
-          var isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
-          if (!isLocal) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Sign in';
-            showStatus('On the hosted portal, please sign in with your email address and password.', 'error');
-            return;
-          }
-
-          // Local development fallback
+          // 2. Institutional ID (without '@', e.g. ADM-001, STU-101)
           submitBtn.disabled = true;
           submitBtn.textContent = 'Verifying credentials...';
           showStatus('Authenticating institutional credentials...', 'info');

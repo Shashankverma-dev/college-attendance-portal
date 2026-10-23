@@ -1032,7 +1032,8 @@
       var status = encodeURIComponent(document.getElementById('filter-status').value);
       var enrollment = encodeURIComponent(document.getElementById('filter-enrollment').value);
 
-      var url = '/api/admin/students?page=' + currentPage + '&limit=' + currentLimit +
+      var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+      var url = apiBase + '/api/admin/students?page=' + currentPage + '&limit=' + currentLimit +
         (search ? '&search=' + search : '') +
         (school ? '&school_id=' + school : '') +
         (dept ? '&department_id=' + dept : '') +

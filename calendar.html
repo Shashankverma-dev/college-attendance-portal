@@ -701,7 +701,8 @@
 
       // Sync from backend
       function fetchEventsFromBackend() {
-        fetch('/api/academic/calendar')
+        var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+        fetch(apiBase + '/api/academic/calendar')
           .then(function (res) { return res.ok ? res.json() : null; })
           .then(function (data) {
             if (data && Array.isArray(data) && data.length > 0) {
@@ -1126,7 +1127,8 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Saving...';
 
-        var url = id ? ('/api/academic/calendar/' + id) : '/api/academic/calendar';
+        var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+        var url = apiBase + (id ? ('/api/academic/calendar/' + id) : '/api/academic/calendar');
         var method = id ? 'PUT' : 'POST';
 
         fetch(url, {
@@ -1215,7 +1217,8 @@
         btn.disabled = true;
         btn.textContent = 'Deleting...';
 
-        fetch('/api/academic/calendar/' + id, {
+        var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+        fetch(apiBase + '/api/academic/calendar/' + id, {
           method: 'DELETE',
           headers: {
             'Authorization': 'Bearer ' + (sessionStorage.getItem('attendance_auth_token') || '')

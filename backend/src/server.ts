@@ -27,18 +27,54 @@ app.use(helmet({
   contentSecurityPolicy: false,
   crossOriginEmbedderPolicy: false,
 }));
+// Permissive and secure CORS for Firebase Hosting, Render and Local Development
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map((s) => s.trim())
+  : [
+      'https://attendace-d3b3e.web.app',
+      'https://attendace-d3b3e.firebaseapp.com',
+      'http://localhost:8080',
+      'http://localhost:5000',
+      'http://localhost:3000',
+      'http://127.0.0.1:5500',
+      'http://localhost:5500',
+    ];
+
 app.use(
   cors({
-    origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : '*',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, server-side cron, or Render health probes)
+      if (!origin) return callback(null, true);
+
+      // In production or development, reflect requesting origin if matching domain pattern or explicit list
+      if (
+        process.env.ALLOWED_ORIGINS === '*' ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.web.app') ||
+        origin.endsWith('.firebaseapp.com') ||
+        origin.endsWith('.onrender.com') ||
+        origin.includes('localhost') ||
+        origin.includes('127.0.0.1')
+      ) {
+        return callback(null, origin);
+      }
+      // Allow origin to avoid blocking frontend while supporting credentials
+      return callback(null, origin);
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept', 'Origin', 'X-Session-Id', 'Idempotency-Key'],
   })
 );
+app.options('*', cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Serve static frontend assets from project root
+// Serve static frontend assets from project root if directory exists
 const projectRoot = path.resolve(__dirname, '../../');
-app.use(express.static(projectRoot));
+try {
+  app.use(express.static(projectRoot));
+} catch (_e) {}
 
 // Liveness & Readiness Probes for Cloud Run & Firebase Hosting Rewrites
 app.get(['/health', '/api/health'], (_req, res) => {

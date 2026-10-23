@@ -3,18 +3,28 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// PostgreSQL Connection Pool configured for Cloud SQL and PgBouncer
-export const pool = new Pool({
-  host: process.env.DB_HOST || '127.0.0.1',
-  port: parseInt(process.env.DB_PORT || '5432', 10),
-  user: process.env.DB_USER || 'postgres',
-  password: process.env.DB_PASSWORD || 'postgres',
-  database: process.env.DB_NAME || 'attendance_db',
-  max: parseInt(process.env.DB_MAX_CONNECTIONS || '20', 10),
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000,
-  ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
-});
+// PostgreSQL Connection Pool configured for Render, Supabase, Cloud SQL and local development
+const poolConfig = process.env.DATABASE_URL
+  ? {
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.DB_SSL === 'false' ? false : { rejectUnauthorized: false },
+      max: parseInt(process.env.DB_MAX_CONNECTIONS || '20', 10),
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+    }
+  : {
+      host: process.env.DB_HOST || '127.0.0.1',
+      port: parseInt(process.env.DB_PORT || '5432', 10),
+      user: process.env.DB_USER || 'postgres',
+      password: process.env.DB_PASSWORD || 'postgres',
+      database: process.env.DB_NAME || 'attendance_db',
+      max: parseInt(process.env.DB_MAX_CONNECTIONS || '20', 10),
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 5000,
+      ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
+    };
+
+export const pool = new Pool(poolConfig);
 
 pool.on('error', (err) => {
   console.error('Unexpected error on idle PostgreSQL client pool', err);
