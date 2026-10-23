@@ -438,7 +438,7 @@ router.get(
 router.post(
   '/academic/departments',
   authenticate,
-  requireRole(['GLOBAL_ADMIN', 'HOD']),
+  requireRole(['GLOBAL_ADMIN']),
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { department_code, department_name, programs, school_id, hod_name, hod_email, hod_password } = req.body;
@@ -521,7 +521,7 @@ router.post(
 router.post(
   '/academic/departments/:id/assign-hod',
   authenticate,
-  requireRole(['GLOBAL_ADMIN', 'HOD']),
+  requireRole(['GLOBAL_ADMIN']),
   async (req: Request, res: Response): Promise<void> => {
     try {
       const deptId = req.params.id.toLowerCase().trim();

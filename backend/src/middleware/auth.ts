@@ -101,6 +101,16 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
       return;
     }
 
+    // In-memory faculty deactivation/suspension check
+    const inMemTeacher = localTeachers.find((t) => t.user_uid === uid);
+    if (inMemTeacher && (inMemTeacher.status === 'INACTIVE' || inMemTeacher.status === 'SUSPENDED')) {
+      res.status(403).json({
+        error: 'ACCOUNT_DEACTIVATED',
+        message: 'Your account has been deactivated or suspended by institutional administration.',
+      });
+      return;
+    }
+
     // 2. Validate per-device session if X-Session-ID is present
     if (sessionId) {
       const sessionResult = await pool.query(

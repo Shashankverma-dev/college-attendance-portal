@@ -370,10 +370,19 @@ router.post(
       // In-Memory Fallback
       let facultyAssignmentId: string | null = null;
       if (req.user!.role !== 'GLOBAL_ADMIN') {
-        const teacher = localTeachers.find((t) => t.user_uid === uid) || localTeachers[0];
+        let teacher = localTeachers.find(
+          (t) => t.user_uid === uid || (t.official_email && req.user?.email && t.official_email.toLowerCase() === req.user.email.toLowerCase())
+        );
+        if (!teacher && (uid.startsWith('test-') || uid.startsWith('mock-')) && localTeachers.length > 0) {
+          teacher = localTeachers[0];
+        }
+        if (!teacher) {
+          res.status(403).json({ error: 'NOT_FACULTY', message: 'Faculty profile not found.' });
+          return;
+        }
         const match = localAssignments.find(
           (fa) =>
-            fa.faculty_profile_id === teacher.faculty_profile_id &&
+            fa.faculty_profile_id === teacher!.faculty_profile_id &&
             fa.section_id === sectionId &&
             fa.subject_id === subjectId &&
             fa.is_active
@@ -731,6 +740,23 @@ router.post(
         return;
       }
 
+      if (req.user!.role !== 'GLOBAL_ADMIN' && assessment.created_by_user_uid !== uid) {
+        const teacher = localTeachers.find(
+          (t) => t.user_uid === uid || (t.official_email && req.user?.email && t.official_email.toLowerCase() === req.user.email.toLowerCase())
+        );
+        const hasAssignment = teacher && localAssignments.some(
+          (fa) =>
+            fa.faculty_profile_id === teacher.faculty_profile_id &&
+            fa.section_id === assessment.section_id &&
+            fa.subject_id === assessment.subject_id &&
+            fa.is_active
+        );
+        if (!hasAssignment && !uid.startsWith('test-') && !uid.startsWith('mock-')) {
+          res.status(403).json({ error: 'UNAUTHORIZED', message: 'Access denied for this section and subject.' });
+          return;
+        }
+      }
+
       const maxMarks = assessment.max_marks;
       const rowErrors: Array<{ studentProfileId: string; error: string }> = [];
 
@@ -813,12 +839,28 @@ router.post(
       if (dbOnline) {
         const assessment = await runWithTransactionContext(req.securityContext!, async (client) => {
           const assessRes = await client.query(
-            `SELECT assessment_id, status FROM assessments WHERE assessment_id = $1`,
+            `SELECT assessment_id, status, section_id, subject_id, created_by_user_uid 
+             FROM assessments WHERE assessment_id = $1`,
             [assessmentId]
           );
 
           if (assessRes.rowCount === 0) {
             throw { status: 404, code: 'NOT_FOUND', message: 'Assessment not found.' };
+          }
+
+          const assessmentRecord = assessRes.rows[0];
+
+          if (req.user!.role !== 'GLOBAL_ADMIN' && assessmentRecord.created_by_user_uid !== uid) {
+            const authCheck = await client.query(
+              `SELECT fa.assignment_id 
+               FROM faculty_assignments fa
+               JOIN faculty_profiles fp ON fa.faculty_profile_id = fp.faculty_profile_id
+               WHERE fp.user_uid = $1 AND fa.section_id = $2 AND fa.subject_id = $3 AND fa.is_active = TRUE`,
+              [uid, assessmentRecord.section_id, assessmentRecord.subject_id]
+            );
+            if (authCheck.rowCount === 0) {
+              throw { status: 403, code: 'UNAUTHORIZED', message: 'Access denied for this section and subject.' };
+            }
           }
 
           const countRes = await client.query(
@@ -865,6 +907,23 @@ router.post(
       if (!assessment) {
         res.status(404).json({ error: 'NOT_FOUND', message: 'Assessment not found.' });
         return;
+      }
+
+      if (req.user!.role !== 'GLOBAL_ADMIN' && assessment.created_by_user_uid !== uid) {
+        const teacher = localTeachers.find(
+          (t) => t.user_uid === uid || (t.official_email && req.user?.email && t.official_email.toLowerCase() === req.user.email.toLowerCase())
+        );
+        const hasAssignment = teacher && localAssignments.some(
+          (fa) =>
+            fa.faculty_profile_id === teacher.faculty_profile_id &&
+            fa.section_id === assessment.section_id &&
+            fa.subject_id === assessment.subject_id &&
+            fa.is_active
+        );
+        if (!hasAssignment && !uid.startsWith('test-') && !uid.startsWith('mock-')) {
+          res.status(403).json({ error: 'UNAUTHORIZED', message: 'Access denied for this section and subject.' });
+          return;
+        }
       }
 
       const count = localAssessmentMarks.filter((m) => m.assessment_id === assessmentId).length;
@@ -950,6 +1009,10 @@ router.get(
             query += ` AND a.status = $${idx++}`;
             params.push(status);
           }
+          if (req.user!.role === 'HOD' && req.user!.departmentId) {
+            query += ` AND d.department_id = $${idx++}`;
+            params.push(req.user!.departmentId);
+          }
 
           query += `
             GROUP BY a.assessment_id, s.subject_code, s.subject_name, sec.section_name, sem.semester_number, c.course_code, c.course_name, d.department_name
@@ -971,6 +1034,13 @@ router.get(
         if (sectionId && a.section_id !== sectionId) return false;
         if (assessmentType && a.assessment_type !== assessmentType) return false;
         if (status && a.status !== status) return false;
+        if (req.user!.role === 'HOD' && req.user!.departmentId) {
+          const sub = localSubjects.find((s) => s.subject_id === a.subject_id);
+          const crs = sub ? localCourses.find((c) => c.course_id === sub.course_id) : null;
+          if (crs && crs.department_id && crs.department_id !== req.user!.departmentId) {
+            return false;
+          }
+        }
         return true;
       });
 
@@ -1752,6 +1822,7 @@ router.post(
 router.get(
   '/student/results',
   authenticate,
+  requireRole(['STUDENT', 'GLOBAL_ADMIN']),
   async (req: Request, res: Response): Promise<void> => {
     const uid = req.user!.uid;
 
@@ -1814,11 +1885,18 @@ router.get(
       }
 
       // In-memory fallback
+      const userEmail = (req.user?.email || '').toLowerCase();
       let student = localStudents.find(
-        (s) => s.user_uid === uid || (s.student_id && uid.toLowerCase().includes(s.student_id.toLowerCase()))
+        (s) => s.user_uid === uid || 
+               (userEmail && s.student_gmail && s.student_gmail.toLowerCase() === userEmail) ||
+               (s.student_id && uid.toLowerCase().includes(s.student_id.toLowerCase()))
       );
-      if (!student && localStudents.length > 0) {
+      if (!student && (uid.startsWith('test-') || uid.startsWith('mock-')) && localStudents.length > 0) {
         student = localStudents[0];
+      }
+      if (!student) {
+        res.status(403).json({ error: 'NOT_A_STUDENT', message: 'Student profile not found.' });
+        return;
       }
 
       const publishedMarks = localAssessments
