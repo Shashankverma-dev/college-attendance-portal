@@ -1084,7 +1084,7 @@
 
       function getStoredStudents() {
         var deletedList = getDeletedIdentifiers();
-        var students = null;
+        var students = [];
         try {
           var raw = localStorage.getItem('admin_students_registry');
           if (raw) {
@@ -1093,24 +1093,20 @@
           }
         } catch (e) {}
 
-        if (!students) {
-          students = [
-            { student_profile_id: 's-101', student_id: 'STU-101', enrollment_no: 'ENR-101', registration_no: 'REG-2026-001', full_name: 'Aarav Gupta', student_gmail: 'aarav@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '01', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
-            { student_profile_id: 's-102', student_id: 'STU-102', enrollment_no: 'ENR-102', registration_no: 'REG-2026-002', full_name: 'Aditi Rao', student_gmail: 'aditi@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '02', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
-            { student_profile_id: 's-103', student_id: 'STU-103', enrollment_no: 'ENR-103', registration_no: 'REG-2026-003', full_name: 'Akash Verma', student_gmail: 'akash@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '03', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
-            { student_profile_id: 's-104', student_id: 'STU-104', enrollment_no: 'ENR-104', registration_no: 'REG-2026-004', full_name: 'Ananya Sharma', student_gmail: 'ananya@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '04', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
-            { student_profile_id: 's-105', student_id: 'STU-105', enrollment_no: 'ENR-105', registration_no: 'REG-2026-005', full_name: 'Aryan Patel', student_gmail: 'aryan@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '05', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
-            { student_profile_id: 's-106', student_id: 'STU-106', enrollment_no: 'ENR-106', registration_no: 'REG-2026-006', full_name: 'Bhavna Joshi', student_gmail: 'bhavna@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '06', status: 'PENDING_ACTIVATION', enrollment_status: 'PENDING' },
-            { student_profile_id: 's-107', student_id: 'STU-107', enrollment_no: 'ENR-107', registration_no: 'REG-2026-007', full_name: 'Chetan Rawat', student_gmail: 'chetan@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '07', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
-            { student_profile_id: 's-108', student_id: 'STU-108', enrollment_no: 'ENR-108', registration_no: 'REG-2026-008', full_name: 'Divya Negi', student_gmail: 'divya@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '08', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
-            { student_profile_id: 's-109', student_id: 'STU-109', enrollment_no: 'ENR-109', registration_no: 'REG-2026-009', full_name: 'Gaurav Bisht', student_gmail: 'gaurav@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '09', status: 'ACTIVE', enrollment_status: 'ACTIVE' },
-            { student_profile_id: 's-110', student_id: 'STU-110', enrollment_no: 'ENR-110', registration_no: 'REG-2026-010', full_name: 'Harshit Nautiyal', student_gmail: 'harshit@college.edu', school_name: 'School of Science & Technology', course_code: 'BCA', semester_number: 5, section_name: 'C', roll_number: '10', status: 'ACTIVE', enrollment_status: 'ACTIVE' }
-          ];
-        }
-
-        return students.filter(function (s) {
+        // Filter out any legacy pre-seeded mock student profiles
+        var mockIds = ['s-101', 's-102', 's-103', 's-104', 's-105', 's-106', 's-107', 's-108', 's-109', 's-110'];
+        var cleanList = students.filter(function (s) {
+          if (!s) return false;
+          if (mockIds.indexOf(s.student_profile_id) !== -1 || mockIds.indexOf(s.student_id) !== -1) return false;
+          if (s.full_name === 'Aarav Gupta' || s.full_name === 'Aditi Rao') return false;
           return !isDeletedStudent(s, deletedList);
         });
+
+        if (cleanList.length !== students.length) {
+          try { localStorage.setItem('admin_students_registry', JSON.stringify(cleanList)); } catch (e) {}
+        }
+
+        return cleanList;
       }
 
       function loadOfflineStudents() {

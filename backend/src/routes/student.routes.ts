@@ -63,13 +63,7 @@ async function isDbConnected(): Promise<boolean> {
   }
 }
 
-// Ensure localStudents has initial seed if empty
-if (localStudents.length === 0) {
-  localStudents.push(
-    { student_profile_id: 's-101', user_uid: 'u-s101', student_id: 'STU-101', enrollment_no: 'ENR-101', registration_no: 'REG-2026-001', registration_id: 'REG-2026-001', full_name: 'Aarav Gupta', student_gmail: 'aarav@college.edu', school_id: '10000000-0000-0000-0000-000000000001', school_code: 'SST', school_name: 'School of Science & Technology', department_id: 'b0000000-0000-0000-0000-000000000001', department_code: 'CA', department_name: 'Department of Computer Applications', course_id: 'c0000000-0000-0000-0000-000000000001', course_code: 'BCA', course_name: 'Bachelor of Computer Applications', semester_id: 'e0000000-0000-0000-0000-000000000001', semester_number: 5, section_id: 'f0000000-0000-0000-0000-000000000001', section_name: 'C', roll_number: '01', phone_number: '+91 98765 43210', parent_guardian_contact: '+91 98765 43211', admission_academic_year: '2026-2027', academic_calendar_term: 'Autumn 2026', dob: '2005-06-15', blood_group: 'O+', admission_category: 'GENERAL', status: 'ACTIVE', enrollment_status: 'ACTIVE', invitation_status: 'ACCEPTED', invitation_sent_at: '2026-08-01T09:00:00Z', last_login_at: '2026-10-19T14:30:00Z', created_at: '2026-08-01T09:00:00Z', activated_at: '2026-08-02T10:00:00Z' },
-    { student_profile_id: 's-102', user_uid: 'u-s102', student_id: 'STU-102', enrollment_no: 'ENR-102', registration_no: 'REG-2026-002', registration_id: 'REG-2026-002', full_name: 'Aditi Rao', student_gmail: 'aditi@college.edu', school_id: '10000000-0000-0000-0000-000000000001', school_code: 'SST', school_name: 'School of Science & Technology', department_id: 'b0000000-0000-0000-0000-000000000001', department_code: 'CA', department_name: 'Department of Computer Applications', course_id: 'c0000000-0000-0000-0000-000000000001', course_code: 'BCA', course_name: 'Bachelor of Computer Applications', semester_id: 'e0000000-0000-0000-0000-000000000001', semester_number: 5, section_id: 'f0000000-0000-0000-0000-000000000001', section_name: 'C', roll_number: '02', phone_number: '+91 98765 43212', parent_guardian_contact: '+91 98765 43213', admission_academic_year: '2026-2027', academic_calendar_term: 'Autumn 2026', dob: '2005-08-22', blood_group: 'B+', admission_category: 'OBC', status: 'ACTIVE', enrollment_status: 'ACTIVE', invitation_status: 'ACCEPTED', invitation_sent_at: '2026-08-01T09:00:00Z', last_login_at: '2026-10-19T14:30:00Z', created_at: '2026-08-01T09:00:00Z', activated_at: '2026-08-02T10:00:00Z' }
-  );
-}
+
 
 // Ensure localStudents entries have complete default fields
 localStudents.forEach((stu, idx) => {

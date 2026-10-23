@@ -2097,100 +2097,29 @@
       // 13. OFFLINE FALLBACK
       // =========================================================================
       function getStoredTeachers() {
+        var teachers = [];
         try {
           var raw = localStorage.getItem('admin_teachers_list');
-          if (raw) return JSON.parse(raw);
-        } catch (e) {}
-        return [
-          {
-            id: 'fac-102',
-            staffId: 'FAC-102',
-            name: 'Dr. Neha Dave',
-            email: 'neha.dave@college.edu',
-            departmentId: 'ca',
-            departmentName: 'Department of Computer Applications',
-            designation: 'Professor & HOD',
-            officeLocation: 'Block II, Room 204',
-            phone: '+91 98765 43210',
-            status: 'ACTIVE',
-            assignments: [
-              { id: 'asgn-1', subjectCode: 'BCA-502', subjectName: 'Database Management', sectionCode: 'Section C' },
-              { id: 'asgn-2', subjectCode: 'BCA-506', subjectName: 'Software Eng Lab', sectionCode: 'Section C' }
-            ]
-          },
-          {
-            id: 'fac-104',
-            staffId: 'FAC-104',
-            name: 'Dr. Sanjay Kumar',
-            email: 'sanjay.kumar@college.edu',
-            departmentId: 'ca',
-            departmentName: 'Department of Computer Applications',
-            designation: 'Associate Professor',
-            officeLocation: 'Block II, Room 208',
-            phone: '+91 98765 43211',
-            status: 'ACTIVE',
-            assignments: [
-              { id: 'asgn-3', subjectCode: 'BCA-504', subjectName: 'Software Engineering', sectionCode: 'Section C' }
-            ]
-          },
-          {
-            id: 'fac-103',
-            staffId: 'FAC-103',
-            name: 'Dr. Shiv Prasad',
-            email: 'shiv.prasad@college.edu',
-            departmentId: 'ca',
-            departmentName: 'Department of Computer Applications',
-            designation: 'Assistant Professor',
-            officeLocation: 'Block II, Room 210',
-            phone: '+91 98765 43212',
-            status: 'ACTIVE',
-            assignments: [
-              { id: 'asgn-4', subjectCode: 'BCA-503', subjectName: 'Operating Systems', sectionCode: 'Section C' },
-              { id: 'asgn-5', subjectCode: 'BCA-507', subjectName: 'Web Tech Lab', sectionCode: 'Section C' }
-            ]
-          },
-          {
-            id: 'fac-101',
-            staffId: 'FAC-101',
-            name: 'Dr. S.S. Verma',
-            email: 'ss.verma@college.edu',
-            departmentId: 'ca',
-            departmentName: 'Department of Computer Applications',
-            designation: 'Senior Professor',
-            officeLocation: 'Block II, Room 201',
-            phone: '+91 98765 43213',
-            status: 'ACTIVE',
-            assignments: [
-              { id: 'asgn-6', subjectCode: 'BCA-501', subjectName: 'Java Programming', sectionCode: 'Section C' }
-            ]
-          },
-          {
-            id: 'fac-203',
-            staffId: 'FAC-203',
-            name: 'Dr. Priya Patel',
-            email: 'priya.patel@college.edu',
-            departmentId: 'cse',
-            departmentName: 'Computer Science & Engineering',
-            designation: 'Associate Professor',
-            officeLocation: 'Block I, Room 302',
-            phone: '+91 98765 43214',
-            status: 'ACTIVE',
-            assignments: []
-          },
-          {
-            id: 'fac-105',
-            staffId: 'FAC-105',
-            name: 'Dr. Rajesh Sharma',
-            email: 'rajesh.sharma@college.edu',
-            departmentId: 'ca',
-            departmentName: 'Department of Computer Applications',
-            designation: 'Professor & Dean',
-            officeLocation: 'Dean Office, Block I',
-            phone: '+91 98765 43215',
-            status: 'ACTIVE',
-            assignments: []
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) teachers = parsed;
           }
-        ];
+        } catch (e) {}
+
+        // Filter out legacy mock faculty seeds
+        var mockStaffIds = ['FAC-101', 'FAC-102', 'FAC-103', 'FAC-104', 'FAC-105', 'FAC-203', 'fac-101', 'fac-102', 'fac-103', 'fac-104', 'fac-105', 'fac-203'];
+        var cleanList = teachers.filter(function (t) {
+          if (!t) return false;
+          if (mockStaffIds.indexOf(t.staffId) !== -1 || mockStaffIds.indexOf(t.id) !== -1) return false;
+          if (t.name === 'Dr. Neha Dave' || t.name === 'Dr. Sanjay Kumar' || t.name === 'Dr. Shiv Prasad') return false;
+          return true;
+        });
+
+        if (cleanList.length !== teachers.length) {
+          try { localStorage.setItem('admin_teachers_list', JSON.stringify(cleanList)); } catch (e) {}
+        }
+
+        return cleanList;
       }
 
       function useOfflineTeachersFallback(search, dept, status, page) {

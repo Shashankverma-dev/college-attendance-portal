@@ -1256,57 +1256,6 @@
     }
 
     function getStoredDepartments() {
-      var defaultDepts = [
-        {
-          id: 'sst',
-          code: 'SST',
-          department_code: 'SST',
-          name: 'School of Science & Technology',
-          department_name: 'School of Science & Technology',
-          programs: 'BCA, MCA, B.Tech CSE & M.Tech CSE',
-          hodName: 'Dr. Rajesh Sharma',
-          hodEmail: 'hod.sst@college.edu',
-          facultyCount: 15,
-          sessions: 8
-        },
-        {
-          id: 'sbs',
-          code: 'SBS',
-          department_code: 'SBS',
-          name: 'School of Bioscience',
-          department_name: 'School of Bioscience',
-          programs: 'B.Sc & M.Sc Bioscience',
-          hodName: 'Dr. Priya Verma',
-          hodEmail: 'hod.sbs@college.edu',
-          facultyCount: 8,
-          sessions: 4
-        },
-        {
-          id: 'som',
-          code: 'SOM',
-          department_code: 'SOM',
-          name: 'School of Management',
-          department_name: 'School of Management',
-          programs: 'BBA & MBA Programs',
-          hodName: 'Dr. Amit Patel',
-          hodEmail: 'hod.som@college.edu',
-          facultyCount: 10,
-          sessions: 6
-        },
-        {
-          id: 'ca',
-          code: 'CA',
-          department_code: 'CA',
-          name: 'Department of Computer Applications',
-          department_name: 'Department of Computer Applications',
-          programs: 'BCA & MCA Programs',
-          hodName: 'Dr. Rajesh Sharma',
-          hodEmail: 'hod.ca@college.edu',
-          facultyCount: 12,
-          sessions: 6
-        }
-      ];
-
       var rawList = [];
       try {
         var raw = localStorage.getItem('attendance_academic_departments_v2');
@@ -1324,10 +1273,24 @@
         }
       } catch (e) {}
 
-      var source = rawList.length > 0 ? defaultDepts.concat(rawList) : defaultDepts;
-      var deduplicated = deduplicateDepartments(source);
+      // Strip legacy pre-seeded mock statistics and mock HOD names
+      rawList.forEach(function (d) {
+        if (d) {
+          if (d.facultyCount === 15 || d.facultyCount === 12 || d.facultyCount === 10 || d.facultyCount === 8) {
+            d.facultyCount = 0;
+            d.sessions = 0;
+            d.todaySessions = 0;
+            d.submittedSessions = 0;
+            d.overdueSessions = 0;
+          }
+          if (d.hodName === 'Dr. Rajesh Sharma' || d.hodName === 'Dr. Priya Verma' || d.hodName === 'Dr. Amit Patel') {
+            d.hodName = '';
+            d.hodEmail = '';
+          }
+        }
+      });
 
-      // Persist cleaned deduplicated list back to localStorage to eliminate past duplicates
+      var deduplicated = deduplicateDepartments(rawList);
       try {
         localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(deduplicated));
       } catch (e) {}

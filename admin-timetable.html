@@ -1564,7 +1564,7 @@
       return (window.DEFAULT_RENDER_URL || 'https://college-attendance-backend-ib8i.onrender.com').replace(/\/$/, '');
     }
 
-    // Default authentic BCA Semester 5 Section C published timetable
+    // Standard BCA Semester 5 Section C timetable template structure
     const defaultBCATimetable = {
       timetable_id: 'tt-bca-5c-autumn-2026',
       academic_calendar_term: 'Autumn 2026',
@@ -1580,67 +1580,8 @@
       section_name: 'C',
       effective_date: '2026-08-04',
       version_number: 1,
-      status: 'PUBLISHED',
-      entries: [
-        // Monday
-        { entry_id: 'e-mon-1', day_of_week: 'MONDAY', period_index: 1, subject_code: 'BCA-501', subject_name: 'Java Programming', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
-        { entry_id: 'e-mon-2', day_of_week: 'MONDAY', period_index: 2, subject_code: 'BCA-502', subject_name: 'Operating Systems', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
-        { entry_id: 'e-mon-3', day_of_week: 'MONDAY', period_index: 3, subject_code: 'BCA-503', subject_name: 'Computer Networks', faculty_name: 'Dr. Shiv Prasad', room_code: 'R-204' },
-        { entry_id: 'e-mon-4', day_of_week: 'MONDAY', period_index: 4, subject_code: 'BCA-504', subject_name: 'Database Management', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
-        { entry_id: 'e-mon-5-c1', day_of_week: 'MONDAY', period_index: 6, group_name: 'C1', subject_code: 'Lab 3 (ND)', subject_name: 'OS Lab', faculty_name: 'Dr. Neha Dave', room_code: 'LAB-3' },
-        { entry_id: 'e-mon-5-c2', day_of_week: 'MONDAY', period_index: 6, group_name: 'C2', subject_code: 'Lab 4 (Shiv P)', subject_name: 'Networks Lab', faculty_name: 'Dr. Shiv Prasad', room_code: 'LAB-4' },
-        { entry_id: 'e-mon-6-c1', day_of_week: 'MONDAY', period_index: 7, group_name: 'C1', subject_code: 'Lab 3 (ND)', subject_name: 'OS Lab', faculty_name: 'Dr. Neha Dave', room_code: 'LAB-3' },
-        { entry_id: 'e-mon-6-c2', day_of_week: 'MONDAY', period_index: 7, group_name: 'C2', subject_code: 'Lab 4 (Shiv P)', subject_name: 'Networks Lab', faculty_name: 'Dr. Shiv Prasad', room_code: 'LAB-4' },
-        { entry_id: 'e-mon-7', day_of_week: 'MONDAY', period_index: 8, subject_code: 'Mentoring / Remedial', subject_name: 'Mentoring / Remedial', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
-
-        // Tuesday
-        { entry_id: 'e-tue-1', day_of_week: 'TUESDAY', period_index: 1, subject_code: 'BCA-503', subject_name: 'Computer Networks', faculty_name: 'Dr. Shiv Prasad', room_code: 'R-204' },
-        { entry_id: 'e-tue-2', day_of_week: 'TUESDAY', period_index: 2, subject_code: 'BCA-501', subject_name: 'Java Programming', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
-        { entry_id: 'e-tue-3', day_of_week: 'TUESDAY', period_index: 3, subject_code: 'BCA-504', subject_name: 'Database Management', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
-        { entry_id: 'e-tue-4', day_of_week: 'TUESDAY', period_index: 4, subject_code: 'BCA-502', subject_name: 'Operating Systems', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
-        { entry_id: 'e-tue-5-c1', day_of_week: 'TUESDAY', period_index: 6, group_name: 'C1', subject_code: 'Lab 4 (Shiv P)', subject_name: 'Networks Lab', faculty_name: 'Dr. Shiv Prasad', room_code: 'LAB-4' },
-        { entry_id: 'e-tue-5-c2', day_of_week: 'TUESDAY', period_index: 6, group_name: 'C2', subject_code: 'Lab 3 (ND)', subject_name: 'OS Lab', faculty_name: 'Dr. Neha Dave', room_code: 'LAB-3' },
-        { entry_id: 'e-tue-6-c1', day_of_week: 'TUESDAY', period_index: 7, group_name: 'C1', subject_code: 'Lab 4 (Shiv P)', subject_name: 'Networks Lab', faculty_name: 'Dr. Shiv Prasad', room_code: 'LAB-4' },
-        { entry_id: 'e-tue-6-c2', day_of_week: 'TUESDAY', period_index: 7, group_name: 'C2', subject_code: 'Lab 3 (ND)', subject_name: 'OS Lab', faculty_name: 'Dr. Neha Dave', room_code: 'LAB-3' },
-        { entry_id: 'e-tue-7', day_of_week: 'TUESDAY', period_index: 8, subject_code: 'Library / Self Study', subject_name: 'Library & Research', faculty_name: 'Dr. Priya Patel', room_code: 'R-204' },
-
-        // Wednesday
-        { entry_id: 'e-wed-1', day_of_week: 'WEDNESDAY', period_index: 1, subject_code: 'BCA-502', subject_name: 'Operating Systems', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
-        { entry_id: 'e-wed-2', day_of_week: 'WEDNESDAY', period_index: 2, subject_code: 'BCA-503', subject_name: 'Computer Networks', faculty_name: 'Dr. Shiv Prasad', room_code: 'R-204' },
-        { entry_id: 'e-wed-3', day_of_week: 'WEDNESDAY', period_index: 3, subject_code: 'BCA-501', subject_name: 'Java Programming', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
-        { entry_id: 'e-wed-4', day_of_week: 'WEDNESDAY', period_index: 4, subject_code: 'BCA-505', subject_name: 'Web Frameworks', faculty_name: 'Dr. Priya Patel', room_code: 'R-204' },
-        { entry_id: 'e-wed-5', day_of_week: 'WEDNESDAY', period_index: 6, subject_code: 'BCA-504', subject_name: 'Database Management', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
-        { entry_id: 'e-wed-6', day_of_week: 'WEDNESDAY', period_index: 7, subject_code: 'Placement Training', subject_name: 'Placement Training', faculty_name: 'Dr. S.S. Verma', room_code: 'LH-101' },
-        { entry_id: 'e-wed-7', day_of_week: 'WEDNESDAY', period_index: 8, subject_code: 'Placement Training', subject_name: 'Placement Training', faculty_name: 'Dr. S.S. Verma', room_code: 'LH-101' },
-
-        // Thursday
-        { entry_id: 'e-thu-1', day_of_week: 'THURSDAY', period_index: 1, subject_code: 'BCA-504', subject_name: 'Database Management', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
-        { entry_id: 'e-thu-2', day_of_week: 'THURSDAY', period_index: 2, subject_code: 'BCA-505', subject_name: 'Web Frameworks', faculty_name: 'Dr. Priya Patel', room_code: 'R-204' },
-        { entry_id: 'e-thu-3', day_of_week: 'THURSDAY', period_index: 3, subject_code: 'BCA-502', subject_name: 'Operating Systems', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
-        { entry_id: 'e-thu-4', day_of_week: 'THURSDAY', period_index: 4, subject_code: 'BCA-501', subject_name: 'Java Programming', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
-        { entry_id: 'e-thu-5-c1', day_of_week: 'THURSDAY', period_index: 6, group_name: 'C1', subject_code: 'Web Lab (Sanjay K)', subject_name: 'Web Technologies Lab', faculty_name: 'Dr. Sanjay Kumar', room_code: 'LAB-4' },
-        { entry_id: 'e-thu-5-c2', day_of_week: 'THURSDAY', period_index: 6, group_name: 'C2', subject_code: 'Project Lab (Rajesh S)', subject_name: 'Capstone Project Lab', faculty_name: 'Dr. Rajesh Sharma', room_code: 'LAB-3' },
-        { entry_id: 'e-thu-6-c1', day_of_week: 'THURSDAY', period_index: 7, group_name: 'C1', subject_code: 'Web Lab (Sanjay K)', subject_name: 'Web Technologies Lab', faculty_name: 'Dr. Sanjay Kumar', room_code: 'LAB-4' },
-        { entry_id: 'e-thu-6-c2', day_of_week: 'THURSDAY', period_index: 7, group_name: 'C2', subject_code: 'Project Lab (Rajesh S)', subject_name: 'Capstone Project Lab', faculty_name: 'Dr. Rajesh Sharma', room_code: 'LAB-3' },
-        { entry_id: 'e-thu-7', day_of_week: 'THURSDAY', period_index: 8, subject_code: 'Seminar / Activity', subject_name: 'Seminar / Activity', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
-
-        // Friday
-        { entry_id: 'e-fri-1', day_of_week: 'FRIDAY', period_index: 1, subject_code: 'BCA-501', subject_name: 'Java Programming', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
-        { entry_id: 'e-fri-2', day_of_week: 'FRIDAY', period_index: 2, subject_code: 'BCA-502', subject_name: 'Operating Systems', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
-        { entry_id: 'e-fri-3', day_of_week: 'FRIDAY', period_index: 3, subject_code: 'BCA-503', subject_name: 'Computer Networks', faculty_name: 'Dr. Shiv Prasad', room_code: 'R-204' },
-        { entry_id: 'e-fri-4', day_of_week: 'FRIDAY', period_index: 4, subject_code: 'BCA-504', subject_name: 'Database Management', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
-        { entry_id: 'e-fri-5', day_of_week: 'FRIDAY', period_index: 6, subject_code: 'Mini Project Guidance (Shiv P)', subject_name: 'Mini Project Guidance', faculty_name: 'Dr. Shiv Prasad', room_code: 'LAB-3' },
-        { entry_id: 'e-fri-6', day_of_week: 'FRIDAY', period_index: 7, subject_code: 'Mini Project Guidance (Shiv P)', subject_name: 'Mini Project Guidance', faculty_name: 'Dr. Shiv Prasad', room_code: 'LAB-3' },
-        { entry_id: 'e-fri-7', day_of_week: 'FRIDAY', period_index: 8, subject_code: 'Sports & Cultural', subject_name: 'Sports & Cultural Activities', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
-
-        // Saturday
-        { entry_id: 'e-sat-1', day_of_week: 'SATURDAY', period_index: 1, subject_code: 'BCA-505', subject_name: 'Web Frameworks', faculty_name: 'Dr. Priya Patel', room_code: 'R-204' },
-        { entry_id: 'e-sat-2', day_of_week: 'SATURDAY', period_index: 2, subject_code: 'BCA-503', subject_name: 'Computer Networks', faculty_name: 'Dr. Shiv Prasad', room_code: 'R-204' },
-        { entry_id: 'e-sat-3', day_of_week: 'SATURDAY', period_index: 3, subject_code: 'BCA-502', subject_name: 'Operating Systems', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' },
-        { entry_id: 'e-sat-4', day_of_week: 'SATURDAY', period_index: 4, subject_code: 'Technical Communication (SS)', subject_name: 'Technical Communication', faculty_name: 'Dr. S.S. Verma', room_code: 'R-204' },
-        { entry_id: 'e-sat-5', day_of_week: 'SATURDAY', period_index: 6, subject_code: 'Remedial / Doubt Clearing', subject_name: 'Remedial / Doubt Clearing', faculty_name: 'Dr. Sanjay Kumar', room_code: 'R-204' },
-        { entry_id: 'e-sat-6', day_of_week: 'SATURDAY', period_index: 7, subject_code: 'Student Club Activities', subject_name: 'Student Club Activities', faculty_name: 'Dr. Neha Dave', room_code: 'R-204' }
-      ]
+      status: 'NOT_SCHEDULED',
+      entries: []
     };
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -1728,14 +1669,7 @@
           email: t.email
         }));
       } else {
-        facultyDirectory = [
-          { id: 'FAC-201', staffId: 'FAC-201', name: 'Dr. Neha Dave', department: 'CA', email: 'neha.dave@college.edu' },
-          { id: 'FAC-202', staffId: 'FAC-202', name: 'Dr. Sanjay Kumar', department: 'CA', email: 'sanjay.kumar@college.edu' },
-          { id: 'FAC-203', staffId: 'FAC-203', name: 'Dr. Shiv Prasad', department: 'CA', email: 'shiv.prasad@college.edu' },
-          { id: 'FAC-204', staffId: 'FAC-204', name: 'Dr. S.S. Verma', department: 'CA', email: 'ss.verma@college.edu' },
-          { id: 'FAC-205', staffId: 'FAC-205', name: 'Dr. Priya Patel', department: 'CA', email: 'priya.patel@college.edu' },
-          { id: 'FAC-206', staffId: 'FAC-206', name: 'Dr. Rajesh Sharma', department: 'CA', email: 'rajesh.sharma@college.edu' }
-        ];
+        facultyDirectory = [];
       }
     }
 
@@ -2330,15 +2264,11 @@
       let match = null;
       if (!isExplicitlyCleared) {
         match = storedList.find(t => 
+          t && t.timetable_id !== 'tt-bca-5c-autumn-2026' &&
           (t.course_code === course || t.course_name === course || (course && course.includes(t.course_code))) && 
           String(t.semester_number) === String(semester) && 
           t.section_name === section
         );
-
-        // If no stored entry, but filter is BCA Sem 5 Sec C, load the verified defaultBCATimetable only if not explicitly cleared
-        if (!match && (course === 'BCA' || (course && course.includes('BCA'))) && String(semester) === '5' && section === 'C') {
-          match = defaultBCATimetable;
-        }
       }
 
       if (match) {
