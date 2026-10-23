@@ -1828,7 +1828,9 @@
 
       try {
         if (getApiBase() !== null) {
-          const res = await fetch(getApiBase() + '/api/admin/schools');
+          const res = await fetch(getApiBase() + '/api/admin/schools', {
+            headers: getAuthHeaders()
+          });
           const data = await res.json();
           if (data.success && data.schools && data.schools.length > 0) {
             const cleanSchools = deduplicateSchoolsList(data.schools);
@@ -2035,7 +2037,7 @@
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + '/api/admin/schools', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload)
           });
           const data = await res.json();
@@ -2110,7 +2112,7 @@
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + '/api/admin/schools/' + encodeURIComponent(schoolId), {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({
               school_name: updatedName,
               description: updatedDesc,
@@ -2155,7 +2157,8 @@
       try {
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + '/api/admin/schools/' + encodeURIComponent(schoolId), {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: getAuthHeaders()
           });
           const data = await res.json();
           if (data.success) {
@@ -3580,7 +3583,7 @@
       try {
         const res = await fetch(getApiBase() + '/api/timetable/academic/department', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify(payload)
         });
         const data = await res.json();
@@ -3588,7 +3591,7 @@
         // Also post to admin academic departments endpoint
         fetch(getApiBase() + '/api/admin/academic/departments', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify(payload)
         }).catch(() => {});
 
@@ -3679,7 +3682,7 @@
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + '/api/timetable/academic/programme', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ department_id, course_code: code, course_name: name, code, name, total_semesters })
           });
           const data = await res.json();
@@ -3770,7 +3773,7 @@
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + '/api/timetable/academic/section', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ semester_id, section_name: name, name, max_capacity: capacity, capacity, academic_calendar_term })
           });
           const data = await res.json();
@@ -3806,7 +3809,7 @@
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + '/api/timetable/academic/room', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ room_code, facility_name: name, name, room_type: type, type, capacity, department_id })
           });
           const data = await res.json();
@@ -3840,7 +3843,7 @@
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + '/api/timetable/academic/group', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({ section_id, group_name: name, name, description })
           });
           const data = await res.json();
