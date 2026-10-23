@@ -264,7 +264,7 @@
 
     <!-- Administrative Scope Filters -->
     <div class="marks-filter-toolbar">
-      <div class="marks-filter-group">
+      <div class="marks-filter-group" style="min-width: 140px; flex: 1;">
         <label class="marks-filter-label" for="admin-filter-session">Academic Session</label>
         <select class="marks-filter-select" id="admin-filter-session">
           <option value="Autumn 2026" selected>Autumn 2026</option>
@@ -272,30 +272,34 @@
         </select>
       </div>
 
-      <div class="marks-filter-group">
-        <label class="marks-filter-label" for="admin-filter-course">Academic Program</label>
+      <div class="marks-filter-group" style="min-width: 220px; flex: 1.5;">
+        <label class="marks-filter-label" for="admin-filter-course">Academic Programme</label>
         <select class="marks-filter-select" id="admin-filter-course">
-          <option value="bca" selected>BCA - Bachelor of Computer Applications</option>
-          <option value="btech-cse">B.Tech - Computer Science & Engineering</option>
+          <option value="">Loading Programmes...</option>
         </select>
       </div>
 
-      <div class="marks-filter-group">
-        <label class="marks-filter-label" for="admin-filter-sem">Semester & Section</label>
+      <div class="marks-filter-group" style="min-width: 120px; flex: 1;">
+        <label class="marks-filter-label" for="admin-filter-sem">Semester</label>
         <select class="marks-filter-select" id="admin-filter-sem">
-          <option value="sem1-a" selected>Semester 1 - Section A</option>
-          <option value="sem1-b">Semester 1 - Section B</option>
-          <option value="sem3-a">Semester 3 - Section A</option>
+          <option value="">Loading...</option>
         </select>
       </div>
 
-      <div class="marks-filter-group">
-        <label class="marks-filter-label" for="admin-filter-subject">Subject</label>
+      <div class="marks-filter-group" style="min-width: 110px; flex: 0.8;">
+        <label class="marks-filter-label" for="admin-filter-section">Section</label>
+        <select class="marks-filter-select" id="admin-filter-section">
+          <option value="">Loading...</option>
+        </select>
+      </div>
+
+      <div class="marks-filter-group" style="min-width: 260px; flex: 2;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+          <label class="marks-filter-label" for="admin-filter-subject" style="margin-bottom: 0;">Examination Subject</label>
+          <button type="button" id="btn-quick-add-subject" class="btn btn-sm btn-outline" style="padding: 1px 8px; font-size: 11px; height: 22px; font-weight: 700; line-height: 1;">+ Add Subject</button>
+        </div>
         <select class="marks-filter-select" id="admin-filter-subject">
-          <option value="BCA-101" selected>BCA-101: Programming Fundamentals using C</option>
-          <option value="BCA-102">BCA-102: Computer Architecture & Digital Logic</option>
-          <option value="BCA-103">BCA-103: Discrete Mathematics</option>
-          <option value="BCA-104">BCA-104: Technical Communication</option>
+          <option value="">Loading Subjects...</option>
         </select>
       </div>
     </div>
@@ -623,6 +627,47 @@
         <div class="modal-footer" style="padding: 16px 24px; background: #F8FAFC; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 10px;">
           <button type="button" class="btn-modal-cancel" id="correct-cancel-btn" onclick="closeCorrectionModal()">Cancel</button>
           <button type="submit" class="btn-modal-submit" id="btn-save-correction" style="background: var(--bg); color: #FFFFFF;">Commit Audited Correction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: QUICK ADD SUBJECT -->
+  <div id="modal-add-subject" class="modal-backdrop" aria-hidden="true" style="position: fixed; inset: 0; z-index: 99990; align-items: center; justify-content: center; padding: 20px; display: none;">
+    <div class="modal-dialog" style="max-width: 480px; color: var(--card-ink); background: #FFFFFF; border-radius: var(--radius); box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+      <div class="modal-header" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid var(--line);">
+        <div class="modal-header-title" style="display: flex; align-items: center; gap: 10px;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--accent);">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          <h3 style="margin: 0; font-size: 18px; font-weight: 700; color: var(--card-ink);">Add Examination Subject</h3>
+        </div>
+        <button type="button" class="btn-modal-cancel" style="padding: 4px 10px; font-size: 16px; background: none; border: none; cursor: pointer; color: var(--card-muted);" onclick="closeAddSubjectModal()" aria-label="Close dialog">✕</button>
+      </div>
+
+      <form id="form-quick-add-subject" onsubmit="handleQuickAddSubjectSubmit(event)">
+        <div class="modal-body" style="padding: 20px 24px; display: flex; flex-direction: column; gap: 14px;">
+          <p style="font-size: 13px; color: var(--card-muted); margin: 0;">
+            Add a new examination subject target for <strong id="quick-subject-context" style="color: var(--card-ink);">Selected Programme</strong>:
+          </p>
+          <div>
+            <label class="marks-filter-label" for="new-subject-code" style="display: block; margin-bottom: 4px;">Subject Code <span style="color: var(--status-absent);">*</span></label>
+            <input type="text" class="marks-filter-input" id="new-subject-code" placeholder="e.g. BCA-505 or CS-301" required style="text-transform: uppercase;">
+          </div>
+          <div>
+            <label class="marks-filter-label" for="new-subject-name" style="display: block; margin-bottom: 4px;">Subject Name <span style="color: var(--status-absent);">*</span></label>
+            <input type="text" class="marks-filter-input" id="new-subject-name" placeholder="e.g. Cloud Computing &amp; DevOps" required>
+          </div>
+          <div>
+            <label class="marks-filter-label" for="new-subject-max" style="display: block; margin-bottom: 4px;">Maximum Examination Marks</label>
+            <input type="number" class="marks-filter-input" id="new-subject-max" value="100" min="10" max="200" step="5">
+          </div>
+          <div id="add-subject-error" style="display: none; padding: 10px 14px; background: var(--status-absent-bg); color: var(--status-absent); border: 1px solid #FCA5A5; border-radius: var(--radius); font-size: 13px; font-weight: 600;"></div>
+        </div>
+        <div class="modal-footer" style="padding: 16px 24px; background: #F8FAFC; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeAddSubjectModal()">Cancel</button>
+          <button type="submit" class="btn btn-sm" style="background: var(--bg); color: #FFFFFF;">Add &amp; Open Marks Sheet</button>
         </div>
       </form>
     </div>

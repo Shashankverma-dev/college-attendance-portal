@@ -58,7 +58,9 @@
 }
 
 html {
-  background: var(--bg)
+  background: var(--bg);
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 body {
@@ -74,6 +76,15 @@ body {
   letter-spacing: .01em;
   -webkit-text-size-adjust: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
 }
 
 .wrap {
@@ -81,6 +92,20 @@ body {
   margin-inline: auto;
   padding-left: max(24px, env(safe-area-inset-left, 0px));
   padding-right: max(24px, env(safe-area-inset-right, 0px));
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+}
+
+@media (max-width: 380px) {
+  .wrap {
+    padding-left: max(12px, env(safe-area-inset-left, 0px));
+    padding-right: max(12px, env(safe-area-inset-right, 0px));
+  }
 }
 
 a {
@@ -1989,38 +2014,6 @@ legend {
 }
 
 /* Responsive Media Queries */
-@media (max-width:960px) {
-  .hero-grid {
-    grid-template-columns: minmax(0, 1fr)
-  }
-
-  .about-grid {
-    grid-template-columns: minmax(0, 1fr)
-  }
-
-  .slot-wide {
-    --ratio: 16/9
-  }
-
-  .event-item {
-    grid-template-columns: 85px 1fr;
-    gap: 12px
-  }
-
-  .event-badge {
-    grid-column: 1 / -1;
-    justify-self: start
-  }
-
-  .hero {
-    padding-block: 40px 56px
-  }
-
-  .section,
-  .band {
-    padding-block: 48px
-  }
-
 @media (max-width: 1080px) {
   .head-nav {
     display: none !important;
@@ -2035,8 +2028,40 @@ legend {
   }
 }
 
+@media (max-width: 960px) {
+  .hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .about-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .slot-wide {
+    --ratio: 16/9;
+  }
+
+  .event-item {
+    grid-template-columns: 85px 1fr;
+    gap: 12px;
+  }
+
+  .event-badge {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .hero {
+    padding-block: 40px 56px;
+  }
+
+  .section,
+  .band {
+    padding-block: 48px;
+  }
+
   .dash-grid-2 {
-    grid-template-columns: 1fr
+    grid-template-columns: 1fr;
   }
 }
 
@@ -4024,7 +4049,7 @@ legend {
    Comprehensive Mobile & Multi-Device Responsiveness (Phones, Tablets & Small Laptops)
    ========================================================================== */
 
-/* 1. Mobile Form Rows */
+/* 1. Mobile Form Rows & Universal Grid Helpers */
 .form-row-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -4033,12 +4058,59 @@ legend {
 
 @media (max-width: 640px) {
   .form-row-2col {
-    grid-template-columns: 1fr;
-    gap: 10px;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
   }
 }
 
 /* 2. Responsive Admin Filters & Controls */
+.admin-filter-row-1 {
+  display: grid;
+  grid-template-columns: minmax(260px, 1.8fr) minmax(220px, 1.3fr) minmax(200px, 1.2fr);
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 12px;
+}
+
+.admin-filter-row-2 {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(140px, 1fr)) auto;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+@media (max-width: 960px) {
+  .admin-filter-row-1 {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .admin-filter-row-2 {
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .admin-filter-row-2 > div:last-child {
+    grid-column: 1 / -1;
+  }
+  .admin-filter-row-2 > div:last-child button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-filter-card {
+    padding: 14px 16px !important;
+  }
+  .admin-filter-row-1 {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+  .admin-filter-row-2 {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}
+
 @media (max-width: 768px) {
   .admin-filter-toolbar {
     flex-direction: column;
@@ -4053,13 +4125,12 @@ legend {
     gap: 8px;
   }
 
-  .admin-search-input {
+  .admin-search-input,
+  .admin-select-input {
     width: 100% !important;
     min-width: 0 !important;
-    flex: 1 1 100%;
-    font-size: 16px !important; /* Prevents auto-zoom on mobile browsers */
+    font-size: 16px !important; /* Prevents auto-zoom on mobile iOS Safari */
     box-sizing: border-box !important;
-    padding: 10px 14px !important;
   }
 
   .admin-filter-controls .action-btn-sm {
@@ -4071,20 +4142,30 @@ legend {
   }
 }
 
-/* 3. Responsive Admin Table & Horizontal Touch Scrolling */
-.admin-table-wrap {
+/* 3. Responsive Admin & Portal Tables with Horizontal Touch Scrolling */
+.table-wrap,
+.admin-table-wrap,
+.tt-grid-container {
   position: relative;
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   border-radius: var(--radius);
-  background: #FFFFFF;
+  background: var(--bg-card, #FFFFFF);
+  box-sizing: border-box;
 }
 
 .admin-table {
   min-width: 780px; /* Ensures all columns stay legible on mobile without squeezing */
   width: 100%;
   border-collapse: collapse;
+}
+
+.data-table,
+.mapping-table {
+  min-width: 600px;
+  width: 100%;
 }
 
 .mobile-table-hint {
@@ -4100,27 +4181,59 @@ legend {
   .mobile-table-hint {
     display: block;
   }
+
+  /* Visual touch scroll cue */
+  .table-wrap::after,
+  .admin-table-wrap::after,
+  .tt-grid-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 16px;
+    background: linear-gradient(to right, transparent, rgba(0, 0, 0, 0.08));
+    pointer-events: none;
+    opacity: 0.8;
+  }
 }
 
-/* 4. Responsive Modals & Dialogs */
-.modal-backdrop {
+/* 4. Responsive Modals, Dialogs & Popup Cards */
+.modal,
+.modal-wrapper,
+.modal-backdrop,
+[id^="modal-"],
+[id^="modal_"] {
   box-sizing: border-box;
 }
 
 @media (max-width: 640px) {
-  .modal-backdrop {
+  .modal,
+  .modal-wrapper,
+  .modal-backdrop,
+  [id^="modal-"],
+  [id^="modal_"] {
     padding: 12px !important;
     align-items: center !important;
+    justify-content: center !important;
   }
 
-  .modal-dialog {
+  .modal-dialog,
+  .modal-card,
+  .modal > .card,
+  .modal-wrapper > div,
+  .modal [class*="card"],
+  [id^="modal-"] > div,
+  [id^="modal_"] > div {
     width: 100% !important;
     max-width: 100% !important;
-    max-height: 90vh !important;
+    max-height: 92vh !important;
     display: flex !important;
     flex-direction: column !important;
     border-radius: 12px !important;
     margin: auto !important;
+    padding: 16px !important;
+    box-sizing: border-box !important;
   }
 
   .modal-dialog.medium,
@@ -4129,84 +4242,106 @@ legend {
     max-width: 100% !important;
   }
 
-  .modal-dialog .modal-body {
-    padding: 16px !important;
+  .modal-dialog .modal-body,
+  .modal-body,
+  .modal > .card,
+  .modal-card,
+  [id^="modal-"] > div,
+  [id^="modal_"] > div {
+    padding: 14px !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
-    max-height: calc(90vh - 130px) !important;
+    max-height: calc(92vh - 110px) !important;
   }
 
+  /* Any multi-column grids inside modal dialogs must stack on mobile */
+  .modal [style*="grid-template-columns"],
+  .modal-dialog [style*="grid-template-columns"],
+  .modal-backdrop [style*="grid-template-columns"],
+  .modal-card [style*="grid-template-columns"],
+  [id^="modal-"] [style*="grid-template-columns"],
+  [id^="modal_"] [style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .modal input,
+  .modal select,
+  .modal textarea,
   .modal-dialog input,
   .modal-dialog select,
-  .modal-dialog textarea {
-    font-size: 16px !important; /* Prevents iOS Safari input focus zoom */
+  .modal-dialog textarea,
+  [id^="modal-"] input,
+  [id^="modal-"] select,
+  [id^="modal-"] textarea,
+  [id^="modal_"] input,
+  [id^="modal_"] select,
+  [id^="modal_"] textarea {
+    font-size: 16px !important; /* Prevents auto-zoom on mobile iOS Safari */
     box-sizing: border-box !important;
+    min-height: 42px !important;
   }
 
-  .modal-dialog .modal-footer {
-    padding: 12px 16px !important;
+  .modal-dialog .modal-footer,
+  .modal-footer {
+    padding: 12px 14px !important;
     flex-wrap: wrap;
     gap: 8px !important;
   }
 
-  .modal-dialog .modal-footer .btn {
-    flex: 1 1 45%;
+  .modal-dialog .modal-footer .btn,
+  .modal-footer .btn {
+    flex: 1 1 calc(50% - 6px);
     min-height: 42px;
     justify-content: center;
     font-size: 14px;
   }
-
-  .modal-card {
-    padding: 20px !important;
-    max-height: 90vh !important;
-    border-radius: 12px !important;
-  }
 }
 
-/* 5. Responsive Operations Hub & KPI Cards */
+/* 5. Responsive Operations Hub & KPI Metrics Grids */
 @media (max-width: 768px) {
   .admin-kpi-grid {
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px;
-    margin-bottom: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    gap: 12px !important;
+    margin-bottom: 20px !important;
   }
 
   .admin-kpi-card {
-    padding: 16px;
+    padding: 14px !important;
   }
 
   .admin-kpi-val {
-    font-size: 26px;
+    font-size: 24px !important;
   }
 
   .admin-hub-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    margin-bottom: 28px;
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    margin-bottom: 24px !important;
   }
 
   .admin-hub-card {
-    padding: 18px;
+    padding: 16px !important;
   }
 }
 
 @media (max-width: 480px) {
   .admin-kpi-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 }
 
-/* 6. Responsive Sign-in & Auth Forms */
+/* 6. Responsive Sign-in & Authentication Pages */
 @media (max-width: 600px) {
   .form-wrap {
-    padding-block: 28px 48px;
-    padding-inline: 16px;
+    padding-block: 24px 40px;
+    padding-inline: 14px;
     max-width: 100%;
   }
 
   .form {
-    padding: 22px 18px;
-    gap: 16px;
+    padding: 20px 16px;
+    gap: 14px;
     border-radius: 12px;
   }
 
@@ -4228,11 +4363,273 @@ legend {
   }
 }
 
-/* 7. Action Buttons Touch Target Optimization */
+/* 7. Action Toolbars & Hero Banners Across Portals */
 @media (max-width: 768px) {
+  .dash-hero-banner {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+
+  .dash-hero-main {
+    flex: 1 1 100% !important;
+    min-width: 0 !important;
+  }
+
+  .dash-hero-actions {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    box-sizing: border-box;
+    padding: 8px;
+  }
+
+  .dash-hero-actions .dash-action-btn,
+  .dash-hero-actions .cal-filter-btn {
+    flex: 1 1 calc(50% - 6px);
+    justify-content: center;
+    text-align: center;
+    min-height: 40px;
+    box-sizing: border-box;
+  }
+
+  .dash-card-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .dash-card-header > div:last-child {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .dash-card-header > div:last-child .btn {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+
   .action-btn-sm {
-    min-height: 36px;
+    min-height: 38px;
     padding: 6px 12px;
     font-size: 13px;
+  }
+}
+
+/* 8. Timetable & Academic Scheduler Mobile Responsiveness */
+.tab-bar {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid var(--slate-border, #D7E3F0);
+  margin-bottom: 20px;
+  overflow-x: auto;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+
+.tab-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.tt-table td.day-col {
+  position: sticky;
+  left: 0;
+  z-index: 5;
+  background: var(--slate-panel, #F1F5F9);
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
+}
+
+.tt-table th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 6;
+  background: var(--slate-header, #E8EEF5);
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.08);
+}
+
+@media (max-width: 768px) {
+  .tt-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+    padding: 14px;
+  }
+
+  .tt-filter-bar > div:first-child {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .tt-filter-bar > div:last-child {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .tt-filter-bar > div:last-child .btn {
+    flex: 1 1 calc(50% - 6px);
+    justify-content: center;
+  }
+
+  .tt-filter-select {
+    width: 100%;
+    box-sizing: border-box;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tt-filter-bar > div:first-child {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* 9. Calendar Month View & Filters Mobile Responsiveness */
+.cal-grid-month-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius);
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .cal-grid-month {
+    min-width: 620px;
+  }
+
+  .calendar-top-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .calendar-top-bar > div:last-child {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .calendar-top-bar > div:last-child .btn {
+    flex: 1;
+    text-align: center;
+    justify-content: center;
+    min-height: 36px;
+  }
+
+  .cal-filters {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+  }
+
+  .cal-filters::-webkit-scrollbar {
+    display: none;
+  }
+
+  .cal-filter-btn {
+    flex-shrink: 0;
+  }
+}
+
+/* 10. Profile Navigation & Panels Mobile Optimization */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 0 14px;
+    margin: 18px auto;
+  }
+
+  .profile-grid-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .profile-sidebar {
+    position: static;
+    top: auto;
+    border-radius: var(--radius);
+  }
+
+  .profile-sidebar-header {
+    display: none;
+  }
+
+  .profile-nav-list {
+    flex-direction: row;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding: 6px;
+    gap: 6px;
+    scrollbar-width: none;
+  }
+
+  .profile-nav-list::-webkit-scrollbar {
+    display: none;
+  }
+
+  .profile-nav-item {
+    border-left: none;
+    border-bottom: 3px solid transparent;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+
+  .profile-nav-item.active {
+    border-bottom-color: var(--accent);
+    border-left-color: transparent;
+  }
+
+  #nav-signout-trigger {
+    border-top: none;
+    margin-top: 0;
+  }
+
+  .profile-hero-card {
+    padding: 16px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+}
+
+/* 11. Live QR Attendance Modal Responsiveness */
+.live-qr-grid {
+  display: grid;
+  grid-template-columns: 340px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .live-qr-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+
+  #qr-code-img {
+    max-width: 100% !important;
+    height: auto !important;
+    width: 200px !important;
   }
 }

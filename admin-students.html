@@ -359,7 +359,7 @@
     <!-- Student Filter Toolbar Card -->
     <div class="admin-filter-card" style="background: #FFFFFF; border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 20px; margin-bottom: 20px; box-shadow: var(--shadow-sm);">
       <!-- Row 1: Search & Primary Academic Hierarchy (Unified School & Department) -->
-      <div style="display: grid; grid-template-columns: minmax(260px, 1.8fr) minmax(220px, 1.3fr) minmax(200px, 1.2fr); gap: 12px; align-items: flex-end; margin-bottom: 12px;">
+      <div class="admin-filter-row-1">
         <div>
           <label for="filter-search" style="display: block; font-size: 11px; font-weight: 700; color: var(--card-ink); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em;">SEARCH DIRECTORY</label>
           <input type="text" id="filter-search" class="admin-search-input" placeholder="Enrollment No, Reg No, Name..."
@@ -381,7 +381,7 @@
       </div>
 
       <!-- Row 2: Cohort, Status & Inline Reset Action -->
-      <div style="display: grid; grid-template-columns: repeat(4, minmax(140px, 1fr)) auto; gap: 12px; align-items: flex-end;">
+      <div class="admin-filter-row-2">
         <div>
           <label for="filter-semester" style="display: block; font-size: 11px; font-weight: 700; color: var(--card-ink); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.05em;">SEMESTER</label>
           <select id="filter-semester" class="admin-select-input" style="width: 100%; min-width: 0; height: 36px;" onchange="applyFilters()">

@@ -2130,6 +2130,12 @@ router.delete(
       }
 
       const removed = localDepartments.splice(idx, 1)[0];
+      const schoolIdx = localSchools.findIndex(
+        (s) => s.school_id === removed.department_id || s.school_code.toUpperCase() === removed.department_code.toUpperCase()
+      );
+      if (schoolIdx !== -1) {
+        localSchools.splice(schoolIdx, 1);
+      }
 
       const dbOnline = await isDbConnected();
       if (dbOnline) {
@@ -2222,6 +2228,7 @@ router.get(
           LEFT JOIN courses c ON (s.school_id = c.school_id OR d.department_id = c.department_id) AND c.is_active = TRUE
           LEFT JOIN student_profiles sp ON (s.school_id = sp.school_id OR c.course_id = sp.current_course_id)
           LEFT JOIN faculty_profiles fp ON d.department_id = fp.department_id
+          WHERE s.is_active = TRUE
           GROUP BY s.school_id
           ORDER BY s.school_name ASC
         `);
@@ -2230,7 +2237,8 @@ router.get(
       }
 
       // In-Memory Mode
-      const schoolsWithCounts = localSchools.map((sch) => {
+      const activeSchools = localSchools.filter((sch) => sch.is_active !== false);
+      const schoolsWithCounts = activeSchools.map((sch) => {
         const depts = localDepartments.filter((d) => d.school_id === sch.school_id);
         const deptIds = new Set(depts.map((d) => d.department_id));
         const courses = localCourses.filter((c) => c.school_id === sch.school_id || (c.department_id && deptIds.has(c.department_id)));
@@ -2440,15 +2448,21 @@ router.delete(
         return;
       }
 
-      const school = localSchools.find((s) => s.school_id === id);
-      if (!school) {
+      const idUpper = id.toUpperCase();
+      const idx = localSchools.findIndex((s) => s.school_id === id || s.school_code.toUpperCase() === idUpper);
+      if (idx === -1) {
         res.status(404).json({ error: 'SCHOOL_NOT_FOUND', message: 'School not found.' });
         return;
       }
 
-      school.is_active = false;
-      school.updated_at = new Date().toISOString();
-      res.json({ success: true, message: 'School deactivated safely to preserve historical records.' });
+      const removed = localSchools.splice(idx, 1)[0];
+      const deptIdx = localDepartments.findIndex(
+        (d) => d.department_id === removed.school_id || d.department_code.toUpperCase() === removed.school_code.toUpperCase()
+      );
+      if (deptIdx !== -1) {
+        localDepartments.splice(deptIdx, 1);
+      }
+      res.json({ success: true, message: `School "${removed.school_name}" deleted successfully.` });
     } catch (err: any) {
       res.status(500).json({ error: 'DELETE_SCHOOL_FAILED', message: err.message });
     }

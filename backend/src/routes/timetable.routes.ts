@@ -103,7 +103,7 @@ router.get('/academic/all', adminAuth, async (_req: Request, res: Response): Pro
     semesters: localSemesters,
     sections: localSections,
     subjects: localSubjects,
-    rooms: localClassrooms,
+    rooms: localClassrooms.filter((r) => r.is_active !== false),
     groups: localSectionGroups,
     periods: defaultPeriodSlots,
   });

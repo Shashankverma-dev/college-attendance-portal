@@ -736,19 +736,21 @@
             <h3 style="font-size: 16px; font-weight: 700; color: #17345C; margin: 0;">Schools &amp; Academic Departments</h3>
             <span class="tag" id="dept-count-tag" style="background: #E2E8F0; color: #17345C;">Departments</span>
           </div>
-          <table class="mapping-table" id="depts-table">
-            <thead>
-              <tr>
-                <th style="width: 80px;">Code</th>
-                <th>School / Department Name</th>
-                <th style="width: 80px;">Status</th>
-                <th style="width: 90px; text-align: right;">Action</th>
-              </tr>
-            </thead>
-            <tbody id="depts-table-body">
-              <tr><td colspan="4" style="text-align: center; color: #64748B;">Loading departments...</td></tr>
-            </tbody>
-          </table>
+          <div class="table-wrap">
+            <table class="mapping-table" id="depts-table">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Code</th>
+                  <th>School / Department Name</th>
+                  <th style="width: 80px;">Status</th>
+                  <th style="width: 90px; text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="depts-table-body">
+                <tr><td colspan="4" style="text-align: center; color: #64748B;">Loading departments...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
 
         <!-- Programmes Panel -->
@@ -757,19 +759,21 @@
             <h3 style="font-size: 16px; font-weight: 700; color: #17345C; margin: 0;">Degree Programmes & Courses</h3>
             <span class="tag" id="course-count-tag" style="background: #E2E8F0; color: #17345C;">Programmes</span>
           </div>
-          <table class="mapping-table" id="courses-table">
-            <thead>
-              <tr>
-                <th style="width: 90px;">Code</th>
-                <th>Programme Name</th>
-                <th style="width: 80px;">Semesters</th>
-                <th style="width: 90px; text-align: right;">Action</th>
-              </tr>
-            </thead>
-            <tbody id="courses-table-body">
-              <tr><td colspan="4" style="text-align: center; color: #64748B;">Loading programmes...</td></tr>
-            </tbody>
-          </table>
+          <div class="table-wrap">
+            <table class="mapping-table" id="courses-table">
+              <thead>
+                <tr>
+                  <th style="width: 90px;">Code</th>
+                  <th>Programme Name</th>
+                  <th style="width: 80px;">Semesters</th>
+                  <th style="width: 90px; text-align: right;">Action</th>
+                </tr>
+              </thead>
+              <tbody id="courses-table-body">
+                <tr><td colspan="4" style="text-align: center; color: #64748B;">Loading programmes...</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
@@ -782,21 +786,23 @@
           </div>
           <span class="tag" id="room-count-tag" style="background: #E2E8F0; color: #17345C;">Facilities</span>
         </div>
-        <table class="mapping-table" id="rooms-table">
-          <thead>
-            <tr>
-              <th style="width: 120px;">Room Code</th>
-              <th>Facility Name</th>
-              <th style="width: 130px;">Type</th>
-              <th style="width: 90px;">Capacity</th>
-              <th style="width: 90px;">Status</th>
-              <th style="width: 90px; text-align: right;">Action</th>
-            </tr>
-          </thead>
-          <tbody id="rooms-table-body">
-            <tr><td colspan="6" style="text-align: center; color: #64748B;">Loading facilities...</td></tr>
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table class="mapping-table" id="rooms-table">
+            <thead>
+              <tr>
+                <th style="width: 120px;">Room Code</th>
+                <th>Facility Name</th>
+                <th style="width: 130px;">Type</th>
+                <th style="width: 90px;">Capacity</th>
+                <th style="width: 90px;">Status</th>
+                <th style="width: 90px; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="rooms-table-body">
+              <tr><td colspan="6" style="text-align: center; color: #64748B;">Loading facilities...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </section>
 
@@ -835,20 +841,22 @@
             </button>
           </div>
         </div>
-        <table class="mapping-table" id="semesters-table">
-          <thead>
-            <tr>
-              <th style="min-width: 220px;">Programme</th>
-              <th style="width: 110px;">Semester</th>
-              <th>Display Label</th>
-              <th style="width: 130px;">Sections</th>
-              <th style="width: 170px; text-align: right;">Action</th>
-            </tr>
-          </thead>
-          <tbody id="semesters-table-body">
-            <tr><td colspan="5" style="text-align: center; color: #64748B;">Loading semesters...</td></tr>
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table class="mapping-table" id="semesters-table">
+            <thead>
+              <tr>
+                <th style="min-width: 220px;">Programme</th>
+                <th style="width: 110px;">Semester</th>
+                <th>Display Label</th>
+                <th style="width: 130px;">Sections</th>
+                <th style="width: 170px; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="semesters-table-body">
+              <tr><td colspan="5" style="text-align: center; color: #64748B;">Loading semesters...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Sections Table Panel -->
@@ -857,22 +865,24 @@
           <h3 style="font-size: 16px; font-weight: 700; color: #17345C; margin: 0;">Registered Academic Sections</h3>
           <span class="tag" id="section-count-tag" style="background: #E2E8F0; color: #17345C;">Sections</span>
         </div>
-        <table class="mapping-table" id="sections-table">
-          <thead>
-            <tr>
-              <th style="width: 140px;">Programme</th>
-              <th style="width: 100px;">Semester</th>
-              <th style="width: 90px;">Section</th>
-              <th style="width: 110px;">Max Intake</th>
-              <th>Academic Calendar Term</th>
-              <th style="width: 80px;">Status</th>
-              <th style="width: 90px; text-align: right;">Action</th>
-            </tr>
-          </thead>
-          <tbody id="sections-table-body">
-            <tr><td colspan="7" style="text-align: center; color: #64748B;">Loading sections...</td></tr>
-          </tbody>
-        </table>
+        <div class="table-wrap">
+          <table class="mapping-table" id="sections-table">
+            <thead>
+              <tr>
+                <th style="width: 140px;">Programme</th>
+                <th style="width: 100px;">Semester</th>
+                <th style="width: 90px;">Section</th>
+                <th style="width: 110px;">Max Intake</th>
+                <th>Academic Calendar Term</th>
+                <th style="width: 80px;">Status</th>
+                <th style="width: 90px; text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="sections-table-body">
+              <tr><td colspan="7" style="text-align: center; color: #64748B;">Loading sections...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- Subgroups Cards Panel -->
@@ -1486,47 +1496,60 @@
     let uploadedFile = null;
     let facultyDirectory = [];
 
+    // Persistent Deletion Blacklist Manager
+    // Guarantees deleted items never resurrect from default institutional state, offline mocks, or backend in-memory resets
+    function getDeletedBlacklist() {
+      try {
+        const item = localStorage.getItem('admin_deleted_entities_blacklist');
+        return item ? JSON.parse(item) : {};
+      } catch (e) {
+        return {};
+      }
+    }
+
+    function addToDeletedBlacklist(category, identifier) {
+      if (!identifier) return;
+      try {
+        const list = getDeletedBlacklist();
+        if (!Array.isArray(list[category])) list[category] = [];
+        const norm = String(identifier).trim().toLowerCase();
+        if (!list[category].includes(norm)) {
+          list[category].push(norm);
+        }
+        localStorage.setItem('admin_deleted_entities_blacklist', JSON.stringify(list));
+      } catch (e) {}
+    }
+
+    function removeFromDeletedBlacklist(category, identifier) {
+      if (!identifier) return;
+      try {
+        const list = getDeletedBlacklist();
+        if (Array.isArray(list[category])) {
+          const norm = String(identifier).trim().toLowerCase();
+          list[category] = list[category].filter(x => x !== norm);
+          localStorage.setItem('admin_deleted_entities_blacklist', JSON.stringify(list));
+        }
+      } catch (e) {}
+    }
+
+    function isEntityDeleted(category, ...identifiers) {
+      const list = getDeletedBlacklist();
+      const deletedSet = Array.isArray(list[category]) ? list[category] : [];
+      if (deletedSet.length === 0) return false;
+      return identifiers.some(id => {
+        if (!id) return false;
+        const norm = String(id).trim().toLowerCase();
+        return deletedSet.includes(norm);
+      });
+    }
+
     const defaultInstitutionalState = {
-      departments: [
-        { id: 'dept-ca', code: 'CA', name: 'Department of Computer Applications' },
-        { id: 'dept-cse', code: 'CSE', name: 'Department of Computer Science & Engineering' },
-        { id: 'dept-ece', code: 'ECE', name: 'Department of Electronics & Communication' },
-        { id: 'dept-me', code: 'ME', name: 'Department of Mechanical Engineering' },
-        { id: 'dept-mgmt', code: 'MGMT', name: 'Department of Management Studies' },
-        { id: 'dept-appsci', code: 'APPSCI', name: 'Department of Applied Sciences' }
-      ],
-      courses: [
-        { id: 'prog-bca', department_id: 'dept-ca', code: 'BCA', name: 'Bachelor of Computer Applications', total_semesters: 6 },
-        { id: 'prog-mca', department_id: 'dept-ca', code: 'MCA', name: 'Master of Computer Applications', total_semesters: 4 },
-        { id: 'prog-btech', department_id: 'dept-cse', code: 'BTECH', name: 'Bachelor of Technology (CSE)', total_semesters: 8 }
-      ],
-      semesters: [
-        { id: 'sem-bca-1', course_id: 'prog-bca', semester_number: 1, display_label: 'Semester 1' },
-        { id: 'sem-bca-2', course_id: 'prog-bca', semester_number: 2, display_label: 'Semester 2' },
-        { id: 'sem-bca-3', course_id: 'prog-bca', semester_number: 3, display_label: 'Semester 3' },
-        { id: 'sem-bca-4', course_id: 'prog-bca', semester_number: 4, display_label: 'Semester 4' },
-        { id: 'sem-bca-5', course_id: 'prog-bca', semester_number: 5, display_label: 'Semester 5' },
-        { id: 'sem-bca-6', course_id: 'prog-bca', semester_number: 6, display_label: 'Semester 6' }
-      ],
-      sections: [
-        { id: 'sec-bca-5a', semester_id: 'sem-bca-5', name: 'A', capacity: 80, academic_calendar_term: 'Autumn 2026' },
-        { id: 'sec-bca-5b', semester_id: 'sem-bca-5', name: 'B', capacity: 80, academic_calendar_term: 'Autumn 2026' },
-        { id: 'sec-bca-5c', semester_id: 'sem-bca-5', name: 'C', capacity: 80, academic_calendar_term: 'Autumn 2026' }
-      ],
-      rooms: [
-        { id: 'r-101', room_code: 'R-101', name: 'Lecture Hall 101', type: 'LECTURE_HALL', capacity: 90, department_id: 'dept-ca' },
-        { id: 'r-102', room_code: 'R-102', name: 'Lecture Hall 102', type: 'LECTURE_HALL', capacity: 90, department_id: 'dept-ca' },
-        { id: 'r-204', room_code: 'R-204', name: 'Academic Block B, Room 204', type: 'CLASSROOM', capacity: 80, department_id: 'dept-ca' },
-        { id: 'r-305', room_code: 'R-305', name: 'Academic Block B, Room 305', type: 'CLASSROOM', capacity: 80, department_id: 'dept-ca' },
-        { id: 'lab-1', room_code: 'LAB-1', name: 'Software Engineering Laboratory (Lab 1)', type: 'LABORATORY', capacity: 45, department_id: 'dept-ca' },
-        { id: 'lab-3', room_code: 'LAB-3', name: 'Turing Computing Laboratory (Lab 3)', type: 'LABORATORY', capacity: 45, department_id: 'dept-ca' },
-        { id: 'lab-4', room_code: 'LAB-4', name: 'Web & Cloud Laboratory (Lab 4)', type: 'LABORATORY', capacity: 45, department_id: 'dept-cse' },
-        { id: 'hw-lab', room_code: 'HARDWARE-LAB', name: 'Digital Electronics & Hardware Lab', type: 'LABORATORY', capacity: 40, department_id: 'dept-ece' }
-      ],
-      groups: [
-        { id: 'grp-c1', section_id: 'sec-bca-5c', name: 'C1', description: 'Subgroup C1 (Roll No 1-40)' },
-        { id: 'grp-c2', section_id: 'sec-bca-5c', name: 'C2', description: 'Subgroup C2 (Roll No 41-80)' }
-      ],
+      departments: [],
+      courses: [],
+      semesters: [],
+      sections: [],
+      rooms: [],
+      groups: [],
       periods: [
         { period_index: 1, period_label: 'Period 1', start_time: '09:00', end_time: '09:55' },
         { period_index: 2, period_label: 'Period 2', start_time: '09:55', end_time: '10:50' },
@@ -1537,13 +1560,7 @@
         { period_index: 7, period_label: 'Period 6', start_time: '14:25', end_time: '15:20' },
         { period_index: 8, period_label: 'Period 7', start_time: '15:20', end_time: '16:15' }
       ],
-      subjects: [
-        { id: 'subj-501', code: 'BCA-501', name: 'Java Programming' },
-        { id: 'subj-502', code: 'BCA-502', name: 'Operating Systems' },
-        { id: 'subj-503', code: 'BCA-503', name: 'Computer Networks' },
-        { id: 'subj-504', code: 'BCA-504', name: 'Database Management' },
-        { id: 'subj-505', code: 'BCA-505', name: 'Web Frameworks' }
-      ]
+      subjects: []
     };
 
     let academicState = JSON.parse(JSON.stringify(defaultInstitutionalState));
@@ -1842,14 +1859,15 @@
             headers: getAuthHeaders()
           });
           const data = await res.json();
-          if (data.success && data.schools && data.schools.length > 0) {
-            const cleanSchools = deduplicateSchoolsList(data.schools);
+          if (data.success && Array.isArray(data.schools)) {
+            const cleanSchools = deduplicateSchoolsList(data.schools)
+              .filter(s => !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
             renderSchoolsData(cleanSchools);
             return;
           }
         }
       } catch (err) {
-        console.warn('Backend unavailable, using default schools list:', err);
+        console.warn('Backend unavailable, checking client schools registry:', err);
       }
 
       let storedSchools = [];
@@ -1857,64 +1875,8 @@
         storedSchools = JSON.parse(localStorage.getItem('admin_schools_list') || '[]');
       } catch (e) {}
 
-      if (!storedSchools || storedSchools.length === 0) {
-        storedSchools = [
-          {
-            school_id: '10000000-0000-0000-0000-000000000001',
-            school_code: 'SST',
-            school_name: 'School of Science & Technology',
-            description: 'Faculty of Science, Engineering & Computing',
-            dean_name: 'Dr. Rajesh Sharma',
-            contact_email: 'hod.sst@college.edu',
-            department_count: 2,
-            course_count: 3,
-            student_count: 120,
-            faculty_count: 15,
-            is_active: true
-          },
-          {
-            school_id: '10000000-0000-0000-0000-000000000002',
-            school_code: 'SBS',
-            school_name: 'School of Bioscience',
-            description: 'Faculty of Biosciences, Biotechnology & Life Sciences',
-            dean_name: 'Dr. Priya Verma',
-            contact_email: 'hod.sbs@college.edu',
-            department_count: 1,
-            course_count: 2,
-            student_count: 65,
-            faculty_count: 8,
-            is_active: true
-          },
-          {
-            school_id: '10000000-0000-0000-0000-000000000003',
-            school_code: 'SOM',
-            school_name: 'School of Management',
-            description: 'Faculty of Management Studies, Commerce & Business',
-            dean_name: 'Dr. Amit Patel',
-            contact_email: 'hod.som@college.edu',
-            department_count: 1,
-            course_count: 2,
-            student_count: 85,
-            faculty_count: 10,
-            is_active: true
-          },
-          {
-            school_id: '10000000-0000-0000-0000-000000000004',
-            school_code: 'CA',
-            school_name: 'Department of Computer Applications',
-            description: 'Computer Applications & Information Technology Faculty',
-            dean_name: 'Dr. Rajesh Sharma',
-            contact_email: 'hod.ca@college.edu',
-            department_count: 1,
-            course_count: 2,
-            student_count: 140,
-            faculty_count: 12,
-            is_active: true
-          }
-        ];
-      }
-
-      storedSchools = deduplicateSchoolsList(storedSchools);
+      storedSchools = deduplicateSchoolsList(storedSchools)
+        .filter(s => !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
       try { localStorage.setItem('admin_schools_list', JSON.stringify(storedSchools)); } catch (e) {}
 
       renderSchoolsData(storedSchools);
@@ -1923,13 +1885,13 @@
     function renderSchoolsData(schools) {
       const container = document.getElementById('schools-cards-container');
       if (!container) return;
-      loadedSchools = deduplicateSchoolsList(schools);
+      loadedSchools = deduplicateSchoolsList(schools).filter(s => !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
 
       const kpiSchools = document.getElementById('kpi-schools-count');
-      if (kpiSchools) kpiSchools.textContent = schools.length;
-      const totalDepts = schools.reduce((acc, s) => acc + (s.department_count || 0), 0);
-      const totalProgs = schools.reduce((acc, s) => acc + (s.course_count || 0), 0);
-      const totalStudents = schools.reduce((acc, s) => acc + (s.student_count || 0), 0);
+      if (kpiSchools) kpiSchools.textContent = loadedSchools.length;
+      const totalDepts = loadedSchools.reduce((acc, s) => acc + (s.department_count || 0), 0);
+      const totalProgs = loadedSchools.reduce((acc, s) => acc + (s.course_count || 0), 0);
+      const totalStudents = loadedSchools.reduce((acc, s) => acc + (s.student_count || 0), 0);
       
       const kpiDepts = document.getElementById('kpi-depts-count');
       if (kpiDepts) kpiDepts.textContent = totalDepts;
@@ -1939,6 +1901,16 @@
       if (kpiStudents) kpiStudents.textContent = totalStudents;
 
       container.innerHTML = '';
+      if (loadedSchools.length === 0) {
+        container.innerHTML = `
+          <div style="grid-column: 1 / -1; background: #FFFFFF; border: 1px dashed var(--slate-border); border-radius: var(--radius); padding: 48px 24px; text-align: center;">
+            <div style="font-size: 16px; font-weight: 700; color: #17345C; margin-bottom: 6px;">No Schools or Academic Departments Registered</div>
+            <p style="font-size: 13px; color: var(--slate-text-sub); margin: 0 0 16px 0;">All default mock schools have been deleted. Click below to add an official institutional school.</p>
+            <button type="button" class="btn btn-primary" onclick="openAddSchoolModal()">+ Add School / Department</button>
+          </div>
+        `;
+        return;
+      }
       schools.forEach(school => {
         const card = document.createElement('div');
         card.style.cssText = 'background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05);';
@@ -2030,6 +2002,11 @@
       const desc = document.getElementById('add-school-desc').value.trim();
       const dean = document.getElementById('add-school-dean').value.trim();
       const email = document.getElementById('add-school-email').value.trim();
+
+      removeFromDeletedBlacklist('schools', code);
+      removeFromDeletedBlacklist('schools', name);
+      removeFromDeletedBlacklist('departments', code);
+      removeFromDeletedBlacklist('departments', name);
 
       const payload = {
         school_id: code,
@@ -2199,10 +2176,42 @@
     async function deleteSchoolPermanently(schoolId, schoolName) {
       if (!confirm(`Are you sure you want to permanently delete "${schoolName}"?\n\nThis will remove the school and its academic records.`)) return;
 
-      loadedSchools = loadedSchools.filter(s => s.school_id !== schoolId && s.school_code !== schoolId);
+      addToDeletedBlacklist('schools', schoolId);
+      addToDeletedBlacklist('schools', schoolName);
+      addToDeletedBlacklist('departments', schoolId);
+      addToDeletedBlacklist('departments', schoolName);
+
+      const targetSchool = loadedSchools.find(s => s.school_id === schoolId || s.school_code === schoolId);
+      if (targetSchool) {
+        if (targetSchool.school_id) {
+          addToDeletedBlacklist('schools', targetSchool.school_id);
+          addToDeletedBlacklist('departments', targetSchool.school_id);
+        }
+        if (targetSchool.school_code) {
+          addToDeletedBlacklist('schools', targetSchool.school_code);
+          addToDeletedBlacklist('departments', targetSchool.school_code);
+        }
+        if (targetSchool.school_name) {
+          addToDeletedBlacklist('schools', targetSchool.school_name);
+          addToDeletedBlacklist('departments', targetSchool.school_name);
+        }
+      }
+
+      loadedSchools = loadedSchools.filter(s => !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
       loadedSchools = deduplicateSchoolsList(loadedSchools);
       try { localStorage.setItem('admin_schools_list', JSON.stringify(loadedSchools)); } catch (e) {}
+
+      if (academicState && Array.isArray(academicState.departments)) {
+        academicState.departments = academicState.departments.filter(d => 
+          !isEntityDeleted('departments', d.id, d.code, d.name) &&
+          !isEntityDeleted('schools', d.id, d.code, d.name)
+        );
+        try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
+      }
+
       renderSchoolsData(loadedSchools);
+      renderDepartmentsTable();
+      populateAcademicDropdowns();
 
       try {
         if (getApiBase() !== null) {
@@ -2210,6 +2219,10 @@
             method: 'DELETE',
             headers: getAuthHeaders()
           });
+          await fetch(getApiBase() + '/api/timetable/academic/department/' + encodeURIComponent(schoolId), {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          }).catch(() => {});
           await loadSchoolsGrid();
           await loadAcademicEntities();
         }
@@ -2243,6 +2256,9 @@
             });
             const data = await res.json();
             if (data.success && data.timetable) {
+              if (Array.isArray(data.timetable.entries)) {
+                data.timetable.entries = data.timetable.entries.filter(e => !isEntityDeleted('periods', e.entry_id));
+              }
               currentTimetable = data.timetable;
               renderGrid(data.timetable);
               updateStatusPill(data.timetable.status || 'PUBLISHED');
@@ -2272,6 +2288,9 @@
       }
 
       if (match) {
+        if (Array.isArray(match.entries)) {
+          match.entries = match.entries.filter(e => !isEntityDeleted('periods', e.entry_id));
+        }
         currentTimetable = match;
         renderGrid(match);
         updateStatusPill(match.status || 'PUBLISHED');
@@ -2347,8 +2366,10 @@
         return;
       }
 
+      addToDeletedBlacklist('periods', entryId);
+
       if (currentTimetable && Array.isArray(currentTimetable.entries)) {
-        currentTimetable.entries = currentTimetable.entries.filter(e => e.entry_id !== entryId);
+        currentTimetable.entries = currentTimetable.entries.filter(e => e.entry_id !== entryId && !isEntityDeleted('periods', e.entry_id));
         try {
           let stored = JSON.parse(localStorage.getItem('admin_published_timetables') || '[]');
           const idx = stored.findIndex(t => 
@@ -2379,7 +2400,7 @@
 
     function renderPeriodCell(entries, day, periodIndex) {
       const td = document.createElement('td');
-      const matching = (entries || []).filter(e => e.day_of_week === day && e.period_index === periodIndex && !e.is_cancelled);
+      const matching = (entries || []).filter(e => e.day_of_week === day && e.period_index === periodIndex && !e.is_cancelled && !isEntityDeleted('periods', e.entry_id));
 
       if (matching.length === 0) {
         td.innerHTML = '<span style="color: #CBD5E1; font-size: 11px;">-</span>';
@@ -2689,10 +2710,12 @@
             const cCode = (currentPreview.academicContext && currentPreview.academicContext.course) || 'BCA';
             const sNum = (currentPreview.academicContext && currentPreview.academicContext.semester) || 5;
             const sName = (currentPreview.academicContext && currentPreview.academicContext.section) || 'C';
+            const clearKey = `${cCode}_${sNum}_${sName}`;
+            removeFromDeletedBlacklist('timetables', clearKey);
             try {
               let cleared = JSON.parse(localStorage.getItem('admin_cleared_schedules') || '[]');
               if (Array.isArray(cleared)) {
-                cleared = cleared.filter(k => k !== `${cCode}_${sNum}_${sName}`);
+                cleared = cleared.filter(k => k !== clearKey);
                 localStorage.setItem('admin_cleared_schedules', JSON.stringify(cleared));
               }
             } catch (e) {}
@@ -2722,6 +2745,7 @@
       };
 
       const clearKey = `${publishedTT.course_code}_${publishedTT.semester_number}_${publishedTT.section_name}`;
+      removeFromDeletedBlacklist('timetables', clearKey);
       try {
         let cleared = JSON.parse(localStorage.getItem('admin_cleared_schedules') || '[]');
         if (Array.isArray(cleared)) {
@@ -2840,15 +2864,16 @@
           });
           const data = await res.json();
           if (data && data.success) {
-            academicState.departments = Array.isArray(data.departments)
+            academicState.departments = (Array.isArray(data.departments)
               ? deduplicateDepartmentsList(data.departments.map(d => ({
                   id: d.id || d.department_id,
                   code: d.code || d.department_code,
                   name: d.name || d.department_name
                 })))
-              : (academicState.departments || defaultInstitutionalState.departments);
+              : (academicState.departments || defaultInstitutionalState.departments)
+            ).filter(d => !isEntityDeleted('departments', d.id, d.code, d.name) && !isEntityDeleted('schools', d.id, d.code, d.name));
 
-            academicState.courses = Array.isArray(data.courses)
+            academicState.courses = (Array.isArray(data.courses)
               ? data.courses.map(c => ({
                   id: c.id || c.course_id,
                   department_id: c.department_id,
@@ -2856,18 +2881,20 @@
                   name: c.name || c.course_name,
                   total_semesters: c.total_semesters || 6
                 }))
-              : (academicState.courses || defaultInstitutionalState.courses);
+              : (academicState.courses || defaultInstitutionalState.courses)
+            ).filter(c => !isEntityDeleted('courses', c.id, c.code, c.name));
 
-            academicState.semesters = Array.isArray(data.semesters)
+            academicState.semesters = (Array.isArray(data.semesters)
               ? data.semesters.map(s => ({
                   id: s.id || s.semester_id,
                   course_id: s.course_id,
                   semester_number: s.semester_number,
                   display_label: s.display_label || `Semester ${s.semester_number}`
                 }))
-              : (academicState.semesters || defaultInstitutionalState.semesters);
+              : (academicState.semesters || defaultInstitutionalState.semesters)
+            ).filter(s => !isEntityDeleted('semesters', s.id, s.display_label) && !isEntityDeleted('courses', s.course_id));
 
-            academicState.sections = Array.isArray(data.sections)
+            academicState.sections = (Array.isArray(data.sections)
               ? data.sections.map(s => ({
                   id: s.id || s.section_id,
                   semester_id: s.semester_id,
@@ -2875,9 +2902,10 @@
                   capacity: s.capacity || s.max_capacity || 80,
                   academic_calendar_term: s.academic_calendar_term || 'Autumn 2026'
                 }))
-              : (academicState.sections || defaultInstitutionalState.sections);
+              : (academicState.sections || defaultInstitutionalState.sections)
+            ).filter(s => !isEntityDeleted('sections', s.id, s.name) && !isEntityDeleted('semesters', s.semester_id));
 
-            academicState.rooms = Array.isArray(data.rooms)
+            academicState.rooms = (Array.isArray(data.rooms)
               ? data.rooms.map(r => ({
                   id: r.id || r.room_id,
                   room_code: r.room_code,
@@ -2886,16 +2914,18 @@
                   capacity: r.capacity || 45,
                   department_id: r.department_id
                 }))
-              : (academicState.rooms || defaultInstitutionalState.rooms);
+              : (academicState.rooms || defaultInstitutionalState.rooms)
+            ).filter(r => !isEntityDeleted('rooms', r.id, r.room_code, r.name));
 
-            academicState.groups = Array.isArray(data.groups)
+            academicState.groups = (Array.isArray(data.groups)
               ? data.groups.map(g => ({
                   id: g.id || g.group_id,
                   section_id: g.section_id,
                   name: g.name || g.group_name,
                   description: g.description
                 }))
-              : (academicState.groups || defaultInstitutionalState.groups);
+              : (academicState.groups || defaultInstitutionalState.groups)
+            ).filter(g => !isEntityDeleted('subgroups', g.id, g.name) && !isEntityDeleted('sections', g.section_id));
 
             academicState.periods = Array.isArray(data.periods)
               ? data.periods
@@ -2928,8 +2958,19 @@
         savedState = JSON.parse(localStorage.getItem('admin_academic_state'));
       } catch (e) {}
 
-      if (savedState && typeof savedState === 'object' && Array.isArray(savedState.departments)) {
-        savedState.departments = deduplicateDepartmentsList(savedState.departments);
+      if (savedState && typeof savedState === 'object') {
+        savedState.departments = deduplicateDepartmentsList(savedState.departments || [])
+          .filter(d => !isEntityDeleted('departments', d.id, d.code, d.name) && !isEntityDeleted('schools', d.id, d.code, d.name));
+        savedState.courses = (savedState.courses || [])
+          .filter(c => !isEntityDeleted('courses', c.id, c.code, c.name));
+        savedState.semesters = (savedState.semesters || [])
+          .filter(s => !isEntityDeleted('semesters', s.id, s.display_label) && !isEntityDeleted('courses', s.course_id));
+        savedState.sections = (savedState.sections || [])
+          .filter(s => !isEntityDeleted('sections', s.id, s.name) && !isEntityDeleted('semesters', s.semester_id));
+        savedState.rooms = (savedState.rooms || [])
+          .filter(r => !isEntityDeleted('rooms', r.id, r.room_code, r.name));
+        savedState.groups = (savedState.groups || [])
+          .filter(g => !isEntityDeleted('subgroups', g.id, g.name) && !isEntityDeleted('sections', g.section_id));
         academicState = savedState;
       } else {
         academicState = JSON.parse(JSON.stringify(defaultInstitutionalState));
@@ -2989,8 +3030,17 @@
         return;
       }
 
+      addToDeletedBlacklist('departments', deptId);
+      addToDeletedBlacklist('departments', deptName);
+      addToDeletedBlacklist('schools', deptId);
+      addToDeletedBlacklist('schools', deptName);
+
       // Optimistic local deletion
-      academicState.departments = academicState.departments.filter(d => d.id !== deptId && d.code !== deptId && String(d.id).toLowerCase() !== String(deptId).toLowerCase());
+      academicState.departments = academicState.departments.filter(d => 
+        d.id !== deptId && d.code !== deptId && 
+        String(d.id).toLowerCase() !== String(deptId).toLowerCase() &&
+        !isEntityDeleted('departments', d.id, d.code, d.name)
+      );
       try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
       renderDepartmentsTable();
       populateAcademicDropdowns();
@@ -3051,6 +3101,9 @@
         return;
       }
 
+      addToDeletedBlacklist('courses', progId);
+      addToDeletedBlacklist('courses', progName);
+
       // Optimistic local deletion
       academicState.courses = academicState.courses.filter(c => c.id !== progId && c.code !== progId && String(c.id).toLowerCase() !== String(progId).toLowerCase());
       const removedSemIds = academicState.semesters.filter(s => s.course_id === progId).map(s => s.id);
@@ -3058,6 +3111,9 @@
       const removedSecIds = academicState.sections.filter(sec => removedSemIds.includes(sec.semester_id)).map(sec => sec.id);
       academicState.sections = academicState.sections.filter(sec => !removedSemIds.includes(sec.semester_id));
       academicState.groups = academicState.groups.filter(grp => !removedSecIds.includes(grp.section_id));
+
+      removedSemIds.forEach(id => addToDeletedBlacklist('semesters', id));
+      removedSecIds.forEach(id => addToDeletedBlacklist('sections', id));
 
       try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
       renderCoursesTable();
@@ -3120,8 +3176,15 @@
         return;
       }
 
+      addToDeletedBlacklist('rooms', roomId);
+      addToDeletedBlacklist('rooms', roomCode);
+
       // Optimistic local deletion
-      academicState.rooms = academicState.rooms.filter(r => r.id !== roomId && r.room_code !== roomCode && String(r.room_code).toUpperCase() !== String(roomCode).toUpperCase());
+      academicState.rooms = academicState.rooms.filter(r => 
+        r.id !== roomId && r.room_code !== roomCode && 
+        String(r.room_code).toUpperCase() !== String(roomCode).toUpperCase() &&
+        !isEntityDeleted('rooms', r.id, r.room_code)
+      );
       try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
       renderRoomsTable();
       populateAcademicDropdowns();
@@ -3203,11 +3266,16 @@
         return;
       }
 
+      addToDeletedBlacklist('semesters', semId);
+      addToDeletedBlacklist('semesters', semLabel);
+
       // Optimistic local deletion
-      academicState.semesters = academicState.semesters.filter(s => s.id !== semId);
+      academicState.semesters = academicState.semesters.filter(s => s.id !== semId && !isEntityDeleted('semesters', s.id));
       const removedSecIds = academicState.sections.filter(sec => sec.semester_id === semId).map(sec => sec.id);
       academicState.sections = academicState.sections.filter(sec => sec.semester_id !== semId);
       academicState.groups = academicState.groups.filter(grp => !removedSecIds.includes(grp.section_id));
+
+      removedSecIds.forEach(id => addToDeletedBlacklist('sections', id));
 
       try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
       renderSemestersTable();
@@ -3277,8 +3345,17 @@
         return;
       }
 
+      addToDeletedBlacklist('sections', secId);
+      addToDeletedBlacklist('sections', secName);
+      const removedGrpIds = academicState.groups.filter(g => g.section_id === secId).map(g => g.id);
+      removedGrpIds.forEach(id => addToDeletedBlacklist('subgroups', id));
+
       // Optimistic local deletion
-      academicState.sections = academicState.sections.filter(s => s.id !== secId && s.name !== secName && String(s.name).toUpperCase() !== String(secName).toUpperCase());
+      academicState.sections = academicState.sections.filter(s => 
+        s.id !== secId && s.name !== secName && 
+        String(s.name).toUpperCase() !== String(secName).toUpperCase() &&
+        !isEntityDeleted('sections', s.id, s.name)
+      );
       academicState.groups = academicState.groups.filter(g => g.section_id !== secId);
 
       try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
@@ -3343,8 +3420,15 @@
         return;
       }
 
+      addToDeletedBlacklist('subgroups', grpId);
+      addToDeletedBlacklist('subgroups', grpName);
+
       // Optimistic local deletion
-      academicState.groups = academicState.groups.filter(g => g.id !== grpId && g.name !== grpName && String(g.name).toUpperCase() !== String(grpName).toUpperCase());
+      academicState.groups = academicState.groups.filter(g => 
+        g.id !== grpId && g.name !== grpName && 
+        String(g.name).toUpperCase() !== String(grpName).toUpperCase() &&
+        !isEntityDeleted('subgroups', g.id, g.name)
+      );
       try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
       renderSubgroups();
       populateAcademicDropdowns();
@@ -3655,6 +3739,14 @@
       }
 
       const department_id = 'dept-' + code.toLowerCase();
+
+      removeFromDeletedBlacklist('departments', code);
+      removeFromDeletedBlacklist('departments', name);
+      removeFromDeletedBlacklist('departments', department_id);
+      removeFromDeletedBlacklist('schools', code);
+      removeFromDeletedBlacklist('schools', name);
+      removeFromDeletedBlacklist('schools', department_id);
+
       const payload = {
         department_id: department_id,
         id: department_id,
@@ -3772,6 +3864,10 @@
       const total_semesters = parseInt(document.getElementById('new-prog-semesters').value) || 6;
       const prog_id = 'prog-' + (code ? code.toLowerCase() : Date.now());
 
+      removeFromDeletedBlacklist('courses', code);
+      removeFromDeletedBlacklist('courses', name);
+      removeFromDeletedBlacklist('courses', prog_id);
+
       try {
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + '/api/timetable/academic/programme', {
@@ -3820,6 +3916,9 @@
       const display_label = document.getElementById('new-sem-label').value.trim() || `Semester ${semester_number}`;
       const sem_id = 'sem-' + Date.now();
       const msg = document.getElementById('add-sem-msg');
+
+      removeFromDeletedBlacklist('semesters', sem_id);
+      removeFromDeletedBlacklist('semesters', display_label);
 
       try {
         if (getApiBase() !== null) {
@@ -3875,6 +3974,9 @@
       const sec_id = 'sec-' + Date.now();
       const msg = document.getElementById('add-sec-msg');
 
+      removeFromDeletedBlacklist('sections', sec_id);
+      removeFromDeletedBlacklist('sections', name);
+
       try {
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + '/api/timetable/academic/section', {
@@ -3920,6 +4022,10 @@
       const room_id = 'r-' + Date.now();
       const msg = document.getElementById('add-room-msg');
 
+      removeFromDeletedBlacklist('rooms', room_id);
+      removeFromDeletedBlacklist('rooms', room_code);
+      removeFromDeletedBlacklist('rooms', name);
+
       try {
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + '/api/timetable/academic/room', {
@@ -3962,6 +4068,9 @@
       const description = document.getElementById('new-grp-desc').value.trim();
       const group_id = 'grp-' + Date.now();
       const msg = document.getElementById('add-grp-msg');
+
+      removeFromDeletedBlacklist('subgroups', group_id);
+      removeFromDeletedBlacklist('subgroups', name);
 
       try {
         if (getApiBase() !== null) {
@@ -4096,6 +4205,8 @@
 
           const data = await res.json();
           if (data.success) {
+            const courseVal = (academicState.courses.find(c => c.id === (activeSection ? activeSection.course_id : ''))?.code) || 'BCA';
+            removeFromDeletedBlacklist('timetables', `${courseVal}_5_${activeSection ? activeSection.name : 'C'}`);
             saveBtn.disabled = false;
             saveBtn.textContent = 'Save & Schedule Class';
             closeNewEntryModal();
@@ -4148,6 +4259,8 @@
         localStorage.setItem('admin_published_timetables', JSON.stringify(stored));
 
         const clearKey = `${currentTimetable.course_code}_${currentTimetable.semester_number}_${currentTimetable.section_name}`;
+        removeFromDeletedBlacklist('timetables', clearKey);
+        removeFromDeletedBlacklist('periods', newEntry.entry_id);
         let cleared = JSON.parse(localStorage.getItem('admin_cleared_schedules') || '[]');
         if (Array.isArray(cleared)) {
           cleared = cleared.filter(k => k !== clearKey);
@@ -4205,6 +4318,14 @@
       }
 
       const scheduleKey = `${course}_${semester}_${section}`;
+      addToDeletedBlacklist('timetables', scheduleKey);
+
+      if (currentTimetable && Array.isArray(currentTimetable.entries)) {
+        currentTimetable.entries.forEach(e => {
+          if (e.entry_id) addToDeletedBlacklist('periods', e.entry_id);
+        });
+      }
+
       // Track explicitly cleared schedule in localStorage
       try {
         let clearedList = JSON.parse(localStorage.getItem('admin_cleared_schedules') || '[]');

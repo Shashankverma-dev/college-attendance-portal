@@ -338,73 +338,78 @@
     var isCal = page.indexOf('calendar') !== -1;
     var isProf = page.indexOf('profile') !== -1;
 
-    if (calNav && calActions) {
+    if (calNav || calActions || drawerUserInfo || drawerNavLinks) {
       if (activeRole === 'admin') {
         if (wordmark) wordmark.href = 'admin.html';
         if (drawerWordmark) drawerWordmark.href = 'admin.html';
 
-        calNav.setAttribute('aria-label', 'Administrator navigation');
-        calNav.innerHTML = [
-          '<a class="nav-link' + (page === 'admin.html' ? ' active' : '') + '" href="admin.html" data-nav="overview" title="Institutional Operations Dashboard">Dashboard</a>',
-          '<a class="nav-link' + (page.indexOf('admin-students') !== -1 ? ' active' : '') + '" href="admin-students.html">Students</a>',
-          '<a class="nav-link' + (page.indexOf('admin-teachers') !== -1 ? ' active' : '') + '" href="admin-teachers.html">Teacher management</a>',
-          '<a class="nav-link' + (page.indexOf('admin-timetable') !== -1 ? ' active' : '') + '" href="admin-timetable.html">Timetable & Academic</a>',
-          '<a class="nav-link' + (page.indexOf('admin-marks') !== -1 ? ' active' : '') + '" href="admin-marks.html">Final marks</a>',
-          '<a class="nav-link' + (isCal ? ' active' : '') + '" href="calendar.html">Calendar</a>'
-        ].join('');
+        if (calNav) {
+          calNav.setAttribute('aria-label', 'Administrator navigation');
+          calNav.innerHTML = [
+            '<a class="nav-link' + (page === 'admin.html' ? ' active' : '') + '" href="admin.html" data-nav="overview" title="Institutional Operations Dashboard">Dashboard</a>',
+            '<a class="nav-link' + (page.indexOf('admin-students') !== -1 ? ' active' : '') + '" href="admin-students.html">Students</a>',
+            '<a class="nav-link' + (page.indexOf('admin-teachers') !== -1 ? ' active' : '') + '" href="admin-teachers.html">Teacher management</a>',
+            '<a class="nav-link' + (page.indexOf('admin-timetable') !== -1 ? ' active' : '') + '" href="admin-timetable.html">Timetable & Academic</a>',
+            '<a class="nav-link' + (page.indexOf('admin-marks') !== -1 ? ' active' : '') + '" href="admin-marks.html">Final marks</a>',
+            '<a class="nav-link' + (isCal ? ' active' : '') + '" href="calendar.html">Calendar</a>'
+          ].join('');
+        }
 
-        var _admName = sessionStorage.getItem('attendance_user_name') || activeId;
-        var _admInitials = sessionStorage.getItem('attendance_user_initials') || activeId.substring(0,2).toUpperCase();
+        var _admName = sessionStorage.getItem('attendance_user_name') || activeId || 'System Administrator';
+        var _admInitials = sessionStorage.getItem('attendance_user_initials') || (_admName ? _admName.substring(0,2).toUpperCase() : 'AD');
         var _admRoleTitle = rawRole.toLowerCase() === 'hod' ? 'Head of Department' : 'Global Admin';
-        calActions.innerHTML = [
-          '<div class="user-menu-wrap" id="user-menu-wrap">',
-          '  <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">',
-          '    <div class="user-avatar-circle" id="display-user-avatar">' + _admInitials + '</div>',
-          '    <div class="user-avatar-info">',
-          '      <span class="user-avatar-name" id="display-user-name">' + _admName + '</span>',
-          '      <span class="user-avatar-role" id="display-user-id">' + _admRoleTitle + '</span>',
-          '    </div>',
-          '    <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">',
-          '      <polyline points="6 9 12 15 18 9"></polyline>',
-          '    </svg>',
-          '  </button>',
-          '  <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">',
-          '    <div class="user-dropdown-header">',
-          '      <strong id="dropdown-user-name">' + _admName + '</strong>',
-          '      <span id="dropdown-user-id">ID: ' + activeId + ' \u2022 ' + _admRoleTitle + '</span>',
-          '    </div>',
-          '    <a class="user-dropdown-item' + (isProf ? ' active' : '') + '" href="profile.html" role="menuitem">',
-          '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
-          '      <span>View Profile</span>',
-          '    </a>',
-          '    <a class="user-dropdown-item" href="admin.html" role="menuitem">',
-          '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
-          '      <span>Dashboard Overview</span>',
-          '    </a>',
-          '    <a class="user-dropdown-item" href="admin-students.html" role="menuitem">',
-          '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>',
-          '      <span>Student Management</span>',
-          '    </a>',
-          '    <a class="user-dropdown-item" href="admin-teachers.html" role="menuitem">',
-          '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
-          '      <span>Teacher Management</span>',
-          '    </a>',
-          '    <a class="user-dropdown-item" href="admin-timetable.html" role="menuitem">',
-          '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
-          '      <span>Timetable & Academic</span>',
-          '    </a>',
-          '    <a class="user-dropdown-item" href="admin-marks.html" role="menuitem">',
-          '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>',
-          '      <span>Final Semester Marks</span>',
-          '    </a>',
-          '    <div class="user-dropdown-divider"></div>',
-          '    <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" onclick="sessionStorage.clear();" role="menuitem">',
-          '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>',
-          '      <span>Sign Out</span>',
-          '    </a>',
-          '  </div>',
-          '</div>'
-        ].join('');
+
+        if (calActions) {
+          calActions.innerHTML = [
+            '<div class="user-menu-wrap" id="user-menu-wrap">',
+            '  <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">',
+            '    <div class="user-avatar-circle" id="display-user-avatar">' + _admInitials + '</div>',
+            '    <div class="user-avatar-info">',
+            '      <span class="user-avatar-name" id="display-user-name">' + _admName + '</span>',
+            '      <span class="user-avatar-role" id="display-user-id">' + _admRoleTitle + '</span>',
+            '    </div>',
+            '    <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">',
+            '      <polyline points="6 9 12 15 18 9"></polyline>',
+            '    </svg>',
+            '  </button>',
+            '  <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">',
+            '    <div class="user-dropdown-header">',
+            '      <strong id="dropdown-user-name">' + _admName + '</strong>',
+            '      <span id="dropdown-user-id">ID: ' + activeId + ' \u2022 ' + _admRoleTitle + '</span>',
+            '    </div>',
+            '    <a class="user-dropdown-item' + (isProf ? ' active' : '') + '" href="profile.html" role="menuitem">',
+            '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
+            '      <span>View Profile</span>',
+            '    </a>',
+            '    <a class="user-dropdown-item" href="admin.html" role="menuitem">',
+            '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>',
+            '      <span>Dashboard Overview</span>',
+            '    </a>',
+            '    <a class="user-dropdown-item" href="admin-students.html" role="menuitem">',
+            '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>',
+            '      <span>Student Management</span>',
+            '    </a>',
+            '    <a class="user-dropdown-item" href="admin-teachers.html" role="menuitem">',
+            '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
+            '      <span>Teacher Management</span>',
+            '    </a>',
+            '    <a class="user-dropdown-item" href="admin-timetable.html" role="menuitem">',
+            '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>',
+            '      <span>Timetable & Academic</span>',
+            '    </a>',
+            '    <a class="user-dropdown-item" href="admin-marks.html" role="menuitem">',
+            '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>',
+            '      <span>Final Semester Marks</span>',
+            '    </a>',
+            '    <div class="user-dropdown-divider"></div>',
+            '    <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" onclick="sessionStorage.clear();" role="menuitem">',
+            '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>',
+            '      <span>Sign Out</span>',
+            '    </a>',
+            '  </div>',
+            '</div>'
+          ].join('');
+        }
 
         if (drawerUserInfo) {
           drawerUserInfo.style.display = 'block';
@@ -429,37 +434,42 @@
         if (wordmark) wordmark.href = 'teacher.html';
         if (drawerWordmark) drawerWordmark.href = 'teacher.html';
 
-        calNav.setAttribute('aria-label', 'Faculty navigation');
-        calNav.innerHTML = [
-          '<a class="nav-link' + (page === 'teacher.html' ? ' active' : '') + '" href="teacher.html">Today\'s classes</a>',
-          '<a class="nav-link' + (page.indexOf('past-registers') !== -1 ? ' active' : '') + '" href="past-registers.html">Past registers</a>',
-          '<a class="nav-link' + (page.indexOf('teacher-marks') !== -1 ? ' active' : '') + '" href="teacher-marks.html">Marks management</a>',
-          '<a class="nav-link' + (isCal ? ' active' : '') + '" href="calendar.html">Calendar</a>'
-        ].join('');
+        if (calNav) {
+          calNav.setAttribute('aria-label', 'Faculty navigation');
+          calNav.innerHTML = [
+            '<a class="nav-link' + (page === 'teacher.html' ? ' active' : '') + '" href="teacher.html">Today\'s classes</a>',
+            '<a class="nav-link' + (page.indexOf('past-registers') !== -1 ? ' active' : '') + '" href="past-registers.html">Past registers</a>',
+            '<a class="nav-link' + (page.indexOf('teacher-marks') !== -1 ? ' active' : '') + '" href="teacher-marks.html">Marks management</a>',
+            '<a class="nav-link' + (isCal ? ' active' : '') + '" href="calendar.html">Calendar</a>'
+          ].join('');
+        }
 
-        var _facName = sessionStorage.getItem('attendance_user_name') || activeId;
-        var _facInitials = sessionStorage.getItem('attendance_user_initials') || activeId.substring(0,2).toUpperCase();
-        calActions.innerHTML = [
-          '<div class="user-menu-wrap" id="user-menu-wrap">',
-          '  <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">',
-          '    <div class="user-avatar-circle" id="display-user-avatar">' + _facInitials + '</div>',
-          '    <div class="user-avatar-info">',
-          '      <span class="user-avatar-name" id="display-user-name">' + _facName + '</span>',
-          '      <span class="user-avatar-role" id="display-user-id">Faculty</span>',
-          '    </div>',
-          '    <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>',
-          '  </button>',
-          '  <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">',
-          '    <div class="user-dropdown-header"><strong id="dropdown-user-name">' + _facName + '</strong><span id="dropdown-user-id">ID: ' + activeId + ' \u2022 Faculty</span></div>',
-          '    <a class="user-dropdown-item' + (isProf ? ' active' : '') + '" href="profile.html" role="menuitem">View Profile</a>',
-          '    <a class="user-dropdown-item" href="teacher.html" role="menuitem">Today\'s Classes</a>',
-          '    <a class="user-dropdown-item" href="past-registers.html" role="menuitem">Past Registers</a>',
-          '    <a class="user-dropdown-item" href="teacher-marks.html" role="menuitem">Marks Management</a>',
-          '    <div class="user-dropdown-divider"></div>',
-          '    <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" onclick="sessionStorage.clear();" role="menuitem">Sign Out</a>',
-          '  </div>',
-          '</div>'
-        ].join('');
+        var _facName = sessionStorage.getItem('attendance_user_name') || activeId || 'Faculty Member';
+        var _facInitials = sessionStorage.getItem('attendance_user_initials') || (_facName ? _facName.substring(0,2).toUpperCase() : 'FM');
+
+        if (calActions) {
+          calActions.innerHTML = [
+            '<div class="user-menu-wrap" id="user-menu-wrap">',
+            '  <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">',
+            '    <div class="user-avatar-circle" id="display-user-avatar">' + _facInitials + '</div>',
+            '    <div class="user-avatar-info">',
+            '      <span class="user-avatar-name" id="display-user-name">' + _facName + '</span>',
+            '      <span class="user-avatar-role" id="display-user-id">Faculty</span>',
+            '    </div>',
+            '    <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>',
+            '  </button>',
+            '  <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">',
+            '    <div class="user-dropdown-header"><strong id="dropdown-user-name">' + _facName + '</strong><span id="dropdown-user-id">ID: ' + activeId + ' \u2022 Faculty</span></div>',
+            '    <a class="user-dropdown-item' + (isProf ? ' active' : '') + '" href="profile.html" role="menuitem">View Profile</a>',
+            '    <a class="user-dropdown-item" href="teacher.html" role="menuitem">Today\'s Classes</a>',
+            '    <a class="user-dropdown-item" href="past-registers.html" role="menuitem">Past Registers</a>',
+            '    <a class="user-dropdown-item" href="teacher-marks.html" role="menuitem">Marks Management</a>',
+            '    <div class="user-dropdown-divider"></div>',
+            '    <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" onclick="sessionStorage.clear();" role="menuitem">Sign Out</a>',
+            '  </div>',
+            '</div>'
+          ].join('');
+        }
 
         if (drawerUserInfo) {
           drawerUserInfo.style.display = 'block';
@@ -482,37 +492,42 @@
         if (wordmark) wordmark.href = 'student.html';
         if (drawerWordmark) drawerWordmark.href = 'student.html';
 
-        calNav.setAttribute('aria-label', 'Student navigation');
-        calNav.innerHTML = [
-          '<a class="nav-link' + (page === 'student.html' ? ' active' : '') + '" href="student.html#overview" data-nav="overview">Overview</a>',
-          '<a class="nav-link" href="student.html#subjects">Subject breakdown</a>',
-          '<a class="nav-link" href="student.html#history">Session history</a>',
-          '<a class="nav-link' + (page.indexOf('student-marks') !== -1 ? ' active' : '') + '" href="student-marks.html">Examination marks</a>',
-          '<a class="nav-link' + (isCal ? ' active' : '') + '" href="calendar.html">Calendar</a>'
-        ].join('');
+        if (calNav) {
+          calNav.setAttribute('aria-label', 'Student navigation');
+          calNav.innerHTML = [
+            '<a class="nav-link' + (page === 'student.html' ? ' active' : '') + '" href="student.html#overview" data-nav="overview">Overview</a>',
+            '<a class="nav-link" href="student.html#subjects">Subject breakdown</a>',
+            '<a class="nav-link" href="student.html#history">Session history</a>',
+            '<a class="nav-link' + (page.indexOf('student-marks') !== -1 ? ' active' : '') + '" href="student-marks.html">Examination marks</a>',
+            '<a class="nav-link' + (isCal ? ' active' : '') + '" href="calendar.html">Calendar</a>'
+          ].join('');
+        }
 
-        var _stuName = sessionStorage.getItem('attendance_user_name') || activeId;
-        var _stuInitials = sessionStorage.getItem('attendance_user_initials') || activeId.substring(0,2).toUpperCase();
-        calActions.innerHTML = [
-          '<div class="user-menu-wrap" id="user-menu-wrap">',
-          '  <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">',
-          '    <div class="user-avatar-circle" id="display-user-avatar">' + _stuInitials + '</div>',
-          '    <div class="user-avatar-info">',
-          '      <span class="user-avatar-name" id="display-user-name">' + _stuName + '</span>',
-          '      <span class="user-avatar-role" id="display-user-id">Student</span>',
-          '    </div>',
-          '    <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>',
-          '  </button>',
-          '  <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">',
-          '    <div class="user-dropdown-header"><strong id="dropdown-user-name">' + _stuName + '</strong><span id="dropdown-user-id">ID: ' + activeId + ' \u2022 Student</span></div>',
-          '    <a class="user-dropdown-item' + (isProf ? ' active' : '') + '" href="profile.html" role="menuitem">View Profile</a>',
-          '    <a class="user-dropdown-item" href="student.html" role="menuitem">Attendance Dashboard</a>',
-          '    <a class="user-dropdown-item" href="student-marks.html" role="menuitem">Examination Marks</a>',
-          '    <div class="user-dropdown-divider"></div>',
-          '    <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" onclick="sessionStorage.clear();" role="menuitem">Sign Out</a>',
-          '  </div>',
-          '</div>'
-        ].join('');
+        var _stuName = sessionStorage.getItem('attendance_user_name') || activeId || 'Student Member';
+        var _stuInitials = sessionStorage.getItem('attendance_user_initials') || (_stuName ? _stuName.substring(0,2).toUpperCase() : 'ST');
+
+        if (calActions) {
+          calActions.innerHTML = [
+            '<div class="user-menu-wrap" id="user-menu-wrap">',
+            '  <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">',
+            '    <div class="user-avatar-circle" id="display-user-avatar">' + _stuInitials + '</div>',
+            '    <div class="user-avatar-info">',
+            '      <span class="user-avatar-name" id="display-user-name">' + _stuName + '</span>',
+            '      <span class="user-avatar-role" id="display-user-id">Student</span>',
+            '    </div>',
+            '    <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>',
+            '  </button>',
+            '  <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">',
+            '    <div class="user-dropdown-header"><strong id="dropdown-user-name">' + _stuName + '</strong><span id="dropdown-user-id">ID: ' + activeId + ' \u2022 Student</span></div>',
+            '    <a class="user-dropdown-item' + (isProf ? ' active' : '') + '" href="profile.html" role="menuitem">View Profile</a>',
+            '    <a class="user-dropdown-item" href="student.html" role="menuitem">Attendance Dashboard</a>',
+            '    <a class="user-dropdown-item" href="student-marks.html" role="menuitem">Examination Marks</a>',
+            '    <div class="user-dropdown-divider"></div>',
+            '    <a class="user-dropdown-item danger" href="signin.html" id="signout-btn" onclick="sessionStorage.clear();" role="menuitem">Sign Out</a>',
+            '  </div>',
+            '</div>'
+          ].join('');
+        }
 
         if (drawerUserInfo) {
           drawerUserInfo.style.display = 'block';
@@ -537,15 +552,19 @@
         if (wordmark) wordmark.href = 'index.html';
         if (drawerWordmark) drawerWordmark.href = 'index.html';
 
-        calNav.setAttribute('aria-label', 'Public navigation');
-        calNav.innerHTML = [
-          '<a class="nav-link' + (page === 'index.html' ? ' active' : '') + '" href="index.html">Home</a>',
-          '<a class="nav-link" href="signin.html">Student portal</a>',
-          '<a class="nav-link" href="signin.html">Teacher portal</a>',
-          '<a class="nav-link' + (isCal ? ' active' : '') + '" href="calendar.html">Calendar</a>'
-        ].join('');
+        if (calNav) {
+          calNav.setAttribute('aria-label', 'Public navigation');
+          calNav.innerHTML = [
+            '<a class="nav-link' + (page === 'index.html' ? ' active' : '') + '" href="index.html">Home</a>',
+            '<a class="nav-link" href="signin.html">Student portal</a>',
+            '<a class="nav-link" href="signin.html">Teacher portal</a>',
+            '<a class="nav-link' + (isCal ? ' active' : '') + '" href="calendar.html">Calendar</a>'
+          ].join('');
+        }
 
-        calActions.innerHTML = '<a class="btn btn-sm" href="signin.html">Sign in</a>';
+        if (calActions) {
+          calActions.innerHTML = '<a class="btn btn-sm" href="signin.html">Sign in</a>';
+        }
 
         if (drawerUserInfo) {
           drawerUserInfo.style.display = 'none';
@@ -684,110 +703,13 @@
     return (base ? base : '') + p;
   };
 
-  // Render Backend Status & Configuration Widget
-  function initRenderStatusWidget() {
-    // Only mount widget once DOM is ready
-    var widgetId = 'render-status-indicator';
-    if (document.getElementById(widgetId)) return;
-
-    var container = document.createElement('div');
-    container.id = widgetId;
-    container.style.cssText =
-      'position:fixed;bottom:16px;right:16px;z-index:99999;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;font-size:12px;transition:all 0.3s ease;';
-    
-    var pill = document.createElement('div');
-    pill.id = 'render-status-pill';
-    pill.style.cssText =
-      'display:inline-flex;align-items:center;gap:8px;padding:6px 12px;background:#1e293b;color:#f8fafc;border:1px solid #334155;border-radius:9999px;box-shadow:0 4px 12px rgba(0,0,0,0.15);cursor:pointer;user-select:none;';
-    pill.innerHTML =
-      '<span id="render-dot" style="width:8px;height:8px;border-radius:50%;background:#eab308;display:inline-block;"></span>' +
-      '<span id="render-msg" style="font-weight:500;">Checking Backend...</span>';
-
-    pill.title = 'Click to configure or view backend URL';
-    pill.addEventListener('click', function () {
-      openBackendModal();
-    });
-
-    container.appendChild(pill);
-    document.body.appendChild(container);
-
-    window.checkBackendHealth = function () {
-      var dot = document.getElementById('render-dot');
-      var msg = document.getElementById('render-msg');
-      if (!dot || !msg) return;
-
-      var base = window.getApiBase();
-      if (!base) {
-        dot.style.background = '#ef4444';
-        msg.textContent = 'Backend: Unconfigured';
-        return;
-      }
-
-      msg.textContent = 'Connecting...';
-      dot.style.background = '#eab308';
-
-      var controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-      var timeout = setTimeout(function () {
-        if (controller) controller.abort();
-      }, 7000);
-
-      fetch(base + '/health', { signal: controller ? controller.signal : undefined })
-        .then(function (res) {
-          clearTimeout(timeout);
-          return res.json();
-        })
-        .then(function (data) {
-          if (data && data.status === 'HEALTHY') {
-            dot.style.background = '#22c55e';
-            msg.textContent = 'Backend Online';
-            // Auto-minimize after 4 seconds to avoid distraction
-            setTimeout(function () {
-              if (msg && dot && msg.textContent === 'Backend Online') {
-                msg.textContent = 'Render';
-              }
-            }, 4000);
-          } else {
-            throw new Error('Unexpected status');
-          }
-        })
-        .catch(function () {
-          clearTimeout(timeout);
-          dot.style.background = '#f59e0b';
-          msg.textContent = 'Backend Waking Up...';
-          // Retry every 8 seconds if waking up from Render free tier sleep
-          setTimeout(function () {
-            if (document.getElementById(widgetId)) {
-              window.checkBackendHealth();
-            }
-          }, 8000);
-        });
-    };
-
-    function openBackendModal() {
-      var currentUrl = localStorage.getItem('attendance_api_url') || window.getApiBase() || '';
-      var input = prompt(
-        'Configure Render Backend Service URL:\n\n' +
-        'Enter your deployed Render Web Service URL (e.g. https://attendance-backend-xxxx.onrender.com or http://localhost:8080):',
-        currentUrl
-      );
-      if (input !== null) {
-        var clean = input.trim();
-        window.setApiBase(clean);
-        alert('Backend URL saved: ' + (clean || 'Default') + '\nTesting connection now...');
-        window.checkBackendHealth();
-      }
-    }
-
-    // Run health check initially
-    setTimeout(window.checkBackendHealth, 800);
-  }
+  window.checkBackendHealth = function () {};
 
   window.syncRoleNavigation = syncRoleNavigation;
   window.enforceRouteGuards = enforceRouteGuards;
 
   function initAll() {
     syncRoleNavigation();
-    initRenderStatusWidget();
   }
 
   if (document.readyState === 'loading') {
@@ -795,6 +717,7 @@
   } else {
     initAll();
   }
+
 
 })();
 
