@@ -20,7 +20,7 @@
       --slate-header: #E8EEF5;
       --slate-border: #D7E3F0;
       --slate-text-main: #17345C;
-      --slate-text-sub: #64748B;
+      --slate-text-sub: #334155;
       --slate-success-text: #15803D;
       --slate-success-bg: #DCFCE7;
       --slate-error: #DC2626;
@@ -159,21 +159,27 @@
 
     .mapping-table th {
       background: var(--slate-header);
-      color: var(--slate-text-main) !important;
+      color: #0F172A !important;
       font-weight: 700;
     }
 
     .mapping-table td {
       background: #FFFFFF !important;
-      color: var(--slate-text-main) !important;
+      color: #0F172A !important;
     }
 
     .mapping-table td strong {
-      color: var(--slate-text-main) !important;
+      color: #0F172A !important;
     }
 
     .mapping-table td span {
       color: inherit;
+    }
+
+    .mapping-table td .sub-label,
+    .mapping-table td .text-secondary {
+      color: #334155 !important;
+      font-weight: 500;
     }
 
     .mapping-table tbody tr:hover td {
@@ -181,18 +187,20 @@
     }
 
     #panel-academic-entities, #panel-subgroups {
-      color: var(--slate-text-main);
+      color: #0F172A;
     }
     #panel-academic-entities h3, #panel-subgroups h3,
-    #panel-academic-entities h4, #panel-subgroups h4,
+    #panel-academic-entities h4, #panel-subgroups h4 {
+      color: #0F172A;
+    }
     #panel-academic-entities p, #panel-subgroups p {
-      color: var(--slate-text-main);
+      color: #334155;
     }
     #panel-academic-entities table td, #panel-subgroups table td {
-      color: var(--slate-text-main) !important;
+      color: #0F172A !important;
     }
     #panel-academic-entities table td strong, #panel-subgroups table td strong {
-      color: var(--slate-text-main) !important;
+      color: #0F172A !important;
     }
 
     /* Print Schedule Stylesheet */
@@ -830,11 +838,11 @@
         <table class="mapping-table" id="semesters-table">
           <thead>
             <tr>
-              <th style="width: 140px;">Programme</th>
+              <th style="min-width: 220px;">Programme</th>
               <th style="width: 110px;">Semester</th>
               <th>Display Label</th>
-              <th style="width: 110px;">Sections</th>
-              <th style="width: 160px; text-align: right;">Action</th>
+              <th style="width: 130px;">Sections</th>
+              <th style="width: 170px; text-align: right;">Action</th>
             </tr>
           </thead>
           <tbody id="semesters-table-body">
@@ -904,24 +912,24 @@
       <!-- School KPI Summary -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;">
         <div class="card" style="padding: 16px; background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius);">
-          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Active Schools / Departments</span>
+          <span style="font-size: 11px; font-weight: 700; color: #334155; text-transform: uppercase;">Active Schools / Departments</span>
           <div style="font-size: 26px; font-weight: 800; color: #1D3C72; margin-top: 4px;" id="kpi-schools-count">--</div>
-          <div style="font-size: 12px; color: #64748B; margin-top: 2px;">Created by administrator</div>
+          <div style="font-size: 12px; color: #475569; margin-top: 2px;">Created by administrator</div>
         </div>
         <div class="card" style="padding: 16px; background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius);">
-          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Appointed HODs &amp; Deans</span>
+          <span style="font-size: 11px; font-weight: 700; color: #334155; text-transform: uppercase;">Appointed HODs &amp; Deans</span>
           <div style="font-size: 26px; font-weight: 800; color: #0284C7; margin-top: 4px;" id="kpi-depts-count">--</div>
-          <div style="font-size: 12px; color: #64748B; margin-top: 2px;">Departmental leadership</div>
+          <div style="font-size: 12px; color: #475569; margin-top: 2px;">Departmental leadership</div>
         </div>
         <div class="card" style="padding: 16px; background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius);">
-          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Approved Programmes</span>
+          <span style="font-size: 11px; font-weight: 700; color: #334155; text-transform: uppercase;">Approved Programmes</span>
           <div style="font-size: 26px; font-weight: 800; color: #15803D; margin-top: 4px;" id="kpi-programmes-count">--</div>
-          <div style="font-size: 12px; color: #64748B; margin-top: 2px;">Courses &amp; degrees offered</div>
+          <div style="font-size: 12px; color: #475569; margin-top: 2px;">Courses &amp; degrees offered</div>
         </div>
         <div class="card" style="padding: 16px; background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius);">
-          <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Enrolled Students</span>
+          <span style="font-size: 11px; font-weight: 700; color: #334155; text-transform: uppercase;">Enrolled Students</span>
           <div style="font-size: 26px; font-weight: 800; color: #7C3AED; margin-top: 4px;" id="kpi-students-count">--</div>
-          <div style="font-size: 12px; color: #64748B; margin-top: 2px;">Across all schools/departments</div>
+          <div style="font-size: 12px; color: #475569; margin-top: 2px;">Across all schools/departments</div>
         </div>
       </div>
 
@@ -2020,11 +2028,11 @@
 
             <div style="background: var(--slate-panel); border-radius: 6px; padding: 12px; margin-bottom: 16px; font-size: 12px;">
               <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
-                <span style="color: #64748B;">Dean / Director:</span>
+                <span style="color: #334155; font-weight: 500;">Dean / Director:</span>
                 <strong style="color: #17345C;">${school.dean_name || 'Dean of School'}</strong>
               </div>
               <div style="display: flex; justify-content: space-between;">
-                <span style="color: #64748B;">Contact Email:</span>
+                <span style="color: #334155; font-weight: 500;">Contact Email:</span>
                 <strong style="color: #17345C;">${school.contact_email || 'info@srhu.edu.in'}</strong>
               </div>
             </div>
@@ -2032,19 +2040,19 @@
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; border-top: 1px solid var(--slate-border); border-bottom: 1px solid var(--slate-border); padding: 10px 0; margin-bottom: 16px;">
               <div>
                 <div style="font-size: 16px; font-weight: 800; color: #1D3C72;">${school.department_count || 0}</div>
-                <div style="font-size: 10px; color: #64748B; font-weight: 700; text-transform: uppercase;">Depts</div>
+                <div style="font-size: 10px; color: #334155; font-weight: 700; text-transform: uppercase;">Depts</div>
               </div>
               <div>
                 <div style="font-size: 16px; font-weight: 800; color: #0284C7;">${school.course_count || 0}</div>
-                <div style="font-size: 10px; color: #64748B; font-weight: 700; text-transform: uppercase;">Courses</div>
+                <div style="font-size: 10px; color: #334155; font-weight: 700; text-transform: uppercase;">Courses</div>
               </div>
               <div>
                 <div style="font-size: 16px; font-weight: 800; color: #15803D;">${school.student_count || 0}</div>
-                <div style="font-size: 10px; color: #64748B; font-weight: 700; text-transform: uppercase;">Students</div>
+                <div style="font-size: 10px; color: #334155; font-weight: 700; text-transform: uppercase;">Students</div>
               </div>
               <div>
                 <div style="font-size: 16px; font-weight: 800; color: #7C3AED;">${school.faculty_count || 0}</div>
-                <div style="font-size: 10px; color: #64748B; font-weight: 700; text-transform: uppercase;">Faculty</div>
+                <div style="font-size: 10px; color: #334155; font-weight: 700; text-transform: uppercase;">Faculty</div>
               </div>
             </div>
           </div>
@@ -3030,11 +3038,11 @@
 
       tbody.innerHTML = academicState.departments.map(d => `
         <tr>
-          <td><strong>${d.code}</strong></td>
-          <td>${d.name}</td>
-          <td><span class="tag tag-present">ACTIVE</span></td>
+          <td><strong style="color: #0F172A; font-size: 13px;">${d.code}</strong></td>
+          <td style="color: #0F172A; font-weight: 500; font-size: 13px;">${d.name}</td>
+          <td><span class="tag tag-present" style="font-weight: 700;">ACTIVE</span></td>
           <td style="text-align: right;">
-            <button type="button" class="action-btn-sm" onclick="deleteDepartment('${d.id}', '${d.name.replace(/'/g, "\\'")}')" title="Delete ${d.code} Department" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 4px 8px; font-size: 12px; cursor: pointer;">
+            <button type="button" class="action-btn-sm" onclick="deleteDepartment('${d.id}', '${d.name.replace(/'/g, "\\'")}')" title="Delete ${d.code} Department" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 4px 10px; font-size: 12px; cursor: pointer; font-weight: 600;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -3091,11 +3099,11 @@
         const semCount = sems.length || c.total_semesters || 6;
         return `
           <tr>
-            <td><strong>${c.code}</strong></td>
-            <td>${c.name}</td>
-            <td><span class="tag" style="background: #E2E8F0; color: #17345C;">${semCount} Sems</span></td>
+            <td><strong style="color: #0F172A; font-size: 13px;">${c.code}</strong></td>
+            <td style="color: #0F172A; font-weight: 500; font-size: 13px;">${c.name}</td>
+            <td><span class="tag" style="background: #E2E8F0; color: #17345C; font-weight: 700; font-size: 12px; padding: 3px 8px;">${semCount} Sems</span></td>
             <td style="text-align: right;">
-              <button type="button" class="action-btn-sm" onclick="deleteProgramme('${c.id}', '${c.name.replace(/'/g, "\\'")}')" title="Delete ${c.code}" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 4px 8px; font-size: 12px; cursor: pointer;">
+              <button type="button" class="action-btn-sm" onclick="deleteProgramme('${c.id}', '${c.name.replace(/'/g, "\\'")}')" title="Delete ${c.code}" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 4px 10px; font-size: 12px; cursor: pointer; font-weight: 600;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -3153,19 +3161,19 @@
       if (!tbody) return;
 
       if (academicState.rooms.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #64748B;">No facilities registered.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #334155;">No facilities registered.</td></tr>';
         return;
       }
 
       tbody.innerHTML = academicState.rooms.map(r => `
         <tr>
-          <td><strong>${r.room_code}</strong></td>
-          <td>${r.name}</td>
-          <td><span class="room-badge">${r.type || 'CLASSROOM'}</span></td>
-          <td>${r.capacity || 45} seats</td>
-          <td><span class="tag tag-present">ACTIVE</span></td>
+          <td><strong style="color: #0F172A; font-size: 13px;">${r.room_code}</strong></td>
+          <td style="color: #0F172A; font-weight: 500; font-size: 13px;">${r.name}</td>
+          <td><span class="room-badge" style="color: #17345C; font-weight: 700; font-size: 11px;">${r.type || 'CLASSROOM'}</span></td>
+          <td style="color: #334155; font-weight: 500;">${r.capacity || 45} seats</td>
+          <td><span class="tag tag-present" style="font-weight: 700;">ACTIVE</span></td>
           <td style="text-align: right;">
-            <button type="button" class="action-btn-sm" onclick="deleteRoom('${r.id}', '${r.room_code.replace(/'/g, "\\'")}')" title="Delete Facility ${r.room_code}" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 4px 8px; font-size: 12px; cursor: pointer;">
+            <button type="button" class="action-btn-sm" onclick="deleteRoom('${r.id}', '${r.room_code.replace(/'/g, "\\'")}')" title="Delete Facility ${r.room_code}" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 4px 10px; font-size: 12px; cursor: pointer; font-weight: 600;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -3230,21 +3238,24 @@
       tbody.innerHTML = sortedSems.map(s => {
         const crs = academicState.courses.find(c => c.id === s.course_id);
         const progCode = crs ? crs.code : (s.course_code || 'BCA');
-        const progName = crs ? crs.name : 'Degree Programme';
+        const progName = crs ? crs.name : 'Bachelor of Computer Applications';
         const secCount = academicState.sections.filter(sec => sec.semester_id === s.id).length;
         const displayLabel = s.display_label || `Semester ${s.semester_number}`;
 
         return `
           <tr>
-            <td><strong>${progCode}</strong> <span style="font-size: 11px; color: #64748B;">(${progName})</span></td>
-            <td><span class="tag" style="background: #E2E8F0; color: #17345C; font-weight: 700;">Sem ${s.semester_number}</span></td>
-            <td>${displayLabel}</td>
-            <td><span class="badge" style="background: rgba(29, 60, 114, 0.1); color: #1D3C72; font-weight: 700;">${secCount} Sections</span></td>
+            <td>
+              <div style="font-weight: 800; color: #0F172A; font-size: 14px; letter-spacing: 0.3px;">${progCode}</div>
+              <div style="font-size: 12px; color: #334155; font-weight: 600; margin-top: 3px; line-height: 1.35;">${progName}</div>
+            </td>
+            <td><span class="tag" style="background: #E0E7FF; color: #1E1B4B; font-weight: 700; font-size: 12px; padding: 4px 10px; border: 1px solid #C7D2FE;">Sem ${s.semester_number}</span></td>
+            <td style="color: #0F172A; font-weight: 600; font-size: 13px;">${displayLabel}</td>
+            <td><span class="badge" style="background: #EEF2F6; color: #1D3C72; font-weight: 700; font-size: 12px; padding: 4px 10px; border-radius: 4px; border: 1px solid #D7E3F0; display: inline-block;">${secCount} Sections</span></td>
             <td style="text-align: right; white-space: nowrap;">
-              <button type="button" class="btn btn-sm btn-outline" onclick="openAddSectionModalWithSemester('${s.id}', '${s.course_id}')" style="padding: 3px 8px; font-size: 11px; margin-right: 6px;">
+              <button type="button" class="btn btn-sm btn-outline" onclick="openAddSectionModalWithSemester('${s.id}', '${s.course_id}')" style="padding: 4px 10px; font-size: 12px; margin-right: 6px; font-weight: 600;">
                 + Section
               </button>
-              <button type="button" class="action-btn-sm" onclick="deleteSemester('${s.id}', '${displayLabel.replace(/'/g, "\\'")}')" title="Delete ${displayLabel}" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 3px 8px; font-size: 11px; cursor: pointer;">
+              <button type="button" class="action-btn-sm" onclick="deleteSemester('${s.id}', '${displayLabel.replace(/'/g, "\\'")}')" title="Delete ${displayLabel}" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 4px 10px; font-size: 12px; cursor: pointer; font-weight: 600;">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 2px;">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
@@ -3300,7 +3311,7 @@
       if (!tbody) return;
 
       if (academicState.sections.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #64748B;">No sections registered.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: #334155;">No sections registered.</td></tr>';
         return;
       }
 
@@ -3311,14 +3322,14 @@
         const semNum = sem ? `Semester ${sem.semester_number}` : 'Semester 5';
         return `
           <tr>
-            <td><strong>${progCode}</strong></td>
-            <td>${semNum}</td>
-            <td><span class="tag" style="background: #E0F2FE; color: #0284C7; font-weight: 700;">Section ${s.name}</span></td>
-            <td>${s.capacity || 80} students</td>
-            <td>${s.academic_calendar_term || 'Autumn 2026'}</td>
-            <td><span class="tag tag-present">ACTIVE</span></td>
+            <td><strong style="color: #0F172A; font-size: 13px;">${progCode}</strong></td>
+            <td style="color: #0F172A; font-weight: 600; font-size: 13px;">${semNum}</td>
+            <td><span class="tag" style="background: #E0F2FE; color: #0369A1; font-weight: 700; font-size: 12px; padding: 3px 8px; border: 1px solid #BAE6FD;">Section ${s.name}</span></td>
+            <td style="color: #334155; font-weight: 500;">${s.capacity || 80} students</td>
+            <td style="color: #334155; font-weight: 500;">${s.academic_calendar_term || 'Autumn 2026'}</td>
+            <td><span class="tag tag-present" style="font-weight: 700;">ACTIVE</span></td>
             <td style="text-align: right;">
-              <button type="button" class="action-btn-sm" onclick="deleteSection('${s.id}', '${s.name.replace(/'/g, "\\'")}')" title="Delete Section ${s.name}" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 4px 8px; font-size: 12px; cursor: pointer;">
+              <button type="button" class="action-btn-sm" onclick="deleteSection('${s.id}', '${s.name.replace(/'/g, "\\'")}')" title="Delete Section ${s.name}" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); padding: 4px 10px; font-size: 12px; cursor: pointer; font-weight: 600;">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;">
                   <polyline points="3 6 5 6 21 6"></polyline>
                   <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
