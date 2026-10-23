@@ -421,7 +421,7 @@ async function testIdempotentImport() {
 // -----------------------------------------------------------------------------
 // Scenario 12: Attendance loads only the correct roster (whole section vs group C1)
 // -----------------------------------------------------------------------------
-if (localStudents.length === 0) {
+if (!localStudents.some((s) => s.section_name === 'A' && s.semester_number === 1)) {
   localStudents.push(
     { student_profile_id: 'test-s1', user_uid: 'u-s1', student_id: 'STU-101', enrollment_no: 'ENR-101', registration_no: null, registration_id: null, full_name: 'Aarav Gupta', student_gmail: 'aarav@college.edu', course_code: 'BCA', semester_number: 1, section_name: 'A', roll_number: '01', phone_number: null, parent_guardian_contact: null, status: 'ACTIVE', created_at: new Date().toISOString(), activated_at: null },
     { student_profile_id: 'test-s2', user_uid: 'u-s2', student_id: 'STU-102', enrollment_no: 'ENR-102', registration_no: null, registration_id: null, full_name: 'Aditi Rao', student_gmail: 'aditi@college.edu', course_code: 'BCA', semester_number: 1, section_name: 'A', roll_number: '02', phone_number: null, parent_guardian_contact: null, status: 'ACTIVE', created_at: new Date().toISOString(), activated_at: null },
