@@ -892,6 +892,19 @@
         });
     }
 
+    function normalizeSchoolCode(s) {
+      if (!s) return '';
+      var code = String(s.school_code || s.department_code || s.code || s.school_id || s.department_id || s.id || '').trim().toUpperCase();
+      if (!code || code.length > 8 || code.indexOf('-') !== -1) {
+        var n = String(s.school_name || s.department_name || s.name || '').toLowerCase();
+        if (n.indexOf('science & technology') !== -1 || n.indexOf('science and technology') !== -1) return 'SST';
+        if (n.indexOf('bioscience') !== -1) return 'SBS';
+        if (n.indexOf('management') !== -1) return 'SOM';
+        if (n.indexOf('computer applications') !== -1) return 'CA';
+      }
+      return code;
+    }
+
     function populateFilterDropdowns() {
       var deptSel = document.getElementById('filter-department');
       var courseSel = document.getElementById('filter-course');
@@ -899,32 +912,32 @@
 
       var unifiedList = [];
       var seenCodes = new Set();
+      var seenNames = new Set();
 
-      // Collect from academicSchools
-      academicSchools.forEach(function (sch) {
-        var code = (sch.school_code || sch.code || sch.school_id || sch.id || '').toUpperCase();
-        if (code && !seenCodes.has(code)) {
-          seenCodes.add(code);
-          unifiedList.push({
-            id: code,
-            name: sch.school_name || sch.name || ('School of ' + code),
-            code: code
-          });
-        }
-      });
+      function addUnifiedItem(item) {
+        if (!item) return;
+        var code = normalizeSchoolCode(item);
+        var rawName = String(item.school_name || item.department_name || item.name || '').trim();
+        var nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
 
-      // Collect from academicTree
-      academicTree.forEach(function (dept) {
-        var code = (dept.department_code || dept.code || dept.department_id || dept.id || '').toUpperCase();
-        if (code && !seenCodes.has(code)) {
-          seenCodes.add(code);
-          unifiedList.push({
-            id: code,
-            name: dept.department_name || dept.name || ('Department of ' + code),
-            code: code
-          });
+        if ((code && seenCodes.has(code)) || (nameKey && seenNames.has(nameKey))) {
+          return;
         }
-      });
+        if (code) seenCodes.add(code);
+        if (nameKey) seenNames.add(nameKey);
+
+        var canonicalCode = code || 'SCH';
+        var canonicalName = rawName || ('School of ' + canonicalCode);
+        unifiedList.push({
+          id: canonicalCode,
+          code: canonicalCode,
+          name: canonicalName
+        });
+      }
+
+      // Collect from academicSchools and academicTree without duplicates
+      academicSchools.forEach(addUnifiedItem);
+      academicTree.forEach(addUnifiedItem);
 
       deptSel.innerHTML = '<option value="">All Schools &amp; Departments</option>';
       unifiedList.forEach(function (d) {
@@ -1227,20 +1240,28 @@
         schoolSel.innerHTML = '<option value="">Select School / Department</option>';
         var unifiedList = [];
         var seenCodes = new Set();
-        academicSchools.forEach(function (sch) {
-          var code = (sch.school_code || sch.code || sch.school_id || sch.id || '').toUpperCase();
-          if (code && !seenCodes.has(code)) {
-            seenCodes.add(code);
-            unifiedList.push({ id: code, name: sch.school_name || sch.name || ('School of ' + code) });
+        var seenNames = new Set();
+
+        function addCreateSchoolItem(sch) {
+          if (!sch) return;
+          var code = normalizeSchoolCode(sch);
+          var rawName = String(sch.school_name || sch.department_name || sch.name || '').trim();
+          var nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
+
+          if ((code && seenCodes.has(code)) || (nameKey && seenNames.has(nameKey))) {
+            return;
           }
-        });
-        academicTree.forEach(function (dept) {
-          var code = (dept.department_code || dept.code || dept.department_id || dept.id || '').toUpperCase();
-          if (code && !seenCodes.has(code)) {
-            seenCodes.add(code);
-            unifiedList.push({ id: code, name: dept.department_name || dept.name || ('Department of ' + code) });
-          }
-        });
+          if (code) seenCodes.add(code);
+          if (nameKey) seenNames.add(nameKey);
+
+          var canonicalCode = code || 'SCH';
+          var canonicalName = rawName || ('School of ' + canonicalCode);
+          unifiedList.push({ id: canonicalCode, name: canonicalName });
+        }
+
+        academicSchools.forEach(addCreateSchoolItem);
+        academicTree.forEach(addCreateSchoolItem);
+
         unifiedList.forEach(function (sch) {
           var opt = document.createElement('option');
           opt.value = sch.id;

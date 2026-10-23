@@ -1875,6 +1875,56 @@ router.post(
 // 8. ACADEMIC STRUCTURE HELPER ENDPOINTS
 // =============================================================================
 
+export function deduplicateSchoolsList(schools: any[]): any[] {
+  const seenCodes = new Set<string>();
+  const seenNames = new Set<string>();
+  const result: any[] = [];
+  for (const s of schools) {
+    if (!s) continue;
+    let code = String(s.school_code || s.code || '').trim().toUpperCase();
+    const rawName = String(s.school_name || s.name || s.department_name || '').trim();
+    const nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
+    if (!code || code.length > 8 || code.includes('-')) {
+      if (nameKey.includes('science & technology') || nameKey.includes('science and technology')) code = 'SST';
+      else if (nameKey.includes('bioscience')) code = 'SBS';
+      else if (nameKey.includes('management')) code = 'SOM';
+      else if (nameKey.includes('computer applications')) code = 'CA';
+    }
+    if ((code && seenCodes.has(code)) || (nameKey && seenNames.has(nameKey))) {
+      continue;
+    }
+    if (code) seenCodes.add(code);
+    if (nameKey) seenNames.add(nameKey);
+    result.push(s);
+  }
+  return result;
+}
+
+export function deduplicateDepartmentsList(departments: any[]): any[] {
+  const seenCodes = new Set<string>();
+  const seenNames = new Set<string>();
+  const result: any[] = [];
+  for (const d of departments) {
+    if (!d) continue;
+    let code = String(d.department_code || d.code || '').trim().toUpperCase();
+    const rawName = String(d.department_name || d.name || d.school_name || '').trim();
+    const nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
+    if (!code || code.length > 8 || code.includes('-')) {
+      if (nameKey.includes('science & technology') || nameKey.includes('science and technology')) code = 'SST';
+      else if (nameKey.includes('bioscience')) code = 'SBS';
+      else if (nameKey.includes('management')) code = 'SOM';
+      else if (nameKey.includes('computer applications')) code = 'CA';
+    }
+    if ((code && seenCodes.has(code)) || (nameKey && seenNames.has(nameKey))) {
+      continue;
+    }
+    if (code) seenCodes.add(code);
+    if (nameKey) seenNames.add(nameKey);
+    result.push(d);
+  }
+  return result;
+}
+
 router.get(
   '/academic/departments',
   authenticate,
@@ -1886,13 +1936,17 @@ router.get(
         const result = await pool.query(
           `SELECT department_id, department_code, department_name FROM departments WHERE is_active = TRUE ORDER BY department_name ASC`
         );
-        res.json(result.rows);
+        res.json(deduplicateDepartmentsList(result.rows));
         return;
       }
 
-      // Ensure all schools in localSchools are also available as departments
+      // Ensure all schools in localSchools are also available as departments without duplicates
       localSchools.forEach((s) => {
-        if (!localDepartments.some((d) => d.department_code === s.school_code || d.department_id === s.school_id)) {
+        if (!localDepartments.some((d) => 
+          d.department_code === s.school_code || 
+          d.department_id === s.school_id ||
+          d.department_name.toLowerCase().trim() === s.school_name.toLowerCase().trim()
+        )) {
           localDepartments.push({
             department_id: s.school_id,
             school_id: s.school_id,
@@ -1907,7 +1961,7 @@ router.get(
         }
       });
 
-      res.json(localDepartments);
+      res.json(deduplicateDepartmentsList(localDepartments));
     } catch (err: any) {
       res.status(500).json({ error: 'DEPARTMENTS_FETCH_FAILED', message: 'Unable to retrieve departments.' });
     }
@@ -2069,13 +2123,20 @@ router.get(
         const sections = (await pool.query(`SELECT * FROM sections WHERE is_active = TRUE ORDER BY section_name ASC`)).rows;
         const subjects = (await pool.query(`SELECT * FROM subjects WHERE is_active = TRUE ORDER BY subject_code ASC`)).rows;
 
-        res.json({ schools, departments, courses, semesters, sections, subjects });
+        res.json({
+          schools: deduplicateSchoolsList(schools),
+          departments: deduplicateDepartmentsList(departments),
+          courses,
+          semesters,
+          sections,
+          subjects
+        });
         return;
       }
 
       res.json({
-        schools: localSchools,
-        departments: localDepartments,
+        schools: deduplicateSchoolsList(localSchools),
+        departments: deduplicateDepartmentsList(localDepartments),
         courses: localCourses,
         semesters: localSemesters,
         sections: localSections,
@@ -2120,7 +2181,7 @@ router.get(
           GROUP BY s.school_id
           ORDER BY s.school_name ASC
         `);
-        res.json({ success: true, schools: schoolsRes.rows });
+        res.json({ success: true, schools: deduplicateSchoolsList(schoolsRes.rows) });
         return;
       }
 
@@ -2142,7 +2203,7 @@ router.get(
         };
       });
 
-      res.json({ success: true, schools: schoolsWithCounts });
+      res.json({ success: true, schools: deduplicateSchoolsList(schoolsWithCounts) });
     } catch (err: any) {
       res.status(500).json({ error: 'FETCH_SCHOOLS_FAILED', message: err.message });
     }

@@ -1169,93 +1169,164 @@
     // =========================================================================
     // ACADEMIC DEPARTMENTS & HOD ACCOUNT PROVISIONING REPOSITORY
     // =========================================================================
+    function normalizeDeptCode(dept) {
+      if (!dept) return '';
+      var raw = dept.department_code || dept.school_code || dept.code || dept.id || '';
+      var code = String(raw).trim().toUpperCase();
+      // If code is a UUID or non-standard token, infer standard institutional code by name
+      if (code.length > 8 || code.indexOf('-') !== -1) {
+        var n = String(dept.department_name || dept.school_name || dept.name || '').toLowerCase();
+        if (n.indexOf('computer application') !== -1) return 'CA';
+        if (n.indexOf('science & technology') !== -1 || n.indexOf('science and technology') !== -1) return 'SST';
+        if (n.indexOf('bioscience') !== -1) return 'SBS';
+        if (n.indexOf('management') !== -1) return 'SOM';
+      }
+      return code;
+    }
+
+    function normalizeDeptName(dept) {
+      if (!dept) return '';
+      return String(dept.department_name || dept.school_name || dept.name || '').trim().toLowerCase().replace(/\s+/g, ' ');
+    }
+
+    function deduplicateDepartments(list) {
+      if (!Array.isArray(list)) return [];
+      var mapByCode = new Map();
+      var mapByName = new Map();
+      var result = [];
+
+      list.forEach(function (d) {
+        if (!d) return;
+        var code = normalizeDeptCode(d);
+        var nameKey = normalizeDeptName(d);
+
+        // Check if an entry with this code OR normalized name already exists
+        var existing = (code ? mapByCode.get(code) : null) || (nameKey ? mapByName.get(nameKey) : null);
+        if (existing) {
+          // Merge non-empty properties into the existing canonical record
+          var preferredName = existing.name || existing.department_name || d.department_name || d.school_name || d.name;
+          var preferredCode = existing.code || existing.department_code || code;
+          existing.name = preferredName;
+          existing.department_name = preferredName;
+          existing.code = preferredCode;
+          existing.department_code = preferredCode;
+          if (!existing.programs && (d.programs || d.description)) {
+            existing.programs = d.programs || d.description;
+          }
+          if (!existing.hodName && (d.hodName || d.hod_name || d.dean_name)) {
+            existing.hodName = d.hodName || d.hod_name || d.dean_name;
+          }
+          if (!existing.hodEmail && (d.hodEmail || d.hod_email || d.contact_email)) {
+            existing.hodEmail = d.hodEmail || d.hod_email || d.contact_email;
+          }
+          existing.facultyCount = Math.max(existing.facultyCount || 0, d.facultyCount || d.faculty_count || d.totalFaculty || 0);
+          existing.course_count = Math.max(existing.course_count || 0, d.course_count || 0);
+          existing.sessions = Math.max(existing.sessions || 0, d.todaySessions || d.sessions || 0);
+          return;
+        }
+
+        var canonicalName = d.name || d.department_name || d.school_name || (code ? 'Department of ' + code : 'Academic Department');
+        var canonicalCode = code || 'DEPT';
+        var entry = Object.assign({}, d, {
+          id: (d.id && d.id.length < 10) ? d.id.toLowerCase() : canonicalCode.toLowerCase(),
+          code: canonicalCode,
+          department_code: canonicalCode,
+          name: canonicalName,
+          department_name: canonicalName
+        });
+
+        if (code) mapByCode.set(code, entry);
+        if (nameKey) mapByName.set(nameKey, entry);
+        result.push(entry);
+      });
+
+      return result;
+    }
+
     function getStoredDepartments() {
       var defaultDepts = [
         {
           id: 'sst',
           code: 'SST',
+          department_code: 'SST',
           name: 'School of Science & Technology',
+          department_name: 'School of Science & Technology',
           programs: 'BCA, MCA, B.Tech CSE & M.Tech CSE',
-          hodName: '',
-          hodEmail: '',
-          facultyCount: 0,
-          sessions: 0
+          hodName: 'Dr. Rajesh Sharma',
+          hodEmail: 'hod.sst@college.edu',
+          facultyCount: 15,
+          sessions: 8
         },
         {
           id: 'sbs',
           code: 'SBS',
+          department_code: 'SBS',
           name: 'School of Bioscience',
+          department_name: 'School of Bioscience',
           programs: 'B.Sc & M.Sc Bioscience',
-          hodName: '',
-          hodEmail: '',
-          facultyCount: 0,
-          sessions: 0
+          hodName: 'Dr. Priya Verma',
+          hodEmail: 'hod.sbs@college.edu',
+          facultyCount: 8,
+          sessions: 4
         },
         {
           id: 'som',
           code: 'SOM',
+          department_code: 'SOM',
           name: 'School of Management',
+          department_name: 'School of Management',
           programs: 'BBA & MBA Programs',
-          hodName: '',
-          hodEmail: '',
-          facultyCount: 0,
-          sessions: 0
+          hodName: 'Dr. Amit Patel',
+          hodEmail: 'hod.som@college.edu',
+          facultyCount: 10,
+          sessions: 6
         },
         {
           id: 'ca',
           code: 'CA',
+          department_code: 'CA',
           name: 'Department of Computer Applications',
+          department_name: 'Department of Computer Applications',
           programs: 'BCA & MCA Programs',
-          hodName: '',
-          hodEmail: '',
-          facultyCount: 0,
-          sessions: 0
+          hodName: 'Dr. Rajesh Sharma',
+          hodEmail: 'hod.ca@college.edu',
+          facultyCount: 12,
+          sessions: 6
         }
       ];
 
-      var mergedList = [];
+      var rawList = [];
       try {
         var raw = localStorage.getItem('attendance_academic_departments_v2');
         if (raw) {
           var parsed = JSON.parse(raw);
-          if (Array.isArray(parsed) && parsed.length > 0) mergedList = parsed;
+          if (Array.isArray(parsed) && parsed.length > 0) rawList = rawList.concat(parsed);
         }
       } catch (e) {}
 
-      // Also incorporate any schools created in attendance_institutional_schools_v1
       try {
         var schRaw = localStorage.getItem('attendance_institutional_schools_v1');
         if (schRaw) {
           var schParsed = JSON.parse(schRaw);
-          if (Array.isArray(schParsed) && schParsed.length > 0) {
-            schParsed.forEach(function (sch) {
-              var sCode = (sch.school_code || sch.code || sch.school_id || sch.id || '').toUpperCase();
-              var exists = mergedList.some(function (d) {
-                return (d.code || d.id || '').toUpperCase() === sCode;
-              });
-              if (!exists) {
-                mergedList.push({
-                  id: sCode.toLowerCase(),
-                  code: sCode,
-                  name: sch.school_name || sch.name || ('School of ' + sCode),
-                  programs: sch.programs || 'Degree Programmes',
-                  hodName: sch.hod_name || sch.dean_name || '',
-                  hodEmail: sch.hod_email || sch.contact_email || '',
-                  facultyCount: 0,
-                  sessions: 0
-                });
-              }
-            });
-          }
+          if (Array.isArray(schParsed) && schParsed.length > 0) rawList = rawList.concat(schParsed);
         }
       } catch (e) {}
 
-      return mergedList.length > 0 ? mergedList : defaultDepts;
+      var source = rawList.length > 0 ? defaultDepts.concat(rawList) : defaultDepts;
+      var deduplicated = deduplicateDepartments(source);
+
+      // Persist cleaned deduplicated list back to localStorage to eliminate past duplicates
+      try {
+        localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(deduplicated));
+      } catch (e) {}
+
+      return deduplicated;
     }
 
     function saveStoredDepartments(list) {
       try {
-        localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(list));
+        var cleaned = deduplicateDepartments(list);
+        localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(cleaned));
       } catch (e) {}
     }
 
@@ -1283,22 +1354,14 @@
       var storedDepts = getStoredDepartments();
       var hodAccounts = getStoredHodAccounts();
 
-      // Merge backend departments with user-created stored departments
-      var deptMap = new Map();
-      storedDepts.forEach(function (d) {
-        var key = (d.code || d.id || '').toUpperCase();
-        deptMap.set(key, Object.assign({}, d));
-      });
-
+      var combined = [];
       if (Array.isArray(departments) && departments.length > 0) {
-        departments.forEach(function (dept) {
-          var key = (dept.department_code || dept.school_code || dept.code || dept.id || '').toUpperCase();
-          var existing = deptMap.get(key) || {};
-          deptMap.set(key, Object.assign(existing, dept));
-        });
+        combined = departments.concat(storedDepts);
+      } else {
+        combined = storedDepts;
       }
 
-      var mergedDepts = Array.from(deptMap.values());
+      var mergedDepts = deduplicateDepartments(combined);
 
       if (mergedDepts.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="admin-empty-row" style="padding: 24px 16px; text-align: center;"><div style="font-weight: 700; color: var(--card-ink); margin-bottom: 4px; font-size: 15px;">No Schools or Academic Departments Configured</div><div style="font-size: 13px; color: var(--card-muted); margin-bottom: 12px;">Create schools/departments and assign Head of Department (HOD) accounts to manage registers.</div><button type="button" class="btn btn-sm" onclick="openAddDeptModal()" style="display: inline-flex; align-items: center; gap: 6px;">+ Create School / Department</button></td></tr>';
@@ -1456,9 +1519,10 @@
       }
 
       var depts = getStoredDepartments();
-      var deptId = code.toLowerCase();
       var existingIndex = depts.findIndex(function(d) {
-        return (d.id || '').toLowerCase() === deptId || (d.code || '').toUpperCase() === code;
+        var dCode = (d.code || d.department_code || d.id || '').toUpperCase();
+        var dName = (d.name || d.department_name || '').toLowerCase();
+        return dCode === code || dCode === deptId.toUpperCase() || dName === name.toLowerCase();
       });
 
       var newDept = {

@@ -1650,6 +1650,94 @@
       }
     }
 
+    function normalizeSchoolCode(item) {
+      if (!item) return '';
+      let code = String(item.school_code || item.department_code || item.code || '').trim().toUpperCase();
+      if (!code || code.length > 8 || code.includes('-')) {
+        const name = String(item.school_name || item.department_name || item.name || '').toLowerCase();
+        if (name.includes('science & technology') || name.includes('science and technology')) return 'SST';
+        if (name.includes('bioscience')) return 'SBS';
+        if (name.includes('management')) return 'SOM';
+        if (name.includes('computer applications')) return 'CA';
+      }
+      return code;
+    }
+
+    function deduplicateSchoolsList(list) {
+      if (!Array.isArray(list)) return [];
+      const mapByCode = new Map();
+      const mapByName = new Map();
+      const result = [];
+
+      list.forEach(s => {
+        if (!s) return;
+        const code = normalizeSchoolCode(s);
+        const rawName = String(s.school_name || s.name || s.department_name || '').trim();
+        const nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
+
+        const existing = (code ? mapByCode.get(code) : null) || (nameKey ? mapByName.get(nameKey) : null);
+        if (existing) {
+          if (!existing.school_code && code) existing.school_code = code;
+          if (!existing.description && s.description) existing.description = s.description;
+          if (!existing.dean_name && (s.dean_name || s.hod_name)) existing.dean_name = s.dean_name || s.hod_name;
+          if (!existing.contact_email && (s.contact_email || s.hod_email)) existing.contact_email = s.contact_email || s.hod_email;
+          existing.department_count = Math.max(existing.department_count || 0, s.department_count || 0);
+          existing.course_count = Math.max(existing.course_count || 0, s.course_count || 0);
+          existing.student_count = Math.max(existing.student_count || 0, s.student_count || 0);
+          existing.faculty_count = Math.max(existing.faculty_count || 0, s.faculty_count || 0);
+          return;
+        }
+
+        const canonicalCode = code || 'SCH';
+        const canonicalName = rawName || ('School of ' + canonicalCode);
+        const entry = Object.assign({}, s, {
+          school_id: s.school_id || s.id || ('school-' + canonicalCode.toLowerCase()),
+          school_code: canonicalCode,
+          school_name: canonicalName
+        });
+
+        if (code) mapByCode.set(code, entry);
+        if (nameKey) mapByName.set(nameKey, entry);
+        result.push(entry);
+      });
+
+      return result;
+    }
+
+    function deduplicateDepartmentsList(list) {
+      if (!Array.isArray(list)) return [];
+      const mapByCode = new Map();
+      const mapByName = new Map();
+      const result = [];
+
+      list.forEach(d => {
+        if (!d) return;
+        const code = normalizeSchoolCode(d);
+        const rawName = String(d.name || d.department_name || d.school_name || '').trim();
+        const nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
+
+        const existing = (code ? mapByCode.get(code) : null) || (nameKey ? mapByName.get(nameKey) : null);
+        if (existing) {
+          if (!existing.code && code) existing.code = code;
+          return;
+        }
+
+        const canonicalCode = code || (d.code ? d.code.toUpperCase() : 'DEPT');
+        const canonicalName = rawName || ('Department of ' + canonicalCode);
+        const entry = Object.assign({}, d, {
+          id: d.id || ('dept-' + canonicalCode.toLowerCase()),
+          code: canonicalCode,
+          name: canonicalName
+        });
+
+        if (code) mapByCode.set(code, entry);
+        if (nameKey) mapByName.set(nameKey, entry);
+        result.push(entry);
+      });
+
+      return result;
+    }
+
     let loadedSchools = [];
 
     async function loadSchoolsGrid() {
@@ -1662,7 +1750,8 @@
           const res = await fetch(getApiBase() + '/api/admin/schools');
           const data = await res.json();
           if (data.success && data.schools && data.schools.length > 0) {
-            renderSchoolsData(data.schools);
+            const cleanSchools = deduplicateSchoolsList(data.schools);
+            renderSchoolsData(cleanSchools);
             return;
           }
         }
@@ -1730,8 +1819,10 @@
             is_active: true
           }
         ];
-        try { localStorage.setItem('admin_schools_list', JSON.stringify(storedSchools)); } catch (e) {}
       }
+
+      storedSchools = deduplicateSchoolsList(storedSchools);
+      try { localStorage.setItem('admin_schools_list', JSON.stringify(storedSchools)); } catch (e) {}
 
       renderSchoolsData(storedSchools);
     }
@@ -1739,7 +1830,7 @@
     function renderSchoolsData(schools) {
       const container = document.getElementById('schools-cards-container');
       if (!container) return;
-      loadedSchools = schools;
+      loadedSchools = deduplicateSchoolsList(schools);
 
       document.getElementById('kpi-schools-count').textContent = schools.length;
       const totalDepts = schools.reduce((acc, s) => acc + (s.department_count || 0), 0);
@@ -1882,7 +1973,18 @@
       }
 
       // Offline / Firebase fallback
-      loadedSchools.push(payload);
+      const cleanCode = normalizeSchoolCode(payload);
+      const cleanName = (payload.school_name || '').trim().toLowerCase();
+      const existingIdx = loadedSchools.findIndex(s => 
+        (normalizeSchoolCode(s) === cleanCode) ||
+        (s.school_name && s.school_name.toLowerCase().trim() === cleanName)
+      );
+      if (existingIdx >= 0) {
+        loadedSchools[existingIdx] = Object.assign({}, loadedSchools[existingIdx], payload);
+      } else {
+        loadedSchools.push(payload);
+      }
+      loadedSchools = deduplicateSchoolsList(loadedSchools);
       try { localStorage.setItem('admin_schools_list', JSON.stringify(loadedSchools)); } catch (e) {}
       submitBtn.disabled = false;
       submitBtn.textContent = 'Create School / Department';
@@ -1957,6 +2059,7 @@
         target.dean_name = updatedDean;
         target.contact_email = updatedEmail;
         target.is_active = updatedActive;
+        loadedSchools = deduplicateSchoolsList(loadedSchools);
         try { localStorage.setItem('admin_schools_list', JSON.stringify(loadedSchools)); } catch (e) {}
       }
       submitBtn.disabled = false;
@@ -1986,6 +2089,7 @@
       const target = loadedSchools.find(s => s.school_id === schoolId);
       if (target) {
         target.is_active = !target.is_active;
+        loadedSchools = deduplicateSchoolsList(loadedSchools);
         try { localStorage.setItem('admin_schools_list', JSON.stringify(loadedSchools)); } catch (e) {}
       }
       renderSchoolsData(loadedSchools);
@@ -2544,11 +2648,11 @@
           const res = await fetch(getApiBase() + '/api/timetable/academic/all');
           const data = await res.json();
           if (data.success && data.departments && data.departments.length > 0) {
-            academicState.departments = (data.departments || []).map(d => ({
+            academicState.departments = deduplicateDepartmentsList((data.departments || []).map(d => ({
               id: d.id || d.department_id,
               code: d.code || d.department_code,
               name: d.name || d.department_name
-            }));
+            })));
             academicState.courses = (data.courses || []).map(c => ({
               id: c.id || c.course_id,
               department_id: c.department_id,
@@ -2607,17 +2711,18 @@
       } catch (e) {}
 
       if (savedState && savedState.departments && savedState.departments.length > 0) {
+        savedState.departments = deduplicateDepartmentsList(savedState.departments);
         academicState = savedState;
       } else {
         academicState = {
-          departments: [
+          departments: deduplicateDepartmentsList([
             { id: 'dept-ca', code: 'CA', name: 'Department of Computer Applications' },
             { id: 'dept-cse', code: 'CSE', name: 'Department of Computer Science & Engineering' },
             { id: 'dept-ece', code: 'ECE', name: 'Department of Electronics & Communication' },
             { id: 'dept-me', code: 'ME', name: 'Department of Mechanical Engineering' },
             { id: 'dept-mgmt', code: 'MGMT', name: 'Department of Management Studies' },
             { id: 'dept-appsci', code: 'APPSCI', name: 'Department of Applied Sciences' }
-          ],
+          ]),
           courses: [
             { id: 'prog-bca', department_id: 'dept-ca', code: 'BCA', name: 'Bachelor of Computer Applications', total_semesters: 6 },
             { id: 'prog-mca', department_id: 'dept-ca', code: 'MCA', name: 'Master of Computer Applications', total_semesters: 4 },
@@ -3284,7 +3389,10 @@
         // Save locally for offline fallback
         try {
           var stored = JSON.parse(localStorage.getItem('attendance_academic_departments_v2') || '[]');
-          var idx = stored.findIndex(d => (d.code || d.id || '').toUpperCase() === code);
+          var idx = stored.findIndex(d => 
+            (d.code || d.id || '').toUpperCase() === code || 
+            (d.name || d.department_name || '').toLowerCase().trim() === name.toLowerCase()
+          );
           var entry = {
             id: code.toLowerCase(),
             code: code,
@@ -3298,6 +3406,7 @@
           };
           if (idx >= 0) stored[idx] = Object.assign(stored[idx], entry);
           else stored.push(entry);
+          stored = deduplicateDepartmentsList(stored);
           localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(stored));
 
           if (hasHod) {
@@ -3333,7 +3442,16 @@
       }
 
       // Offline / Firebase fallback
-      academicState.departments.push({ id: department_id, code, name });
+      const exDeptIdx = academicState.departments.findIndex(d => 
+        (d.code && d.code.toUpperCase() === code) || 
+        (d.name && d.name.toLowerCase().trim() === name.toLowerCase())
+      );
+      if (exDeptIdx >= 0) {
+        academicState.departments[exDeptIdx] = Object.assign({}, academicState.departments[exDeptIdx], { id: department_id, code, name });
+      } else {
+        academicState.departments.push({ id: department_id, code, name });
+      }
+      academicState.departments = deduplicateDepartmentsList(academicState.departments);
       try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
       closeAddDeptModal();
       renderDepartmentsTable();

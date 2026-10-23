@@ -27,6 +27,7 @@ import {
   localSections,
   localSubjects,
   localTeachers,
+  deduplicateDepartmentsList,
 } from './admin.routes';
 
 // Connect timetable service dynamically to live registered faculty
@@ -96,7 +97,7 @@ router.get('/resources/faculty', adminAuth, async (req: Request, res: Response):
 router.get('/academic/all', adminAuth, async (_req: Request, res: Response): Promise<void> => {
   res.json({
     success: true,
-    departments: localDepartments,
+    departments: deduplicateDepartmentsList(localDepartments),
     programmes: localCourses,
     courses: localCourses,
     semesters: localSemesters,
@@ -126,7 +127,11 @@ router.post('/academic/department', adminAuth, async (req: Request, res: Respons
   const cleanName = String(department_name).trim();
   const cleanId = department_id ? String(department_id).trim() : `b0000000-0000-0000-0000-${String(localDepartments.length + 1).padStart(12, '0')}`;
 
-  let existing = localDepartments.find((d) => d.department_code === cleanCode || d.department_id === cleanId);
+  let existing = localDepartments.find((d) => 
+    d.department_code === cleanCode || 
+    d.department_id === cleanId || 
+    d.department_name.toLowerCase().trim() === cleanName.toLowerCase()
+  );
   if (existing) {
     existing.department_name = cleanName;
     if (programs) existing.programs = programs;

@@ -2283,8 +2283,46 @@
       };
 
       window.loadDepartmentDropdowns = function () {
+        function normalizeDeptCode(d) {
+          if (!d) return '';
+          var code = String(d.department_code || d.school_code || d.code || '').trim().toUpperCase();
+          if (!code || code.length > 8 || code.indexOf('-') !== -1) {
+            var n = String(d.department_name || d.school_name || d.name || '').toLowerCase();
+            if (n.indexOf('science & technology') !== -1 || n.indexOf('science and technology') !== -1) return 'SST';
+            if (n.indexOf('bioscience') !== -1) return 'SBS';
+            if (n.indexOf('management') !== -1) return 'SOM';
+            if (n.indexOf('computer applications') !== -1) return 'CA';
+          }
+          return code;
+        }
+
+        function deduplicateDepts(list) {
+          if (!Array.isArray(list)) return [];
+          var seenCodes = new Set();
+          var seenNames = new Set();
+          var clean = [];
+          list.forEach(function (d) {
+            if (!d) return;
+            var code = normalizeDeptCode(d);
+            var rawName = String(d.department_name || d.school_name || d.name || '').trim();
+            var nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
+
+            if ((code && seenCodes.has(code)) || (nameKey && seenNames.has(nameKey))) {
+              return;
+            }
+            if (code) seenCodes.add(code);
+            if (nameKey) seenNames.add(nameKey);
+            clean.push({
+              code: code || 'DEPT',
+              name: rawName || (code ? 'Department of ' + code : 'Academic Department'),
+              id: d.department_id || d.school_id || d.id || (code ? code.toLowerCase() : 'dept')
+            });
+          });
+          return clean;
+        }
+
         function renderDepts(depts) {
-          if (!Array.isArray(depts)) depts = [];
+          depts = deduplicateDepts(depts);
           var filterDept = document.getElementById('filter-dept');
           var provDept = document.getElementById('prov-dept');
           var editDept = document.getElementById('edit-dept');
@@ -2297,10 +2335,7 @@
           if (filterDept) {
             var fHtml = '<option value="all">All Schools &amp; Academic Departments (' + depts.length + ')</option>';
             depts.forEach(function (d) {
-              var code = d.department_code || d.school_code || d.code || '';
-              var name = d.department_name || d.school_name || d.name || '';
-              var id = d.department_id || d.school_id || d.id || code.toLowerCase();
-              fHtml += '<option value="' + id + '">' + name + ' (' + code + ')</option>';
+              fHtml += '<option value="' + d.id + '">' + d.name + ' (' + d.code + ')</option>';
             });
             filterDept.innerHTML = fHtml;
           }
@@ -2311,10 +2346,7 @@
           } else {
             modalHtml = '<option value="">-- Select School / Academic Department --</option>';
             depts.forEach(function (d) {
-              var code = d.department_code || d.school_code || d.code || '';
-              var name = d.department_name || d.school_name || d.name || '';
-              var id = d.department_id || d.school_id || d.id || code.toLowerCase();
-              modalHtml += '<option value="' + id + '">' + name + ' (' + code + ')</option>';
+              modalHtml += '<option value="' + d.id + '">' + d.name + ' (' + d.code + ')</option>';
             });
           }
 
