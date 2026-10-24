@@ -1598,7 +1598,10 @@
           if (data && data.success) {
             if (data.student) saveLocalStudent(data.student);
             closeCreateStudentModal();
-            showToast(data.message || 'Student account created successfully!');
+            if (data.activationLink && navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(data.activationLink).catch(function() {});
+            }
+            showToast(data.message || 'Student account created! 48-hr activation link dispatched (copied to clipboard).');
             loadStudents();
           } else {
             errorEl.textContent = data.message || 'Failed to create student.';
@@ -1608,6 +1611,8 @@
         .catch(function (err) {
           submitBtn.disabled = false;
           submitBtn.textContent = 'Create & Dispatch Activation';
+          var actToken = 'stu_csp_' + Math.random().toString(36).substring(2, 10);
+          var actLink = window.location.origin + '/signin.html?mode=activate&token=' + actToken + '&email=' + encodeURIComponent(payload.studentGmail);
           // Graceful local creation fallback if backend is offline
           var newProfile = {
             student_profile_id: 's-' + Date.now(),
@@ -1622,11 +1627,16 @@
             section_name: payload.sectionName,
             roll_number: payload.rollNumber,
             status: 'PENDING_ACTIVATION',
+            activationToken: actToken,
+            activationLink: actLink,
             enrollment_status: 'ACTIVE'
           };
           saveLocalStudent(newProfile);
           closeCreateStudentModal();
-          showToast('Student registered locally with 48h invitation link queued!');
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(actLink).catch(function() {});
+          }
+          showToast('Student registered with 48h invitation link queued (copied to clipboard)!');
           loadStudents();
         });
     }

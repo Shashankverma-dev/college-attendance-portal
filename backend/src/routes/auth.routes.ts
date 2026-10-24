@@ -188,7 +188,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         email: hodEmail,
         role: 'HOD',
         departmentId: deptId,
-        status: 'ACTIVE',
+        status: deptHod?.hod_status || 'ACTIVE',
       };
       if (hodPassword) {
         userPasswords.set(matchedUser.uid, hodPassword);
@@ -354,9 +354,10 @@ router.get('/verify-token', async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    // Lookup user details
-    let studentName = 'Student';
-    let studentId = '';
+    // Lookup user details across all roles (Student, Teacher, HOD)
+    let userName = 'User';
+    let userRole = 'STUDENT';
+    let userIdentifier = '';
     const dbOnline = await isDbConnected();
 
     if (dbOnline && result.userUid) {
@@ -365,22 +366,58 @@ router.get('/verify-token', async (req: Request, res: Response): Promise<void> =
         [result.userUid]
       );
       if (spRes.rowCount && spRes.rowCount > 0) {
-        studentName = spRes.rows[0].full_name;
-        studentId = spRes.rows[0].student_id;
+        userName = spRes.rows[0].full_name;
+        userIdentifier = spRes.rows[0].student_id;
+        userRole = 'STUDENT';
+      } else {
+        const fpRes = await pool.query(
+          `SELECT full_name, faculty_staff_id FROM faculty_profiles WHERE user_uid = $1`,
+          [result.userUid]
+        );
+        if (fpRes.rowCount && fpRes.rowCount > 0) {
+          userName = fpRes.rows[0].full_name;
+          userIdentifier = fpRes.rows[0].faculty_staff_id;
+          userRole = 'FACULTY';
+        }
       }
     } else if (result.userUid) {
       const s = localStudents.find((stu) => stu.user_uid === result.userUid);
       if (s) {
-        studentName = s.full_name;
-        studentId = s.student_id;
+        userName = s.full_name;
+        userIdentifier = s.student_id;
+        userRole = 'STUDENT';
+      } else {
+        const t = localTeachers.find((tc) => tc.user_uid === result.userUid);
+        if (t) {
+          userName = t.full_name;
+          userIdentifier = t.faculty_staff_id;
+          userRole = 'FACULTY';
+        } else {
+          const targetLower = (result.targetEmail || '').toLowerCase();
+          const d = localDepartments.find((dept) =>
+            `usr-hod-${dept.department_id}` === result.userUid ||
+            (dept.hod_email && dept.hod_email.toLowerCase() === targetLower)
+          ) || localSchools.find((sch) =>
+            `usr-hod-${sch.school_id}` === result.userUid ||
+            (sch.hod_email && sch.hod_email.toLowerCase() === targetLower)
+          );
+          if (d) {
+            const anyD = d as any;
+            userName = anyD.hod_name || anyD.dean_name || 'Head of Department';
+            userIdentifier = anyD.department_code || anyD.school_code || 'HOD';
+            userRole = 'HOD';
+          }
+        }
       }
     }
 
     res.json({
       isValid: true,
       email: result.targetEmail,
-      studentName,
-      studentId,
+      userName,
+      userRole,
+      studentName: userName,
+      studentId: userIdentifier,
       purpose,
     });
   } catch (err: any) {
@@ -691,21 +728,48 @@ router.post('/activate', async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+  let activatedRole = 'STUDENT';
   const student = localStudents.find((s) => s.user_uid === redemption.userUid);
   if (student) {
     student.status = 'ACTIVE';
     student.activated_at = new Date().toISOString();
+    activatedRole = 'STUDENT';
   }
   const teacher = localTeachers.find((t) => t.user_uid === redemption.userUid);
   if (teacher) {
     teacher.status = 'ACTIVE';
     teacher.is_email_verified = true;
     teacher.activated_at = new Date().toISOString();
+    activatedRole = 'FACULTY';
+  }
+
+  const targetLower = (redemption.targetEmail || '').toLowerCase();
+  const dept = localDepartments.find((d) =>
+    `usr-hod-${d.department_id}` === redemption.userUid ||
+    (d.hod_email && d.hod_email.toLowerCase() === targetLower)
+  ) || localSchools.find((s) =>
+    `usr-hod-${s.school_id}` === redemption.userUid ||
+    (s.hod_email && s.hod_email.toLowerCase() === targetLower)
+  );
+  if (dept) {
+    dept.hod_status = 'ACTIVE';
+    dept.hod_password = password;
+    if (dept.hod_email) {
+      userPasswords.set(dept.hod_email.toLowerCase(), password);
+    }
+    activatedRole = 'HOD';
   }
 
   userPasswords.set(redemption.userUid!, password);
+  if (redemption.targetEmail) {
+    userPasswords.set(redemption.targetEmail.toLowerCase(), password);
+  }
 
-  res.json({ success: true, message: 'Account successfully activated! You may now sign in with your password.' });
+  res.json({
+    success: true,
+    message: 'Account successfully activated! You may now sign in with your permanent password.',
+    role: activatedRole,
+  });
 });
 
 /**

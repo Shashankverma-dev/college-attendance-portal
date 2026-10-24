@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { authenticate, requireRole } from '../middleware/auth';
 import { pool, runWithTransactionContext } from '../config/db';
 import { AuditService, localAuditLogs } from '../services/audit';
+import { EmailService } from '../services/email';
 import { localStudents } from '../services/bulk-onboard';
 import { localTimetables, localSectionGroups } from '../services/timetable';
 import { TokenService, localTokens } from '../services/token';
@@ -50,6 +51,7 @@ export interface InMemSchool {
   hod_email?: string;
   hod_password?: string;
   hod_user_id?: string;
+  hod_status?: string;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -67,6 +69,7 @@ export interface InMemDepartment {
   hod_email?: string;
   hod_password?: string;
   hod_user_id?: string;
+  hod_status?: string;
   is_active?: boolean;
 }
 
@@ -348,13 +351,21 @@ router.post(
       const name = String(nameInput).trim();
       const deptId = idInput ? String(idInput).trim() : `dept-${code.toLowerCase()}`;
 
+      let activationToken: string | undefined;
+      let activationLink: string | undefined;
+
       let existing = localDepartments.find((d) => d.department_code === code || d.department_id === deptId);
       if (existing) {
         existing.department_name = name;
         if (programsInput) existing.programs = programsInput;
         if (hodNameInput) existing.hod_name = hodNameInput;
         if (hodEmailInput) existing.hod_email = hodEmailInput;
-        if (hodPasswordInput) existing.hod_password = hodPasswordInput;
+        if (hodPasswordInput) {
+          existing.hod_password = hodPasswordInput;
+          existing.hod_status = 'ACTIVE';
+        } else if (hodEmailInput) {
+          existing.hod_status = existing.hod_status || 'PENDING_ACTIVATION';
+        }
         if (hodEmailInput) existing.hod_user_id = hodEmailInput;
       } else {
         existing = {
@@ -366,6 +377,7 @@ router.post(
           hod_name: hodNameInput || undefined,
           hod_email: hodEmailInput || undefined,
           hod_password: hodPasswordInput || undefined,
+          hod_status: hodPasswordInput ? 'ACTIVE' : (hodEmailInput ? 'PENDING_ACTIVATION' : undefined),
           hod_user_id: hodEmailInput || `HOD-${code}`,
         };
         localDepartments.push(existing);
@@ -384,7 +396,12 @@ router.post(
           existingSchool.hod_email = hodEmailInput;
           existingSchool.contact_email = hodEmailInput;
         }
-        if (hodPasswordInput) existingSchool.hod_password = hodPasswordInput;
+        if (hodPasswordInput) {
+          existingSchool.hod_password = hodPasswordInput;
+          existingSchool.hod_status = 'ACTIVE';
+        } else if (hodEmailInput) {
+          existingSchool.hod_status = existingSchool.hod_status || 'PENDING_ACTIVATION';
+        }
       } else {
         existingSchool = {
           school_id: deptId,
@@ -398,6 +415,7 @@ router.post(
           hod_email: hodEmailInput || undefined,
           contact_email: hodEmailInput || undefined,
           hod_password: hodPasswordInput || undefined,
+          hod_status: hodPasswordInput ? 'ACTIVE' : (hodEmailInput ? 'PENDING_ACTIVATION' : undefined),
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
@@ -430,13 +448,47 @@ router.post(
         if (hodEmailInput) {
           userPasswords.set(hodEmailInput.toLowerCase().trim(), hodPasswordInput);
         }
+      } else if (hodEmailInput) {
+        // Self-password creation flow: Generate 48-hour secure single-use activation token
+        const tokenResult = TokenService.generateToken(48);
+        activationToken = tokenResult.rawToken;
+        const userUid = `usr-hod-${deptId}`;
+        await TokenService.storeToken(null, userUid, tokenResult.tokenHash, 'ACCOUNT_ACTIVATION', hodEmailInput, tokenResult.expiresAt);
+
+        const appBaseUrl = process.env.APP_BASE_URL || process.env.APP_URL || 'https://attendace-d3b3e.web.app';
+        activationLink = `${appBaseUrl}/signin.html?mode=activate&token=${activationToken}&email=${encodeURIComponent(hodEmailInput)}`;
+
+        try {
+          await EmailService.sendEmail({
+            to: hodEmailInput,
+            subject: `Activate Your Head of Department (HOD) Portal Account (${code})`,
+            idempotencyKey: `act-hod-${deptId}-${Date.now()}`,
+            operationType: 'ACCOUNT_ACTIVATION',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #E2E8F0; border-radius: 8px;">
+                <h2 style="color: #1D3C72; margin-top: 0;">Institutional HOD Account Invitation</h2>
+                <p>Dear ${hodNameInput || 'Head of Department'},</p>
+                <p>You have been registered as Head of Department for <strong>${name} (${code})</strong> on the Attendance Management Portal.</p>
+                <p>Please click the button below to verify your official email address and establish your secure portal password:</p>
+                <div style="margin: 24px 0;">
+                  <a href="${activationLink}" style="background: #1D3C72; color: #FFFFFF; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 700; display: inline-block;">
+                    Verify Email & Create Password
+                  </a>
+                </div>
+                <p style="font-size: 13px; color: #64748B;">This activation link is single-use and will expire in 48 hours.<br>Direct link: <a href="${activationLink}" style="color: #1D4ED8;">${activationLink}</a></p>
+              </div>
+            `,
+          });
+        } catch (_emailErr) {}
       }
 
       res.status(201).json({
         success: true,
-        message: `School / Department ${name} (${code}) created successfully.`,
+        message: `School / Department ${name} (${code}) created successfully.${activationLink ? ' 48-hour email invitation dispatched to HOD.' : ''}`,
         department: existing,
         school: existingSchool || existing,
+        activationToken,
+        activationLink,
       });
     } catch (err: any) {
       res.status(500).json({ error: 'DEPT_CREATE_FAILED', message: err.message });
@@ -453,8 +505,8 @@ router.post(
       const deptId = req.params.id.toLowerCase().trim();
       const { hod_name, hod_email, hod_password } = req.body;
 
-      if (!hod_name || !hod_email || !hod_password) {
-        res.status(400).json({ error: 'MISSING_FIELDS', message: 'HOD Name, Email, and Password are required.' });
+      if (!hod_name || !hod_email) {
+        res.status(400).json({ error: 'MISSING_FIELDS', message: 'HOD Name and Official Email are required.' });
         return;
       }
 
@@ -473,8 +525,51 @@ router.post(
 
       dept.hod_name = hod_name;
       dept.hod_email = hod_email;
-      dept.hod_password = hod_password;
       dept.hod_user_id = hod_email;
+
+      let activationToken: string | undefined;
+      let activationLink: string | undefined;
+
+      if (hod_password) {
+        dept.hod_password = hod_password;
+        dept.hod_status = 'ACTIVE';
+        userPasswords.set(`usr-hod-${dept.department_id}`, hod_password);
+        if (hod_email) {
+          userPasswords.set(hod_email.toLowerCase().trim(), hod_password);
+        }
+      } else {
+        dept.hod_status = 'PENDING_ACTIVATION';
+        const tokenResult = TokenService.generateToken(48);
+        activationToken = tokenResult.rawToken;
+        const userUid = `usr-hod-${dept.department_id}`;
+        await TokenService.storeToken(null, userUid, tokenResult.tokenHash, 'ACCOUNT_ACTIVATION', hod_email, tokenResult.expiresAt);
+
+        const appBaseUrl = process.env.APP_BASE_URL || process.env.APP_URL || 'https://attendace-d3b3e.web.app';
+        activationLink = `${appBaseUrl}/signin.html?mode=activate&token=${activationToken}&email=${encodeURIComponent(hod_email)}`;
+
+        try {
+          await EmailService.sendEmail({
+            to: hod_email,
+            subject: `Activate Your Head of Department (HOD) Portal Account (${dept.department_code || dept.department_name})`,
+            idempotencyKey: `act-assign-hod-${deptId}-${Date.now()}`,
+            operationType: 'ACCOUNT_ACTIVATION',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #E2E8F0; border-radius: 8px;">
+                <h2 style="color: #1D3C72; margin-top: 0;">Head of Department Appointment</h2>
+                <p>Dear ${hod_name},</p>
+                <p>You have been appointed as Head of Department for <strong>${dept.department_name}</strong>.</p>
+                <p>Please click the button below to verify your email and establish your secure portal password:</p>
+                <div style="margin: 24px 0;">
+                  <a href="${activationLink}" style="background: #1D3C72; color: #FFFFFF; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 700; display: inline-block;">
+                    Verify Email & Create Password
+                  </a>
+                </div>
+                <p style="font-size: 13px; color: #64748B;">Link expires in 48 hours.<br>Direct link: <a href="${activationLink}" style="color: #1D4ED8;">${activationLink}</a></p>
+              </div>
+            `,
+          });
+        } catch (_emailErr) {}
+      }
 
       // Sync HOD to localSchools
       let school = localSchools.find(
@@ -485,21 +580,21 @@ router.post(
         school.dean_name = hod_name;
         school.hod_email = hod_email;
         school.contact_email = hod_email;
-        school.hod_password = hod_password;
-        school.hod_user_id = hod_email;
-      }
-
-      if (hod_password) {
-        userPasswords.set(`usr-hod-${dept.department_id}`, hod_password);
-        if (hod_email) {
-          userPasswords.set(hod_email.toLowerCase().trim(), hod_password);
+        if (hod_password) {
+          school.hod_password = hod_password;
+          school.hod_status = 'ACTIVE';
+        } else {
+          school.hod_status = 'PENDING_ACTIVATION';
         }
+        school.hod_user_id = hod_email;
       }
 
       res.json({
         success: true,
-        message: `Head of Department assigned to ${dept.department_name} successfully.`,
+        message: `Head of Department assigned to ${dept.department_name} successfully.${activationLink ? ' 48-hour email invitation dispatched.' : ''}`,
         department: dept,
+        activationToken,
+        activationLink,
       });
     } catch (err: any) {
       res.status(500).json({ error: 'HOD_ASSIGN_FAILED', message: err.message });
@@ -964,11 +1059,40 @@ router.post(
             },
           });
 
+          const { rawToken: dbRawToken, tokenHash: dbTokenHash, expiresAt: dbExpiresAt } = TokenService.generateToken(48);
+          await TokenService.storeToken(client, newUserUid, dbTokenHash, 'ACCOUNT_ACTIVATION', officialEmail, dbExpiresAt);
+
+          const appBaseUrl = process.env.APP_BASE_URL || process.env.APP_URL || 'https://attendace-d3b3e.web.app';
+          const dbActivationLink = `${appBaseUrl}/signin.html?mode=activate&token=${dbRawToken}&email=${encodeURIComponent(officialEmail)}`;
+
+          try {
+            await EmailService.sendEmail({
+              to: officialEmail,
+              subject: 'Activate Your Faculty Attendance Portal Account',
+              idempotencyKey: `act-fac-${newUserUid}-${Date.now()}`,
+              operationType: 'ACCOUNT_ACTIVATION',
+              html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #E2E8F0; border-radius: 8px;">
+                  <h2 style="color: #1D3C72; margin-top: 0;">Faculty Portal Account Invitation</h2>
+                  <p>Dear ${fullName},</p>
+                  <p>Your faculty profile (${facultyStaffId}) has been registered on the Attendance Management Portal.</p>
+                  <p>Please click the button below to verify your official email address and establish your secure portal password:</p>
+                  <div style="margin: 24px 0;">
+                    <a href="${dbActivationLink}" style="background: #1D3C72; color: #FFFFFF; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 700; display: inline-block;">
+                      Verify Email & Create Password
+                    </a>
+                  </div>
+                  <p style="font-size: 13px; color: #64748B;">This activation link is single-use and will expire in 48 hours.<br>Direct link: <a href="${dbActivationLink}" style="color: #1D4ED8;">${dbActivationLink}</a></p>
+                </div>
+              `,
+            });
+          } catch (_emailErr) {}
+
           await client.query('COMMIT');
 
           res.status(201).json({
             success: true,
-            message: `Faculty member ${fullName} (${facultyStaffId}) provisioned successfully. 48-hour activation link dispatched to ${officialEmail}.`,
+            message: `Faculty member ${fullName} (${facultyStaffId}) provisioned successfully. 48-hour activation email dispatched to ${officialEmail}.`,
             teacher: {
               faculty_profile_id: facultyProfileId,
               faculty_staff_id: facultyStaffId,
@@ -979,6 +1103,8 @@ router.post(
               designation,
               status: 'PENDING_ACTIVATION',
             },
+            activationToken: dbRawToken,
+            activationLink: dbActivationLink,
           });
           return;
         } catch (dbErr: any) {
@@ -1084,12 +1210,37 @@ router.post(
         is_invalidated: false,
       });
 
-      const activationLink = `${process.env.APP_BASE_URL || 'http://localhost:5000'}/signin.html?token=${rawToken}&purpose=ACCOUNT_ACTIVATION`;
+      const appBaseUrl = process.env.APP_BASE_URL || process.env.APP_URL || 'https://attendace-d3b3e.web.app';
+      const activationLink = `${appBaseUrl}/signin.html?mode=activate&token=${rawToken}&email=${encodeURIComponent(officialEmail)}`;
+
+      try {
+        await EmailService.sendEmail({
+          to: officialEmail,
+          subject: 'Activate Your Faculty Attendance Portal Account',
+          idempotencyKey: `act-fac-${newUserUid}-${Date.now()}`,
+          operationType: 'ACCOUNT_ACTIVATION',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #E2E8F0; border-radius: 8px;">
+              <h2 style="color: #1D3C72; margin-top: 0;">Faculty Portal Account Invitation</h2>
+              <p>Dear ${fullName},</p>
+              <p>Your faculty profile (${facultyStaffId}) has been registered on the Attendance Management Portal.</p>
+              <p>Please click the button below to verify your official email address and establish your secure portal password:</p>
+              <div style="margin: 24px 0;">
+                <a href="${activationLink}" style="background: #1D3C72; color: #FFFFFF; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 700; display: inline-block;">
+                  Verify Email & Create Password
+                </a>
+              </div>
+              <p style="font-size: 13px; color: #64748B;">This activation link is single-use and will expire in 48 hours.<br>Direct link: <a href="${activationLink}" style="color: #1D4ED8;">${activationLink}</a></p>
+            </div>
+          `,
+        });
+      } catch (_emailErr) {}
 
       res.status(201).json({
         success: true,
-        message: `Faculty member ${fullName} (${facultyStaffId}) provisioned successfully. 48-hour activation link dispatched to ${officialEmail}.`,
+        message: `Faculty member ${fullName} (${facultyStaffId}) provisioned successfully. 48-hour activation email dispatched to ${officialEmail}.`,
         teacher: newTeacher,
+        activationToken: rawToken,
         activationLink,
       });
     } catch (err: any) {

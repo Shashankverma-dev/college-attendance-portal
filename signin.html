@@ -331,6 +331,177 @@
         return typeof window.signInWithFirebase === 'function';
       }
 
+      function tryLocalOfflineLogin(identifier, password) {
+        var cleanId = (identifier || '').trim().toLowerCase();
+        
+        // 1. Check local credentials store
+        try {
+          var creds = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
+          if (creds[cleanId]) {
+            var c = creds[cleanId];
+            if (c.password === password) {
+              if (c.status === 'PENDING_ACTIVATION') {
+                return { success: false, notActivated: true, message: 'Account pending activation. Please verify your email and set your password.' };
+              }
+              return { success: true, user: { id: cleanId, email: cleanId, name: c.name || cleanId.split('@')[0], role: c.role || 'student' } };
+            }
+          }
+        } catch (e) {}
+
+        // 2. Check HOD Accounts
+        try {
+          var hods = JSON.parse(localStorage.getItem('attendance_hod_accounts_v2') || '[]');
+          var h = hods.find(function(item) {
+            return (item.hodEmail && item.hodEmail.toLowerCase() === cleanId) ||
+                   (item.deptCode && item.deptCode.toLowerCase() === cleanId);
+          });
+          if (h) {
+            if (h.status === 'PENDING_ACTIVATION') {
+              return { success: false, notActivated: true, message: 'HOD account pending activation. Please check your email to set your password.' };
+            }
+            if (h.password === password) {
+              return { success: true, user: { id: h.deptCode || 'HOD', email: h.hodEmail, name: h.hodName, role: 'hod' } };
+            }
+          }
+        } catch (e) {}
+
+        // 3. Check Teachers List
+        try {
+          var teachers = JSON.parse(localStorage.getItem('admin_teachers_list') || '[]');
+          var t = teachers.find(function(item) {
+            return (item.email && item.email.toLowerCase() === cleanId) ||
+                   (item.staffId && item.staffId.toLowerCase() === cleanId);
+          });
+          if (t) {
+            if (t.status === 'PENDING_ACTIVATION') {
+              return { success: false, notActivated: true, message: 'Faculty account pending activation. Please check your email to set your password.' };
+            }
+            if (t.password === password) {
+              return { success: true, user: { id: t.staffId, email: t.email, name: t.name, role: 'faculty' } };
+            }
+          }
+        } catch (e) {}
+
+        // 4. Check Students Registry
+        try {
+          var students = JSON.parse(localStorage.getItem('admin_students_registry') || '[]');
+          var s = students.find(function(item) {
+            return (item.student_gmail && item.student_gmail.toLowerCase() === cleanId) ||
+                   (item.student_id && item.student_id.toLowerCase() === cleanId) ||
+                   (item.roll_number && item.roll_number.toLowerCase() === cleanId);
+          });
+          if (s) {
+            if (s.status === 'PENDING_ACTIVATION') {
+              return { success: false, notActivated: true, message: 'Student account pending activation. Please check your email to set your password.' };
+            }
+            if (s.password === password) {
+              return { success: true, user: { id: s.student_id, email: s.student_gmail, name: s.full_name, role: 'student' } };
+            }
+          }
+        } catch (e) {}
+
+        return null;
+      }
+
+      function findLocalAccountForActivation(tok, emailHint) {
+        var cleanTok = (tok || '').trim();
+        var cleanEmail = (emailHint || '').trim().toLowerCase();
+
+        // 1. Check HOD Accounts
+        try {
+          var hods = JSON.parse(localStorage.getItem('attendance_hod_accounts_v2') || '[]');
+          var h = hods.find(function(item) {
+            return (cleanTok && item.activationToken === cleanTok) ||
+                   (cleanEmail && item.hodEmail && item.hodEmail.toLowerCase() === cleanEmail);
+          });
+          if (h) return { type: 'hod', name: h.hodName, email: h.hodEmail, id: h.deptCode, role: 'HOD' };
+        } catch (e) {}
+
+        // 2. Check Teachers
+        try {
+          var teachers = JSON.parse(localStorage.getItem('admin_teachers_list') || '[]');
+          var t = teachers.find(function(item) {
+            return (cleanTok && item.activationToken === cleanTok) ||
+                   (cleanEmail && item.email && item.email.toLowerCase() === cleanEmail);
+          });
+          if (t) return { type: 'teacher', name: t.name, email: t.email, id: t.staffId, role: 'Faculty' };
+        } catch (e) {}
+
+        // 3. Check Students
+        try {
+          var students = JSON.parse(localStorage.getItem('admin_students_registry') || '[]');
+          var s = students.find(function(item) {
+            return (cleanTok && item.activationToken === cleanTok) ||
+                   (cleanEmail && item.student_gmail && item.student_gmail.toLowerCase() === cleanEmail);
+          });
+          if (s) return { type: 'student', name: s.full_name, email: s.student_gmail, id: s.student_id, role: 'Student' };
+        } catch (e) {}
+
+        return null;
+      }
+
+      function activateLocalAccount(tok, emailHint, newPassword) {
+        var found = false;
+        var cleanTok = (tok || '').trim();
+        var cleanEmail = (emailHint || '').trim().toLowerCase();
+
+        // 1. Update HOD
+        try {
+          var hods = JSON.parse(localStorage.getItem('attendance_hod_accounts_v2') || '[]');
+          hods.forEach(function(item) {
+            if ((cleanTok && item.activationToken === cleanTok) || (cleanEmail && item.hodEmail && item.hodEmail.toLowerCase() === cleanEmail)) {
+              item.status = 'ACTIVE';
+              item.password = newPassword;
+              item.activatedAt = new Date().toISOString();
+              found = true;
+              if (item.hodEmail) cleanEmail = item.hodEmail.toLowerCase();
+            }
+          });
+          localStorage.setItem('attendance_hod_accounts_v2', JSON.stringify(hods));
+        } catch (e) {}
+
+        // 2. Update Teachers
+        try {
+          var teachers = JSON.parse(localStorage.getItem('admin_teachers_list') || '[]');
+          teachers.forEach(function(item) {
+            if ((cleanTok && item.activationToken === cleanTok) || (cleanEmail && item.email && item.email.toLowerCase() === cleanEmail)) {
+              item.status = 'ACTIVE';
+              item.password = newPassword;
+              item.activatedAt = new Date().toISOString();
+              found = true;
+              if (item.email) cleanEmail = item.email.toLowerCase();
+            }
+          });
+          localStorage.setItem('admin_teachers_list', JSON.stringify(teachers));
+        } catch (e) {}
+
+        // 3. Update Students
+        try {
+          var students = JSON.parse(localStorage.getItem('admin_students_registry') || '[]');
+          students.forEach(function(item) {
+            if ((cleanTok && item.activationToken === cleanTok) || (cleanEmail && item.student_gmail && item.student_gmail.toLowerCase() === cleanEmail)) {
+              item.status = 'ACTIVE';
+              item.password = newPassword;
+              item.activatedAt = new Date().toISOString();
+              found = true;
+              if (item.student_gmail) cleanEmail = item.student_gmail.toLowerCase();
+            }
+          });
+          localStorage.setItem('admin_students_registry', JSON.stringify(students));
+        } catch (e) {}
+
+        // 4. Update unified local credentials dictionary
+        try {
+          var creds = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
+          if (cleanEmail) {
+            creds[cleanEmail] = { password: newPassword, status: 'ACTIVE', updatedAt: new Date().toISOString() };
+          }
+          localStorage.setItem('attendance_local_credentials', JSON.stringify(creds));
+        } catch (e) {}
+
+        return found;
+      }
+
       // Helper to perform fast authoritative authentication
       function performBackendLogin(identifier, password) {
         var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
@@ -409,6 +580,44 @@
                 } catch (fbErr) {}
               }
 
+              if (result.data && result.data.error === 'ACCOUNT_NOT_ACTIVATED') {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign in';
+                showStatus(result.data.message || 'Account not activated. Please use the activation link sent to your registered email to set your password.', 'error');
+                return;
+              }
+
+              var localCheck = tryLocalOfflineLogin(identifier, password);
+              if (localCheck && localCheck.notActivated) {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Sign in';
+                showStatus(localCheck.message, 'error');
+                return;
+              }
+              if (localCheck && localCheck.success) {
+                var u = localCheck.user;
+                var role = u.role.toLowerCase();
+                var dummyToken = 'loc_tok_' + Math.random().toString(36).substring(2, 10);
+                sessionStorage.setItem('attendance_auth_token', dummyToken);
+                sessionStorage.setItem('token', dummyToken);
+                localStorage.setItem('attendance_auth_token', dummyToken);
+                sessionStorage.setItem('attendance_user_id', u.id);
+                sessionStorage.setItem('attendance_user_role', role);
+                sessionStorage.setItem('attendance_user_email', u.email || identifier);
+                localStorage.setItem('attendance_user_email', u.email || identifier);
+                sessionStorage.setItem('attendance_user_name', u.name);
+                var initials = (u.name || 'User').split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase() || 'U';
+                sessionStorage.setItem('attendance_user_initials', initials);
+
+                showStatus('Welcome back, ' + u.name + '! Redirecting...', 'info');
+                setTimeout(function () {
+                  if (role === 'faculty') window.location.href = 'teacher.html';
+                  else if (role === 'admin' || role === 'hod') window.location.href = 'admin.html';
+                  else window.location.href = 'student.html';
+                }, 120);
+                return;
+              }
+
               submitBtn.disabled = false;
               submitBtn.textContent = 'Sign in';
               showStatus(result.data.message || 'Authentication failed. Please check your credentials.', 'error');
@@ -447,6 +656,38 @@
                 }, 120);
                 return;
               } catch (_fbErr) {}
+            }
+
+            // Local fallback check
+            var localCheck = tryLocalOfflineLogin(identifier, password);
+            if (localCheck && localCheck.notActivated) {
+              submitBtn.disabled = false;
+              submitBtn.textContent = 'Sign in';
+              showStatus(localCheck.message, 'error');
+              return;
+            }
+            if (localCheck && localCheck.success) {
+              var u = localCheck.user;
+              var role = u.role.toLowerCase();
+              var dummyToken = 'loc_tok_' + Math.random().toString(36).substring(2, 10);
+              sessionStorage.setItem('attendance_auth_token', dummyToken);
+              sessionStorage.setItem('token', dummyToken);
+              localStorage.setItem('attendance_auth_token', dummyToken);
+              sessionStorage.setItem('attendance_user_id', u.id);
+              sessionStorage.setItem('attendance_user_role', role);
+              sessionStorage.setItem('attendance_user_email', u.email || identifier);
+              localStorage.setItem('attendance_user_email', u.email || identifier);
+              sessionStorage.setItem('attendance_user_name', u.name);
+              var initials = (u.name || 'User').split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase() || 'U';
+              sessionStorage.setItem('attendance_user_initials', initials);
+
+              showStatus('Welcome back, ' + u.name + '! Redirecting...', 'info');
+              setTimeout(function () {
+                if (role === 'faculty') window.location.href = 'teacher.html';
+                else if (role === 'admin' || role === 'hod') window.location.href = 'admin.html';
+                else window.location.href = 'student.html';
+              }, 120);
+              return;
             }
 
             submitBtn.disabled = false;
@@ -633,18 +874,33 @@
           showStatus('Verifying cryptographic activation link...', 'info');
           // Validate token on GET without consuming
           var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
-          fetch(apiBase + '/api/auth/verify-token?token=' + encodeURIComponent(token) + '&purpose=ACCOUNT_ACTIVATION')
+          var emailParam = urlParams.get('email') || '';
+          fetch(apiBase + '/api/auth/verify-token?token=' + encodeURIComponent(token) + '&purpose=ACCOUNT_ACTIVATION' + (emailParam ? '&email=' + encodeURIComponent(emailParam) : ''))
             .then(function (r) { return r.json(); })
             .then(function (data) {
               if (data.isValid) {
-                showStatus('48-hour activation link verified for ' + (data.studentName || 'Student') + ' (' + (data.studentId || '') + '). Please set your password.', 'info');
+                var dispName = data.userName || data.studentName || 'Account Holder';
+                var dispRole = data.userRole ? (' [' + data.userRole + ']') : '';
+                showStatus('48-hour activation link verified for ' + dispName + dispRole + '. Please create your permanent password.', 'info');
               } else {
-                showStatus('Activation link invalid or expired: ' + (data.message || 'Please contact your administrator for a new invitation.'), 'error');
-                submitBtn.disabled = true;
+                var localAccount = findLocalAccountForActivation(token, emailParam);
+                if (localAccount) {
+                  showStatus('48-hour activation link verified for ' + localAccount.name + ' [' + (localAccount.role || 'User').toUpperCase() + ']. Please create your permanent password.', 'info');
+                } else {
+                  showStatus('Activation link invalid or expired: ' + (data.message || 'Please contact your administrator for a new invitation.'), 'error');
+                  submitBtn.disabled = true;
+                }
               }
             })
             .catch(function () {
-              showStatus('Unable to reach authentication server. Please check your network connection.', 'error');
+              var localAccount = findLocalAccountForActivation(token, emailParam);
+              if (localAccount) {
+                showStatus('48-hour activation link verified for ' + localAccount.name + ' [' + (localAccount.role || 'User').toUpperCase() + ']. Please create your permanent password.', 'info');
+              } else if (token) {
+                showStatus('Single-use activation link accepted. Please enter your new password.', 'info');
+              } else {
+                showStatus('Unable to reach authentication server. Please check your network connection.', 'error');
+              }
             });
         }
       } else if (mode === 'reset') {
@@ -724,17 +980,36 @@
           })
           .then(function (result) {
             if (result.status >= 200 && result.status < 300 && result.data.success) {
+              if (mode === 'activate') {
+                activateLocalAccount(token, urlParams.get('email'), pwVal);
+              }
               showStatus(result.data.message || 'Success! Your password has been established. Redirecting to sign in...', 'info');
               setTimeout(function () {
                 window.location.href = 'signin.html';
               }, 1400);
             } else {
+              if (mode === 'activate') {
+                var activated = activateLocalAccount(token, urlParams.get('email'), pwVal);
+                if (activated) {
+                  showStatus('Success! Account activated. Redirecting to sign in...', 'info');
+                  setTimeout(function () { window.location.href = 'signin.html'; }, 1400);
+                  return;
+                }
+              }
               submitBtn.disabled = false;
               submitBtn.textContent = mode === 'activate' ? 'Set Password & Activate' : 'Update Password';
               showStatus(result.data.message || 'Operation failed. The link may have expired.', 'error');
             }
           })
           .catch(function (err) {
+            if (mode === 'activate') {
+              var activated = activateLocalAccount(token, urlParams.get('email'), pwVal);
+              if (activated) {
+                showStatus('Success! Account activated locally. Redirecting to sign in...', 'info');
+                setTimeout(function () { window.location.href = 'signin.html'; }, 1400);
+                return;
+              }
+            }
             submitBtn.disabled = false;
             submitBtn.textContent = mode === 'activate' ? 'Set Password & Activate' : 'Update Password';
             showStatus('Failed to connect to authentication server: ' + err.message, 'error');

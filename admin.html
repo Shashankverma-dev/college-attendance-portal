@@ -874,14 +874,15 @@
               </div>
               <div>
                 <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px;">HOD Official Email / Login ID *</label>
-                <input type="email" id="dept-hod-email" required placeholder="e.g. hod.cs@college.edu" style="width: 100%; height: 36px; padding: 0 10px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px; background: #FFFFFF; color: #0F172A;">
+                <input type="email" id="dept-hod-email" required placeholder="e.g. hod.cs@college.edu or faculty@gmail.com" style="width: 100%; height: 36px; padding: 0 10px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px; background: #FFFFFF; color: #0F172A;">
               </div>
-              <div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                  <label style="font-size: 12px; font-weight: 600; color: #475569;">HOD Login Password *</label>
-                  <button type="button" onclick="generateRandomHodPassword('dept-hod-password')" style="background: none; border: none; color: #1D4ED8; font-size: 11px; font-weight: 600; cursor: pointer;">Generate New Password</button>
-                </div>
-                <input type="text" id="dept-hod-password" required placeholder="e.g. HodPass2026!" style="width: 100%; height: 36px; padding: 0 10px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px; font-family: monospace; background: #FFFFFF; color: #0F172A;">
+              <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #1E40AF; line-height: 1.5; display: flex; align-items: flex-start; gap: 8px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+                <span><strong>Verification &amp; Password Setup:</strong> Admin only enters the HOD's email. An activation email with a 48-hour secure token will be sent so the HOD can verify their email and establish their own password.</span>
               </div>
             </div>
           </div>
@@ -924,24 +925,22 @@
 
           <div>
             <label style="display: block; font-size: 13px; font-weight: 700; color: var(--card-ink); margin-bottom: 4px;">HOD Official Email / Login ID *</label>
-            <input type="email" id="assign-hod-email" required placeholder="e.g. hod.ca@college.edu" style="width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; background: var(--bg-dark); color: var(--card-ink);">
+            <input type="email" id="assign-hod-email" required placeholder="e.g. hod.ca@college.edu or name@gmail.com" style="width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; background: var(--bg-dark); color: var(--card-ink);">
             <div style="font-size: 12px; color: var(--card-muted); margin-top: 4px;">The HOD will sign in to the portal using this ID/email.</div>
           </div>
 
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-              <label style="font-size: 13px; font-weight: 700; color: var(--card-ink);">Admin-Created Password *</label>
-              <button type="button" onclick="generateRandomHodPassword('assign-hod-password')" style="background: none; border: none; color: #1D4ED8; font-size: 12px; font-weight: 600; cursor: pointer;">Generate Password</button>
-            </div>
-            <div>
-              <input type="text" id="assign-hod-password" required placeholder="Create portal password for HOD (min 6 characters)" style="width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; font-family: monospace; background: var(--bg-dark); color: var(--card-ink);">
-            </div>
-            <div style="font-size: 12px; color: var(--card-muted); margin-top: 4px;">The HOD will access the portal using this password.</div>
+          <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 6px; padding: 12px 14px; font-size: 12px; color: #1E40AF; line-height: 1.5; display: flex; align-items: flex-start; gap: 8px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; margin-top:2px;">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" y1="16" x2="12" y2="12"></line>
+              <line x1="12" y1="8" x2="12.01" y2="8"></line>
+            </svg>
+            <span><strong>Email Verification &amp; Self-Password Setup:</strong> Admin only enters the official email. An activation email with a 48-hour secure token will be sent to the appointee. The HOD will verify their email and establish their own strong password.</span>
           </div>
         </div>
         <div class="modal-footer" style="padding: 14px 20px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--line);">
           <button type="button" class="btn btn-outline" onclick="closeAssignHodModal()">Cancel</button>
-          <button type="submit" class="btn" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Save &amp; Provision HOD Account</button>
+          <button type="submit" class="btn" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Dispatch HOD Invitation &amp; Save</button>
         </div>
       </form>
     </div>
@@ -957,13 +956,13 @@
               <polyline points="20 6 9 17 4 12"></polyline>
             </svg>
           </div>
-          <h3 id="modal-hod-cred-title" style="margin: 0; font-size: 18px; color: var(--card-ink);">HOD Account Ready</h3>
+          <h3 id="modal-hod-cred-title" style="margin: 0; font-size: 18px; color: var(--card-ink);">HOD Invitation Dispatched</h3>
         </div>
         <button type="button" class="modal-close-btn" onclick="closeHodCredentialsModal()" aria-label="Close modal">&times;</button>
       </div>
       <div class="modal-body" style="padding: 20px;">
         <p style="font-size: 14px; color: var(--card-muted); margin: 0 0 16px 0; line-height: 1.5;">
-          The Head of Department account has been successfully created. Please share these administrator-provisioned credentials with the HOD:
+          The Head of Department account has been successfully provisioned. An activation email has been queued for delivery. The appointee will verify their email and set their password. You can also copy the activation link directly below:
         </p>
 
         <div style="background: #F8FAFC; border: 1px solid #D7E3F0; border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 10px;">
@@ -980,15 +979,17 @@
             <div id="cred-hod-email" style="font-size: 14px; font-weight: 700; color: #1D4ED8; font-family: monospace;">-</div>
           </div>
           <div>
-            <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Created Password</span>
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 2px;">
-              <code id="cred-hod-password" style="font-size: 15px; font-weight: 700; color: #0F172A; background: #E2E8F0; padding: 4px 8px; border-radius: 4px;">-</code>
-              <button type="button" class="action-btn-sm" onclick="copyHodPassword()" id="copy-hod-pw-btn" style="cursor: pointer;">Copy</button>
+            <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Account Status</span>
+            <div style="margin-top: 3px;">
+              <span style="background: #FEF3C7; color: #92400E; font-size: 12px; font-weight: 700; padding: 3px 8px; border-radius: 4px; display: inline-block;">Pending Verification &amp; Self-Password Setup</span>
             </div>
           </div>
           <div>
-            <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">Portal Sign In URL</span>
-            <div style="font-size: 12px; color: #475569; word-break: break-all;">https://attendace-d3b3e.web.app/signin.html</div>
+            <span style="font-size: 11px; font-weight: 700; color: #64748B; text-transform: uppercase;">48-Hour Secure Activation Link</span>
+            <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
+              <input type="text" id="cred-hod-link" readonly style="flex: 1; height: 34px; padding: 0 10px; font-size: 12px; font-family: monospace; border: 1px solid #CBD5E1; border-radius: 6px; background: #FFFFFF; color: #0F172A;" />
+              <button type="button" class="btn btn-sm" onclick="copyHodActivationLink()" id="copy-hod-link-btn" style="background: #1D3C72; color: #FFFFFF; white-space: nowrap; height: 34px; font-size: 12px; cursor: pointer;">Copy Link</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1719,7 +1720,6 @@
       var assignHod = true; // Always mandatory
       var hodName = (document.getElementById('dept-hod-name').value || '').trim();
       var hodEmail = (document.getElementById('dept-hod-email').value || '').trim();
-      var hodPassword = (document.getElementById('dept-hod-password').value || '').trim();
       var deptId = code.toLowerCase();
 
       if (!name || !code || !programs) {
@@ -1727,12 +1727,8 @@
         return;
       }
 
-      if (!hodName || !hodEmail || !hodPassword) {
-        showToast('Please provide HOD Name, Official Email / Login ID, and Password.', 'error');
-        return;
-      }
-      if (hodPassword.length < 6) {
-        showToast('HOD Password must be at least 6 characters.', 'error');
+      if (!hodName || !hodEmail) {
+        showToast('Please provide HOD Full Name and Official Email / Login ID.', 'error');
         return;
       }
 
@@ -1827,6 +1823,9 @@
         localStorage.setItem('admin_schools_list', JSON.stringify(aSchools));
       } catch (e) {}
 
+      var hodToken = 'act_hod_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      var activationLink = window.location.origin + '/signin.html?mode=activate&token=' + hodToken + '&email=' + encodeURIComponent(hodEmail);
+
       if (assignHod) {
         var hodAccounts = getStoredHodAccounts();
         var existingHodIndex = hodAccounts.findIndex(function(h) { return h.deptId === deptId; });
@@ -1836,7 +1835,9 @@
           deptCode: code,
           hodName: hodName,
           hodEmail: hodEmail,
-          password: hodPassword,
+          status: 'PENDING_ACTIVATION',
+          activationToken: hodToken,
+          activationLink: activationLink,
           role: 'hod',
           createdAt: new Date().toISOString()
         };
@@ -1862,14 +1863,23 @@
         contact_email: assignHod ? hodEmail : undefined,
         hod_name: assignHod ? hodName : undefined,
         hod_email: assignHod ? hodEmail : undefined,
-        hod_password: assignHod ? hodPassword : undefined
+        hod_token: hodToken
       };
 
       fetch(getApiBase() + '/api/admin/academic/departments', {
         method: 'POST',
         headers: authHeaders,
         body: JSON.stringify(unifiedPayload)
-      }).catch(function() {});
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data && data.activationLink) {
+          activationLink = data.activationLink;
+          var linkInput = document.getElementById('cred-hod-link');
+          if (linkInput) linkInput.value = activationLink;
+        }
+      })
+      .catch(function() {});
 
       fetch(getApiBase() + '/api/admin/schools', {
         method: 'POST',
@@ -1886,10 +1896,10 @@
       closeAddDeptModal();
 
       if (assignHod) {
-        openHodCredentialsModal(name, hodName, hodEmail, hodPassword);
+        openHodCredentialsModal(name, hodName, hodEmail, activationLink);
       }
 
-      showToast('School / Academic Department "' + name + '" created successfully.', 'success');
+      showToast('School / Academic Department "' + name + '" created successfully. HOD invite queued.', 'success');
       renderDepartmentTable(depts);
     }
 
@@ -1912,10 +1922,6 @@
 
       document.getElementById('assign-hod-name').value = existingHod ? existingHod.hodName : (dept && dept.hodName && dept.hodName !== 'Head of Department' ? dept.hodName : '');
       document.getElementById('assign-hod-email').value = existingHod ? existingHod.hodEmail : (dept && dept.hodEmail ? dept.hodEmail : 'hod.' + (deptId || '').toLowerCase() + '@college.edu');
-      document.getElementById('assign-hod-password').value = existingHod ? existingHod.password : '';
-      if (!document.getElementById('assign-hod-password').value) {
-        generateRandomHodPassword('assign-hod-password');
-      }
 
       var modal = document.getElementById('modal-assign-hod');
       if (modal) {
@@ -1936,14 +1942,9 @@
       var deptId = (document.getElementById('assign-hod-dept-id').value || '').trim().toLowerCase();
       var hodName = (document.getElementById('assign-hod-name').value || '').trim();
       var hodEmail = (document.getElementById('assign-hod-email').value || '').trim();
-      var password = (document.getElementById('assign-hod-password').value || '').trim();
 
-      if (!deptId || !hodName || !hodEmail || !password) {
-        showToast('Please fill all required HOD credential fields.', 'error');
-        return;
-      }
-      if (password.length < 6) {
-        showToast('HOD Password must be at least 6 characters.', 'error');
+      if (!deptId || !hodName || !hodEmail) {
+        showToast('Please provide HOD Name and Official Email address.', 'error');
         return;
       }
 
@@ -1961,6 +1962,9 @@
         saveStoredDepartments(depts);
       }
 
+      var hodToken = 'act_hod_' + Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+      var activationLink = window.location.origin + '/signin.html?mode=activate&token=' + hodToken + '&email=' + encodeURIComponent(hodEmail);
+
       var hodAccounts = getStoredHodAccounts();
       var existingIndex = hodAccounts.findIndex(function(h) { return (h.deptId || '').toLowerCase() === deptId; });
       var hodRecord = {
@@ -1969,7 +1973,9 @@
         deptCode: deptCode,
         hodName: hodName,
         hodEmail: hodEmail,
-        password: password,
+        status: 'PENDING_ACTIVATION',
+        activationToken: hodToken,
+        activationLink: activationLink,
         role: 'hod',
         updatedAt: new Date().toISOString()
       };
@@ -1988,13 +1994,22 @@
         body: JSON.stringify({
           hod_name: hodName,
           hod_email: hodEmail,
-          hod_password: password
+          hod_token: hodToken
         })
-      }).catch(function() {});
+      })
+      .then(function(res) { return res.json(); })
+      .then(function(data) {
+        if (data && data.activationLink) {
+          activationLink = data.activationLink;
+          var linkInput = document.getElementById('cred-hod-link');
+          if (linkInput) linkInput.value = activationLink;
+        }
+      })
+      .catch(function() {});
 
       closeAssignHodModal();
-      openHodCredentialsModal(deptName, hodName, hodEmail, password);
-      showToast('Head of Department assigned to ' + deptName + ' successfully.', 'success');
+      openHodCredentialsModal(deptName, hodName, hodEmail, activationLink);
+      showToast('Head of Department appointed to ' + deptName + '. Activation email dispatched.', 'success');
       renderDepartmentTable(depts);
     }
 
@@ -2007,13 +2022,17 @@
       if (input) input.value = genPw;
     }
 
-    function openHodCredentialsModal(deptName, hodName, hodEmail, password) {
+    function openHodCredentialsModal(deptName, hodName, hodEmail, activationLink) {
       document.getElementById('cred-dept-name').textContent = deptName;
       document.getElementById('cred-hod-name').textContent = hodName;
       document.getElementById('cred-hod-email').textContent = hodEmail;
-      document.getElementById('cred-hod-password').textContent = password;
-      var copyBtn = document.getElementById('copy-hod-pw-btn');
-      if (copyBtn) copyBtn.textContent = 'Copy';
+      
+      var linkInput = document.getElementById('cred-hod-link');
+      if (linkInput) {
+        linkInput.value = activationLink || (window.location.origin + '/signin.html?mode=activate&email=' + encodeURIComponent(hodEmail));
+      }
+      var copyBtn = document.getElementById('copy-hod-link-btn');
+      if (copyBtn) copyBtn.textContent = 'Copy Link';
 
       var modal = document.getElementById('modal-hod-credentials');
       if (modal) {
@@ -2030,17 +2049,26 @@
       }
     }
 
-    function copyHodPassword() {
-      var pw = document.getElementById('cred-hod-password').textContent;
-      if (!pw || pw === '-') return;
+    function copyHodActivationLink() {
+      var linkInput = document.getElementById('cred-hod-link');
+      var link = linkInput ? linkInput.value : '';
+      if (!link) return;
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(pw).then(function() {
-          var btn = document.getElementById('copy-hod-pw-btn');
+        navigator.clipboard.writeText(link).then(function() {
+          var btn = document.getElementById('copy-hod-link-btn');
           if (btn) {
             btn.textContent = 'Copied!';
-            setTimeout(function() { btn.textContent = 'Copy'; }, 2000);
+            setTimeout(function() { btn.textContent = 'Copy Link'; }, 2000);
           }
         });
+      } else if (linkInput) {
+        linkInput.select();
+        document.execCommand('copy');
+        var btn = document.getElementById('copy-hod-link-btn');
+        if (btn) {
+          btn.textContent = 'Copied!';
+          setTimeout(function() { btn.textContent = 'Copy Link'; }, 2000);
+        }
       }
     }
 

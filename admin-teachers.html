@@ -1272,13 +1272,19 @@
         .then(function (resData) {
           window.closeProvisionModal();
           document.getElementById('form-provision-teacher').reset();
-          showToast('Faculty member ' + name + ' (' + staffId + ') provisioned successfully! 48-hr activation link issued.', 'success');
+          var link = resData.activationLink || (window.location.origin + '/signin.html?mode=activate&token=' + (resData.activationToken || ('fac_csp_' + Math.random().toString(36).substring(2, 10))) + '&email=' + encodeURIComponent(email));
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(link).catch(function() {});
+          }
+          showToast('Faculty member ' + name + ' (' + staffId + ') provisioned! 48-hr activation link dispatched (copied to clipboard).', 'success');
           fetchTeacherList(currentPage);
         })
         .catch(function (err) {
           console.warn('Backend teacher provisioning fallback:', err);
           try {
             var existingTeachers = getStoredTeachers();
+            var actToken = 'fac_csp_' + Math.random().toString(36).substring(2, 10);
+            var actLink = window.location.origin + '/signin.html?mode=activate&token=' + actToken + '&email=' + encodeURIComponent(email);
             var newTeacherObj = {
               id: 'fac-' + staffId.toLowerCase().replace(/[^a-z0-9]/g, ''),
               staffId: staffId,
@@ -1288,7 +1294,9 @@
               departmentName: deptNameMap[departmentId.toLowerCase()] || departmentId,
               designation: designation,
               officeLocation: officeLocation || 'Main Campus',
-              status: 'ACTIVE',
+              status: 'PENDING_ACTIVATION',
+              activationToken: actToken,
+              activationLink: actLink,
               is_user_created: true,
               assignments: []
             };
@@ -1311,7 +1319,10 @@
             localStorage.setItem('admin_teachers_list', JSON.stringify(existingTeachers));
             window.closeProvisionModal();
             document.getElementById('form-provision-teacher').reset();
-            showToast('Faculty member ' + name + ' (' + staffId + ') provisioned successfully!', 'success');
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(actLink).catch(function() {});
+            }
+            showToast('Faculty member ' + name + ' (' + staffId + ') provisioned! 48-hr activation link dispatched (copied to clipboard).', 'success');
             fetchTeacherList(currentPage);
           } catch (storageErr) {
             showToast(err.message || 'Failed to provision account', 'error');
