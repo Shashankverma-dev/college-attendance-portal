@@ -152,11 +152,11 @@
               '<a class="nav-link" href="admin-marks.html">Final marks</a>' +
               '<a class="nav-link active" href="calendar.html">Calendar</a>';
           }
-          var adminName = sessionStorage.getItem('attendance_user_name') || 'Dr. Arvind Sharma';
+          var adminName = sessionStorage.getItem('attendance_user_name') || 'Administrator';
           if (calActions) {
             calActions.innerHTML = '<div class="user-menu-wrap" id="user-menu-wrap">' +
               '  <button type="button" class="user-avatar-btn" id="user-avatar-btn" onclick="toggleUserDropdown(event)" aria-haspopup="true" aria-expanded="false" aria-label="Open user profile menu">' +
-              '    <div class="user-avatar-circle" id="display-user-avatar">AS</div>' +
+              '    <div class="user-avatar-circle" id="display-user-avatar">AD</div>' +
               '    <div class="user-avatar-info">' +
               '      <span class="user-avatar-name" id="display-user-name">' + adminName + '</span>' +
               '      <span class="user-avatar-role" id="display-user-id">Global Admin</span>' +

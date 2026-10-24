@@ -271,15 +271,15 @@ router.get('/', adminAuth, async (req: Request, res: Response): Promise<void> =>
         registration_id: s.registration_id,
         full_name: s.full_name,
         student_gmail: s.student_gmail,
-        department_id: s.department_id || 'b0000000-0000-0000-0000-000000000001',
-        department_code: s.department_code || 'CA',
-        department_name: s.department_name || 'Department of Computer Applications',
-        course_id: s.course_id || 'c0000000-0000-0000-0000-000000000001',
+        department_id: s.department_id || '',
+        department_code: s.department_code || '',
+        department_name: s.department_name || '',
+        course_id: s.course_id || '',
         course_code: s.course_code,
-        course_name: s.course_name || 'Bachelor of Computer Applications',
-        semester_id: s.semester_id || 'e0000000-0000-0000-0000-000000000001',
+        course_name: s.course_name || s.course_code,
+        semester_id: s.semester_id || '',
         semester_number: s.semester_number,
-        section_id: s.section_id || 'f0000000-0000-0000-0000-000000000001',
+        section_id: s.section_id || '',
         section_name: s.section_name,
         roll_number: s.roll_number,
         phone_number: s.phone_number,
@@ -567,7 +567,7 @@ router.post('/', adminAuth, async (req: Request, res: Response): Promise<void> =
     const resolvedSchool = localSchools.find((s) => s.school_id === (schoolId || course.school_id)) || localSchools[0];
 
     // H. Profile & Enrollment Creation
-    const profileId = `20000000-0000-0000-0000-${String(localStudents.length + 11).padStart(12, '0')}`;
+    const profileId = crypto.randomUUID();
     const userUid = `firebase-uid-stu-${finalEnrollmentNo.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
 
     const newStudent: InMemStudentProfile = {
@@ -582,9 +582,9 @@ router.post('/', adminAuth, async (req: Request, res: Response): Promise<void> =
       school_name: resolvedSchool.school_name,
       full_name: String(fullName).trim(),
       student_gmail: cleanEmail,
-      department_id: dept?.department_id || 'b0000000-0000-0000-0000-000000000001',
-      department_code: dept?.department_code || 'CA',
-      department_name: dept?.department_name || 'Department of Computer Applications',
+      department_id: dept?.department_id || resolvedSchool.school_id,
+      department_code: dept?.department_code || resolvedSchool.school_code,
+      department_name: dept?.department_name || resolvedSchool.school_name,
       course_id: course.course_id,
       course_code: course.course_code,
       course_name: course.course_name,
@@ -616,9 +616,9 @@ router.post('/', adminAuth, async (req: Request, res: Response): Promise<void> =
       enrollment_id: `enh-${crypto.randomUUID()}`,
       student_profile_id: profileId,
       student_id: finalStudentId,
-      department_id: dept?.department_id || 'b0000000-0000-0000-0000-000000000001',
-      department_code: dept?.department_code || 'CA',
-      department_name: dept?.department_name || 'Department of Computer Applications',
+      department_id: dept?.department_id || resolvedSchool.school_id,
+      department_code: dept?.department_code || resolvedSchool.school_code,
+      department_name: dept?.department_name || resolvedSchool.school_name,
       course_id: course.course_id,
       course_code: course.course_code,
       course_name: course.course_name,
@@ -880,9 +880,9 @@ router.post('/:id/transfer', adminAuth, async (req: Request, res: Response): Pro
       enrollment_id: `enh-${crypto.randomUUID()}`,
       student_profile_id: student.student_profile_id,
       student_id: student.student_id,
-      department_id: dept?.department_id || 'b0000000-0000-0000-0000-000000000001',
-      department_code: dept?.department_code || 'CA',
-      department_name: dept?.department_name || 'Department of Computer Applications',
+      department_id: dept?.department_id || student.department_id || '',
+      department_code: dept?.department_code || student.department_code || '',
+      department_name: dept?.department_name || student.department_name || '',
       course_id: course.course_id,
       course_code: course.course_code,
       course_name: course.course_name,
@@ -1413,7 +1413,7 @@ router.post('/import/commit', adminAuth, async (req: Request, res: Response): Pr
 
       const registrationNo = r.registrationNo || null;
 
-      const profileId = `20000000-0000-0000-0000-${String(localStudents.length + 11).padStart(12, '0')}`;
+      const profileId = crypto.randomUUID();
       const userUid = `firebase-uid-stu-${enrollmentNo.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
 
       const newStudent: InMemStudentProfile = {
@@ -1428,15 +1428,15 @@ router.post('/import/commit', adminAuth, async (req: Request, res: Response): Pr
         school_name: school.school_name,
         full_name: r.fullName,
         student_gmail: r.studentGmail,
-        department_id: dept?.department_id || 'b0000000-0000-0000-0000-000000000001',
-        department_code: dept?.department_code || 'CA',
-        department_name: dept?.department_name || 'Department of Computer Applications',
-        course_id: course?.course_id || 'c0000000-0000-0000-0000-000000000001',
+        department_id: dept?.department_id || school.school_id,
+        department_code: dept?.department_code || school.school_code,
+        department_name: dept?.department_name || school.school_name,
+        course_id: course?.course_id || r.courseCode,
         course_code: r.courseCode,
-        course_name: course?.course_name || 'Bachelor of Computer Applications',
-        semester_id: sem?.semester_id || 'e0000000-0000-0000-0000-000000000001',
+        course_name: course?.course_name || r.courseCode,
+        semester_id: sem?.semester_id || `sem-${r.semesterNumber}`,
         semester_number: r.semesterNumber,
-        section_id: sec?.section_id || 'f0000000-0000-0000-0000-000000000001',
+        section_id: sec?.section_id || `sec-${r.sectionName}`,
         section_name: r.sectionName,
         roll_number: r.rollNumber,
         phone_number: r.phoneNumber || null,

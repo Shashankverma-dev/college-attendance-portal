@@ -482,24 +482,12 @@
                 <label class="marks-filter-label" for="prov-init-subject" style="display: block; margin-bottom: 4px;">Subject</label>
                 <select id="prov-init-subject" class="admin-select-input" style="width: 100%;">
                   <option value="">No initial subject assignment</option>
-                  <option value="BCA-101">BCA-101: Programming Fundamentals using C (Sem 1)</option>
-                  <option value="BCA-102">BCA-102: Computer Architecture & Digital Logic (Sem 1)</option>
-                  <option value="BCA-103">BCA-103: Discrete Mathematics (Sem 1)</option>
-                  <option value="BCA-104">BCA-104: Technical Communication (Sem 1)</option>
-                  <option value="BCA-301">BCA-301: Object-Oriented Programming with Java (Sem 3)</option>
-                  <option value="BCA-302">BCA-302: Data Structures & Algorithms (Sem 3)</option>
                 </select>
               </div>
               <div>
                 <label class="marks-filter-label" for="prov-init-section" style="display: block; margin-bottom: 4px;">Section & Semester</label>
                 <select id="prov-init-section" class="admin-select-input" style="width: 100%;">
                   <option value="">No initial section</option>
-                  <option value="BCA-Sem1-SecA">BCA Semester 1 - Section A</option>
-                  <option value="BCA-Sem1-SecB">BCA Semester 1 - Section B</option>
-                  <option value="BCA-Sem1-SecC">BCA Semester 1 - Section C</option>
-                  <option value="BCA-Sem1-SecD">BCA Semester 1 - Section D</option>
-                  <option value="BCA-Sem3-SecA">BCA Semester 3 - Section A</option>
-                  <option value="BCA-Sem3-SecB">BCA Semester 3 - Section B</option>
                 </select>
               </div>
             </div>
@@ -2237,31 +2225,25 @@
           return identifiers.some(function(id) {
             if (!id) return false;
             var norm = String(id).trim().toLowerCase();
+            var normClean = norm.replace(/&amp;/g, '&').replace(/\band\b/g, '&').replace(/[^a-z0-9]/g, '');
             return combined.some(function(c) {
               if (!c) return false;
               var cNorm = String(c).trim().toLowerCase();
-              return norm === cNorm || (cNorm.length >= 3 && (norm.indexOf(cNorm) !== -1 || cNorm.indexOf(norm) !== -1));
+              var cClean = cNorm.replace(/&amp;/g, '&').replace(/\band\b/g, '&').replace(/[^a-z0-9]/g, '');
+              return norm === cNorm || (normClean && cClean && normClean === cClean);
             });
           });
         }
 
         function isLegacyMockSchool(d) {
           if (!d) return false;
-          var code = String(d.department_code || d.school_code || d.code || d.id || '').toUpperCase().trim();
-          var name = String(d.department_name || d.school_name || d.name || '').toLowerCase().trim().replace(/&amp;/g, '&');
+          if (d.is_user_created || d.user_created) return false;
           var id = String(d.department_id || d.school_id || d.id || '').toLowerCase().trim();
+          var email = String(d.contact_email || d.email || d.hod_email || d.hodEmail || '').toLowerCase().trim();
+          var dean = String(d.dean_name || d.hod_name || d.hodName || '').trim();
           
-          if (code === 'SST' || code === 'SBS' || code === 'SOM' || (code === 'CA' && (name.indexOf('computer') !== -1 || !name))) {
-            return true;
-          }
-          if (name.indexOf('school of science & technology') !== -1 ||
-              name.indexOf('school of science and technology') !== -1 ||
-              name.indexOf('school of bioscience') !== -1 ||
-              name.indexOf('school of management') !== -1 ||
-              name.indexOf('department of computer applications') !== -1) {
-            return true;
-          }
-          if (id.indexOf('10000000-') !== -1 || id.indexOf('s0000000-') !== -1 || id.indexOf('b0000000-') !== -1) {
+          if ((id.indexOf('10000000-') !== -1 || id.indexOf('s0000000-') !== -1 || id.indexOf('b0000000-') !== -1) &&
+              (dean === 'Dr. Arvind Sharma' || email === 'sst@college.edu')) {
             return true;
           }
           return false;
@@ -2303,7 +2285,7 @@
             var rawName = String(d.department_name || d.school_name || d.name || '').trim();
             var nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
 
-            if (isEntityDeleted(code, rawName, d.department_id, d.school_id, d.id, d.department_code, d.school_code)) {
+            if (!d.is_user_created && !d.user_created && isEntityDeleted(code, rawName, d.department_id, d.school_id, d.id, d.department_code, d.school_code)) {
               return;
             }
 

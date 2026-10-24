@@ -186,21 +186,52 @@
       background: #F8FAFC !important;
     }
 
-    #panel-academic-entities, #panel-subgroups {
-      color: #0F172A;
+    /* Panel toolbar text visibility on #1D3C72 background */
+    #panel-academic-entities h2,
+    #panel-subgroups h2,
+    #panel-schools h2,
+    #panel-academic-entities > div:first-child h2,
+    #panel-subgroups > div:first-child h2,
+    #panel-schools > div:first-child h2,
+    .panel-toolbar h2 {
+      color: #FFFFFF !important;
     }
+    #panel-academic-entities > div:first-child p,
+    #panel-subgroups > div:first-child p,
+    #panel-schools > div:first-child p,
+    .panel-toolbar p {
+      color: #D0DBEB !important;
+    }
+
+    /* Interior card styling */
     #panel-academic-entities h3, #panel-subgroups h3,
     #panel-academic-entities h4, #panel-subgroups h4 {
-      color: #0F172A;
-    }
-    #panel-academic-entities p, #panel-subgroups p {
-      color: #334155;
+      color: #17345C;
     }
     #panel-academic-entities table td, #panel-subgroups table td {
       color: #0F172A !important;
     }
     #panel-academic-entities table td strong, #panel-subgroups table td strong {
       color: #0F172A !important;
+    }
+
+    /* Action buttons inside school cards and tables */
+    .school-card .btn-outline,
+    #schools-cards-container .btn-outline,
+    table .btn-outline,
+    .mapping-table .btn-outline {
+      background: #FFFFFF !important;
+      color: #17345C !important;
+      border: 1px solid var(--slate-border) !important;
+      font-weight: 600 !important;
+    }
+    .school-card .btn-outline:hover,
+    #schools-cards-container .btn-outline:hover,
+    table .btn-outline:hover,
+    .mapping-table .btn-outline:hover {
+      background: #F1F5F9 !important;
+      color: #0F172A !important;
+      border-color: #94A3B8 !important;
     }
 
     /* Print Schedule Stylesheet */
@@ -592,7 +623,7 @@
           </p>
         </div>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <button type="button" class="btn btn-sm" id="btn-import-excel" onclick="openImportModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">
+          <button type="button" class="btn btn-sm" id="btn-import-excel" onclick="openImportModal()" style="background: #0284C7; color: #FFFFFF; font-weight: 700; border: 1px solid #38BDF8; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
               <polyline points="17 8 12 3 7 8"></polyline>
@@ -600,14 +631,14 @@
             </svg>
             Import Timetable (Excel)
           </button>
-          <button type="button" class="btn btn-sm btn-outline" id="btn-new-entry" onclick="openNewEntryModal()">
+          <button type="button" class="btn btn-sm btn-outline" id="btn-new-entry" onclick="openNewEntryModal()" style="color: #FFFFFF; border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.08);">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
             Add Class Period
           </button>
-          <button type="button" class="btn btn-sm btn-outline" id="btn-validate-conflicts" onclick="runConflictCheck()">
+          <button type="button" class="btn btn-sm btn-outline" id="btn-validate-conflicts" onclick="runConflictCheck()" style="color: #FFFFFF; border-color: rgba(255,255,255,0.45); background: rgba(255,255,255,0.08);">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
               <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
               <polyline points="2 17 12 22 22 17"></polyline>
@@ -705,25 +736,25 @@
     <!-- TAB 2: Academic Entities & Rooms -->
     <section id="panel-academic-entities" style="display: none;">
       <!-- Action Toolbar for Tab 2 -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
         <div>
-          <h2 style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Academic Structure & Facilities</h2>
-          <p style="font-size: 13px; color: var(--slate-text-sub); margin: 2px 0 0 0;">Manage teaching departments, degree programmes, classrooms, and specialized laboratories.</p>
+          <h2 style="font-size: 20px; font-weight: 700; color: #FFFFFF !important; margin: 0 0 4px 0;">Academic Structure &amp; Facilities</h2>
+          <p style="font-size: 13.5px; color: #D0DBEB !important; margin: 0;">Manage teaching departments, degree programmes, classrooms, and specialized laboratories.</p>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button type="button" class="btn btn-sm" onclick="openAddDeptModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+          <button type="button" class="btn btn-sm btn-primary" onclick="openAddDeptModal()" style="background: #FFFFFF !important; color: #17345C !important; font-weight: 700; font-size: 13px; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
             + Add School / Department
           </button>
-          <button type="button" class="btn btn-sm" onclick="openAddProgrammeModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+          <button type="button" class="btn btn-sm btn-primary" onclick="openAddProgrammeModal()" style="background: #FFFFFF !important; color: #17345C !important; font-weight: 700; font-size: 13px; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
             + Add Programme
           </button>
-          <button type="button" class="btn btn-sm" onclick="openAddSemesterModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+          <button type="button" class="btn btn-sm btn-primary" onclick="openAddSemesterModal()" style="background: #FFFFFF !important; color: #17345C !important; font-weight: 700; font-size: 13px; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
             + Add Semester
           </button>
-          <button type="button" class="btn btn-sm" onclick="openAddSectionModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+          <button type="button" class="btn btn-sm btn-primary" onclick="openAddSectionModal()" style="background: #FFFFFF !important; color: #17345C !important; font-weight: 700; font-size: 13px; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
             + Add Section
           </button>
-          <button type="button" class="btn btn-sm" onclick="openAddRoomModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+          <button type="button" class="btn btn-sm btn-primary" onclick="openAddRoomModal()" style="background: #FFFFFF !important; color: #17345C !important; font-weight: 700; font-size: 13px; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
             + Add Classroom / Lab
           </button>
         </div>
@@ -809,19 +840,19 @@
     <!-- TAB 3: Semesters, Sections & Practical Subgroups -->
     <section id="panel-subgroups" style="display: none;">
       <!-- Action Toolbar for Tab 3 -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px;">
         <div>
-          <h2 style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Academic Semesters, Sections & Practical Subgroups</h2>
-          <p style="font-size: 13px; color: var(--slate-text-sub); margin: 2px 0 0 0;">Create and manage semesters, academic sections (A, B, C...) and concurrent practical laboratory cohorts (C1, C2...).</p>
+          <h2 style="font-size: 20px; font-weight: 700; color: #FFFFFF !important; margin: 0 0 4px 0;">Academic Semesters, Sections &amp; Practical Subgroups</h2>
+          <p style="font-size: 13.5px; color: #D0DBEB !important; margin: 0;">Create and manage semesters, academic sections (A, B, C...) and concurrent practical laboratory cohorts (C1, C2...).</p>
         </div>
         <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button type="button" class="btn btn-sm" onclick="openAddSemesterModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+          <button type="button" class="btn btn-sm btn-primary" onclick="openAddSemesterModal()" style="background: #FFFFFF !important; color: #17345C !important; font-weight: 700; font-size: 13px; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
             + Add Semester
           </button>
-          <button type="button" class="btn btn-sm" onclick="openAddSectionModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+          <button type="button" class="btn btn-sm btn-primary" onclick="openAddSectionModal()" style="background: #FFFFFF !important; color: #17345C !important; font-weight: 700; font-size: 13px; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
             + Add Section
           </button>
-          <button type="button" class="btn btn-sm" onclick="openAddGroupModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
+          <button type="button" class="btn btn-sm btn-primary" onclick="openAddGroupModal()" style="background: #FFFFFF !important; color: #17345C !important; font-weight: 700; font-size: 13px; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
             + Add Subgroup (C1/C2)
           </button>
         </div>
@@ -903,14 +934,14 @@
     <section id="panel-schools" style="display: none;">
       <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
         <div>
-          <h2 style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0 0 4px 0;">Institutional Schools &amp; Academic Departments</h2>
-          <p style="font-size: 13px; color: var(--slate-text-sub); margin: 0; max-width: 780px;">
+          <h2 style="font-size: 20px; font-weight: 700; color: #FFFFFF !important; margin: 0 0 4px 0;">Institutional Schools &amp; Academic Departments</h2>
+          <p style="font-size: 13.5px; color: #D0DBEB !important; margin: 0; max-width: 780px;">
             Constituent academic schools and departments created directly by administrator. Each school/department is led by an appointed Head of Department (HOD) and offers undergraduate &amp; postgraduate degree programmes.
           </p>
         </div>
         <div style="display: flex; gap: 10px;">
-          <button type="button" class="btn btn-sm" onclick="openAddSchoolModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; font-size: 13px;">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 4px;">
+          <button type="button" class="btn btn-sm btn-primary" onclick="openAddSchoolModal()" style="background: #FFFFFF !important; color: #17345C !important; font-weight: 700; font-size: 13px; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
               <line x1="12" y1="5" x2="12" y2="19"></line>
               <line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
@@ -1524,42 +1555,58 @@
       if (!identifier) return;
       try {
         const list = getDeletedBlacklist();
-        if (Array.isArray(list[category])) {
-          const norm = String(identifier).trim().toLowerCase();
-          list[category] = list[category].filter(x => x !== norm);
-          localStorage.setItem('admin_deleted_entities_blacklist', JSON.stringify(list));
-        }
+        const cats = ['schools', 'departments'];
+        const norm = String(identifier).trim().toLowerCase();
+        const normClean = norm.replace(/&amp;/g, '&').replace(/\band\b/g, '&').replace(/[^a-z0-9]/g, '');
+        cats.forEach(cat => {
+          if (Array.isArray(list[cat])) {
+            list[cat] = list[cat].filter(x => {
+              if (!x) return false;
+              const xNorm = String(x).trim().toLowerCase();
+              const xClean = xNorm.replace(/&amp;/g, '&').replace(/\band\b/g, '&').replace(/[^a-z0-9]/g, '');
+              if (xNorm === norm || (xClean && normClean && xClean === normClean)) return false;
+              if (norm.length >= 3 && xNorm.length >= 3 && (xNorm.includes(norm) || norm.includes(xNorm) || (xClean && normClean && (xClean.includes(normClean) || normClean.includes(xClean))))) return false;
+              return true;
+            });
+          }
+        });
+        localStorage.setItem('admin_deleted_entities_blacklist', JSON.stringify(list));
       } catch (e) {}
     }
 
     function isEntityDeleted(category, ...identifiers) {
+      for (const item of identifiers) {
+        if (item && typeof item === 'object') {
+          if (item.is_user_created || item.user_created) return false;
+        }
+      }
       const list = getDeletedBlacklist();
       const deletedSet = Array.isArray(list[category]) ? list[category] : [];
       if (deletedSet.length === 0) return false;
       return identifiers.some(id => {
         if (!id) return false;
+        if (typeof id === 'object') return false;
         const norm = String(id).trim().toLowerCase();
-        return deletedSet.some(c => norm === c || (c.length >= 3 && (norm.indexOf(c) !== -1 || c.indexOf(norm) !== -1)));
+        if (!norm) return false;
+        return deletedSet.some(c => {
+          if (!c) return false;
+          const cNorm = String(c).trim().toLowerCase();
+          return norm === cNorm;
+        });
       });
     }
 
     function isLegacyMockSchool(d) {
       if (!d) return false;
-      const code = String(d.department_code || d.school_code || d.code || d.id || '').toUpperCase().trim();
-      const name = String(d.department_name || d.school_name || d.name || '').toLowerCase().trim().replace(/&amp;/g, '&');
+      // User-created or user-configured schools are NEVER legacy mock schools
+      if (d.is_user_created || d.user_created) return false;
       const id = String(d.department_id || d.school_id || d.id || '').toLowerCase().trim();
-      
-      if (code === 'SST' || code === 'SBS' || code === 'SOM' || (code === 'CA' && (name.indexOf('computer') !== -1 || !name))) {
-        return true;
-      }
-      if (name.indexOf('school of science & technology') !== -1 ||
-          name.indexOf('school of science and technology') !== -1 ||
-          name.indexOf('school of bioscience') !== -1 ||
-          name.indexOf('school of management') !== -1 ||
-          name.indexOf('department of computer applications') !== -1) {
-        return true;
-      }
-      if (id.indexOf('10000000-') !== -1 || id.indexOf('s0000000-') !== -1 || id.indexOf('b0000000-') !== -1) {
+      const email = String(d.contact_email || d.email || d.hod_email || d.hodEmail || '').toLowerCase().trim();
+      const dean = String(d.dean_name || d.hod_name || d.hodName || '').trim();
+
+      // Only true pre-seeded template records with mock UUIDs and known mock email/dean are considered legacy mock
+      if ((id.startsWith('s0000000-') || id.startsWith('10000000-') || id.startsWith('b0000000-')) &&
+          (dean === 'Dr. Arvind Sharma' || email === 'sst@college.edu')) {
         return true;
       }
       return false;
@@ -1895,11 +1942,87 @@
 
     let loadedSchools = [];
 
+    function syncSchoolToLocalCaches(payload) {
+      if (!payload) return;
+      payload.is_user_created = true;
+      payload.is_active = true;
+
+      const code = normalizeSchoolCode(payload);
+      const name = (payload.school_name || payload.department_name || payload.name || '').trim();
+      const id = (payload.school_id || payload.id || code).toLowerCase();
+
+      removeFromDeletedBlacklist('schools', code);
+      removeFromDeletedBlacklist('schools', name);
+      removeFromDeletedBlacklist('schools', id);
+      removeFromDeletedBlacklist('departments', code);
+      removeFromDeletedBlacklist('departments', name);
+      removeFromDeletedBlacklist('departments', id);
+
+      // 1. Update loadedSchools and admin_schools_list
+      const schIdx = loadedSchools.findIndex(s => 
+        (normalizeSchoolCode(s) === code) ||
+        ((s.school_name || '').trim().toLowerCase() === name.toLowerCase()) ||
+        (s.school_id && s.school_id.toLowerCase() === id)
+      );
+      if (schIdx >= 0) {
+        loadedSchools[schIdx] = Object.assign({}, loadedSchools[schIdx], payload);
+      } else {
+        loadedSchools.push(payload);
+      }
+      loadedSchools = deduplicateSchoolsList(loadedSchools);
+      try { localStorage.setItem('admin_schools_list', JSON.stringify(loadedSchools)); } catch (e) {}
+
+      // 2. Update attendance_institutional_schools_v1
+      try {
+        let inst = JSON.parse(localStorage.getItem('attendance_institutional_schools_v1') || '[]');
+        const iIdx = inst.findIndex(s => (s.school_code || '').toUpperCase() === code || (s.school_name || '').toLowerCase().trim() === name.toLowerCase());
+        if (iIdx >= 0) inst[iIdx] = Object.assign({}, inst[iIdx], payload);
+        else inst.push(payload);
+        inst = deduplicateSchoolsList(inst);
+        localStorage.setItem('attendance_institutional_schools_v1', JSON.stringify(inst));
+      } catch (e) {}
+
+      // 3. Update attendance_academic_departments_v2
+      try {
+        let depts = JSON.parse(localStorage.getItem('attendance_academic_departments_v2') || '[]');
+        const dIdx = depts.findIndex(d => (d.code || d.department_code || '').toUpperCase() === code || (d.name || d.department_name || '').toLowerCase().trim() === name.toLowerCase());
+        const dEntry = {
+          id: id,
+          code: code,
+          name: name,
+          department_code: code,
+          department_name: name,
+          programs: payload.programs || payload.description || '',
+          hodName: payload.hod_name || payload.dean_name || '',
+          hodEmail: payload.hod_email || payload.contact_email || '',
+          facultyCount: payload.faculty_count || 0,
+          sessions: 0,
+          attendanceRate: 100.0,
+          is_user_created: true
+        };
+        if (dIdx >= 0) depts[dIdx] = Object.assign({}, depts[dIdx], dEntry);
+        else depts.push(dEntry);
+        depts = deduplicateDepartmentsList(depts);
+        localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(depts));
+      } catch (e) {}
+
+      // 4. Update admin_academic_state.departments
+      if (academicState && Array.isArray(academicState.departments)) {
+        const adIdx = academicState.departments.findIndex(d => (d.code || '').toUpperCase() === code || (d.name || '').toLowerCase().trim() === name.toLowerCase());
+        const adEntry = { id: id, code: code, name: name, is_user_created: true };
+        if (adIdx >= 0) academicState.departments[adIdx] = Object.assign({}, academicState.departments[adIdx], adEntry);
+        else academicState.departments.push(adEntry);
+        academicState.departments = deduplicateDepartmentsList(academicState.departments);
+        try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
+      }
+    }
+
     async function loadSchoolsGrid() {
       const container = document.getElementById('schools-cards-container');
       if (!container) return;
-      container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: var(--slate-text-sub);">Loading university constituent schools...</div>';
+      container.innerHTML = '<div style="grid-column: 1 / -1; text-align: center; padding: 24px; color: #D0DBEB;">Loading university constituent schools...</div>';
 
+      let schools = [];
       try {
         if (getApiBase() !== null) {
           const res = await fetch(getApiBase() + '/api/admin/schools', {
@@ -1907,37 +2030,72 @@
           });
           const data = await res.json();
           if (data.success && Array.isArray(data.schools)) {
-            const cleanSchools = deduplicateSchoolsList(data.schools)
-              .filter(s => !isLegacyMockSchool(s) && !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
-            renderSchoolsData(cleanSchools);
-            return;
+            schools = data.schools;
           }
         }
       } catch (err) {
         console.warn('Backend unavailable, checking client schools registry:', err);
       }
 
+      // Also read stored schools from localStorage keys
       let storedSchools = [];
+      try { storedSchools = JSON.parse(localStorage.getItem('admin_schools_list') || '[]'); } catch (e) {}
       try {
-        storedSchools = JSON.parse(localStorage.getItem('admin_schools_list') || '[]');
-      } catch (e) {}
+        const instSchools = JSON.parse(localStorage.getItem('attendance_institutional_schools_v1') || '[]');
+        if (Array.isArray(instSchools) && instSchools.length > 0) {
+          storedSchools = storedSchools.concat(instSchools);
+        }
+      } catch(e) {}
+      try {
+        const depts = JSON.parse(localStorage.getItem('attendance_academic_departments_v2') || '[]');
+        if (Array.isArray(depts) && depts.length > 0) {
+          storedSchools = storedSchools.concat(depts.map(d => ({
+            school_id: d.id || d.department_id || (d.code || '').toLowerCase(),
+            school_code: d.code || d.department_code || '',
+            school_name: d.name || d.department_name || '',
+            description: d.programs || '',
+            programs: d.programs || '',
+            dean_name: d.hodName || d.hod_name || '',
+            contact_email: d.hodEmail || d.hod_email || '',
+            department_count: 1,
+            course_count: 1,
+            is_active: true,
+            is_user_created: true
+          })));
+        }
+      } catch(e) {}
+      if (academicState && Array.isArray(academicState.departments) && academicState.departments.length > 0) {
+        storedSchools = storedSchools.concat(academicState.departments.map(d => ({
+          school_id: d.id || d.department_id || (d.code || '').toLowerCase(),
+          school_code: d.code || d.department_code || '',
+          school_name: d.name || d.department_name || '',
+          description: d.programs || `Constituent school for ${d.name || d.code}`,
+          programs: d.programs || '',
+          dean_name: d.hodName || d.hod_name || 'Appointed Dean / Director',
+          contact_email: d.hodEmail || d.hod_email || '',
+          department_count: 1,
+          course_count: 1,
+          is_active: true,
+          is_user_created: true
+        })));
+      }
 
-      storedSchools = deduplicateSchoolsList(storedSchools)
-        .filter(s => !isLegacyMockSchool(s) && !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
-      try { localStorage.setItem('admin_schools_list', JSON.stringify(storedSchools)); } catch (e) {}
+      const combined = deduplicateSchoolsList(schools.concat(storedSchools));
+      const cleanSchools = combined.filter(s => !isLegacyMockSchool(s) && (s.is_user_created || s.user_created || !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name)));
+      try { localStorage.setItem('admin_schools_list', JSON.stringify(cleanSchools)); } catch (e) {}
 
-      renderSchoolsData(storedSchools);
+      renderSchoolsData(cleanSchools);
     }
 
     function renderSchoolsData(schools) {
       const container = document.getElementById('schools-cards-container');
       if (!container) return;
-      loadedSchools = deduplicateSchoolsList(schools).filter(s => !isLegacyMockSchool(s) && !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
+      loadedSchools = deduplicateSchoolsList(schools).filter(s => !isLegacyMockSchool(s) && (s.is_user_created || s.user_created || !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name)));
 
       const kpiSchools = document.getElementById('kpi-schools-count');
       if (kpiSchools) kpiSchools.textContent = loadedSchools.length;
-      const totalDepts = loadedSchools.reduce((acc, s) => acc + (s.department_count || 0), 0);
-      const totalProgs = loadedSchools.reduce((acc, s) => acc + (s.course_count || 0), 0);
+      const totalDepts = loadedSchools.reduce((acc, s) => acc + (s.department_count || 1), 0);
+      const totalProgs = loadedSchools.reduce((acc, s) => acc + (s.course_count || 1), 0);
       const totalStudents = loadedSchools.reduce((acc, s) => acc + (s.student_count || 0), 0);
       
       const kpiDepts = document.getElementById('kpi-depts-count');
@@ -1952,14 +2110,15 @@
         container.innerHTML = `
           <div style="grid-column: 1 / -1; background: #FFFFFF; border: 1px dashed var(--slate-border); border-radius: var(--radius); padding: 48px 24px; text-align: center;">
             <div style="font-size: 16px; font-weight: 700; color: #17345C; margin-bottom: 6px;">No Schools or Academic Departments Registered</div>
-            <p style="font-size: 13px; color: var(--slate-text-sub); margin: 0 0 16px 0;">All default mock schools have been deleted. Click below to add an official institutional school.</p>
-            <button type="button" class="btn btn-primary" onclick="openAddSchoolModal()">+ Add School / Department</button>
+            <p style="font-size: 13px; color: var(--slate-text-sub); margin: 0 0 16px 0;">No active schools or academic departments found. Click below to add an official institutional school.</p>
+            <button type="button" class="btn btn-primary" onclick="openAddSchoolModal()" style="background: #1D3C72 !important; color: #FFFFFF !important; border: 1px solid #1D3C72 !important; font-weight: 700; padding: 10px 22px; cursor: pointer; border-radius: 4px;">+ Add School / Department</button>
           </div>
         `;
         return;
       }
-      schools.forEach(school => {
+      loadedSchools.forEach(school => {
         const card = document.createElement('div');
+        card.className = 'card school-card';
         card.style.cssText = 'background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 1px 3px rgba(0,0,0,0.05);';
 
         const activeBadge = school.is_active !== false
@@ -1992,11 +2151,11 @@
 
             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center; border-top: 1px solid var(--slate-border); border-bottom: 1px solid var(--slate-border); padding: 10px 0; margin-bottom: 16px;">
               <div>
-                <div style="font-size: 16px; font-weight: 800; color: #1D3C72;">${school.department_count || 0}</div>
+                <div style="font-size: 16px; font-weight: 800; color: #1D3C72;">${school.department_count || 1}</div>
                 <div style="font-size: 10px; color: #334155; font-weight: 700; text-transform: uppercase;">Depts</div>
               </div>
               <div>
-                <div style="font-size: 16px; font-weight: 800; color: #0284C7;">${school.course_count || 0}</div>
+                <div style="font-size: 16px; font-weight: 800; color: #0284C7;">${school.course_count || 1}</div>
                 <div style="font-size: 10px; color: #334155; font-weight: 700; text-transform: uppercase;">Courses</div>
               </div>
               <div>
@@ -2011,7 +2170,7 @@
           </div>
 
           <div style="display: flex; gap: 8px; justify-content: flex-end;">
-            <button type="button" class="btn btn-sm btn-outline" onclick="openEditSchoolModal('${school.school_id}')" style="font-size: 12px; padding: 4px 10px;">
+            <button type="button" class="btn btn-sm btn-outline" onclick="openEditSchoolModal('${school.school_id}')" style="font-size: 12px; padding: 4px 10px; background: #FFFFFF; color: #17345C; border: 1px solid var(--slate-border);">
               Edit
             </button>
             <button type="button" class="btn btn-sm btn-outline" onclick="deactivateSchool('${school.school_id}')" style="font-size: 12px; padding: 4px 10px; color: #D97706; border-color: #FCD34D;">
@@ -2050,6 +2209,14 @@
       const dean = document.getElementById('add-school-dean').value.trim();
       const email = document.getElementById('add-school-email').value.trim();
 
+      if (!code || !name) {
+        errEl.style.display = 'block';
+        errEl.textContent = 'School code and school name are required.';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create School / Department';
+        return;
+      }
+
       removeFromDeletedBlacklist('schools', code);
       removeFromDeletedBlacklist('schools', name);
       removeFromDeletedBlacklist('departments', code);
@@ -2061,17 +2228,18 @@
         department_code: code,
         school_name: name,
         department_name: name,
-        description: desc,
-        programs: desc,
-        dean_name: dean,
-        hod_name: dean,
-        contact_email: email,
-        hod_email: email,
+        description: desc || `Constituent school for ${name}`,
+        programs: desc || `${code} Degree Programmes`,
+        dean_name: dean || 'Appointed Dean / Director',
+        hod_name: dean || 'Appointed Dean / Director',
+        contact_email: email || `office.${code.toLowerCase()}@college.edu`,
+        hod_email: email || `office.${code.toLowerCase()}@college.edu`,
         department_count: 1,
         course_count: 1,
         student_count: 0,
         faculty_count: 0,
-        is_active: true
+        is_active: true,
+        is_user_created: true
       };
 
       try {
@@ -2086,9 +2254,14 @@
             submitBtn.disabled = false;
             submitBtn.textContent = 'Create School / Department';
             closeAddSchoolModal();
+            const created = Object.assign({}, payload, data.school || {});
+            created.is_user_created = true;
+            created.is_active = true;
+            syncSchoolToLocalCaches(created);
             await loadSchoolsGrid();
             await loadAcademicEntities();
-            alert('School / Department successfully registered: ' + payload.school_name);
+            switchTab('schools');
+            showSuccessBanner('School / Academic Department "' + payload.school_name + '" created successfully.');
             return;
           }
         }
@@ -2097,23 +2270,15 @@
       }
 
       // Offline / Firebase fallback
-      const cleanCode = normalizeSchoolCode(payload);
-      const cleanName = (payload.school_name || '').trim().toLowerCase();
-      const existingIdx = loadedSchools.findIndex(s => 
-        (normalizeSchoolCode(s) === cleanCode) ||
-        (s.school_name && s.school_name.toLowerCase().trim() === cleanName)
-      );
-      if (existingIdx >= 0) {
-        loadedSchools[existingIdx] = Object.assign({}, loadedSchools[existingIdx], payload);
-      } else {
-        loadedSchools.push(payload);
-      }
-      loadedSchools = deduplicateSchoolsList(loadedSchools);
-      try { localStorage.setItem('admin_schools_list', JSON.stringify(loadedSchools)); } catch (e) {}
+      syncSchoolToLocalCaches(payload);
       submitBtn.disabled = false;
       submitBtn.textContent = 'Create School / Department';
       closeAddSchoolModal();
       renderSchoolsData(loadedSchools);
+      if (typeof renderDepartmentsTable === 'function') {
+        renderDepartmentsTable();
+      }
+      switchTab('schools');
       showSuccessBanner('School / Academic Department "' + payload.school_name + '" created successfully.');
     }
 
@@ -2938,7 +3103,7 @@
                   name: d.name || d.department_name
                 })))
               : (academicState.departments || defaultInstitutionalState.departments)
-            ).filter(d => !isLegacyMockSchool(d) && !isEntityDeleted('departments', d.id, d.code, d.name) && !isEntityDeleted('schools', d.id, d.code, d.name));
+            ).filter(d => !isLegacyMockSchool(d) && (d.is_user_created || (!isEntityDeleted('departments', d.id, d.code, d.name) && !isEntityDeleted('schools', d.id, d.code, d.name))));
 
             academicState.courses = (Array.isArray(data.courses)
               ? data.courses.map(c => ({
@@ -3002,6 +3167,34 @@
               ? data.subjects
               : (academicState.subjects || defaultInstitutionalState.subjects);
 
+            // Merge institutional schools into academicState.departments
+            try {
+              let localSchoolsList = [];
+              try { localSchoolsList = JSON.parse(localStorage.getItem('admin_schools_list') || '[]'); } catch (e) {}
+              try {
+                const inst = JSON.parse(localStorage.getItem('attendance_institutional_schools_v1') || '[]');
+                if (Array.isArray(inst)) localSchoolsList = localSchoolsList.concat(inst);
+              } catch (e) {}
+              if (Array.isArray(loadedSchools) && loadedSchools.length > 0) {
+                localSchoolsList = localSchoolsList.concat(loadedSchools);
+              }
+              localSchoolsList.forEach(sch => {
+                if (!sch) return;
+                const sCode = normalizeSchoolCode(sch);
+                const sName = (sch.school_name || sch.name || sch.department_name || '').trim();
+                const sId = sch.school_id || sch.id || sCode.toLowerCase();
+                if (sCode && !academicState.departments.some(d => (d.code && d.code.toUpperCase() === sCode) || (d.name && d.name.toLowerCase() === sName.toLowerCase()))) {
+                  academicState.departments.push({
+                    id: sId,
+                    code: sCode,
+                    name: sName,
+                    is_user_created: true
+                  });
+                }
+              });
+              academicState.departments = deduplicateDepartmentsList(academicState.departments);
+            } catch (e) {}
+
             try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
 
             renderDepartmentsTable();
@@ -3027,7 +3220,7 @@
 
       if (savedState && typeof savedState === 'object') {
         savedState.departments = deduplicateDepartmentsList(savedState.departments || [])
-          .filter(d => !isLegacyMockSchool(d) && !isEntityDeleted('departments', d.id, d.code, d.name) && !isEntityDeleted('schools', d.id, d.code, d.name));
+          .filter(d => !isLegacyMockSchool(d) && (d.is_user_created || (!isEntityDeleted('departments', d.id, d.code, d.name) && !isEntityDeleted('schools', d.id, d.code, d.name))));
         savedState.courses = (savedState.courses || [])
           .filter(c => !isEntityDeleted('courses', c.id, c.code, c.name));
         savedState.semesters = (savedState.semesters || [])
@@ -3934,6 +4127,10 @@
           }
         } catch (e) {}
 
+        if (typeof syncSchoolToLocalCaches === 'function') {
+          syncSchoolToLocalCaches(payload);
+        }
+
         if (data && data.success) {
           closeAddDeptModal();
           await loadAcademicEntities();
@@ -3948,14 +4145,17 @@
       }
 
       // Offline / Firebase fallback
+      if (typeof syncSchoolToLocalCaches === 'function') {
+        syncSchoolToLocalCaches(payload);
+      }
       const exDeptIdx = academicState.departments.findIndex(d => 
         (d.code && d.code.toUpperCase() === code) || 
         (d.name && d.name.toLowerCase().trim() === name.toLowerCase())
       );
       if (exDeptIdx >= 0) {
-        academicState.departments[exDeptIdx] = Object.assign({}, academicState.departments[exDeptIdx], { id: department_id, code, name });
+        academicState.departments[exDeptIdx] = Object.assign({}, academicState.departments[exDeptIdx], { id: department_id, code, name, is_user_created: true });
       } else {
-        academicState.departments.push({ id: department_id, code, name });
+        academicState.departments.push({ id: department_id, code, name, is_user_created: true });
       }
       academicState.departments = deduplicateDepartmentsList(academicState.departments);
       try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}

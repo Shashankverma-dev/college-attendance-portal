@@ -854,14 +854,16 @@
           var tCode = (code || '').toString().trim().toUpperCase();
           var tName = (name || '').toString().trim().toUpperCase();
           var tId = (id || '').toString().trim();
+          var tClean = tName.replace(/&AMP;/g, '&').replace(/\bAND\b/g, '&').replace(/[^A-Z0-9]/g, '');
           return list.some(function (item) {
             if (!item) return false;
             var iId = (item.id || '').toString().trim();
             var iCode = (item.code || '').toString().trim().toUpperCase();
             var iName = (item.name || '').toString().trim().toUpperCase();
+            var iClean = iName.replace(/&AMP;/g, '&').replace(/\bAND\b/g, '&').replace(/[^A-Z0-9]/g, '');
             if (tId && iId && tId === iId) return true;
-            if (tCode && iCode && (tCode === iCode || tCode.indexOf(iCode) !== -1 || iCode.indexOf(tCode) !== -1)) return true;
-            if (tName && iName && (tName === iName || tName.indexOf(iName) !== -1 || iName.indexOf(tName) !== -1)) return true;
+            if (tCode && iCode && tCode === iCode) return true;
+            if (tName && iName && (tName === iName || (tClean && iClean && tClean === iClean))) return true;
             return false;
           });
         } catch (e) {
@@ -871,21 +873,13 @@
 
       function isLegacyMockSchool(d) {
         if (!d) return false;
-        var code = String(d.department_code || d.school_code || d.code || d.id || '').toUpperCase().trim();
-        var name = String(d.department_name || d.school_name || d.name || '').toLowerCase().trim().replace(/&amp;/g, '&');
+        if (d.is_user_created || d.user_created) return false;
         var id = String(d.department_id || d.school_id || d.id || '').toLowerCase().trim();
+        var email = String(d.contact_email || d.email || d.hod_email || d.hodEmail || '').toLowerCase().trim();
+        var dean = String(d.dean_name || d.hod_name || d.hodName || '').trim();
         
-        if (code === 'SST' || code === 'SBS' || code === 'SOM' || (code === 'CA' && (name.indexOf('computer') !== -1 || !name))) {
-          return true;
-        }
-        if (name.indexOf('school of science & technology') !== -1 ||
-            name.indexOf('school of science and technology') !== -1 ||
-            name.indexOf('school of bioscience') !== -1 ||
-            name.indexOf('school of management') !== -1 ||
-            name.indexOf('department of computer applications') !== -1) {
-          return true;
-        }
-        if (id.indexOf('10000000-') !== -1 || id.indexOf('s0000000-') !== -1 || id.indexOf('b0000000-') !== -1) {
+        if ((id.indexOf('10000000-') !== -1 || id.indexOf('s0000000-') !== -1 || id.indexOf('b0000000-') !== -1) &&
+            (dean === 'Dr. Arvind Sharma' || email === 'sst@college.edu')) {
           return true;
         }
         return false;
@@ -911,8 +905,8 @@
             if (Array.isArray(saved.departments)) {
               academicState.departments = saved.departments.filter(function (d) {
                 return !isLegacyMockSchool(d) &&
-                       !isEntityDeleted('departments', d.id, d.code, d.name) &&
-                       !isEntityDeleted('schools', d.school_id, d.school_code, d.school_name);
+                       (d.is_user_created || d.user_created || (!isEntityDeleted('departments', d.id, d.code, d.name) &&
+                        !isEntityDeleted('schools', d.school_id, d.school_code, d.school_name)));
               });
             }
             if (Array.isArray(saved.courses)) {
@@ -1212,52 +1206,9 @@
         populateSubjects();
       }
 
-      function getStandardDefaultSubjects(courseCode, semNum) {
-        if (courseCode === 'BCA') {
-          if (semNum === '1') {
-            return [
-              { code: 'BCA-101', name: 'Programming Fundamentals using C' },
-              { code: 'BCA-102', name: 'Computer Architecture & Digital Logic' },
-              { code: 'BCA-103', name: 'Discrete Mathematics' },
-              { code: 'BCA-104', name: 'Technical Communication' }
-            ];
-          }
-          if (semNum === '5') {
-            return [
-              { code: 'BCA-501', name: 'Python Programming' },
-              { code: 'BCA-502', name: 'Software Engineering & Agile' },
-              { code: 'BCA-503', name: 'Computer Networks' },
-              { code: 'BCA-504', name: 'Web Technologies & Applications' }
-            ];
-          }
-        }
-        if (courseCode === 'BTECH') {
-          if (semNum === '1') {
-            return [
-              { code: 'BTECH-101', name: 'Engineering Mathematics I' },
-              { code: 'BTECH-102', name: 'Engineering Physics' },
-              { code: 'BTECH-103', name: 'Basic Electrical Engineering' },
-              { code: 'BTECH-104', name: 'Problem Solving & C Programming' }
-            ];
-          }
-          if (semNum === '3') {
-            return [
-              { code: 'BTECH-301', name: 'Data Structures & Algorithms' },
-              { code: 'BTECH-302', name: 'Object Oriented Programming in Java' },
-              { code: 'BTECH-303', name: 'Database Management Systems' },
-              { code: 'BTECH-304', name: 'Discrete Mathematical Structures' }
-            ];
-          }
-        }
-        return [
-          { code: courseCode + '-' + semNum + '01', name: 'Core Theory & Computation I' },
-          { code: courseCode + '-' + semNum + '02', name: 'Core Theory & Computation II' }
-        ];
-      }
-
       function populateSubjects() {
         if (!filterSubject) return;
-        var courseCode = normCourse(filterCourse ? filterCourse.value : 'BCA');
+        var courseCode = normCourse(filterCourse ? filterCourse.value : '');
         var semNum = filterSem ? filterSem.value : '1';
         var secName = filterSection ? filterSection.value : 'A';
         var prevSubj = filterSubject.value;
@@ -1307,11 +1258,9 @@
           }
         });
 
-        // 5. Standard defaults if none found
         if (Object.keys(subjectsMap).length === 0) {
-          getStandardDefaultSubjects(courseCode, semNum).forEach(function (s) {
-            addSubject(s.code, s.name);
-          });
+          filterSubject.innerHTML = '<option value="">-- No Subjects Registered (Create in Timetable) --</option>';
+          return;
         }
 
         var sortedSubs = Object.keys(subjectsMap).map(function (k) { return subjectsMap[k]; });

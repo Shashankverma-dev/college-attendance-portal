@@ -136,26 +136,14 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
       matchedUser = {
         uid: 'usr-admin-001',
         id: 'ADM-001',
-        name: 'Dr. Arvind Sharma',
+        name: 'System Administrator',
         email: 'admin@college.edu',
         role: 'GLOBAL_ADMIN',
         departmentId: null,
         status: 'ACTIVE',
       };
     }
-    // B. Head of Department (HOD) fixture
-    else if (lowerId === 'hod.ca@college.edu' || upperId === 'HOD-CA-01') {
-      matchedUser = {
-        uid: 'usr-hod-ca-001',
-        id: 'HOD-CA-01',
-        name: 'Dr. K. R. Ramanathan',
-        email: 'hod.ca@college.edu',
-        role: 'HOD',
-        departmentId: 'b0000000-0000-0000-0000-000000000001',
-        status: 'ACTIVE',
-      };
-    }
-    // C. Dynamically provisioned department HODs
+    // B. Dynamically provisioned department HODs
     else if (localDepartments.some((d) => 
       (d.hod_email && d.hod_email.toLowerCase() === lowerId) ||
       (d.hod_user_id && d.hod_user_id.toLowerCase() === lowerId)
@@ -559,14 +547,15 @@ router.get('/me', authenticate, async (req: Request, res: Response): Promise<voi
     } else if (role === 'GLOBAL_ADMIN') {
       profileData = {
         administrative_staff_id: 'ADM-001',
-        full_name: 'Dr. Arvind Sharma',
-        designation: 'Dean of Academic Affairs & Global Admin',
+        full_name: 'System Administrator',
+        designation: 'Institutional Administrator',
       };
     } else if (role === 'HOD') {
+      const dept = localDepartments[0];
       profileData = {
-        administrative_staff_id: 'HOD-CA-01',
-        full_name: 'Dr. K. R. Ramanathan',
-        designation: 'Head of Department (Computer Applications)',
+        administrative_staff_id: dept ? `HOD-${dept.department_code}` : 'HOD-01',
+        full_name: dept?.hod_name || 'Head of Department',
+        designation: `Head of Department (${dept?.department_name || 'Academic'})`,
       };
     }
 
@@ -927,10 +916,16 @@ router.get('/profile-by-id', async (req: Request, res: Response): Promise<void> 
         return;
       }
     } else if (isHOD) {
-      res.json({ found: true, name: 'Dr. K. R. Ramanathan', id: institutionalId, role: 'hod', initials: 'KR' });
-      return;
+      const deptHod = localDepartments.find((d) => 
+        (d.hod_user_id && d.hod_user_id.toUpperCase() === institutionalId) ||
+        (d.department_code && `HOD-${d.department_code.toUpperCase()}` === institutionalId)
+      );
+      if (deptHod) {
+        res.json({ found: true, name: deptHod.hod_name || 'Head of Department', id: institutionalId, role: 'hod', initials: getInitials(deptHod.hod_name || 'HD') });
+        return;
+      }
     } else if (isAdmin) {
-      res.json({ found: true, name: 'Dr. Arvind Sharma', id: institutionalId, role: 'admin', initials: 'AS' });
+      res.json({ found: true, name: 'System Administrator', id: institutionalId, role: 'admin', initials: 'SA' });
       return;
     }
 

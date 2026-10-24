@@ -6,6 +6,7 @@ import { IdempotencyService } from '../services/idempotency';
 import { localTimetables, localSectionGroups, TimetableEntry, DayOfWeek } from '../services/timetable';
 import { localStudents } from '../services/bulk-onboard';
 import { QRAttendanceService } from '../services/qr-attendance';
+import { localSections, localSubjects, localTeachers } from './admin.routes';
 
 const router = Router();
 
@@ -360,8 +361,12 @@ router.post(
       }
 
       // In-Memory Mode
-      const targetSectionId = sectionId || 'f0000000-0000-0000-0000-000000000001';
-      const targetSubjectId = subjectId || '10000000-0000-0000-0000-000000000001';
+      const matchedSection = sectionId ? localSections.find((s) => s.section_id === sectionId) : localSections[0];
+      const matchedSubject = subjectId ? localSubjects.find((s) => s.subject_id === subjectId) : localSubjects[0];
+      const matchedFaculty = localTeachers.find((t) => t.user_uid === req.user?.uid || t.official_email === req.user?.email) || localTeachers[0];
+
+      const targetSectionId = sectionId || matchedSection?.section_id || '';
+      const targetSubjectId = subjectId || matchedSubject?.subject_id || '';
       const targetSessionDate = sessionDate || new Date().toISOString().split('T')[0];
       const targetStartTime = startTime || '10:00';
 
@@ -389,12 +394,12 @@ router.post(
       const newSession: InMemAttendanceSession = {
         session_id: newSessionId,
         section_id: targetSectionId,
-        section_name: 'A',
+        section_name: matchedSection?.section_name || 'A',
         subject_id: targetSubjectId,
-        subject_code: 'BCA-101',
-        subject_name: 'Programming Fundamentals using C',
-        conducting_faculty_id: '30000000-0000-0000-0000-000000000001',
-        conducting_faculty_name: 'Dr. Meenakshi Sundaram',
+        subject_code: matchedSubject?.subject_code || 'SUB-01',
+        subject_name: matchedSubject?.subject_name || 'Subject',
+        conducting_faculty_id: matchedFaculty?.faculty_profile_id || '',
+        conducting_faculty_name: matchedFaculty?.full_name || req.user?.email || 'Conducting Faculty',
         session_date: targetSessionDate,
         start_time: targetStartTime,
         end_time: endTime || '11:00',
@@ -404,7 +409,12 @@ router.post(
       };
       localAttendanceSessions.push(newSession);
 
-      const rosterRecords: InMemAttendanceRecord[] = localStudents.map((stu, idx) => ({
+      const sectionStudents = targetSectionId
+        ? localStudents.filter((stu) => stu.section_id === targetSectionId || (stu as any).current_section_id === targetSectionId)
+        : localStudents;
+      const targetStudents = sectionStudents.length > 0 ? sectionStudents : localStudents;
+
+      const rosterRecords: InMemAttendanceRecord[] = targetStudents.map((stu, idx) => ({
         record_id: `rec-${newSessionId}-${idx + 1}`,
         session_id: newSessionId,
         student_profile_id: stu.student_profile_id,

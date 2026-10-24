@@ -83,26 +83,26 @@ function getSyntheticProfile(uid: string, role: string, email?: string) {
       personalInfo: {
         fullName: studentName,
         identifier: studentId,
-        registrationId: matchedStudent?.registration_id || 'REG-2026-BCA-001',
-        rollNumber: matchedStudent?.roll_number || '01',
+        registrationId: matchedStudent?.registration_id || '',
+        rollNumber: matchedStudent?.roll_number || '',
         email: studentEmail,
-        phoneNumber: matchedStudent?.phone_number || '+91 98765 43210',
-        bloodGroup: matchedStudent?.blood_group || 'O+',
-        parentGuardianContact: matchedStudent?.parent_guardian_contact || '+91 98765 43211',
+        phoneNumber: matchedStudent?.phone_number || '',
+        bloodGroup: matchedStudent?.blood_group || '',
+        parentGuardianContact: matchedStudent?.parent_guardian_contact || '',
         profilePhotoUrl: null,
         photoNotice: 'Profile photo updates must be processed through the Registrar ID Card Division.',
       },
       institutionalInfo: {
-        program: matchedStudent?.course_code === 'BCA' ? 'Bachelor of Computer Applications' : 'Undergraduate Degree',
-        programCode: matchedStudent?.course_code || 'BCA',
-        department: 'Department of Computer Applications',
-        departmentCode: 'CA',
-        academicYear: 'BCA 1st Year',
-        semester: `Semester ${matchedStudent?.semester_number || 1}`,
+        program: matchedStudent?.course_name || matchedStudent?.course_code || '',
+        programCode: matchedStudent?.course_code || '',
+        department: matchedStudent?.department_name || '',
+        departmentCode: matchedStudent?.department_code || '',
+        academicYear: matchedStudent?.course_code ? `${matchedStudent.course_code} Academic Year` : '',
+        semester: matchedStudent?.semester_number ? `Semester ${matchedStudent.semester_number}` : '',
         semesterNumber: matchedStudent?.semester_number || 1,
-        section: `Section ${matchedStudent?.section_name || 'A'}`,
-        rollNumber: matchedStudent?.roll_number || '01',
-        enrollmentStatus: 'ACTIVE',
+        section: matchedStudent?.section_name ? `Section ${matchedStudent.section_name}` : '',
+        rollNumber: matchedStudent?.roll_number || '',
+        enrollmentStatus: matchedStudent?.enrollment_status || 'ACTIVE',
         termStartDate: '2026-08-01',
       },
       editableFields: ['phoneNumber', 'parentGuardianContact', 'bloodGroup'],
@@ -142,16 +142,16 @@ function getSyntheticProfile(uid: string, role: string, email?: string) {
       personalInfo: {
         fullName: teacherName,
         identifier: teacherId,
-        designation: matchedTeacher?.designation || 'Associate Professor',
+        designation: matchedTeacher?.designation || 'Faculty Member',
         email: teacherEmail,
-        contactPhone: matchedTeacher?.contact_phone || '+91 98765 00001',
-        officeLocation: matchedTeacher?.office_location || 'Academic Block B, Room 304',
+        contactPhone: matchedTeacher?.contact_phone || '',
+        officeLocation: matchedTeacher?.office_location || '',
         profilePhotoUrl: null,
         photoNotice: 'Faculty directory photos are maintained by the Dean of Faculty Affairs.',
       },
       institutionalInfo: {
-        department: matchedTeacher?.department_name || 'Department of Computer Applications',
-        departmentCode: matchedTeacher?.department_code || 'CA',
+        department: matchedTeacher?.department_name || '',
+        departmentCode: matchedTeacher?.department_code || '',
         assignedSubjects: teacherAssignments.map((a) => ({
           subjectCode: a.subject_code,
           subjectName: a.subject_name,
@@ -168,9 +168,9 @@ function getSyntheticProfile(uid: string, role: string, email?: string) {
   }
 
   const isAdmin = role === 'GLOBAL_ADMIN';
-  const staffName = isAdmin ? 'Dr. Arvind Sharma' : 'Dr. K. R. Ramanathan';
-  const staffId = isAdmin ? 'ADM-001' : 'HOD-CA-01';
-  const staffEmail = email || (isAdmin ? 'admin@college.edu' : 'hod.ca@college.edu');
+  const staffName = isAdmin ? 'System Administrator' : 'Head of Department';
+  const staffId = isAdmin ? 'ADM-001' : 'HOD-01';
+  const staffEmail = email || (isAdmin ? 'admin@college.edu' : 'hod@college.edu');
 
   return {
     uid,
@@ -186,13 +186,13 @@ function getSyntheticProfile(uid: string, role: string, email?: string) {
       fullName: staffName,
       identifier: staffId,
       email: staffEmail,
-      phoneNumber: '+91 98765 11111',
+      phoneNumber: '',
       profilePhotoUrl: null,
       photoNotice: 'Administrative credentials and photos are maintained by Central Administration.',
     },
     institutionalInfo: {
-      department: isAdmin ? 'Central Administration' : 'Department of Computer Applications',
-      departmentCode: isAdmin ? 'ADMIN' : 'CA',
+      department: isAdmin ? 'Central Administration' : 'Academic Department',
+      departmentCode: isAdmin ? 'ADMIN' : 'DEPT',
       permissionScope: isAdmin ? 'GLOBAL_ADMIN' : 'HOD_DEPT_ADMIN',
       oversightScope: isAdmin ? 'Institution-Wide Management & Audit Authority' : 'Departmental Academic & Attendance Oversight',
     },
@@ -329,16 +329,16 @@ router.get('/me', authenticate, async (req: Request, res: Response): Promise<voi
         },
         personalInfo: {
           fullName: fp.full_name || 'Faculty Member',
-          identifier: fp.faculty_staff_id || 'FAC-201',
-          designation: fp.designation || 'Associate Professor',
-          officeLocation: fp.office_location || 'Academic Block B, Room 304',
-          contactPhone: fp.contact_phone || '+1 (555) 019-3321',
+          identifier: fp.faculty_staff_id || '',
+          designation: fp.designation || 'Faculty Member',
+          officeLocation: fp.office_location || '',
+          contactPhone: fp.contact_phone || '',
           profilePhotoUrl: fp.profile_photo_url || null,
           photoNotice: 'Faculty directory photos are maintained by the Dean of Faculty Affairs.',
         },
         institutionalInfo: {
-          department: fp.department_name || 'Department of Computer Applications',
-          departmentCode: fp.department_code || 'CA',
+          department: fp.department_name || '',
+          departmentCode: fp.department_code || '',
           assignedSubjects: assignmentsResult.rows.map((row: any) => ({
             subjectCode: row.subject_code,
             subjectName: row.subject_name,

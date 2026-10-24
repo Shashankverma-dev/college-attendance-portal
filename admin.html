@@ -1257,21 +1257,14 @@
 
     function isLegacyMockSchool(d) {
       if (!d) return false;
-      var code = String(d.department_code || d.school_code || d.code || d.id || '').toUpperCase().trim();
-      var name = String(d.department_name || d.school_name || d.name || '').toLowerCase().trim().replace(/&amp;/g, '&');
+      if (d.is_user_created || d.user_created || d.is_custom) return false;
       var id = String(d.department_id || d.school_id || d.id || '').toLowerCase().trim();
-      
-      if (code === 'SST' || code === 'SBS' || code === 'SOM' || (code === 'CA' && (name.indexOf('computer') !== -1 || !name))) {
-        return true;
-      }
-      if (name.indexOf('school of science & technology') !== -1 ||
-          name.indexOf('school of science and technology') !== -1 ||
-          name.indexOf('school of bioscience') !== -1 ||
-          name.indexOf('school of management') !== -1 ||
-          name.indexOf('department of computer applications') !== -1) {
-        return true;
-      }
-      if (id.indexOf('10000000-') !== -1 || id.indexOf('s0000000-') !== -1 || id.indexOf('b0000000-') !== -1) {
+      var dean = String(d.dean_name || d.hod_name || d.hodName || '').trim();
+      var email = String(d.contact_email || d.hod_email || d.hodEmail || '').toLowerCase().trim();
+
+      // Only authentic pre-seeded template records with mock UUIDs and mock dean names are legacy mock
+      if ((id.startsWith('s0000000-') || id.startsWith('10000000-') || id.startsWith('b0000000-')) &&
+          (dean === 'Dr. Arvind Sharma' || email === 'sst@college.edu' || d.facultyCount === 15 || d.facultyCount === 12)) {
         return true;
       }
       return false;
@@ -1306,6 +1299,10 @@
     // Read the deletion blacklist shared with admin-timetable.html
     function isAdminEntityDeleted() {
       var identifiers = Array.prototype.slice.call(arguments);
+      for (var i = 0; i < identifiers.length; i++) {
+        var it = identifiers[i];
+        if (it && typeof it === 'object' && (it.is_user_created || it.user_created)) return false;
+      }
       var list = {};
       try {
         var bl = localStorage.getItem('admin_deleted_entities_blacklist');
@@ -1316,12 +1313,15 @@
       if (combined.length === 0) return false;
       return identifiers.some(function(id) {
         if (!id) return false;
+        if (typeof id === 'object') return false;
         var norm = String(id).trim().toLowerCase();
         if (!norm) return false;
+        var normClean = norm.replace(/&amp;/g, '&').replace(/\band\b/g, '&').replace(/[^a-z0-9]/g, '');
         return combined.some(function(c) {
           if (!c) return false;
           var cNorm = String(c).trim().toLowerCase();
-          return norm === cNorm || (cNorm.length >= 3 && (norm.indexOf(cNorm) !== -1 || cNorm.indexOf(norm) !== -1));
+          var cClean = cNorm.replace(/&amp;/g, '&').replace(/\band\b/g, '&').replace(/[^a-z0-9]/g, '');
+          return norm === cNorm || (normClean && cClean && normClean === cClean);
         });
       });
     }
@@ -1364,6 +1364,7 @@
       // Filter out deleted entities and legacy mock schools
       rawList = rawList.filter(function(d) {
         if (!d) return false;
+        if (d.is_user_created || d.user_created) return true;
         if (isLegacyMockSchool(d)) return false;
         var code = (d.department_code || d.school_code || d.code || d.id || '').toLowerCase();
         var name = (d.department_name || d.school_name || d.name || '').toLowerCase().trim();
@@ -1436,6 +1437,7 @@
       // Filter API-returned data through legacy mock checker and deletion blacklist
       combined = combined.filter(function(d) {
         if (!d) return false;
+        if (d.is_user_created || d.user_created) return true;
         if (isLegacyMockSchool(d)) return false;
         var code = (d.department_code || d.school_code || d.code || d.id || '').toLowerCase();
         var name = (d.department_name || d.school_name || d.name || '').toLowerCase().trim();
@@ -1587,6 +1589,7 @@
       var hodName = (document.getElementById('dept-hod-name').value || '').trim();
       var hodEmail = (document.getElementById('dept-hod-email').value || '').trim();
       var hodPassword = (document.getElementById('dept-hod-password').value || '').trim();
+      var deptId = code.toLowerCase();
 
       if (!name || !code || !programs) {
         showToast('Please fill all required department fields.', 'error');
@@ -1604,6 +1607,27 @@
         }
       }
 
+      // Un-blacklist if previously deleted
+      try {
+        var bl = JSON.parse(localStorage.getItem('admin_deleted_entities_blacklist') || '{}');
+        ['schools', 'departments'].forEach(function(cat) {
+          if (Array.isArray(bl[cat])) {
+            var cNorm = code.toLowerCase();
+            var nNorm = name.toLowerCase();
+            var nClean = nNorm.replace(/&amp;/g, '&').replace(/\band\b/g, '&').replace(/[^a-z0-9]/g, '');
+            bl[cat] = bl[cat].filter(function(x) {
+              if (!x) return false;
+              var xNorm = String(x).toLowerCase().trim();
+              var xClean = xNorm.replace(/&amp;/g, '&').replace(/\band\b/g, '&').replace(/[^a-z0-9]/g, '');
+              if (xNorm === cNorm || xNorm === nNorm || (xClean && nClean && xClean === nClean)) return false;
+              if (cNorm.length >= 4 && xNorm.length >= 4 && (xNorm.includes(cNorm) || cNorm.includes(xNorm))) return false;
+              return true;
+            });
+          }
+        });
+        localStorage.setItem('admin_deleted_entities_blacklist', JSON.stringify(bl));
+      } catch (e) {}
+
       var depts = getStoredDepartments();
       var existingIndex = depts.findIndex(function(d) {
         var dCode = (d.code || d.department_code || d.id || '').toUpperCase();
@@ -1615,12 +1639,15 @@
         id: deptId,
         code: code,
         name: name,
+        department_code: code,
+        department_name: name,
         programs: programs,
         hodName: assignHod ? hodName : '',
         hodEmail: assignHod ? hodEmail : '',
         facultyCount: 0,
         sessions: 0,
-        attendanceRate: 100.0
+        attendanceRate: 100.0,
+        is_user_created: true
       };
 
       if (existingIndex >= 0) {
@@ -1630,11 +1657,11 @@
       }
       saveStoredDepartments(depts);
 
-      // Also sync to attendance_institutional_schools_v1
+      // Also sync to attendance_institutional_schools_v1 and admin_schools_list
       try {
         var existingSchools = JSON.parse(localStorage.getItem('attendance_institutional_schools_v1') || '[]');
         var schIdx = existingSchools.findIndex(function(s) {
-          return (s.school_code || s.code || '').toUpperCase() === code;
+          return (s.school_code || s.code || '').toUpperCase() === code || (s.school_name || '').toLowerCase() === name.toLowerCase();
         });
         var schEntry = {
           school_id: code,
@@ -1647,7 +1674,9 @@
           hod_email: assignHod ? hodEmail : undefined,
           hod_password: assignHod ? hodPassword : undefined,
           faculty_count: 0,
-          student_count: 0
+          student_count: 0,
+          is_active: true,
+          is_user_created: true
         };
         if (schIdx >= 0) {
           existingSchools[schIdx] = Object.assign(existingSchools[schIdx], schEntry);
@@ -1655,6 +1684,17 @@
           existingSchools.push(schEntry);
         }
         localStorage.setItem('attendance_institutional_schools_v1', JSON.stringify(existingSchools));
+
+        var aSchools = JSON.parse(localStorage.getItem('admin_schools_list') || '[]');
+        var aIdx = aSchools.findIndex(function(s) {
+          return (s.school_code || s.code || '').toUpperCase() === code || (s.school_name || '').toLowerCase() === name.toLowerCase();
+        });
+        if (aIdx >= 0) {
+          aSchools[aIdx] = Object.assign(aSchools[aIdx], schEntry);
+        } else {
+          aSchools.push(schEntry);
+        }
+        localStorage.setItem('admin_schools_list', JSON.stringify(aSchools));
       } catch (e) {}
 
       if (assignHod) {

@@ -116,6 +116,7 @@ export interface InMemStudentProfile {
   semester_id?: string;
   semester_number: number;
   section_id?: string;
+  current_section_id?: string;
   section_name: string;
   roll_number: string;
   phone_number: string | null;
@@ -137,76 +138,10 @@ export interface InMemStudentProfile {
 export const localStudents: InMemStudentProfile[] = [];
 
 export function initializeSeedStudents(): void {
-  if (localStudents.length === 0) {
-    localStudents.push(
-      {
-        student_profile_id: 'stu-prof-101',
-        user_uid: 'usr-stu-101',
-        student_id: 'STU-101',
-        enrollment_no: 'SRHU2026101',
-        registration_no: 'REG2026101',
-        registration_id: 'REG2026101',
-        full_name: 'Alex Chen',
-        student_gmail: 'alex.chen@college.edu',
-        course_code: 'BCA',
-        semester_number: 1,
-        section_name: 'A',
-        roll_number: '01',
-        phone_number: '+91 9876543201',
-        parent_guardian_contact: '+91 9876543200',
-        status: 'ACTIVE',
-        enrollment_status: 'ACTIVE',
-        invitation_status: 'ACCEPTED',
-        created_at: '2026-08-01T00:00:00Z',
-        activated_at: '2026-08-01T00:00:00Z',
-      },
-      {
-        student_profile_id: 'stu-prof-102',
-        user_uid: 'usr-stu-102',
-        student_id: 'STU-102',
-        enrollment_no: 'SRHU2026102',
-        registration_no: 'REG2026102',
-        registration_id: 'REG2026102',
-        full_name: 'Brian Patel',
-        student_gmail: 'brian.patel@college.edu',
-        course_code: 'BCA',
-        semester_number: 1,
-        section_name: 'A',
-        roll_number: '02',
-        phone_number: '+91 9876543202',
-        parent_guardian_contact: '+91 9876543200',
-        status: 'ACTIVE',
-        enrollment_status: 'ACTIVE',
-        invitation_status: 'ACCEPTED',
-        created_at: '2026-08-01T00:00:00Z',
-        activated_at: '2026-08-01T00:00:00Z',
-      },
-      {
-        student_profile_id: 'stu-prof-103',
-        user_uid: 'usr-stu-103',
-        student_id: 'STU-103',
-        enrollment_no: 'SRHU2026103',
-        registration_no: 'REG2026103',
-        registration_id: 'REG2026103',
-        full_name: 'Claire Zhang',
-        student_gmail: 'claire.zhang@college.edu',
-        course_code: 'BCA',
-        semester_number: 1,
-        section_name: 'A',
-        roll_number: '03',
-        phone_number: '+91 9876543203',
-        parent_guardian_contact: '+91 9876543200',
-        status: 'ACTIVE',
-        enrollment_status: 'ACTIVE',
-        invitation_status: 'ACCEPTED',
-        created_at: '2026-08-01T00:00:00Z',
-        activated_at: '2026-08-01T00:00:00Z',
-      }
-    );
-  }
+  // Preseeded mock students removed.
+  // The system relies exclusively on authentic student profiles onboarded by the administrator.
 }
 
-initializeSeedStudents();
 
 async function isDbConnected(): Promise<boolean> {
   try {

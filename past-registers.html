@@ -459,7 +459,7 @@
 
       <div style="background: #F8FAFC; border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; margin-bottom: 16px; font-size: 13px; color: var(--card-ink);">
         <p style="margin: 0 0 4px 0;"><strong>Curriculum Topic:</strong> <span id="slip-topic">Relational Algebra & Normalization</span></p>
-        <p style="margin: 0 0 4px 0;"><strong>Conducted by:</strong> Dr. Meenakshi Sundaram (Faculty ID: FAC-201)</p>
+        <p style="margin: 0 0 4px 0;"><strong>Conducted by:</strong> <span id="slip-conductor">Faculty Member</span></p>
         <p style="margin: 0;"><strong>Audit Hash:</strong> <code style="font-size: 11px; color: var(--accent);">0x9a8f4c2e11d0b384</code> • Status: <span class="tag tag-present" style="font-size: 11px; padding: 2px 6px;">Locked</span></p>
       </div>
 
@@ -615,6 +615,12 @@
       document.getElementById('slip-p').textContent = p;
       document.getElementById('slip-a').textContent = a;
       document.getElementById('slip-l').textContent = l;
+      var conductorEl = document.getElementById('slip-conductor');
+      if (conductorEl) {
+        var user = sessionStorage.getItem('attendance_user_name') || 'Faculty Member';
+        var uid = sessionStorage.getItem('attendance_user_id') || '';
+        conductorEl.textContent = user + (uid ? ' (' + uid + ')' : '');
+      }
       var modal = document.getElementById('slip-modal');
       modal.style.display = 'flex';
     }

@@ -97,12 +97,6 @@ export class QRAttendanceService {
     const interval = params.intervalSeconds || 20;
     const duration = params.durationMinutes || 60; // default 60 min lecture
 
-    if (localTimetables.length === 0) {
-      initializeMasterTimetables();
-    }
-    if (localStudents.length === 0) {
-      initializeSeedStudents();
-    }
 
     // 1. Locate Timetable Entry
     let targetEntry: TimetableEntry | undefined;
@@ -372,9 +366,6 @@ export class QRAttendanceService {
     }
 
     // 3. Find Authenticated Student
-    if (localStudents.length === 0) {
-      initializeSeedStudents();
-    }
     const student = localStudents.find(
       (s) => s.user_uid === params.studentUid || s.student_id === params.studentUid
     );

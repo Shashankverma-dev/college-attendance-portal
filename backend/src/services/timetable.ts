@@ -1,4 +1,5 @@
 import * as xlsx from 'xlsx';
+import { randomUUID } from 'crypto';
 import { PoolClient } from 'pg';
 import { runWithTransactionContext, pool } from '../config/db';
 import { AuditService } from './audit';
@@ -155,102 +156,10 @@ export const localSectionGroups: SectionGroup[] = [];
 export const localTimetables: TimetableMaster[] = [];
 
 export function initializeMasterTimetables(): void {
-  if (localClassrooms.length === 0) {
-    localClassrooms.push(
-      {
-        room_id: 'room-lh-101',
-        room_code: 'LH-101',
-        room_name: 'Lecture Hall 101',
-        room_type: 'LECTURE_HALL',
-        capacity: 90,
-        department_id: 'b0000000-0000-0000-0000-000000000001',
-        is_active: true,
-      },
-      {
-        room_id: 'room-lh-102',
-        room_code: 'LH-102',
-        room_name: 'Lecture Hall 102',
-        room_type: 'LECTURE_HALL',
-        capacity: 90,
-        department_id: 'b0000000-0000-0000-0000-000000000001',
-        is_active: true,
-      },
-      {
-        room_id: 'room-lab-1',
-        room_code: 'LAB-1',
-        room_name: 'Computer Applications Lab 1',
-        room_type: 'LABORATORY',
-        capacity: 45,
-        department_id: 'b0000000-0000-0000-0000-000000000001',
-        is_active: true,
-      }
-    );
-  }
-
-  if (localSectionGroups.length === 0) {
-    const secAId = 'f0000000-0000-0000-0000-000000000001';
-    localSectionGroups.push(
-      {
-        group_id: 'g0000000-0000-0000-0000-000000000001',
-        section_id: secAId,
-        group_name: 'C1',
-        description: 'Practical Lab Group C1 (Roll 1-30)',
-        enrolled_student_ids: ['STU-101', 'STU-102'],
-      },
-      {
-        group_id: 'g0000000-0000-0000-0000-000000000002',
-        section_id: secAId,
-        group_name: 'C2',
-        description: 'Practical Lab Group C2 (Roll 31-60)',
-        enrolled_student_ids: ['STU-103'],
-      }
-    );
-  }
-
-  if (localTimetables.length === 0) {
-    localTimetables.push({
-      timetable_id: 'tt000000-0000-0000-0000-000000000001',
-      academic_calendar_term: 'Autumn 2026',
-      department_id: 'b0000000-0000-0000-0000-000000000001',
-      department_code: 'CA',
-      department_name: 'Department of Computer Applications',
-      course_id: 'c0000000-0000-0000-0000-000000000001',
-      course_code: 'BCA',
-      course_name: 'Bachelor of Computer Applications',
-      semester_id: 'e0000000-0000-0000-0000-000000000001',
-      semester_number: 1,
-      section_id: 'f0000000-0000-0000-0000-000000000001',
-      section_name: 'A',
-      effective_date: '2026-08-01',
-      version_number: 1,
-      status: 'PUBLISHED',
-      created_by: 'usr-admin-001',
-      created_at: '2026-08-01T00:00:00Z',
-      published_at: '2026-08-01T00:00:00Z',
-      entries: [
-        {
-          entry_id: 'tte00000-0000-0000-0000-000000000001',
-          timetable_id: 'tt000000-0000-0000-0000-000000000001',
-          day_of_week: 'MONDAY',
-          period_index: 1,
-          start_time: '09:00',
-          end_time: '09:55',
-          subject_id: '10000000-0000-0000-0000-000000000001',
-          subject_code: 'BCA-101',
-          subject_name: 'Programming Fundamentals using C',
-          class_type: 'THEORY',
-          room_id: 'room-lh-101',
-          room_code: 'LH-101',
-          primary_faculty_id: 'usr-fac-201',
-          faculty_name: 'Dr. Meenakshi Sundaram',
-          faculty_staff_id: 'FAC-201',
-        },
-      ],
-    });
-  }
+  // Preseeded mock classrooms, section groups, and timetables removed.
+  // The system relies exclusively on authentic timetables created and managed by the administrator.
 }
 
-initializeMasterTimetables();
 
 // =============================================================================
 // CONFLICT DETECTION & VALIDATION ENGINE
@@ -688,7 +597,7 @@ export class TimetableImportService {
           detectedFacultyAbbrs.add(facultyAbbr);
 
           // Resolve faculty
-          let facultyId = '30000000-0000-0000-0000-000000000005';
+          let facultyId: string = randomUUID();
           let facultyName = `Faculty (${facultyAbbr})`;
           let staffId = `FAC-${facultyAbbr}`;
 
@@ -760,9 +669,9 @@ export class TimetableImportService {
     // Run conflict detection on parsed entries
     const conflicts = TimetableEngine.checkConflicts(parsedEntries, {
       academic_calendar_term: academicTerm,
-      course_id: 'c0000000-0000-0000-0000-000000000001',
-      semester_id: 'e0000000-0000-0000-0000-000000000005',
-      section_id: 'f0000000-0000-0000-0000-000000000003',
+      course_id: course,
+      semester_id: String(semester),
+      section_id: section,
     });
 
     const unresolvedCount = facultyMappings.filter((f) => f.status === 'UNRESOLVED').length;
@@ -808,19 +717,47 @@ export class TimetableImportService {
     }
 
     const timetableId = `tt-${Date.now()}`;
+    const adminRoutes = require('../routes/admin.routes');
+    const matchedDept = (preview.academicContext.department
+      ? (adminRoutes.localDepartments || []).find((d: any) =>
+          d.department_code === preview.academicContext.department ||
+          d.department_name.toLowerCase().includes(preview.academicContext.department.toLowerCase())
+        )
+      : null) || (adminRoutes.localDepartments || [])[0];
+
+    const matchedCrs = (preview.academicContext.course
+      ? (adminRoutes.localCourses || []).find((c: any) =>
+          c.course_code === preview.academicContext.course ||
+          c.course_name.toLowerCase().includes(preview.academicContext.course.toLowerCase())
+        )
+      : null) || (adminRoutes.localCourses || [])[0];
+
+    const matchedSem = (preview.academicContext.semester
+      ? (adminRoutes.localSemesters || []).find((s: any) =>
+          s.semester_number === preview.academicContext.semester && (!matchedCrs || s.course_id === matchedCrs.course_id)
+        )
+      : null) || (adminRoutes.localSemesters || [])[0];
+
+    const matchedSec = (preview.academicContext.section
+      ? (adminRoutes.localSections || []).find((sc: any) =>
+          sc.section_name.toLowerCase() === preview.academicContext.section.toLowerCase() &&
+          (!matchedSem || sc.semester_id === matchedSem.semester_id)
+        )
+      : null) || (adminRoutes.localSections || [])[0];
+
     const newMaster: TimetableMaster = {
       timetable_id: timetableId,
       academic_calendar_term: preview.academicContext.academicTerm,
-      department_id: 'b0000000-0000-0000-0000-000000000001',
-      department_code: 'CA',
-      department_name: preview.academicContext.department,
-      course_id: 'c0000000-0000-0000-0000-000000000001',
-      course_code: preview.academicContext.course,
-      course_name: 'Bachelor of Computer Applications',
-      semester_id: 'e0000000-0000-0000-0000-000000000005',
-      semester_number: preview.academicContext.semester,
-      section_id: 'f0000000-0000-0000-0000-000000000003',
-      section_name: preview.academicContext.section,
+      department_id: matchedDept?.department_id || randomUUID(),
+      department_code: matchedDept?.department_code || preview.academicContext.department || 'GEN',
+      department_name: matchedDept?.department_name || preview.academicContext.department || 'Department',
+      course_id: matchedCrs?.course_id || randomUUID(),
+      course_code: matchedCrs?.course_code || preview.academicContext.course || 'GEN',
+      course_name: matchedCrs?.course_name || 'Course',
+      semester_id: matchedSem?.semester_id || randomUUID(),
+      semester_number: matchedSem?.semester_number || preview.academicContext.semester || 1,
+      section_id: matchedSec?.section_id || randomUUID(),
+      section_name: matchedSec?.section_name || preview.academicContext.section || 'A',
       effective_date: preview.academicContext.effectiveDate,
       version_number: 1,
       status: 'PUBLISHED',

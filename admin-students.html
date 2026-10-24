@@ -910,21 +910,13 @@
 
     function isLegacyMockSchool(d) {
       if (!d) return false;
-      var code = String(d.department_code || d.school_code || d.code || d.id || '').toUpperCase().trim();
-      var name = String(d.school_name || d.department_name || d.name || '').toLowerCase().trim().replace(/&amp;/g, '&');
+      if (d.is_user_created || d.user_created) return false;
       var id = String(d.school_id || d.department_id || d.id || '').toLowerCase().trim();
+      var email = String(d.contact_email || d.email || d.hod_email || d.hodEmail || '').toLowerCase().trim();
+      var dean = String(d.dean_name || d.hod_name || d.hodName || '').trim();
       
-      if (code === 'SST' || code === 'SBS' || code === 'SOM' || (code === 'CA' && (name.indexOf('computer') !== -1 || !name))) {
-        return true;
-      }
-      if (name.indexOf('school of science & technology') !== -1 ||
-          name.indexOf('school of science and technology') !== -1 ||
-          name.indexOf('school of bioscience') !== -1 ||
-          name.indexOf('school of management') !== -1 ||
-          name.indexOf('department of computer applications') !== -1) {
-        return true;
-      }
-      if (id.indexOf('10000000-') !== -1 || id.indexOf('s0000000-') !== -1 || id.indexOf('b0000000-') !== -1) {
+      if ((id.indexOf('10000000-') !== -1 || id.indexOf('s0000000-') !== -1 || id.indexOf('b0000000-') !== -1) &&
+          (dean === 'Dr. Arvind Sharma' || email === 'sst@college.edu')) {
         return true;
       }
       return false;
@@ -991,7 +983,7 @@
         var rawName = String(item.school_name || item.department_name || item.name || '').trim();
         var nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
 
-        if (isEntityDeleted(code, rawName, item.school_id, item.department_id, item.id, item.school_code, item.department_code)) {
+        if (!item.is_user_created && !item.user_created && isEntityDeleted(code, rawName, item.school_id, item.department_id, item.id, item.school_code, item.department_code)) {
           return;
         }
 
@@ -1365,7 +1357,7 @@
           var rawName = String(sch.school_name || sch.department_name || sch.name || '').trim();
           var nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
 
-          if (isEntityDeleted(code, rawName, sch.school_id, sch.department_id, sch.id, sch.school_code, sch.department_code)) {
+          if (!sch.is_user_created && !sch.user_created && isEntityDeleted(code, rawName, sch.school_id, sch.department_id, sch.id, sch.school_code, sch.department_code)) {
             return;
           }
 

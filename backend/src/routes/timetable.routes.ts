@@ -116,7 +116,7 @@ router.post('/academic/department', adminAuth, async (req: Request, res: Respons
   }
   const cleanCode = String(department_code).trim().toUpperCase();
   const cleanName = String(department_name).trim();
-  const cleanId = department_id ? String(department_id).trim() : `b0000000-0000-0000-0000-${String(localDepartments.length + 1).padStart(12, '0')}`;
+  const cleanId = department_id ? String(department_id).trim() : crypto.randomUUID();
 
   let existing = localDepartments.find((d) => 
     d.department_code === cleanCode || 
@@ -249,7 +249,7 @@ router.post('/academic/programme', adminAuth, async (req: Request, res: Response
     return;
   }
 
-  const newCourseId = `c0000000-0000-0000-0000-${String(localCourses.length + 1).padStart(12, '0')}`;
+  const newCourseId = crypto.randomUUID();
   const newCourse = {
     course_id: newCourseId,
     department_id,
@@ -261,7 +261,7 @@ router.post('/academic/programme', adminAuth, async (req: Request, res: Response
   const createdSemesters = [];
   for (let s = 1; s <= numSemesters; s++) {
     const sem = {
-      semester_id: `e0000000-0000-0000-${String(localCourses.length).padStart(4, '0')}-${String(s).padStart(12, '0')}`,
+      semester_id: crypto.randomUUID(),
       course_id: newCourseId,
       semester_number: s,
       display_label: `Semester ${s}`,
@@ -327,7 +327,7 @@ router.post('/academic/semester', adminAuth, async (req: Request, res: Response)
   }
 
   const newSem = {
-    semester_id: `e0000000-0000-0000-9999-${String(localSemesters.length + 1).padStart(12, '0')}`,
+    semester_id: crypto.randomUUID(),
     course_id: resolvedCourseId,
     semester_number: semNum,
     display_label: display_label || `Semester ${semNum}`,
@@ -388,7 +388,7 @@ router.post('/academic/section', adminAuth, async (req: Request, res: Response):
   }
 
   const newSection = {
-    section_id: `f0000000-0000-0000-0000-${String(localSections.length + 1).padStart(12, '0')}`,
+    section_id: crypto.randomUUID(),
     semester_id,
     section_name: cleanSection,
     max_capacity: Number(max_capacity) || 80,
@@ -444,7 +444,7 @@ router.post('/academic/room', adminAuth, async (req: Request, res: Response): Pr
   }
 
   const newRoom = {
-    room_id: `r0000000-0000-0000-0000-${String(localClassrooms.length + 1).padStart(12, '0')}`,
+    room_id: crypto.randomUUID(),
     room_code: cleanCode,
     room_name: cleanName,
     room_type: (room_type || 'CLASSROOM').toUpperCase() as any,
@@ -497,7 +497,7 @@ router.post('/academic/group', adminAuth, async (req: Request, res: Response): P
   }
 
   const newGroup = {
-    group_id: `g0000000-0000-0000-0000-${String(localSectionGroups.length + 1).padStart(12, '0')}`,
+    group_id: crypto.randomUUID(),
     section_id,
     group_name: cleanName,
     description: description || `Practical Lab Cohort ${cleanName}`,
@@ -572,18 +572,25 @@ router.post('/entries', adminAuth, async (req: Request, res: Response): Promise<
     );
 
     if (!tt) {
+      const matchedCourse = localCourses.find((c) => c.course_code === cCode || c.course_id === course_id);
+      const matchedDept = matchedCourse 
+        ? localDepartments.find((d) => d.department_id === matchedCourse.department_id) 
+        : localDepartments[0];
+      const matchedSem = localSemesters.find((s) => (matchedCourse ? s.course_id === matchedCourse.course_id : true) && s.semester_number === semNum);
+      const matchedSec = localSections.find((sec) => (matchedSem ? sec.semester_id === matchedSem.semester_id : true) && sec.section_name === secName);
+
       tt = {
-        timetable_id: `tt000000-0000-0000-0000-${String(localTimetables.length + 1).padStart(12, '0')}`,
+        timetable_id: `tt-${crypto.randomUUID()}`,
         academic_calendar_term: term,
-        department_id: localDepartments[0]?.department_id || 'b0000000-0000-0000-0000-000000000001',
-        department_code: 'CA',
-        department_name: 'Department of Computer Applications',
-        course_id: course_id || 'c0000000-0000-0000-0000-000000000001',
+        department_id: matchedDept?.department_id || matchedCourse?.department_id || '',
+        department_code: matchedDept?.department_code || '',
+        department_name: matchedDept?.department_name || '',
+        course_id: course_id || matchedCourse?.course_id || cCode,
         course_code: cCode,
-        course_name: 'Bachelor of Computer Applications',
-        semester_id: semester_id || 'e0000000-0000-0000-0000-000000000006',
+        course_name: matchedCourse?.course_name || cCode,
+        semester_id: semester_id || matchedSem?.semester_id || `sem-${semNum}`,
         semester_number: semNum,
-        section_id: section_id || 'f0000000-0000-0000-0000-000000000003',
+        section_id: section_id || matchedSec?.section_id || `sec-${secName}`,
         section_name: secName,
         effective_date: new Date().toISOString().split('T')[0],
         version_number: 1,

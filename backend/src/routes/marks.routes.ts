@@ -201,8 +201,8 @@ router.get(
             section_id: fa.section_id,
             section_name: fa.section_name,
             semester_number: fa.semester_number,
-            semester_id: sem?.semester_id || 'e0000000-0000-0000-0000-000000000001',
-            course_id: crs?.course_id || 'c0000000-0000-0000-0000-000000000001',
+            semester_id: sem?.semester_id || sec?.semester_id || '',
+            course_id: crs?.course_id || sub?.course_id || '',
             course_code: fa.course_code,
             course_name: fa.course_name,
             academic_calendar_term: fa.academic_calendar_term,
@@ -408,7 +408,7 @@ router.post(
         return;
       }
 
-      const newId = `a1000000-0000-0000-0000-${String(localAssessments.length + 10).padStart(12, '0')}`;
+      const newId = crypto.randomUUID();
       const newAssessment: InMemAssessment = {
         assessment_id: newId,
         course_id: courseId,

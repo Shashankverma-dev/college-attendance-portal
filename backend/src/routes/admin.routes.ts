@@ -66,6 +66,7 @@ export interface InMemDepartment {
   hod_email?: string;
   hod_password?: string;
   hod_user_id?: string;
+  is_active?: boolean;
 }
 
 export interface InMemCourse {
@@ -147,217 +148,10 @@ export const localTeachers: InMemTeacher[] = [];
 export const localAssignments: InMemAssignment[] = [];
 
 export function initializeAcademicHierarchy(): void {
-  if (localSchools.length === 0) {
-    localSchools.push(
-      {
-        school_id: 's0000000-0000-0000-0000-000000000001',
-        school_code: 'SST',
-        school_name: 'School of Science & Technology',
-        description: 'Premier engineering, computer applications, and technology school.',
-        dean_name: 'Dr. Arvind Sharma',
-        contact_email: 'sst@college.edu',
-        is_active: true,
-        created_at: '2026-08-01T00:00:00Z',
-        updated_at: '2026-08-01T00:00:00Z',
-      },
-      {
-        school_id: 's0000000-0000-0000-0000-000000000002',
-        school_code: 'SBS',
-        school_name: 'School of Bioscience',
-        description: 'Biotechnology, biomedical sciences, and life sciences school.',
-        is_active: true,
-        created_at: '2026-08-01T00:00:00Z',
-        updated_at: '2026-08-01T00:00:00Z',
-      },
-      {
-        school_id: 's0000000-0000-0000-0000-000000000003',
-        school_code: 'SOM',
-        school_name: 'School of Management',
-        description: 'Business administration, leadership, and commerce school.',
-        is_active: true,
-        created_at: '2026-08-01T00:00:00Z',
-        updated_at: '2026-08-01T00:00:00Z',
-      }
-    );
-  }
-
-  if (localDepartments.length === 0) {
-    localDepartments.push(
-      {
-        department_id: 'b0000000-0000-0000-0000-000000000001',
-        school_id: 's0000000-0000-0000-0000-000000000001',
-        department_code: 'CA',
-        department_name: 'Department of Computer Applications',
-        hod_name: 'Dr. K. R. Ramanathan',
-        hod_email: 'hod.ca@college.edu',
-        hod_user_id: 'HOD-CA-01',
-      },
-      {
-        department_id: 'b0000000-0000-0000-0000-000000000002',
-        school_id: 's0000000-0000-0000-0000-000000000001',
-        department_code: 'CSE',
-        department_name: 'Department of Computer Science & Engineering',
-        hod_name: 'Dr. R. K. Mittal',
-        hod_email: 'hod.cse@college.edu',
-        hod_user_id: 'HOD-CSE-01',
-      }
-    );
-  }
-
-  if (localCourses.length === 0) {
-    localCourses.push(
-      {
-        course_id: 'c0000000-0000-0000-0000-000000000001',
-        school_id: 's0000000-0000-0000-0000-000000000001',
-        department_id: 'b0000000-0000-0000-0000-000000000001',
-        course_code: 'BCA',
-        course_name: 'Bachelor of Computer Applications',
-        total_semesters: 6,
-      },
-      {
-        course_id: 'c0000000-0000-0000-0000-000000000002',
-        school_id: 's0000000-0000-0000-0000-000000000001',
-        department_id: 'b0000000-0000-0000-0000-000000000002',
-        course_code: 'BTECH-CSE',
-        course_name: 'Bachelor of Technology in Computer Science & Engineering',
-        total_semesters: 8,
-      }
-    );
-  }
-
-  if (localSemesters.length === 0) {
-    for (let sem = 1; sem <= 6; sem++) {
-      localSemesters.push({
-        semester_id: `e0000000-0000-0000-0000-00000000000${sem}`,
-        course_id: 'c0000000-0000-0000-0000-000000000001',
-        semester_number: sem,
-        display_label: `Semester ${sem}`,
-      });
-    }
-  }
-
-  if (localSections.length === 0) {
-    const sem1Id = 'e0000000-0000-0000-0000-000000000001';
-    ['A', 'B', 'C', 'D'].forEach((secName, idx) => {
-      localSections.push({
-        section_id: `f0000000-0000-0000-0000-00000000000${idx + 1}`,
-        semester_id: sem1Id,
-        section_name: secName,
-        max_capacity: 80,
-        academic_calendar_term: 'Autumn 2026',
-      });
-    });
-    // Sem 5 Sec C
-    localSections.push({
-      section_id: 'f0000000-0000-0000-0000-000000000005',
-      semester_id: 'e0000000-0000-0000-0000-000000000005',
-      section_name: 'C',
-      max_capacity: 80,
-      academic_calendar_term: 'Autumn 2026',
-    });
-  }
-
-  if (localSubjects.length === 0) {
-    const sem1Id = 'e0000000-0000-0000-0000-000000000001';
-    const bcaCourseId = 'c0000000-0000-0000-0000-000000000001';
-    localSubjects.push(
-      {
-        subject_id: '10000000-0000-0000-0000-000000000001',
-        course_id: bcaCourseId,
-        semester_id: sem1Id,
-        subject_code: 'BCA-101',
-        subject_name: 'Programming Fundamentals using C',
-        planned_hours: 45,
-        credit_value: 4,
-      },
-      {
-        subject_id: '10000000-0000-0000-0000-000000000002',
-        course_id: bcaCourseId,
-        semester_id: sem1Id,
-        subject_code: 'BCA-102',
-        subject_name: 'Computer Architecture & Digital Logic',
-        planned_hours: 45,
-        credit_value: 4,
-      },
-      {
-        subject_id: '10000000-0000-0000-0000-000000000003',
-        course_id: bcaCourseId,
-        semester_id: sem1Id,
-        subject_code: 'BCA-103',
-        subject_name: 'Discrete Mathematics',
-        planned_hours: 40,
-        credit_value: 3,
-      },
-      {
-        subject_id: '10000000-0000-0000-0000-000000000004',
-        course_id: bcaCourseId,
-        semester_id: sem1Id,
-        subject_code: 'BCA-104',
-        subject_name: 'Technical Communication',
-        planned_hours: 30,
-        credit_value: 2,
-      }
-    );
-  }
-
-  if (localTeachers.length === 0) {
-    localTeachers.push(
-      {
-        faculty_profile_id: '30000000-0000-0000-0000-000000000001',
-        user_uid: 'usr-fac-201',
-        faculty_staff_id: 'FAC-201',
-        full_name: 'Dr. Meenakshi Sundaram',
-        official_email: 'faculty@college.edu',
-        department_id: 'b0000000-0000-0000-0000-000000000001',
-        department_name: 'Department of Computer Applications',
-        department_code: 'CA',
-        designation: 'Professor & Dean',
-        office_location: 'Block A, Room 204',
-        contact_phone: '+91 9876543210',
-        status: 'ACTIVE',
-        is_email_verified: true,
-        created_at: '2026-08-01T00:00:00Z',
-        activated_at: '2026-08-01T00:00:00Z',
-      },
-      {
-        faculty_profile_id: '30000000-0000-0000-0000-000000000002',
-        user_uid: 'usr-fac-202',
-        faculty_staff_id: 'FAC-202',
-        full_name: 'Prof. Marcus Chen',
-        official_email: 'marcus.chen@college.edu',
-        department_id: 'b0000000-0000-0000-0000-000000000001',
-        department_name: 'Department of Computer Applications',
-        department_code: 'CA',
-        designation: 'Assistant Professor',
-        office_location: 'Block A, Room 205',
-        contact_phone: '+91 9876543211',
-        status: 'ACTIVE',
-        is_email_verified: true,
-        created_at: '2026-08-01T00:00:00Z',
-        activated_at: '2026-08-01T00:00:00Z',
-      }
-    );
-  }
-
-  if (localAssignments.length === 0) {
-    localAssignments.push({
-      assignment_id: '40000000-0000-0000-0000-000000000001',
-      faculty_profile_id: '30000000-0000-0000-0000-000000000001',
-      subject_id: '10000000-0000-0000-0000-000000000001',
-      subject_code: 'BCA-101',
-      subject_name: 'Programming Fundamentals using C',
-      section_id: 'f0000000-0000-0000-0000-000000000001',
-      section_name: 'A',
-      course_code: 'BCA',
-      course_name: 'Bachelor of Computer Applications',
-      semester_number: 1,
-      academic_calendar_term: 'Autumn 2026',
-      is_active: true,
-    });
-  }
+  // Demo, mock, and preseed data removed.
+  // The system relies exclusively on authentic data created and managed by the administrator.
 }
 
-initializeAcademicHierarchy();
 
 async function isDbConnected(): Promise<boolean> {
   try {
@@ -1169,7 +963,7 @@ router.post(
         return;
       }
 
-      const newId = `30000000-0000-0000-0000-${String(localTeachers.length + 10).padStart(12, '0')}`;
+      const newId = crypto.randomUUID();
       const newUserUid = `firebase-uid-fac-${facultyStaffId.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
 
       const newTeacher: InMemTeacher = {
@@ -2119,7 +1913,7 @@ router.post(
 
       const cleanCode = String(code).trim().toUpperCase();
       const cleanName = String(name).trim();
-      const cleanId = id ? String(id).trim() : `b0000000-0000-0000-0000-${String(localDepartments.length + 1).padStart(12, '0')}`;
+      const cleanId = id ? String(id).trim() : crypto.randomUUID();
 
       const exists = localDepartments.find(
         (d) => d.department_id === cleanId || d.department_code.toUpperCase() === cleanCode || d.department_name.toLowerCase() === cleanName.toLowerCase()
@@ -2285,9 +2079,6 @@ router.get(
         return;
       }
 
-      if (localSchools.length === 0 || localDepartments.length === 0) {
-        initializeAcademicHierarchy();
-      }
 
       res.json({
         schools: deduplicateSchoolsList(localSchools),
@@ -2388,11 +2179,73 @@ router.post(
       const dbOnline = await isDbConnected();
       if (dbOnline) {
         const dupCheck = await pool.query(
-          `SELECT school_id FROM schools WHERE UPPER(school_code) = $1 OR LOWER(school_name) = LOWER($2)`,
+          `SELECT school_id, is_active FROM schools WHERE UPPER(school_code) = $1 OR LOWER(school_name) = LOWER($2)`,
           [cleanCode, cleanName]
         );
         if (dupCheck.rowCount && dupCheck.rowCount > 0) {
-          res.status(400).json({ error: 'DUPLICATE_SCHOOL', message: `A school with code '${cleanCode}' or name '${cleanName}' already exists.` });
+          const dupRow = dupCheck.rows[0];
+          const updateRes = await pool.query(
+            `UPDATE schools 
+             SET school_code = $1, school_name = $2, description = $3, is_active = TRUE, updated_at = CURRENT_TIMESTAMP
+             WHERE school_id = $4
+             RETURNING *`,
+            [cleanCode, cleanName, description || null, dupRow.school_id]
+          );
+          try {
+            await pool.query(
+              `UPDATE departments 
+               SET department_code = $1, department_name = $2, is_active = TRUE
+               WHERE school_id = $3 OR UPPER(department_code) = $1`,
+              [cleanCode, cleanName, dupRow.school_id]
+            );
+          } catch (_depErr) {}
+
+          const exS = localSchools.find((s) => s.school_code === cleanCode || s.school_id === dupRow.school_id);
+          if (exS) {
+            exS.school_code = cleanCode;
+            exS.school_name = cleanName;
+            exS.description = description || programs || exS.description || '';
+            exS.programs = programs || description || exS.programs || `${cleanCode} Programs`;
+            exS.dean_name = finalHodName || exS.dean_name;
+            exS.hod_name = finalHodName || exS.hod_name;
+            exS.contact_email = finalHodEmail || exS.contact_email;
+            exS.hod_email = finalHodEmail || exS.hod_email;
+            exS.is_active = true;
+          } else {
+            localSchools.push({
+              school_id: dupRow.school_id,
+              school_code: cleanCode,
+              school_name: cleanName,
+              description: description || programs || '',
+              programs: programs || description || `${cleanCode} Programs`,
+              dean_name: finalHodName,
+              hod_name: finalHodName,
+              contact_email: finalHodEmail,
+              hod_email: finalHodEmail,
+              hod_user_id: finalHodEmail || `HOD-${cleanCode}`,
+              is_active: true,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            });
+          }
+          const exD = localDepartments.find((d) => d.department_code === cleanCode || d.department_id === dupRow.school_id);
+          if (exD) {
+            exD.department_name = cleanName;
+            exD.is_active = true;
+          } else {
+            localDepartments.push({
+              department_id: dupRow.school_id,
+              school_id: dupRow.school_id,
+              department_code: cleanCode,
+              department_name: cleanName,
+              programs: programs || description || `${cleanCode} Programs`,
+              hod_name: finalHodName,
+              hod_email: finalHodEmail,
+              hod_user_id: finalHodEmail || `HOD-${cleanCode}`,
+            });
+          }
+
+          res.status(201).json({ success: true, message: 'School / Academic Department registered successfully.', school: updateRes.rows[0] });
           return;
         }
 
@@ -2413,6 +2266,46 @@ router.post(
           );
         } catch (_depErr) {}
 
+        const insertedRow = insertRes.rows[0];
+        const exS = localSchools.find((s) => s.school_code === cleanCode || s.school_id === insertedRow.school_id);
+        if (exS) {
+          exS.school_code = cleanCode;
+          exS.school_name = cleanName;
+          exS.is_active = true;
+        } else {
+          localSchools.push({
+            school_id: insertedRow.school_id,
+            school_code: cleanCode,
+            school_name: cleanName,
+            description: description || programs || '',
+            programs: programs || description || `${cleanCode} Programs`,
+            dean_name: finalHodName,
+            hod_name: finalHodName,
+            contact_email: finalHodEmail,
+            hod_email: finalHodEmail,
+            hod_user_id: finalHodEmail || `HOD-${cleanCode}`,
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
+        }
+        const exD = localDepartments.find((d) => d.department_code === cleanCode || d.department_id === insertedRow.school_id);
+        if (exD) {
+          exD.department_name = cleanName;
+          exD.is_active = true;
+        } else {
+          localDepartments.push({
+            department_id: insertedRow.school_id,
+            school_id: insertedRow.school_id,
+            department_code: cleanCode,
+            department_name: cleanName,
+            programs: programs || description || `${cleanCode} Programs`,
+            hod_name: finalHodName,
+            hod_email: finalHodEmail,
+            hod_user_id: finalHodEmail || `HOD-${cleanCode}`,
+          });
+        }
+
         res.status(201).json({ success: true, message: 'School / Department created successfully.', school: insertRes.rows[0] });
         return;
       }
@@ -2422,7 +2315,36 @@ router.post(
         (s) => s.school_code.toUpperCase() === cleanCode || s.school_name.toLowerCase() === cleanName.toLowerCase()
       );
       if (duplicate) {
-        res.status(400).json({ error: 'DUPLICATE_SCHOOL', message: `A school with code '${cleanCode}' or name '${cleanName}' already exists.` });
+        duplicate.school_code = cleanCode;
+        duplicate.school_name = cleanName;
+        duplicate.description = description || programs || duplicate.description || '';
+        duplicate.programs = programs || description || duplicate.programs || `${cleanCode} Programs`;
+        duplicate.dean_name = finalHodName || duplicate.dean_name;
+        duplicate.hod_name = finalHodName || duplicate.hod_name;
+        duplicate.contact_email = finalHodEmail || duplicate.contact_email;
+        duplicate.hod_email = finalHodEmail || duplicate.hod_email;
+        duplicate.is_active = true;
+        duplicate.updated_at = new Date().toISOString();
+
+        let existingDept = localDepartments.find((d) => d.department_code === cleanCode || d.department_id === duplicate.school_id);
+        if (existingDept) {
+          existingDept.department_name = cleanName;
+          existingDept.is_active = true;
+        } else {
+          localDepartments.push({
+            department_id: duplicate.school_id,
+            school_id: duplicate.school_id,
+            department_code: cleanCode,
+            department_name: cleanName,
+            programs: programs || description || `${cleanCode} Programs`,
+            hod_name: finalHodName,
+            hod_email: finalHodEmail,
+            hod_user_id: finalHodEmail || `HOD-${cleanCode}`,
+            is_active: true,
+          });
+        }
+
+        res.status(201).json({ success: true, message: 'School / Academic Department registered successfully.', school: duplicate });
         return;
       }
 
