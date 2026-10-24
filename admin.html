@@ -854,35 +854,41 @@
             </div>
           </div>
 
-          <!-- Optional HOD Account Creation Card -->
-          <div style="margin-top: 6px; border: 1px solid #D7E3F0; border-radius: 8px; padding: 14px; background: #F8FAFC;">
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: #17345C; font-size: 14px; margin-bottom: 0;">
-              <input type="checkbox" id="dept-assign-hod-toggle" onchange="toggleDeptHodFields()" style="width: 16px; height: 16px; accent-color: #1D3C72;">
-              <span>Create &amp; Assign Head of Department (HOD) Account Now</span>
-            </label>
-
-            <div id="dept-hod-fields-wrap" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid #E2E8F0;">
-              <div style="margin-bottom: 10px;">
-                <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px;">HOD Full Name *</label>
-                <input type="text" id="dept-hod-name" placeholder="e.g. Dr. Rajesh Sharma" style="width: 100%; height: 36px; padding: 0 10px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px;">
+          <!-- Mandatory HOD Account Creation Card -->
+          <div style="margin-top: 6px; border: 1px solid #C7D9EC; border-radius: 8px; padding: 14px; background: #F8FAFC;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid #E2E8F0;">
+              <div style="display: flex; align-items: center; gap: 8px; font-weight: 700; color: #17345C; font-size: 14px;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1D3C72" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                <span>Appoint Head of Department (HOD) *</span>
               </div>
-              <div style="margin-bottom: 10px;">
+              <span style="font-size: 11px; background: #1D3C72; color: #FFFFFF; font-weight: 700; padding: 2px 8px; border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px;">Mandatory</span>
+            </div>
+
+            <div id="dept-hod-fields-wrap" style="display: flex; flex-direction: column; gap: 10px;">
+              <div>
+                <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px;">HOD Full Name *</label>
+                <input type="text" id="dept-hod-name" required placeholder="e.g. Dr. Rajesh Sharma" style="width: 100%; height: 36px; padding: 0 10px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px; background: #FFFFFF; color: #0F172A;">
+              </div>
+              <div>
                 <label style="display: block; font-size: 12px; font-weight: 600; color: #475569; margin-bottom: 4px;">HOD Official Email / Login ID *</label>
-                <input type="email" id="dept-hod-email" placeholder="e.g. hod.sst@college.edu" style="width: 100%; height: 36px; padding: 0 10px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px;">
+                <input type="email" id="dept-hod-email" required placeholder="e.g. hod.cs@college.edu" style="width: 100%; height: 36px; padding: 0 10px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px; background: #FFFFFF; color: #0F172A;">
               </div>
               <div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
                   <label style="font-size: 12px; font-weight: 600; color: #475569;">HOD Login Password *</label>
-                  <button type="button" onclick="generateRandomHodPassword('dept-hod-password')" style="background: none; border: none; color: #1D4ED8; font-size: 11px; font-weight: 600; cursor: pointer;">Generate Password</button>
+                  <button type="button" onclick="generateRandomHodPassword('dept-hod-password')" style="background: none; border: none; color: #1D4ED8; font-size: 11px; font-weight: 600; cursor: pointer;">Generate New Password</button>
                 </div>
-                <input type="text" id="dept-hod-password" placeholder="e.g. HodPass2026!" style="width: 100%; height: 36px; padding: 0 10px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px; font-family: monospace;">
+                <input type="text" id="dept-hod-password" required placeholder="e.g. HodPass2026!" style="width: 100%; height: 36px; padding: 0 10px; border: 1px solid #CBD5E1; border-radius: 6px; font-size: 13px; font-family: monospace; background: #FFFFFF; color: #0F172A;">
               </div>
             </div>
           </div>
         </div>
         <div class="modal-footer" style="padding: 14px 20px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--line);">
           <button type="button" class="btn btn-outline" onclick="closeAddDeptModal()">Cancel</button>
-          <button type="submit" class="btn" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Create School / Department</button>
+          <button type="submit" class="btn" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Create School &amp; Appoint HOD</button>
         </div>
       </form>
     </div>
@@ -1543,20 +1549,16 @@
       tbody.innerHTML = html;
     }
 
-    // Modal management for Add Academic Department
+    // Modal management for Add Academic Department & School (Single Official Creation Point)
     function openAddDeptModal() {
       var modal = document.getElementById('modal-add-dept');
       if (modal) {
         document.getElementById('dept-new-name').value = '';
         document.getElementById('dept-new-code').value = '';
         document.getElementById('dept-new-programs').value = '';
-        var toggle = document.getElementById('dept-assign-hod-toggle');
-        if (toggle) toggle.checked = false;
-        var hodWrap = document.getElementById('dept-hod-fields-wrap');
-        if (hodWrap) hodWrap.style.display = 'none';
         document.getElementById('dept-hod-name').value = '';
         document.getElementById('dept-hod-email').value = '';
-        document.getElementById('dept-hod-password').value = '';
+        generateRandomHodPassword('dept-hod-password');
         modal.hidden = false;
         modal.classList.add('is-open');
       }
@@ -1571,13 +1573,9 @@
     }
 
     function toggleDeptHodFields() {
-      var toggle = document.getElementById('dept-assign-hod-toggle');
-      var hodWrap = document.getElementById('dept-hod-fields-wrap');
-      if (toggle && hodWrap) {
-        hodWrap.style.display = toggle.checked ? 'block' : 'none';
-        if (toggle.checked && !document.getElementById('dept-hod-password').value) {
-          generateRandomHodPassword('dept-hod-password');
-        }
+      // Kept for backward compatibility; HOD appointment is mandatory in this single creation point
+      if (!document.getElementById('dept-hod-password').value) {
+        generateRandomHodPassword('dept-hod-password');
       }
     }
 
@@ -1585,26 +1583,24 @@
       var name = (document.getElementById('dept-new-name').value || '').trim();
       var code = (document.getElementById('dept-new-code').value || '').trim().toUpperCase();
       var programs = (document.getElementById('dept-new-programs').value || '').trim();
-      var assignHod = document.getElementById('dept-assign-hod-toggle').checked;
+      var assignHod = true; // Always mandatory
       var hodName = (document.getElementById('dept-hod-name').value || '').trim();
       var hodEmail = (document.getElementById('dept-hod-email').value || '').trim();
       var hodPassword = (document.getElementById('dept-hod-password').value || '').trim();
       var deptId = code.toLowerCase();
 
       if (!name || !code || !programs) {
-        showToast('Please fill all required department fields.', 'error');
+        showToast('Please fill all required school / department fields.', 'error');
         return;
       }
 
-      if (assignHod) {
-        if (!hodName || !hodEmail || !hodPassword) {
-          showToast('Please provide HOD Name, Email, and Password.', 'error');
-          return;
-        }
-        if (hodPassword.length < 6) {
-          showToast('HOD Password must be at least 6 characters.', 'error');
-          return;
-        }
+      if (!hodName || !hodEmail || !hodPassword) {
+        showToast('Please provide HOD Name, Official Email / Login ID, and Password.', 'error');
+        return;
+      }
+      if (hodPassword.length < 6) {
+        showToast('HOD Password must be at least 6 characters.', 'error');
+        return;
       }
 
       // Un-blacklist if previously deleted

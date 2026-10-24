@@ -10,6 +10,7 @@ import { TokenService, localTokens } from '../services/token';
 import { localAttendanceSessions, localAttendanceRecords } from './attendance.routes';
 import { localAssessments, localAssessmentMarks } from './marks.routes';
 import { localEnrollmentHistory } from './student.routes';
+import { userPasswords } from './auth.routes';
 
 export function purgeAllMockAndTestData(): { studentsCleared: number; teachersCleared: number } {
   const studentsCleared = localStudents.length;
@@ -385,6 +386,13 @@ router.post(
         });
       }
 
+      if (hod_password) {
+        userPasswords.set(`usr-hod-${deptId}`, hod_password);
+        if (hod_email) {
+          userPasswords.set(hod_email.toLowerCase().trim(), hod_password);
+        }
+      }
+
       res.status(201).json({
         success: true,
         message: `School / Department ${name} (${code}) created successfully.`,
@@ -440,6 +448,13 @@ router.post(
         school.contact_email = hod_email;
         school.hod_password = hod_password;
         school.hod_user_id = hod_email;
+      }
+
+      if (hod_password) {
+        userPasswords.set(`usr-hod-${dept.department_id}`, hod_password);
+        if (hod_email) {
+          userPasswords.set(hod_email.toLowerCase().trim(), hod_password);
+        }
       }
 
       res.json({
@@ -2165,7 +2180,7 @@ router.post(
   requireRole(['GLOBAL_ADMIN']),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { school_code, school_name, description, dean_name, hod_name, contact_email, hod_email, programs } = req.body;
+      const { school_code, school_name, description, dean_name, hod_name, contact_email, hod_email, programs, hod_password } = req.body;
       if (!school_code || !school_name) {
         res.status(400).json({ error: 'MISSING_FIELDS', message: 'school_code and school_name are mandatory.' });
         return;
@@ -2360,12 +2375,21 @@ router.post(
         contact_email: finalHodEmail,
         hod_email: finalHodEmail,
         hod_user_id: finalHodEmail || `HOD-${cleanCode}`,
+        hod_password: hod_password || undefined,
         is_active: true,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
       localSchools.push(newSchool);
+
+      if (hod_password) {
+        userPasswords.set(`usr-hod-${schoolId}`, hod_password);
+        userPasswords.set(`usr-hod-dept-${cleanCode.toLowerCase()}`, hod_password);
+        if (finalHodEmail) {
+          userPasswords.set(finalHodEmail.toLowerCase().trim(), hod_password);
+        }
+      }
 
       // Sync into localDepartments
       let existingDept = localDepartments.find((d) => d.department_code === cleanCode || d.department_id === schoolId);
@@ -2378,6 +2402,7 @@ router.post(
           programs: programs || description || `${cleanCode} Programs`,
           hod_name: finalHodName,
           hod_email: finalHodEmail,
+          hod_password: hod_password || undefined,
           hod_user_id: finalHodEmail || `HOD-${cleanCode}`,
         });
       }

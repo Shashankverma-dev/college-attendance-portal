@@ -7,7 +7,7 @@ import { AuditService } from '../services/audit';
 import { TokenService } from '../services/token';
 import { EmailService } from '../services/email';
 import { localStudents } from '../services/bulk-onboard';
-import { localTeachers, localDepartments } from './admin.routes';
+import { localTeachers, localDepartments, localSchools } from './admin.routes';
 
 const router = Router();
 
@@ -143,26 +143,45 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
         status: 'ACTIVE',
       };
     }
-    // B. Dynamically provisioned department HODs
-    else if (localDepartments.some((d) => 
-      (d.hod_email && d.hod_email.toLowerCase() === lowerId) ||
-      (d.hod_user_id && d.hod_user_id.toLowerCase() === lowerId)
-    )) {
-      const deptHod = localDepartments.find((d) =>
+    // B. Dynamically provisioned department / school HODs
+    else if (
+      localDepartments.some((d) => 
         (d.hod_email && d.hod_email.toLowerCase() === lowerId) ||
         (d.hod_user_id && d.hod_user_id.toLowerCase() === lowerId)
-      )!;
+      ) ||
+      localSchools.some((s) =>
+        (s.hod_email && s.hod_email.toLowerCase() === lowerId) ||
+        (s.contact_email && s.contact_email.toLowerCase() === lowerId) ||
+        (s.hod_user_id && s.hod_user_id.toLowerCase() === lowerId)
+      )
+    ) {
+      const deptHod = (localDepartments.find((d) =>
+        (d.hod_email && d.hod_email.toLowerCase() === lowerId) ||
+        (d.hod_user_id && d.hod_user_id.toLowerCase() === lowerId)
+      ) || localSchools.find((s) =>
+        (s.hod_email && s.hod_email.toLowerCase() === lowerId) ||
+        (s.contact_email && s.contact_email.toLowerCase() === lowerId) ||
+        (s.hod_user_id && s.hod_user_id.toLowerCase() === lowerId)
+      )) as any;
+
+      const deptId = deptHod?.department_id || deptHod?.school_id || 'dept-gen';
+      const deptCode = deptHod?.department_code || deptHod?.school_code || 'DEPT';
+      const hodName = deptHod?.hod_name || deptHod?.dean_name || 'Head of Department';
+      const hodEmail = deptHod?.hod_email || deptHod?.contact_email || `${deptCode.toLowerCase()}@college.edu`;
+      const hodPassword = deptHod?.hod_password;
+
       matchedUser = {
-        uid: `usr-hod-${deptHod.department_id}`,
-        id: deptHod.hod_user_id || `HOD-${deptHod.department_code}`,
-        name: deptHod.hod_name || 'Head of Department',
-        email: deptHod.hod_email || `${deptHod.department_code.toLowerCase()}@college.edu`,
+        uid: `usr-hod-${deptId}`,
+        id: deptHod?.hod_user_id || `HOD-${deptCode}`,
+        name: hodName,
+        email: hodEmail,
         role: 'HOD',
-        departmentId: deptHod.department_id,
+        departmentId: deptId,
         status: 'ACTIVE',
       };
-      if (deptHod.hod_password) {
-        userPasswords.set(matchedUser.uid, deptHod.hod_password);
+      if (hodPassword) {
+        userPasswords.set(matchedUser.uid, hodPassword);
+        userPasswords.set(matchedUser.email.toLowerCase(), hodPassword);
       }
     }
     // D. Faculty Member
@@ -232,9 +251,9 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
   // Authoritative Password Verification
   let isPasswordValid = false;
 
-  // In development/test mode, offline standby, or for administrator, verify password fixture
-  if (!dbOnline || process.env.NODE_ENV !== 'production' || matchedUser.role === 'GLOBAL_ADMIN') {
-    const expectedPassword = userPasswords.get(matchedUser.uid);
+  // In development/test mode, offline standby, or for administrator / HOD, verify password fixture
+  if (!dbOnline || process.env.NODE_ENV !== 'production' || matchedUser.role === 'GLOBAL_ADMIN' || matchedUser.role === 'HOD') {
+    const expectedPassword = userPasswords.get(matchedUser.uid) || (matchedUser.email ? userPasswords.get(matchedUser.email.toLowerCase()) : undefined);
     if (expectedPassword && expectedPassword === password) {
       isPasswordValid = true;
     }

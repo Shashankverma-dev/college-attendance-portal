@@ -655,7 +655,6 @@
       <button type="button" class="tab-btn active" id="tab-timetable" onclick="switchTab('timetable')">Weekly Schedule Grid</button>
       <button type="button" class="tab-btn" id="tab-academic-entities" onclick="switchTab('academic-entities')">Academic Entities & Rooms</button>
       <button type="button" class="tab-btn" id="tab-subgroups" onclick="switchTab('subgroups')">Sections & Practical Subgroups</button>
-      <button type="button" class="tab-btn" id="tab-schools" onclick="switchTab('schools')">Schools & Academic Departments</button>
     </div>
 
     <!-- Conflict Warning Banner Area -->
@@ -741,10 +740,14 @@
           <h2 style="font-size: 20px; font-weight: 700; color: #FFFFFF !important; margin: 0 0 4px 0;">Academic Structure &amp; Facilities</h2>
           <p style="font-size: 13.5px; color: #D0DBEB !important; margin: 0;">Manage teaching departments, degree programmes, classrooms, and specialized laboratories.</p>
         </div>
-        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-          <button type="button" class="btn btn-sm btn-primary" onclick="openAddDeptModal()" style="background: #FFFFFF !important; color: #17345C !important; font-weight: 700; font-size: 13px; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
-            + Add School / Department
-          </button>
+          <a href="admin.html#sec-dept-timeliness" class="btn btn-sm btn-primary" style="background: #FFFFFF !important; color: #17345C !important; font-weight: 700; font-size: 13px; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.12); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;" title="Schools and Departments are created in the Administrator Governance Dashboard with mandatory HOD appointment">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+              <polyline points="15 3 21 3 21 9"></polyline>
+              <line x1="10" y1="14" x2="21" y2="3"></line>
+            </svg>
+            Manage Schools &amp; Departments &rarr;
+          </a>
           <button type="button" class="btn btn-sm btn-primary" onclick="openAddProgrammeModal()" style="background: #FFFFFF !important; color: #17345C !important; font-weight: 700; font-size: 13px; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 2px 6px rgba(0,0,0,0.12);">
             + Add Programme
           </button>
@@ -930,140 +933,7 @@
       </div>
     </section>
 
-    <!-- TAB 4: Schools & Academic Departments Management -->
-    <section id="panel-schools" style="display: none;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 14px; margin-bottom: 20px;">
-        <div>
-          <h2 style="font-size: 20px; font-weight: 700; color: #FFFFFF !important; margin: 0 0 4px 0;">Institutional Schools &amp; Academic Departments</h2>
-          <p style="font-size: 13.5px; color: #D0DBEB !important; margin: 0; max-width: 780px;">
-            Constituent academic schools and departments created directly by administrator. Each school/department is led by an appointed Head of Department (HOD) and offers undergraduate &amp; postgraduate degree programmes.
-          </p>
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <button type="button" class="btn btn-sm btn-primary" onclick="openAddSchoolModal()" style="background: #FFFFFF !important; color: #17345C !important; font-weight: 700; font-size: 13px; border: 1px solid #FFFFFF; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px;">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-            Add School / Department
-          </button>
-        </div>
-      </div>
-
-      <!-- School KPI Summary -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;">
-        <div class="card" style="padding: 16px; background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius);">
-          <span style="font-size: 11px; font-weight: 700; color: #334155; text-transform: uppercase;">Active Schools / Departments</span>
-          <div style="font-size: 26px; font-weight: 800; color: #1D3C72; margin-top: 4px;" id="kpi-schools-count">--</div>
-          <div style="font-size: 12px; color: #475569; margin-top: 2px;">Created by administrator</div>
-        </div>
-        <div class="card" style="padding: 16px; background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius);">
-          <span style="font-size: 11px; font-weight: 700; color: #334155; text-transform: uppercase;">Appointed HODs &amp; Deans</span>
-          <div style="font-size: 26px; font-weight: 800; color: #0284C7; margin-top: 4px;" id="kpi-depts-count">--</div>
-          <div style="font-size: 12px; color: #475569; margin-top: 2px;">Departmental leadership</div>
-        </div>
-        <div class="card" style="padding: 16px; background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius);">
-          <span style="font-size: 11px; font-weight: 700; color: #334155; text-transform: uppercase;">Approved Programmes</span>
-          <div style="font-size: 26px; font-weight: 800; color: #15803D; margin-top: 4px;" id="kpi-programmes-count">--</div>
-          <div style="font-size: 12px; color: #475569; margin-top: 2px;">Courses &amp; degrees offered</div>
-        </div>
-        <div class="card" style="padding: 16px; background: #FFFFFF; border: 1px solid var(--slate-border); border-radius: var(--radius);">
-          <span style="font-size: 11px; font-weight: 700; color: #334155; text-transform: uppercase;">Enrolled Students</span>
-          <div style="font-size: 26px; font-weight: 800; color: #7C3AED; margin-top: 4px;" id="kpi-students-count">--</div>
-          <div style="font-size: 12px; color: #475569; margin-top: 2px;">Across all schools/departments</div>
-        </div>
-      </div>
-
-      <!-- Schools Grid Container -->
-      <div id="schools-cards-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 18px; margin-bottom: 24px;">
-        <!-- Rendered dynamically via loadSchoolsGrid() -->
-      </div>
-    </section>
-
   </main>
-
-  <!-- MODAL: Add New School -->
-  <div id="modal-add-school" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
-    <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); color: #17345C;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--slate-border); padding-bottom: 12px;">
-        <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Add Constituent School</h3>
-        <button type="button" onclick="closeAddSchoolModal()" style="background: none; border: none; font-size: 22px; cursor: pointer; color: #64748B;">&times;</button>
-      </div>
-      <form id="form-add-school" onsubmit="handleAddSchoolSubmit(event)">
-        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 14px; margin-bottom: 14px;">
-          <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">School Code *</label>
-            <input type="text" id="add-school-code" required placeholder="e.g. SOL" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px; font-weight: 700; text-transform: uppercase;">
-          </div>
-          <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">School Name *</label>
-            <input type="text" id="add-school-name" required placeholder="e.g. School of Law" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
-          </div>
-        </div>
-        <div style="margin-bottom: 14px;">
-          <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Description / Mission</label>
-          <input type="text" id="add-school-desc" placeholder="Constituent academic faculty of law and jurisprudence" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
-          <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Dean / Director</label>
-            <input type="text" id="add-school-dean" placeholder="e.g. Prof. David Miller" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
-          </div>
-          <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Contact Email</label>
-            <input type="email" id="add-school-email" placeholder="e.g. law@srhu.edu.in" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
-          </div>
-        </div>
-        <div id="add-school-error" style="display: none; background: #FEE2E2; color: #DC2626; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 14px;"></div>
-        <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--slate-border); padding-top: 14px;">
-          <button type="button" class="btn btn-sm btn-outline" onclick="closeAddSchoolModal()">Cancel</button>
-          <button type="submit" class="btn btn-sm" id="btn-submit-add-school" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Create School</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <!-- MODAL: Edit School -->
-  <div id="modal-edit-school" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
-    <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); color: #17345C;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--slate-border); padding-bottom: 12px;">
-        <h3 style="font-size: 18px; font-weight: 700; margin: 0;">Edit School Details</h3>
-        <button type="button" onclick="closeEditSchoolModal()" style="background: none; border: none; font-size: 22px; cursor: pointer; color: #64748B;">&times;</button>
-      </div>
-      <form id="form-edit-school" onsubmit="handleEditSchoolSubmit(event)">
-        <input type="hidden" id="edit-school-id">
-        <div style="margin-bottom: 14px;">
-          <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">School Name *</label>
-          <input type="text" id="edit-school-name" required style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
-        </div>
-        <div style="margin-bottom: 14px;">
-          <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Description</label>
-          <input type="text" id="edit-school-desc" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
-          <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Dean / Director</label>
-            <input type="text" id="edit-school-dean" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
-          </div>
-          <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; margin-bottom: 4px;">Contact Email</label>
-            <input type="email" id="edit-school-email" style="width: 100%; height: 38px; border: 1px solid var(--slate-border); border-radius: 6px; padding: 0 10px;">
-          </div>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; cursor: pointer;">
-            <input type="checkbox" id="edit-school-active">
-            <span>School Active &amp; Accepting Admissions</span>
-          </label>
-        </div>
-        <div id="edit-school-error" style="display: none; background: #FEE2E2; color: #DC2626; padding: 10px; border-radius: 6px; font-size: 12px; margin-bottom: 14px;"></div>
-        <div style="display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--slate-border); padding-top: 14px;">
-          <button type="button" class="btn btn-sm btn-outline" onclick="closeEditSchoolModal()">Cancel</button>
-          <button type="submit" class="btn btn-sm" id="btn-submit-edit-school" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Save Changes</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
   <!-- MODAL 1: Excel Timetable Importer -->
   <div id="modal-import" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
@@ -1267,59 +1137,7 @@
     </div>
   </div>
 
-  <!-- MODAL 3: Add School / Department -->
-  <div id="modal-add-dept" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.7); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
-    <div style="background: #FFFFFF; border-radius: var(--radius); width: 100%; max-width: 520px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2); color: #17345C;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid var(--slate-border); padding-bottom: 12px;">
-        <h3 style="font-size: 18px; font-weight: 700; color: #17345C; margin: 0;">Add School / Academic Department</h3>
-        <button type="button" onclick="closeAddDeptModal()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: var(--slate-text-sub); line-height: 1;">&times;</button>
-      </div>
-      <form onsubmit="event.preventDefault(); submitAddDept();">
-        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-bottom: 14px;">
-          <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Code *</label>
-            <input type="text" id="new-dept-code" required placeholder="e.g. CS, ENG, MGMT" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border); text-transform: uppercase; font-weight: 700;">
-          </div>
-          <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">School / Department Name *</label>
-            <input type="text" id="new-dept-name" required placeholder="e.g. Department of Computer Science" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
-          </div>
-        </div>
-        <div style="margin-bottom: 14px;">
-          <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Degree Programmes Offered *</label>
-          <input type="text" id="new-dept-programs" required placeholder="e.g. B.Tech, M.Tech, PhD" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
-        </div>
 
-        <!-- Optional HOD Provisioning -->
-        <div style="border: 1px solid #D7E3F0; border-radius: 8px; padding: 12px; background: #F8FAFC; margin-bottom: 14px;">
-          <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700; color: #17345C; font-size: 13px; margin: 0;">
-            <input type="checkbox" id="new-dept-hod-toggle" onchange="document.getElementById('new-dept-hod-wrap').style.display = this.checked ? 'block' : 'none';" style="accent-color: #1D3C72;">
-            <span>Assign Head of Department (HOD) Account</span>
-          </label>
-          <div id="new-dept-hod-wrap" style="display: none; margin-top: 10px; padding-top: 10px; border-top: 1px solid #E2E8F0;">
-            <div style="margin-bottom: 8px;">
-              <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;">HOD Full Name</label>
-              <input type="text" id="new-dept-hod-name" placeholder="e.g. Dr. Rajesh Sharma" style="width: 100%; padding: 6px 8px; font-size: 13px; border: 1px solid #CBD5E1; border-radius: 4px;">
-            </div>
-            <div style="margin-bottom: 8px;">
-              <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;">HOD Login Email / Institutional ID</label>
-              <input type="email" id="new-dept-hod-email" placeholder="e.g. hod.ca@college.edu" style="width: 100%; padding: 6px 8px; font-size: 13px; border: 1px solid #CBD5E1; border-radius: 4px;">
-            </div>
-            <div>
-              <label style="display: block; font-size: 11px; font-weight: 700; color: #475569; margin-bottom: 2px;">HOD Created Password</label>
-              <input type="text" id="new-dept-hod-password" placeholder="e.g. HodPass2026!" style="width: 100%; padding: 6px 8px; font-size: 13px; font-family: monospace; border: 1px solid #CBD5E1; border-radius: 4px;">
-            </div>
-          </div>
-        </div>
-
-        <div id="add-dept-msg" style="display: none; margin-bottom: 14px;"></div>
-        <div style="display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--slate-border); padding-top: 14px;">
-          <button type="button" class="btn btn-sm btn-outline" onclick="closeAddDeptModal()">Cancel</button>
-          <button type="submit" class="btn btn-sm" id="btn-submit-add-dept" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">Create School / Department</button>
-        </div>
-      </form>
-    </div>
-  </div>
 
 
   <!-- MODAL 4: Add Programme / Course -->
@@ -1823,6 +1641,11 @@
     }
 
     function switchTab(tabId) {
+      if (tabId === 'schools') {
+        window.location.href = 'admin.html#sec-dept-timeliness';
+        return;
+      }
+
       document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
       const activeBtn = document.getElementById('tab-' + tabId);
       if (activeBtn) activeBtn.classList.add('active');
@@ -1830,9 +1653,6 @@
       document.getElementById('panel-timetable').style.display = tabId === 'timetable' ? 'block' : 'none';
       document.getElementById('panel-academic-entities').style.display = tabId === 'academic-entities' ? 'block' : 'none';
       document.getElementById('panel-subgroups').style.display = tabId === 'subgroups' ? 'block' : 'none';
-      if (document.getElementById('panel-schools')) {
-        document.getElementById('panel-schools').style.display = tabId === 'schools' ? 'block' : 'none';
-      }
 
       if (tabId === 'timetable') {
         syncFilterDropdowns();
@@ -1847,8 +1667,6 @@
         renderSectionsTable();
         renderSubgroups();
         populateAcademicDropdowns();
-      } else if (tabId === 'schools') {
-        loadSchoolsGrid();
       }
     }
 
@@ -2186,100 +2004,14 @@
     }
 
     function openAddSchoolModal() {
-      document.getElementById('modal-add-school').style.display = 'flex';
-      document.getElementById('add-school-error').style.display = 'none';
-      document.getElementById('form-add-school').reset();
+      window.location.href = 'admin.html#sec-dept-timeliness';
     }
 
-    function closeAddSchoolModal() {
-      document.getElementById('modal-add-school').style.display = 'none';
-    }
+    function closeAddSchoolModal() {}
 
     async function handleAddSchoolSubmit(e) {
-      e.preventDefault();
-      const errEl = document.getElementById('add-school-error');
-      const submitBtn = document.getElementById('btn-submit-add-school');
-      errEl.style.display = 'none';
-      submitBtn.disabled = true;
-      submitBtn.textContent = 'Creating...';
-
-      const code = document.getElementById('add-school-code').value.trim().toUpperCase();
-      const name = document.getElementById('add-school-name').value.trim();
-      const desc = document.getElementById('add-school-desc').value.trim();
-      const dean = document.getElementById('add-school-dean').value.trim();
-      const email = document.getElementById('add-school-email').value.trim();
-
-      if (!code || !name) {
-        errEl.style.display = 'block';
-        errEl.textContent = 'School code and school name are required.';
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Create School / Department';
-        return;
-      }
-
-      removeFromDeletedBlacklist('schools', code);
-      removeFromDeletedBlacklist('schools', name);
-      removeFromDeletedBlacklist('departments', code);
-      removeFromDeletedBlacklist('departments', name);
-
-      const payload = {
-        school_id: code,
-        school_code: code,
-        department_code: code,
-        school_name: name,
-        department_name: name,
-        description: desc || `Constituent school for ${name}`,
-        programs: desc || `${code} Degree Programmes`,
-        dean_name: dean || 'Appointed Dean / Director',
-        hod_name: dean || 'Appointed Dean / Director',
-        contact_email: email || `office.${code.toLowerCase()}@college.edu`,
-        hod_email: email || `office.${code.toLowerCase()}@college.edu`,
-        department_count: 1,
-        course_count: 1,
-        student_count: 0,
-        faculty_count: 0,
-        is_active: true,
-        is_user_created: true
-      };
-
-      try {
-        if (getApiBase() !== null) {
-          const res = await fetch(getApiBase() + '/api/admin/schools', {
-            method: 'POST',
-            headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-            body: JSON.stringify(payload)
-          });
-          const data = await res.json();
-          if (data.success) {
-            submitBtn.disabled = false;
-            submitBtn.textContent = 'Create School / Department';
-            closeAddSchoolModal();
-            const created = Object.assign({}, payload, data.school || {});
-            created.is_user_created = true;
-            created.is_active = true;
-            syncSchoolToLocalCaches(created);
-            await loadSchoolsGrid();
-            await loadAcademicEntities();
-            switchTab('schools');
-            showSuccessBanner('School / Academic Department "' + payload.school_name + '" created successfully.');
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('Backend offline, saving school locally:', err);
-      }
-
-      // Offline / Firebase fallback
-      syncSchoolToLocalCaches(payload);
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Create School / Department';
-      closeAddSchoolModal();
-      renderSchoolsData(loadedSchools);
-      if (typeof renderDepartmentsTable === 'function') {
-        renderDepartmentsTable();
-      }
-      switchTab('schools');
-      showSuccessBanner('School / Academic Department "' + payload.school_name + '" created successfully.');
+      if (e && e.preventDefault) e.preventDefault();
+      window.location.href = 'admin.html#sec-dept-timeliness';
     }
 
     function openEditSchoolModal(schoolId) {
@@ -3257,10 +2989,10 @@
           <tr>
             <td colspan="4" style="text-align: center; padding: 24px 16px; color: #64748B;">
               <div style="font-weight: 600; color: #17345C; margin-bottom: 4px;">No Academic Departments Created</div>
-              <div style="font-size: 13px; margin-bottom: 12px;">All default mock departments have been removed. Create your own academic departments according to institutional requirements.</div>
-              <button type="button" class="btn btn-sm" onclick="openAddDeptModal()" style="background: #1D3C72; color: #FFFFFF; font-weight: 600;">
-                + Add Academic Department
-              </button>
+              <div style="font-size: 13px; margin-bottom: 12px;">Create official schools &amp; academic departments with assigned HODs in the Governance Dashboard.</div>
+              <a href="admin.html#sec-dept-timeliness" class="btn btn-sm" style="background: #1D3C72; color: #FFFFFF; font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                Manage &amp; Create in Admin Dashboard &rarr;
+              </a>
             </td>
           </tr>
         `;
@@ -3929,23 +3661,9 @@
     }
 
     function openAddDeptModal() {
-      document.getElementById('modal-add-dept').style.display = 'flex';
-      document.getElementById('new-dept-code').value = '';
-      document.getElementById('new-dept-name').value = '';
-      document.getElementById('new-dept-programs').value = '';
-      const toggle = document.getElementById('new-dept-hod-toggle');
-      if (toggle) toggle.checked = false;
-      const wrap = document.getElementById('new-dept-hod-wrap');
-      if (wrap) wrap.style.display = 'none';
-      document.getElementById('new-dept-hod-name').value = '';
-      document.getElementById('new-dept-hod-email').value = '';
-      document.getElementById('new-dept-hod-password').value = '';
-      const msg = document.getElementById('add-dept-msg');
-      if (msg) msg.style.display = 'none';
+      window.location.href = 'admin.html#sec-dept-timeliness';
     }
-    function closeAddDeptModal() {
-      document.getElementById('modal-add-dept').style.display = 'none';
-    }
+    function closeAddDeptModal() {}
 
     function openAddProgrammeModal() {
       document.getElementById('modal-add-programme').style.display = 'flex';
@@ -4021,151 +3739,7 @@
 
     // --- Entity Creation Submissions ---
     async function submitAddDept() {
-      const code = document.getElementById('new-dept-code').value.trim().toUpperCase();
-      const name = document.getElementById('new-dept-name').value.trim();
-      const programs = document.getElementById('new-dept-programs').value.trim();
-      const hasHod = document.getElementById('new-dept-hod-toggle').checked;
-      const hod_name = document.getElementById('new-dept-hod-name').value.trim();
-      const hod_email = document.getElementById('new-dept-hod-email').value.trim();
-      const hod_password = document.getElementById('new-dept-hod-password').value.trim();
-      const msg = document.getElementById('add-dept-msg');
-
-      if (!code || !name || !programs) {
-        msg.style.display = 'block';
-        msg.innerHTML = '<span style="color: #DC2626; font-size: 13px;">School / Department Code, Name, and Degree Programmes are required.</span>';
-        return;
-      }
-
-      if (hasHod && (!hod_name || !hod_email || !hod_password)) {
-        msg.style.display = 'block';
-        msg.innerHTML = '<span style="color: #DC2626; font-size: 13px;">Please complete HOD Name, Email, and Password.</span>';
-        return;
-      }
-
-      const department_id = 'dept-' + code.toLowerCase();
-
-      removeFromDeletedBlacklist('departments', code);
-      removeFromDeletedBlacklist('departments', name);
-      removeFromDeletedBlacklist('departments', department_id);
-      removeFromDeletedBlacklist('schools', code);
-      removeFromDeletedBlacklist('schools', name);
-      removeFromDeletedBlacklist('schools', department_id);
-
-      const payload = {
-        department_id: department_id,
-        id: department_id,
-        department_code: code,
-        department_name: name,
-        code: code,
-        name: name,
-        school_id: department_id,
-        school_code: code,
-        school_name: name,
-        programs: programs,
-        description: programs,
-        hod_name: hasHod ? hod_name : undefined,
-        hod_email: hasHod ? hod_email : undefined,
-        hod_password: hasHod ? hod_password : undefined,
-        dean_name: hasHod ? hod_name : undefined,
-        contact_email: hasHod ? hod_email : undefined
-      };
-
-      try {
-        const res = await fetch(getApiBase() + '/api/timetable/academic/department', {
-          method: 'POST',
-          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-
-        // Also post to admin academic departments endpoint
-        fetch(getApiBase() + '/api/admin/academic/departments', {
-          method: 'POST',
-          headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
-          body: JSON.stringify(payload)
-        }).catch(() => {});
-
-        // Save locally for offline fallback
-        try {
-          var stored = JSON.parse(localStorage.getItem('attendance_academic_departments_v2') || '[]');
-          var idx = stored.findIndex(d => 
-            (d.code || d.id || '').toUpperCase() === code || 
-            (d.name || d.department_name || '').toLowerCase().trim() === name.toLowerCase()
-          );
-          var entry = {
-            id: code.toLowerCase(),
-            code: code,
-            name: name,
-            programs: programs,
-            hodName: hasHod ? hod_name : '',
-            hodEmail: hasHod ? hod_email : '',
-            facultyCount: 0,
-            sessions: 0,
-            attendanceRate: 100.0
-          };
-          if (idx >= 0) stored[idx] = Object.assign(stored[idx], entry);
-          else stored.push(entry);
-          stored = deduplicateDepartmentsList(stored);
-          localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(stored));
-
-          if (hasHod) {
-            var hods = JSON.parse(localStorage.getItem('attendance_hod_accounts_v2') || '[]');
-            var hIdx = hods.findIndex(h => (h.deptCode || '').toUpperCase() === code);
-            var hEntry = {
-              deptId: code.toLowerCase(),
-              deptName: name,
-              deptCode: code,
-              hodName: hod_name,
-              hodEmail: hod_email,
-              password: hod_password,
-              role: 'hod',
-              createdAt: new Date().toISOString()
-            };
-            if (hIdx >= 0) hods[hIdx] = hEntry;
-            else hods.push(hEntry);
-            localStorage.setItem('attendance_hod_accounts_v2', JSON.stringify(hods));
-          }
-        } catch (e) {}
-
-        if (typeof syncSchoolToLocalCaches === 'function') {
-          syncSchoolToLocalCaches(payload);
-        }
-
-        if (data && data.success) {
-          closeAddDeptModal();
-          await loadAcademicEntities();
-          if (typeof loadSchoolsGrid === 'function') {
-            await loadSchoolsGrid();
-          }
-          showSuccessBanner('School / Academic Department "' + name + '" (' + code + ') created successfully.');
-          return;
-        }
-      } catch (err) {
-        console.warn('Backend offline, saving department locally:', err);
-      }
-
-      // Offline / Firebase fallback
-      if (typeof syncSchoolToLocalCaches === 'function') {
-        syncSchoolToLocalCaches(payload);
-      }
-      const exDeptIdx = academicState.departments.findIndex(d => 
-        (d.code && d.code.toUpperCase() === code) || 
-        (d.name && d.name.toLowerCase().trim() === name.toLowerCase())
-      );
-      if (exDeptIdx >= 0) {
-        academicState.departments[exDeptIdx] = Object.assign({}, academicState.departments[exDeptIdx], { id: department_id, code, name, is_user_created: true });
-      } else {
-        academicState.departments.push({ id: department_id, code, name, is_user_created: true });
-      }
-      academicState.departments = deduplicateDepartmentsList(academicState.departments);
-      try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
-      closeAddDeptModal();
-      renderDepartmentsTable();
-      populateAcademicDropdowns();
-      if (typeof loadSchoolsGrid === 'function') {
-        loadSchoolsGrid();
-      }
-      showSuccessBanner('School / Academic Department "' + name + '" (' + code + ') created successfully.');
+      window.location.href = 'admin.html#sec-dept-timeliness';
     }
 
     async function submitAddProgramme() {
