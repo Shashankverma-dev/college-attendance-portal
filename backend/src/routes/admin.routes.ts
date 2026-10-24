@@ -1002,15 +1002,15 @@ router.post(
 
         if (sub && sec) {
           localAssignments.push({
-            assignment_id: `40000000-0000-0000-0000-${String(localAssignments.length + 10).padStart(12, '0')}`,
+            assignment_id: crypto.randomUUID(),
             faculty_profile_id: newId,
             subject_id: sub.subject_id,
             subject_code: sub.subject_code,
             subject_name: sub.subject_name,
             section_id: sec.section_id,
             section_name: sec.section_name,
-            course_code: crs?.course_code || 'BCA',
-            course_name: crs?.course_name || 'Bachelor of Computer Applications',
+            course_code: crs?.course_code || 'GEN',
+            course_name: crs?.course_name || 'General Program',
             semester_number: 1,
             academic_calendar_term: academicTerm,
             is_active: true,
@@ -1488,15 +1488,15 @@ router.post(
       const crs = localCourses.find((c) => c.course_id === sub.course_id);
       const semObj = localSemesters.find((sm) => sm.semester_id === sub.semester_id);
       const newAssignment: InMemAssignment = {
-        assignment_id: `40000000-0000-0000-0000-${String(localAssignments.length + 10).padStart(12, '0')}`,
+        assignment_id: crypto.randomUUID(),
         faculty_profile_id: teacher.faculty_profile_id,
         subject_id: sub.subject_id,
         subject_code: sub.subject_code,
         subject_name: sub.subject_name,
         section_id: sec.section_id,
         section_name: sec.section_name,
-        course_code: crs?.course_code || 'BCA',
-        course_name: crs?.course_name || 'Bachelor of Computer Applications',
+        course_code: crs?.course_code || 'GEN',
+        course_name: crs?.course_name || 'General Program',
         semester_number: semObj?.semester_number || 1,
         academic_calendar_term: academicCalendarTerm,
         is_active: true,
@@ -1711,7 +1711,7 @@ router.post(
                 (s) => s.subject_id === e.subject_id || s.subject_code.toLowerCase() === e.subject_code.toLowerCase()
               );
               localAssignments.push({
-                assignment_id: `40000000-0000-0000-0000-${String(localAssignments.length + 10).padStart(12, '0')}`,
+                assignment_id: crypto.randomUUID(),
                 faculty_profile_id: teacher.faculty_profile_id,
                 subject_id: sub?.subject_id || e.subject_id,
                 subject_code: e.subject_code,
@@ -1765,7 +1765,7 @@ router.post(
                   (s) => s.subject_id === e.subject_id || s.subject_code.toLowerCase() === e.subject_code.toLowerCase()
                 );
                 localAssignments.push({
-                  assignment_id: `40000000-0000-0000-0000-${String(localAssignments.length + 10).padStart(12, '0')}`,
+                  assignment_id: crypto.randomUUID(),
                   faculty_profile_id: teacher.faculty_profile_id,
                   subject_id: sub?.subject_id || e.subject_id,
                   subject_code: e.subject_code,
