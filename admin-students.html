@@ -785,7 +785,7 @@
   <!-- Toast Notification -->
   <div id="admin-toast" style="display: none; position: fixed; bottom: 24px; right: 24px; background: #17345C; color: #FFFFFF; padding: 14px 20px; border-radius: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); z-index: 2000; font-size: 14px; max-width: 400px;"></div>
 
-  <script src="site.js"></script>
+  <script src="site.js?v=4"></script>
   <!-- Client-side Application Script -->
   <script>
     var currentStudents = [];
@@ -834,59 +834,62 @@
           if (schoolData && schoolData.success && schoolData.schools && schoolData.schools.length > 0) {
             academicSchools = schoolData.schools;
           } else {
-            academicSchools = [
-              { school_id: 'SST', school_name: 'School of Science & Technology' },
-              { school_id: 'SBS', school_name: 'School of Bioscience' },
-              { school_id: 'SOM', school_name: 'School of Management' },
-              { school_id: 'CA', school_name: 'Department of Computer Applications' }
-            ];
+            academicSchools = [];
+            try {
+              var sRaw = localStorage.getItem('admin_schools_list') || localStorage.getItem('attendance_institutional_schools_v1');
+              if (sRaw) {
+                var sParsed = JSON.parse(sRaw);
+                if (Array.isArray(sParsed)) academicSchools = sParsed;
+              }
+            } catch (e) {}
           }
 
           if (treeData && treeData.success && treeData.tree && treeData.tree.length > 0) {
             academicTree = treeData.tree;
           } else {
-            academicTree = [
-              {
-                department_id: 'ca',
-                department_code: 'CA',
-                department_name: 'Department of Computer Applications',
-                courses: [
-                  { course_id: 'bca', course_code: 'BCA', course_name: 'Bachelor of Computer Applications' },
-                  { course_id: 'mca', course_code: 'MCA', course_name: 'Master of Computer Applications' }
-                ]
-              },
-              {
-                department_id: 'cse',
-                department_code: 'CSE',
-                department_name: 'Computer Science & Engineering',
-                courses: [
-                  { course_id: 'btech_cse', course_code: 'BTECH', course_name: 'B.Tech Computer Science & Engineering' }
-                ]
+            academicTree = [];
+            try {
+              var aState = JSON.parse(localStorage.getItem('admin_academic_state') || '{}');
+              if (Array.isArray(aState.departments)) {
+                academicTree = aState.departments.map(function(d) {
+                  return {
+                    department_id: d.id,
+                    department_code: d.code,
+                    department_name: d.name,
+                    courses: (aState.courses || []).filter(function(c) { return c.department_id === d.id; })
+                  };
+                });
               }
-            ];
+            } catch (e) {}
           }
 
           populateFilterDropdowns();
           populateCreateModalDropdowns();
         })
         .catch(function (err) {
-          academicSchools = [
-            { school_id: 'SST', school_name: 'School of Science & Technology' },
-            { school_id: 'SBS', school_name: 'School of Bioscience' },
-            { school_id: 'SOM', school_name: 'School of Management' },
-            { school_id: 'CA', school_name: 'Department of Computer Applications' }
-          ];
-          academicTree = [
-            {
-              department_id: 'ca',
-              department_code: 'CA',
-              department_name: 'Department of Computer Applications',
-              courses: [
-                { course_id: 'bca', course_code: 'BCA', course_name: 'Bachelor of Computer Applications' },
-                { course_id: 'mca', course_code: 'MCA', course_name: 'Master of Computer Applications' }
-              ]
+          academicSchools = [];
+          try {
+            var sRaw = localStorage.getItem('admin_schools_list') || localStorage.getItem('attendance_institutional_schools_v1');
+            if (sRaw) {
+              var sParsed = JSON.parse(sRaw);
+              if (Array.isArray(sParsed)) academicSchools = sParsed;
             }
-          ];
+          } catch (e) {}
+
+          academicTree = [];
+          try {
+            var aState = JSON.parse(localStorage.getItem('admin_academic_state') || '{}');
+            if (Array.isArray(aState.departments)) {
+              academicTree = aState.departments.map(function(d) {
+                return {
+                  department_id: d.id,
+                  department_code: d.code,
+                  department_name: d.name,
+                  courses: (aState.courses || []).filter(function(c) { return c.department_id === d.id; })
+                };
+              });
+            }
+          } catch (e) {}
           populateFilterDropdowns();
           populateCreateModalDropdowns();
         });
@@ -905,6 +908,73 @@
       return code;
     }
 
+    function isLegacyMockSchool(d) {
+      if (!d) return false;
+      var code = String(d.department_code || d.school_code || d.code || d.id || '').toUpperCase().trim();
+      var name = String(d.school_name || d.department_name || d.name || '').toLowerCase().trim().replace(/&amp;/g, '&');
+      var id = String(d.school_id || d.department_id || d.id || '').toLowerCase().trim();
+      
+      if (code === 'SST' || code === 'SBS' || code === 'SOM' || (code === 'CA' && (name.indexOf('computer') !== -1 || !name))) {
+        return true;
+      }
+      if (name.indexOf('school of science & technology') !== -1 ||
+          name.indexOf('school of science and technology') !== -1 ||
+          name.indexOf('school of bioscience') !== -1 ||
+          name.indexOf('school of management') !== -1 ||
+          name.indexOf('department of computer applications') !== -1) {
+        return true;
+      }
+      if (id.indexOf('10000000-') !== -1 || id.indexOf('s0000000-') !== -1 || id.indexOf('b0000000-') !== -1) {
+        return true;
+      }
+      return false;
+    }
+
+    (function purgeDefaultMockSchools() {
+      try {
+        ['attendance_academic_departments_v2', 'attendance_institutional_schools_v1', 'admin_schools_list'].forEach(function(key) {
+          try {
+            var raw = localStorage.getItem(key);
+            if (raw) {
+              var parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) {
+                var filtered = parsed.filter(function(x) { return !isLegacyMockSchool(x); });
+                localStorage.setItem(key, JSON.stringify(filtered));
+              }
+            }
+          } catch (e) {}
+        });
+        try {
+          var aState = JSON.parse(localStorage.getItem('admin_academic_state') || '{}');
+          if (Array.isArray(aState.departments)) {
+            aState.departments = aState.departments.filter(function(d) { return !isLegacyMockSchool(d); });
+            localStorage.setItem('admin_academic_state', JSON.stringify(aState));
+          }
+        } catch (e) {}
+      } catch (e) {}
+    })();
+
+    function isEntityDeleted() {
+      var identifiers = Array.prototype.slice.call(arguments);
+      var list = {};
+      try {
+        var bl = localStorage.getItem('admin_deleted_entities_blacklist');
+        if (bl) list = JSON.parse(bl);
+      } catch (e) {}
+      var combined = (Array.isArray(list['schools']) ? list['schools'] : [])
+                      .concat(Array.isArray(list['departments']) ? list['departments'] : []);
+      if (combined.length === 0) return false;
+      return identifiers.some(function(id) {
+        if (!id) return false;
+        var norm = String(id).trim().toLowerCase();
+        return combined.some(function(c) {
+          if (!c) return false;
+          var cNorm = String(c).trim().toLowerCase();
+          return norm === cNorm || (cNorm.length >= 3 && (norm.indexOf(cNorm) !== -1 || cNorm.indexOf(norm) !== -1));
+        });
+      });
+    }
+
     function populateFilterDropdowns() {
       var deptSel = document.getElementById('filter-department');
       var courseSel = document.getElementById('filter-course');
@@ -916,9 +986,14 @@
 
       function addUnifiedItem(item) {
         if (!item) return;
+        if (isLegacyMockSchool(item)) return;
         var code = normalizeSchoolCode(item);
         var rawName = String(item.school_name || item.department_name || item.name || '').trim();
         var nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
+
+        if (isEntityDeleted(code, rawName, item.school_id, item.department_id, item.id, item.school_code, item.department_code)) {
+          return;
+        }
 
         if ((code && seenCodes.has(code)) || (nameKey && seenNames.has(nameKey))) {
           return;
@@ -1285,9 +1360,14 @@
 
         function addCreateSchoolItem(sch) {
           if (!sch) return;
+          if (isLegacyMockSchool(sch)) return;
           var code = normalizeSchoolCode(sch);
           var rawName = String(sch.school_name || sch.department_name || sch.name || '').trim();
           var nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
+
+          if (isEntityDeleted(code, rawName, sch.school_id, sch.department_id, sch.id, sch.school_code, sch.department_code)) {
+            return;
+          }
 
           if ((code && seenCodes.has(code)) || (nameKey && seenNames.has(nameKey))) {
             return;
@@ -1317,6 +1397,11 @@
       if (courseSel) {
         courseSel.innerHTML = '<option value="">Select Programme</option>';
         academicTree.forEach(function (dept) {
+          var dCode = normalizeSchoolCode(dept);
+          var dName = String(dept.school_name || dept.department_name || dept.name || '').trim();
+          if (isEntityDeleted(dCode, dName, dept.department_id, dept.school_id, dept.id)) {
+            return;
+          }
           dept.courses.forEach(function (c) {
             var opt = document.createElement('option');
             opt.value = c.course_code;
@@ -1472,7 +1557,7 @@
             registration_no: payload.registrationNo || ('REG-2026-' + Math.floor(100 + Math.random() * 900)),
             full_name: payload.fullName,
             student_gmail: payload.studentGmail,
-            school_name: payload.schoolId || 'School of Science & Technology',
+            school_name: payload.schoolId || '',
             course_code: payload.courseCode,
             semester_number: payload.semesterNumber,
             section_name: payload.sectionName,
@@ -1498,7 +1583,7 @@
         var schEl = document.getElementById('view-school');
         if (enrEl) enrEl.textContent = s.enrollment_no || s.student_id || '--';
         if (regEl) regEl.textContent = s.registration_no || '--';
-        if (schEl) schEl.textContent = s.school_name || s.school_id || 'School of Science & Technology';
+        if (schEl) schEl.textContent = s.school_name || s.school_id || '--';
 
         document.getElementById('view-email').textContent = s.student_gmail || s.email || '--';
         document.getElementById('view-programme').textContent = (s.course_name || s.course_code) + ' (' + s.course_code + ')';
@@ -1916,7 +2001,7 @@
           s.registration_no || '',
           '"' + s.full_name + '"',
           s.student_gmail,
-          '"' + (s.school_name || s.school_id || 'School of Science & Technology') + '"',
+          '"' + (s.school_name || s.school_id || '') + '"',
           s.course_code,
           s.semester_number,
           s.section_name,

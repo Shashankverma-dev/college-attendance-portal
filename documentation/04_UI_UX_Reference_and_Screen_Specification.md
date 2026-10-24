@@ -1,12 +1,13 @@
 # 4. UI/UX Reference and Screen Specification
 
-**Version:** 2.0.0 — Comprehensive Student Management, Academic Hierarchy, 48-Hour Cryptographic Activation, Two-Stage Bulk Import, Timetable Scheduler, and Master E2E QA Release  
-**Date:** 20 October 2026  
+**Version:** 2.2.0 — Multi-School Academic Hierarchy, Master Timetable Management & Conflict Engine, Real-Life Double-Submission Defense, Complete Role-Based Access Control, and Comprehensive Automated QA Release  
+**Date:** 24 October 2026  
 **Status:** Implemented & Verified in Codebase
 
 ---
 
 ## 4.1 Reference Style — Slate & White Hybrid (Option D) & Brand Colour Lock
+
 The College Attendance Management System implements the **Slate & White Hybrid Theme (Option D)** with permanent **Brand Colour Protection**:
 - **Critical Brand Colour Lock:** The official primary brand colour `#1D3C72` is permanently locked and immutable. Main page background, navbar headers, brand marks, and primary buttons use this exact hexadecimal value.
 - **Surface Architecture:** Clean white content surfaces (`#FFFFFF`) against the institutional `#1D3C72` background with subtle slate-blue borders (`#D7E3F0`).
@@ -21,143 +22,159 @@ The College Attendance Management System implements the **Slate & White Hybrid T
 
 ## 4.2 Comprehensive Screen Inventory
 
-### A. Public Screens
-1. **Landing Page (`index.html`):** Public portal introducing the system, featuring example register illustration, role cards (Student and Teacher), institutional notice, and footer navigation.
-2. **Sign In (`signin.html`):** Role-based authentication interface for Students, Faculty, and Administrators, with credential inputs and link to Password Recovery. Displays session-expiration alerts when redirected with `?reason=session_expired`.
-3. **Account Activation / Password Setup (`activate.html`):** Accessed exclusively via secure 48-hour email activation link. Validates token, displays student identity confirmation, and presents password definition fields (minimum 12 characters, 4 character classes).
-4. **Password Reset / Forgot Password (`forgot-password.html`):** Self-service credential recovery prompting for Student ID or registered Gmail address, dispatching time-limited reset links (30-minute expiration).
-5. **Set New Password (`reset-password.html`):** Accessed via reset email token, validating single-use token and prompting for new password definition (minimum 12 characters).
-6. **Privacy Policy (`privacy.html`) & Terms (`terms.html`):** Formal institutional data protection, attendance compliance, and acceptable use policies.
-
-### B. Student Portal Screens
-1. **Attendance Dashboard (`student.html`):** Real-time aggregate percentage, statutory 75% threshold badge, subject-wise attendance cards, chronological session logs, and "Request Attendance Correction" action button.
-2. **Attendance Correction Request Modal (`#studentCorrectionModal`):** Form to dispute an absence or submit medical/duty leave within 5 days of session, including session selector, reason category, narrative explanation, and evidence file attachment (stored on Cloud Storage for Firebase, up to 10 MB limit).
-3. **Examination Marks Portal (`student-marks.html`):** Semester-wise marks sheets, SGPA/CGPA calculations, verified publication dates, and download options.
-4. **Unified User Profile Portal (`profile.html`):**
-   - Single, secure, role-segregated profile interface dynamically rendering context based on authenticated session claims:
-     - **Student Context (`Alex Chen`, `STU-101`):** Read-only academic enrollment parameters (Program, Semester, Section, Registration ID); permitted contact edits (Personal Phone, Guardian Phone, Blood Group); immutable student ID protection.
-     - **Faculty Context (`Dr. Sarah Jenkins`, `FAC-201`):** Department, Designation, Cabin Location, Contact Extension, and Teaching Allocation summary.
-     - **Global Administrator Context (`Prof. Arthur Vance`, `ADM-001`):** Administrative scope (GLOBAL_ADMIN), Swami Rama Himalayan University affiliation, audit oversight authority badge, and administrative suite contact info.
-   - **Account Security & Session Governance:** In-modal Password Change enforcing 12+ character complexity, live requirements checklist, active device session inspection table, and per-device session revocation buttons.
-   - **Role-Safe Navigation:** The "Dashboard" link in the header and mobile drawer dynamically maps to `admin.html` for administrators, `teacher.html` for faculty, and `student.html` for students, preventing cross-portal degradation.
-5. **Academic Calendar (`calendar.html`):** Comprehensive academic scheduling interface featuring a 3-way view toggle: Full Year (12 Months) interactive calendar grid, dynamic Single-Month view with month zoom and Prev/Next controls, and filterable Agenda view (Examinations, Holidays, Deadlines, College Events).
-
-### C. Faculty Portal Screens
-1. **Today's Classes & Register (`teacher.html`):** Class selector for assigned Course, Semester, Section, and Subject; interactive student roster; bulk "Mark all Present" control; pre-submission verification and live summary; one-time session locking; and quick past registers overview with direct links to the dedicated hub.
-2. **Past Submitted Registers & Attendance Corrections Hub (`past-registers.html`):** Dedicated page in Faculty Dashboard providing a complete historical registers log, multi-criteria filter bar (Course, Section, Date Range, Search), and an interactive **Edit Past Attendance Modal** allowing faculty to modify student attendance statuses (P/A/L), record mandatory institutional correction reasons and audit notes, view session audit trails, and update registers with `MODIFIED (AUDITED)` status.
-3. **Marks Entry Console (`teacher-marks.html`):** Continuous internal assessment (CIA) and semester marks entry console with range validation, draft saving, and submission locking.
-
-### D. Head of Department (HOD) Portal Screens (Department Scope)
-1. **Department Overview Dashboard (`hod-dashboard.html`):** Department-scoped metrics (aggregate attendance, sections at risk, faculty marking timeliness), filterable strictly by courses and sections belonging to their department.
-2. **Department Correction Authorization Queue:** Review and authorization screen for escalated student attendance corrections, medical leave applications, and duty leave approvals within the department.
-3. **Department Faculty & Section Management:** View faculty teaching allocations, reassign substitute teachers for department classes, and inspect department-wide registers.
-
-### E. Administrator Portal Screens
-1. **Institutional Operations Dashboard (`admin.html`):** Real-time command center displaying 4 primary KPI cards (Total Students 4,165, Active/Pending Faculty, Today's Sessions & Lock Status, Campus Attendance Rate 92.4%), Quick Operations Hub routing to active administrative consoles, Department Timeliness & Compliance Table with explicit "Unconfigured" badges for unmapped departments, and interactive SHA-256 Linear Cryptographic Audit Chain verification modal.
-2. **Student Management Console (`admin-students.html`):** Comprehensive student administration interface featuring:
-   - 4 Live KPI metric cards (Total Matriculated, Active Enrolled, Pending Activation, Suspended Accounts).
-   - Cascading filter bar (Academic Year, Course, Semester, Section, Status, Search).
-   - Roster data table with status pill badges (`ACTIVE`, `PENDING_ACTIVATION`, `SUSPENDED`).
-   - Add Single Student Modal with section capacity validation.
-   - Two-Stage Bulk Import Modal (Stage 1 Preview with formula injection sanitization, Stage 2 Commit).
-   - Transfer Section Modal with historical archiving.
-   - Reissue Activation Link Modal with automatic prior token revocation.
-   - Account Suspension Modal with mandatory justification and real-time session termination.
-3. **Master Timetable Management Console (`admin-timetable.html`):** Visual scheduling interface featuring:
-   - Weekly scheduling grid (Monday–Saturday, 09:00–17:00).
-   - Filter bar (Academic Year, Course, Semester, Section).
-   - Color-coded Lecture and Laboratory Practical cards with parallel subgroup indicators (`C1`/`C2`).
-   - Add/Edit Timetable Slot Modal with dynamic teacher collision and room conflict detection.
-   - Delete Slot Confirmation Modal with audit tracking.
-4. **Teacher Portal Management Console (`admin-teachers.html`):** Faculty administration console with search, filtering, pagination, faculty provisioning, teaching allocations, account lifecycle transitions (`ACTIVE`, `SUSPENDED`, `INACTIVE`), and profile export.
-5. **Marks Management Console (`admin-marks.html`):** Examination marks governance interface for reviewing and publishing subject assessment marks.
-6. **Academic Calendar Management (`calendar.html`):** 12-month calendar governance, event scheduling with 5-tier audience targeting (College, Course, Year, Semester, Section).
-7. **System Security & Linear Audit Log Modal:** Cryptographic linear SHA-256 hash chain verification modal inspecting sequential ledger integrity and tamper resistance.
+### A. Public & Authentication Screens
+1. **Landing Page (`index.html`):** Public portal introducing the college attendance system, featuring example register illustration, role cards (Student, Faculty, Administrator), institutional notice, and footer navigation.
+2. **Sign In (`signin.html`):** Role-based authentication interface routing users automatically based on authenticated claims:
+   - `GLOBAL_ADMIN` -> `admin.html`
+   - `HOD` -> `admin.html` (scoped to department)
+   - `FACULTY` -> `teacher.html`
+   - `STUDENT` -> `student.html`
+   Displays alert banners when redirected with session expiration or account suspension reasons.
+3. **Account Activation / Password Definition (`activate.html` / In-Modal):** Accessed via secure 48-hour email activation link. Validates token, displays student identity confirmation, and presents password definition fields (minimum 12 characters, 4 character classes).
+4. **Privacy Policy (`privacy.html`) & Terms of Service (`terms.html`):** Formal institutional data protection, statutory attendance rules, and acceptable use policies with authenticated return navigation.
 
 ---
 
-## 4.3 Detailed Screen Layout Specifications
+### B. Administrator Portal Screens (`admin*.html`)
 
-### A. Student Management Console (`admin-students.html`)
-- **Header & Metric Strip:**
-  - Page title: "Student Roster & Academic Enrollments" with college insignia.
-  - 4 KPI cards: Total Students (`4,165`), Active Enrolled (`4,120`), Pending Activation (`35`), Suspended Accounts (`10`).
-- **Academic Hierarchy Filter Bar:**
-  - Cascading dropdowns: Academic Year (`2026-2027`), Course/Program (`BCA`, `B.Tech CSE`), Semester (`Semester 1` through `8`), Section (`Section A`, `Section B`).
-  - Status filter (`All Statuses`, `Active`, `Pending Activation`, `Suspended`).
-  - Search input with debounced listener matching Student ID, Name, Gmail, or Roll Number.
-  - Action buttons: "Add Student" and "Bulk Import".
-- **Student Data Table:**
-  - Columns: Student ID, Full Name, Gmail Address, Program & Term, Section, Roll No, Status Badge, Actions (`⋮`).
-  - Status Badges:
-    - `ACTIVE`: `#15803D` text on `#DCFCE7` background.
-    - `PENDING_ACTIVATION`: `#D97706` text on `#FEF3C7` background.
-    - `SUSPENDED`: `#DC2626` text on `#FEE2E2` background.
-  - Action Dropdown Items: Transfer Section, Reissue Activation Link, Suspend/Activate Account, View Details.
-- **Two-Stage Bulk Import Modal (`#bulkImportModal`):**
-  - **Stage 1 (Upload & Preview):**
-    - Drag-and-drop file upload zone accepting `.csv` and `.xlsx` (max 10 MB).
-    - Course and Section selector.
-    - "Analyze & Preview" button.
-    - Summary metrics banner: Total Rows, Valid Rows, Errors Found, Warnings.
-    - Interactive preview table showing row status chips (`VALID` green, `DUPLICATE` red, `CAPACITY_EXCEEDED` red, `INVALID_EMAIL` amber).
-    - Explanatory note: "Formula injection characters (=, +, -, @) are automatically neutralized."
-  - **Stage 2 (Commit):**
-    - "Commit Valid Rows" button (disabled if 0 valid rows).
-    - Progress indicator and post-commit confirmation showing generated activation links count.
-- **Transfer Section Modal (`#transferModal`):**
-  - Displays current enrollment: Course, Semester, Current Section, Roll No.
-  - Target Section dropdown showing real-time available capacity (`Section B (68/80 enrolled)`).
-  - Transfer effective date picker.
-  - Informational alert: "All past attendance marks and session registers will remain permanently attributed to Section A."
-  - Action button: "Confirm Transfer".
+1. **Institutional Operations Dashboard (`admin.html`):**
+   - **Header & College Insignia:** Swami Rama Himalayan University identity with quick profile dropdown.
+   - **4 Live KPI Cards:** Total Matriculated Students (`4,165`), Active Faculty Count, Today's Conducted Sessions & Lock Status, and Campus Average Attendance Rate (`92.4%`).
+   - **Operations Hub:** Direct navigation cards to Student Management, Teacher Directory, Master Timetable, Final Marks Console, and Academic Calendar.
+   - **Department Compliance & Timeliness Table:** Monitors departmental performance across conducted sessions, pending locks, submission timeliness %, and overall compliance %, displaying explicit `UNCONFIGURED` badges for unmapped departments.
+   - **SHA-256 Linear Audit Chain Modal:** Inspects cryptographic hash chain ($H_i = \text{SHA-256}(H_{i-1} \parallel \text{payload}_i)$), displaying block height, actor, target entity, timestamp, IP, and verification status.
 
-### B. Master Timetable Management Console (`admin-timetable.html`)
-- **Header & Scope Bar:**
-  - Title: "Master Timetable & Weekly Schedule" with institutional `#1D3C72` branding.
-  - Filter Bar: Academic Year, Course/Program, Semester, and Section selectors.
-  - Legend: Lecture slot (Slate border, `#17345C` text), Practical Lab slot (Amber border, `#B45309` text), Conflict warning badge (Red border, `#DC2626`).
-  - Action button: "Add Schedule Slot".
-- **Weekly Schedule Grid:**
-  - Day rows: Monday through Saturday.
-  - Time columns: 09:00–10:00, 10:00–11:00, 11:15–12:15, 12:15–13:15, 14:00–15:00, 15:00–16:00, 16:00–17:00.
-  - Slot Card Anatomy:
-    - Subject Code & Name (e.g., `BCA-101: Programming in C`).
-    - Faculty Name (e.g., `Dr. Sarah Jenkins`).
-    - Classroom / Lab Room (e.g., `Lab 3` or `Room 204`).
-    - Subgroup pill if applicable (`Batch C1` or `Batch C2`).
-    - Action controls on hover: Edit (pencil icon), Delete (trash icon).
-- **Add / Edit Slot Modal (`#slotModal`):**
-  - Day of Week, Start Time, End Time.
-  - Subject dropdown (filtered to active course/semester).
-  - Faculty dropdown (shows assigned teacher).
-  - Room / Laboratory input.
-  - Session Type toggle: `LECTURE` or `PRACTICAL_LAB`.
-  - Subgroup dropdown: `FULL SECTION`, `BATCH C1`, `BATCH C2`.
-  - **Live Conflict Detection Banner:**
-    - Appears dynamically if the selected faculty or room is occupied elsewhere during the selected time interval.
-    - Displays exact collision detail: *"Teacher Collision: Dr. Sarah Jenkins is already scheduled for BCA Sem 3 Sec A in Room 102."*
-  - Save button (disabled when active conflict is unresolved).
+2. **Student Management Console (`admin-students.html`):**
+   - **Live Metric Strip:** Total Matriculated, Active Enrolled, Pending Activation, and Suspended Accounts.
+   - **Cascading Hierarchy Filter Bar:** School / College, Academic Year, Course / Programme, Semester, Section, and Account Status.
+   - **Debounced Search Bar:** Full-text search matching Student ID, Full Name, Gmail, or Roll Number.
+   - **Student Roster Table:** Checkbox selection, Student ID, Full Name, Email, Course, Semester, Section, Roll No, Status Pill Badge (`ACTIVE`, `PENDING_ACTIVATION`, `SUSPENDED`), and Actions Menu.
+   - **Add Single Student Modal (`#addStudentModal`):** Capacity-guarded enrollment, generating 48-hour cryptographic token and dispatching activation email.
+   - **Two-Stage Bulk Import Modal (`#bulkImportModal`):**
+     - Download Sample Template (.csv and .xlsx).
+     - Drag-and-drop file upload zone (max 10 MB).
+     - Stage 1 Preview: Sanitizes formula injection (`'`, `=`, `+`, `-`, `@`), normalizes headers, checks within-file & database duplicates, and checks section capacity.
+     - Stage 2 Commit: Atomic transactional database commit and email queueing.
+   - **Transfer Section Modal (`#transferModal`):** Non-destructive section transfer archiving prior enrollment as `TRANSFERRED` while retaining historical attendance and marks.
+   - **Reissue Activation Link Modal (`#reissueModal`):** Invalidates prior tokens, creates new 48-hour token, and re-dispatches email.
+   - **Account Suspension Modal (`#suspendModal`):** Toggles account state with mandatory justification; terminates active device sessions and blocks API access.
+   - **Student Deletion Modal (`#deleteStudentModal`):** Permanent purge tracking to prevent ghost resurrection.
 
-### C. Account Activation and First-Login Password Setup Screen (`activate.html`)
-- **Header:** Clean institutional banner with college insignia and "Account Activation" title.
-- **Identity Confirmation Card:** Displays read-only student details retrieved from the secure 48-hour token:
-  - Name (e.g., *Alex Chen*)
-  - Student ID (e.g., *STU-2026-0001*)
-  - Registered Gmail Address (e.g., *alex.chen@gmail.com*)
-  - Academic Affiliation (e.g., *BCA - 1st Year - Semester 1 - Section A*)
-- **Password Setup Form:**
-  - "Create Password" field with live strength validator.
-  - "Confirm Password" field.
-  - **Password Checklist:** 12+ characters, uppercase letter, lowercase letter, number, special character.
-- **Action Button:** "Activate Account and Sign In" (navy rectangular button).
-- **Error States:** Informative banners for *Expired Activation Link (48 hours exceeded)*, *Token Already Redeemed*, or *Token Revoked (Superseded by Administrator)*.
+3. **Master Timetable Management Console (`admin-timetable.html`):**
+   - **5 Core Operational Tabs:**
+     - **Tab 1: Weekly Schedule Grid:**
+       - Filter by School, Programme, Semester, Section, Academic Year, and Term.
+       - Weekly scheduling grid (Monday–Saturday, 09:00–17:00).
+       - Color-coded Lecture and Laboratory Practical cards with parallel subgroup indicators (`C1`/`C2`).
+       - Add/Edit Period Slot Modal with dynamic real-time conflict detection:
+         - Teacher Collision Prevention (`TEACHER_OVERLAP`).
+         - Room Double-Booking Prevention (`ROOM_OVERLAP`).
+         - Section Overlap Prevention (`SECTION_OVERLAP`).
+         - Parallel Practical Subgroups Exemption (`C1` and `C2` in separate labs with separate teachers succeed with 0 conflicts).
+       - Delete Slot Modal with audit tracking.
+     - **Tab 2: Academic Entities:**
+       - Full CRUD management of Schools / Constituent Colleges, Academic Departments, Degree Programmes / Courses, and Academic Semesters with deletion persistence.
+     - **Tab 3: Classrooms & Laboratories (Rooms):**
+       - Classroom and laboratory inventory management (Room Code, Name, Capacity, Room Type). Code uniqueness validation and deletion persistence.
+     - **Tab 4: Sections & Batches:**
+       - Manage sections under semesters with capacity limits (60–80 baseline).
+       - Practical Subgroups (`C1`, `C2`) created under sections for laboratory split scheduling.
+     - **Tab 5: Timetable Settings & Clear Schedule:**
+       - Period slot duration configurations (times, breaks).
+       - Clear Schedule feature: Clear section schedule or clear all schedules with confirmation, without resurrecting mock schedules.
+   - **Spreadsheet Timetable Ingest:** Upload timetable Excel/CSV (e.g. `BCA (V-C).xlsx`) with faculty abbreviation mapping and `UNRESOLVED` warning banners.
 
-### D. Session Idle Timeout Pre-Expiration Modal
-- **Trigger:** Displays at **minute 13 of user inactivity** (2 minutes prior to session expiration).
-- **Modal Content:** High-contrast dialog with prominent countdown timer:
-  *"Your session will expire in 01:59 due to inactivity. For your security on campus computers, unauthenticated sessions are automatically closed."*
-- **Action Controls:**
-  - Primary Button: "Stay Signed In" (dispatches heartbeat ping, resets idle timer, closes modal).
-  - Secondary Link: "Sign Out Now" (immediately destroys session and redirects to signin).
-- **Expiration Behavior:** Upon reaching 00:00, modal transitions to *"Session Expired"*, clears client storage, and redirects to `/signin.html?reason=session_expired`.
+4. **Teacher Portal Management Console (`admin-teachers.html`):**
+   - **Live Metric Strip:** Total Faculty, Active Teachers, Pending Activation, and Academic Departments.
+   - **Search & Filter Bar:** Search by Name, Staff ID, Email; filter by Department and Status; pagination.
+   - **Provision Faculty Modal (`#addTeacherModal`):** Full Name, unique Staff ID, official `@college.edu` email, Department, and Designation. Dispatches 48-hour activation link.
+   - **Teaching Allocations Modal (`#allocationModal`):** Assign Course, Semester, Section, and Subject with semester compatibility validation.
+   - **Edit Faculty Modal (`#editTeacherModal`):** Modify personal profile and contact information.
+   - **Account Access Control Modal (`#accessControlModal`):** Transition status (`ACTIVE`, `SUSPENDED`, `INACTIVE`) with mandatory justification, immediately revoking refresh tokens and sessions.
+   - **Faculty Profile Drawer (`#profileDrawer`):** Slide-out drawer displaying teaching workload, history, and status.
+   - **CSV Export:** One-click roster export.
+
+5. **Examination Marks Management Console (`admin-marks.html`):**
+   - Assessment verification console, assessment component tracking (CIA-1, CIA-2, Theory, Practical).
+   - Grade review sheets, verification cycles, and spreadsheet marks ingestion.
+   - Result Finalization & Publishing: Officially publishes results, unlocking visibility in student portals.
+
+---
+
+### C. Faculty Portal Screens (`teacher*.html` & `past-registers.html`)
+
+1. **Faculty Live Roll-Call Register (`teacher.html`):**
+   - Class selector for assigned Course, Semester, Section, and Subject (enforced server-side).
+   - Today's Class Session banner: Topic, instructional hours, room, date.
+   - Interactive student roster: Roll number, student photo card, full name, Student ID, and status toggles (`P` - Present, `A` - Absent, `L` - Approved Leave).
+   - Bulk toggles: "Mark All Present", "Clear All".
+   - One-Time Submission Locking: Once submitted, register status transitions to `LOCKED`. Direct in-place edits are disabled.
+   - **Dynamic Rolling QR Code Attendance Mode:**
+     - Toggle dynamic QR check-in display on classroom projector/screen.
+     - Automatically refreshes signed cryptographic token every 15-30 seconds.
+     - Live student scan counter and roster synchronization.
+
+2. **Past Submitted Registers & Corrections Hub (`past-registers.html`):**
+   - Multi-parameter filter bar (Course, Section, Subject, Date Range, Search).
+   - Historical registers log displaying Conducted Date, Subject, Section, Total Students, Present/Absent counts, and Status (`LOCKED` or `MODIFIED (AUDITED)`).
+   - **Edit Past Attendance Modal:**
+     - Select student status toggles (`P`, `A`, `L`).
+     - Mandatory correction classification (Clerical Error, Medical Leave, Approved Duty, Administrative Adjustment).
+     - Mandatory faculty audit notes.
+     - Transitions session status to `MODIFIED (AUDITED)` and generates SHA-256 linear hash chain audit entry.
+
+3. **Marks Entry Console (`teacher-marks.html`):**
+   - Class selector based on active teaching allocations.
+   - Assessment creator: Assessment Name, Type (CIA-1, CIA-2, Mid-Term, Practical), Max Marks, Weightage %. Protected by double-click idempotency defense.
+   - Student marks entry grid with range validation (0 <= score <= maxMarks; blocks negative or excessive marks).
+   - Bulk score save executing atomic upserts (updating existing scores without creating redundant score rows).
+   - "Submit to Admin" action to freeze marks and submit for administrative review.
+
+---
+
+### D. Student Portal Screens (`student*.html`)
+
+1. **Student Attendance Portal (`student.html`):**
+   - Header with student profile summary (Name, Student ID, Roll No, Section, Program).
+   - Overall Attendance KPI Card with statutory 75% threshold badge (`Compliant`, `At Risk`, `Severe Shortage`).
+   - Subject-wise Attendance Breakdown Cards: Progress bars color-coded by institutional thresholds (Green >= 75%, Amber 65-74%, Red < 65%).
+   - Monthly Attendance Calendar Heatmap: Visual monthly calendar showing daily attendance state.
+   - Chronological Session History with subject and date filtering.
+   - **Request Attendance Correction Modal:**
+     - Submit dispute within 5 days of conducted session.
+     - Select session, claimed status (`P` or `L`), reason category, narrative description.
+     - Upload supporting document (Medical certificate, duty sanction, up to 10 MB in Cloud Storage for Firebase).
+   - **Mobile Touchless QR Check-in Scanner:**
+     - Built-in camera scanner to check in via faculty's classroom QR code.
+     - Validates cryptographic token, proximity/session active window, and section enrollment match (prevents Section A student from scanning Section B).
+
+2. **Student Examination Marks Portal (`student-marks.html`):**
+   - Term / Semester selector.
+   - Grade Sheet Table: Subject Code, Subject Name, Credits, CIA-1, CIA-2, End-Sem Theory, Practical, Total Marks, Letter Grade.
+   - Aggregate SGPA / CGPA calculations.
+   - Result Publication Status: Strictly displays only **PUBLISHED** assessments. Draft or pending assessments are hidden.
+   - Printable Grade Card / Export PDF button.
+
+---
+
+### E. Universal / Shared Screens (`calendar.html` & `profile.html`)
+
+1. **Academic Calendar (`calendar.html`):**
+   - **3-Way View Toggle:** Full Year 12-Month interactive grid, Dynamic Single-Month view with month zoom and Prev/Next controls, and Filterable Agenda milestone list.
+   - **5-Tier Audience Targeting:** Scoped to Institution-wide, Course, Academic Year, Semester, and Section.
+   - Category badges: Examinations (`EXAM` - red), Holidays (`HOLIDAY` - amber), Deadlines (`DEADLINE` - navy), Vacations (`VACATION` - purple), College Events (`EVENT` - teal).
+   - Total instructional days counter (214 teaching days).
+   - Administrator Event Management Modal: Create, edit, reschedule, and delete events.
+
+2. **Unified User Profile Portal (`profile.html`):**
+   - **Role-Segregated Presentation:**
+     - Student: Academic program, semester, section, permanent Student ID (read-only/immutable); editable phone, guardian contact, blood group.
+     - Faculty: Department, designation, cabin location, office extension, active teaching allocations.
+     - Global Administrator: Administrative scope (`GLOBAL_ADMIN`), institution affiliation, audit oversight authority badge.
+   - **Account Security:**
+     - In-modal Password Change: Requires current password confirmation, enforces 12+ characters, 4 character classes, live strength validation checklist.
+     - Account-wide session revocation on password update.
+   - **Active Device Session Management:**
+     - Table of logged-in devices: Browser / OS, IP address, Last active timestamp, Current Device indicator.
+     - Per-device revocation: User can terminate a specific remote device session (`LOGGED_OUT_DEVICE`) without logging out the current device.
+   - **Role-Safe Navigation:** Header "Dashboard" link dynamically resolves to `admin.html` for Admin/HOD, `teacher.html` for Faculty, and `student.html` for Student.

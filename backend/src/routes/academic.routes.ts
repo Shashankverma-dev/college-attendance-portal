@@ -164,7 +164,7 @@ router.get('/courses', authenticate, async (req: Request, res: Response): Promis
           SELECT c.*, d.department_name, d.department_code
           FROM courses c
           JOIN departments d ON c.department_id = d.department_id
-          WHERE c.is_active = TRUE
+          WHERE c.is_active = TRUE AND d.is_active = TRUE
           ORDER BY c.course_name ASC
         `;
         const resData = await client.query(query);
@@ -175,29 +175,35 @@ router.get('/courses', authenticate, async (req: Request, res: Response): Promis
       return;
     }
 
-    // In-Memory Fallback
-    const joined = localCourses.map((c) => {
-      const dept = localDepartments.find((d) => d.department_id === c.department_id);
-      return {
-        ...c,
-        department_name: dept?.department_name || 'General Department',
-        department_code: dept?.department_code || 'GEN',
-        is_active: true,
-      };
-    });
+    // In-Memory Fallback: filter only courses whose department is still active
+    const activeDeptIds = new Set(localDepartments.map((d) => d.department_id));
+    const joined = localCourses
+      .filter((c) => !c.department_id || activeDeptIds.has(c.department_id))
+      .map((c) => {
+        const dept = localDepartments.find((d) => d.department_id === c.department_id);
+        return {
+          ...c,
+          department_name: dept?.department_name || 'General Department',
+          department_code: dept?.department_code || 'GEN',
+          is_active: true,
+        };
+      });
 
     res.json(joined);
   } catch (err: any) {
     // In-memory fallback on any error
-    const joined = localCourses.map((c) => {
-      const dept = localDepartments.find((d) => d.department_id === c.department_id);
-      return {
-        ...c,
-        department_name: dept?.department_name || 'General Department',
-        department_code: dept?.department_code || 'GEN',
-        is_active: true,
-      };
-    });
+    const activeDeptIds = new Set(localDepartments.map((d) => d.department_id));
+    const joined = localCourses
+      .filter((c) => !c.department_id || activeDeptIds.has(c.department_id))
+      .map((c) => {
+        const dept = localDepartments.find((d) => d.department_id === c.department_id);
+        return {
+          ...c,
+          department_name: dept?.department_name || 'General Department',
+          department_code: dept?.department_code || 'GEN',
+          is_active: true,
+        };
+      });
     res.json(joined);
   }
 });
@@ -449,7 +455,7 @@ router.delete('/calendar/:id', authenticate, requireRole(['GLOBAL_ADMIN']), asyn
 
     if (pool) {
       try {
-        await pool.query('DELETE FROM academic_calendar_events WHERE event_id = $1::uuid', [id]);
+        await pool.query('DELETE FROM academic_calendar_events WHERE event_id::text = $1', [id]);
       } catch (_dbErr) {
         // DB error
       }

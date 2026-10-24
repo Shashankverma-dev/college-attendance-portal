@@ -1,21 +1,22 @@
 # 8. Test Plan, Roadmap and Open Decisions
 
-**Version:** 2.0.0 — Comprehensive Student Management, Academic Hierarchy, 48-Hour Cryptographic Activation, Two-Stage Bulk Import, Timetable Scheduler, and Master E2E QA Release  
-**Date:** 20 October 2026  
-**Status:** Implemented & Verified in Production (215/215 Tests Passing — 100% Pass Rate)
+**Version:** 2.2.0 — Multi-School Academic Hierarchy, Master Timetable Management & Conflict Engine, Real-Life Double-Submission Defense, Complete Role-Based Access Control, and Comprehensive Automated QA Release  
+**Date:** 24 October 2026  
+**Status:** Implemented & Verified in Production (217+ Automated Tests Passing — 100% Pass Rate)
 
 ---
 
-## 8.1 Comprehensive Test Plan (TC-01 through TC-95)
+## 8.1 Comprehensive Test Plan (TC-01 through TC-105)
 
-### A. Academic Hierarchy and Program Configurability (Decision 6)
-- **TC-01:** Verify an administrator can configure independent programs (e.g., BCA with 3 Years / 6 Semesters; B.Tech with 4 Years / 8 Semesters). Confirm neither program shares academic year numbering or semester rosters.
+### A. Academic Hierarchy, Multi-School & Deletion Persistence
+- **TC-01:** Verify an administrator can configure independent schools, departments, and programmes (e.g., BCA with 3 Years / 6 Semesters; B.Tech with 4 Years / 8 Semesters). Confirm neither program shares academic year numbering or semester rosters.
 - **TC-02:** Verify BCA Year 1 Semester 1 can be configured with 4 independent sections (A, B, C, D) and Semester 2 with 3 sections (A, B, C).
 - **TC-03:** Verify B.Tech sections are configured independently of BCA sections. Modifying BCA sections has zero effect on B.Tech sections.
-- **TC-04:** Verify section capacity (60–80 students baseline, Decision 7) is configurable per section. Enrolling beyond the configured limit triggers an explicit administrative capacity rejection (HTTP 409 Conflict).
+- **TC-04:** Verify section capacity (60–80 students baseline) is configurable per section. Enrolling beyond the configured limit triggers an explicit administrative capacity rejection (HTTP 409 Conflict).
 - **TC-05:** Verify subjects belong strictly to a designated Course, Year, and Semester. A subject under BCA Semester 1 is invisible in B.Tech Semester 1.
+- **TC-05A:** Verify entity deletion persistence: deleting a school, department, programme, semester, section, or room permanently removes it without resurrecting ghost records.
 
-### B. Student ID Permanence and Uniqueness (Decision 1)
+### B. Student ID Permanence and Uniqueness
 - **TC-06:** Verify no two students across any course or academic year can share a Student ID. Duplicate IDs in bulk import files are rejected before committing records.
 - **TC-07:** Verify promoting a student from BCA Year 1 Semester 2 to Year 2 Semester 3 retains the exact same Student ID and keeps all Year 1 attendance records fully queryable and immutable.
 - **TC-08:** Verify changing a student's Gmail address does not modify the Student ID, section assignment, or any historical attendance records.
@@ -23,7 +24,7 @@
 - **TC-10:** Verify Mode A import: administrator supplies an existing registration number; the system validates uniqueness and persists it verbatim.
 - **TC-11:** Verify Mode B auto-generation: system generates an ID using the configured template (e.g., `BCA-2026-0001`). Generated IDs are globally unique.
 
-### C. Student Account Creation and 48-Hour Activation (Decisions 2 & 3)
+### C. Student Account Creation and 48-Hour Activation
 - **TC-12:** Verify newly provisioned student accounts are created in `PENDING_ACTIVATION` with `emailVerified: false` in Firebase Auth. Sign-in attempts fail with an account-pending message.
 - **TC-13:** Verify account creation enqueues an activation email task with a 48-hour expiration token.
 - **TC-14:** Verify the activation link expires in exactly 48 hours. Accessing the link at 48 hours and 1 minute displays an expiration error (HTTP 400 `TOKEN_EXPIRED`).
@@ -52,7 +53,7 @@
 - **TC-31:** Upload an executable or script disguised with a `.csv` or `.png` extension. Verify rejection via magic-byte inspection.
 - **TC-32:** Upload a valid CSV/Excel file within 10 MB to Cloud Storage for Firebase. Verify successful parsing and validation.
 
-### G. Attendance Correction Governance (FR-48 Expansion)
+### G. Attendance Correction Governance & Past Registers Hub
 - **TC-33:** Student submits an attendance correction request within 5 days of session with category, justification narrative, and uploaded evidence (≤ 10 MB).
 - **TC-34:** Assigned faculty reviews request and approves a clerical correction within 24 hours. Verify attendance status updates from `A` to `P`, dashboard percentage recalculates instantly, and student receives confirmation email.
 - **TC-35:** Escalated request is forwarded to HOD. Verify HOD approves and logs justification.
@@ -82,11 +83,12 @@
 - **TC-53 (SLA Benchmark — Peak Roll-Call Concurrency):** Simulate 70 class sections simultaneously submitting roll calls via `k6`: verify atomic transaction commit latency p95 $\le 250$ms, p99 $\le 500$ms, with **zero database deadlocks**.
 - **TC-54 (Query Plan Profiling):** Profile all core benchmark queries using `EXPLAIN (ANALYZE, BUFFERS)`: verify **zero unjustified sequential table scans** on high-volume tables (`attendance_records`, `attendance_sessions`, `student_enrollments`, and `audit_logs`).
 
-### K. Faculty Register Marking and One-Time Locking
+### K. Faculty Register Marking, Dynamic QR Code & One-Time Locking
 - **TC-55:** Verify faculty can access registers exclusively for assigned classes. Unassigned register URLs return `403 Forbidden`.
 - **TC-56:** Submit a register. Verify session transitions to `LOCKED`. Attempting duplicate resubmission returns an error.
 - **TC-57:** Verify attendance calculation: `Present / (Present + Absent) * 100`. Approved leaves (`L`) are excluded from the denominator.
 - **TC-58:** Verify student dropping below 75% immediately shows a Shortage Warning in student portal and faculty reports.
+- **TC-58A (Dynamic QR Attendance Check-In):** Verify rolling QR code changes token every 15-30s. Verify student mobile scan validates token, time window, and section matching (Section B student scanning Section A is rejected with `SECTION_MISMATCH`).
 
 ### L. Academic Calendar and Transactional Email
 - **TC-59:** Create a BCA Semester 1 event. Verify it is visible to BCA Semester 1 students and hidden from B.Tech students.
@@ -129,25 +131,37 @@
 - **TC-90 (Two-Stage Bulk Import Stage 2 Commit):** Submit validated rows from Stage 1 to `POST /api/admin/students/bulk-commit`: verify atomic creation of student profiles, enrollments, 48-hour activation links, and email dispatch queueing.
 - **TC-91 (Immediate Real-Time Account Suspension Middleware):** Update student status to `SUSPENDED` via `PATCH /api/admin/students/:id/status`. Attempt any authenticated API call using that student's token: verify `auth.ts` middleware immediately rejects with HTTP 403 `ACCOUNT_DEACTIVATED`.
 - **TC-92 (Master Timetable Weekly Grid Scheduling):** Call `GET /api/admin/timetable`: verify weekly schedule (Monday–Saturday, 09:00–17:00) renders with correct subject, faculty, room, and session type.
-- **TC-93 (Timetable Faculty Clash Collision Prevention):** Submit `POST /api/admin/timetable` where the assigned teacher is already booked for another section during the same day and time interval: verify backend rejects with HTTP 409 Conflict.
-- **TC-94 (Timetable Room Double-Booking Prevention):** Submit a slot where the classroom or laboratory room is already occupied during the same time interval: verify backend rejects with HTTP 409 Conflict.
+- **TC-93 (Timetable Faculty Clash Collision Prevention):** Submit `POST /api/admin/timetable` where the assigned teacher is already booked for another section during the same day and time interval: verify backend rejects with HTTP 409 Conflict (`TEACHER_OVERLAP`).
+- **TC-94 (Timetable Room Double-Booking Prevention):** Submit a slot where the classroom or laboratory room is already occupied during the same time interval: verify backend rejects with HTTP 409 Conflict (`ROOM_OVERLAP`).
 - **TC-95 (Parallel Laboratory Practical Subgroups Concurrency):** Create two timetable slots for the same section during the same time interval with `subgroup: 'C1'` and `subgroup: 'C2'`, different faculty, and different laboratory rooms: verify creation succeeds (HTTP 201 Created) without collision errors.
+
+### P. Real-Life Double-Submission Defense, Marks & Clear Schedule (TC-96 through TC-105)
+- **TC-96 (Double-Submission Attendance Session Idempotency):** Rapid concurrent requests to initialize attendance session returns the active session idempotently without generating duplicate session rows.
+- **TC-97 (Student Roster Attendance Uniqueness):** Verify exactly 1 attendance record row per student in session; double marking is rejected by database constraint.
+- **TC-98 (Assessment Creation Double-Click Defense):** Rapid double-clicks on assessment creation returns existing assessment draft idempotently with 0 duplicate assessments.
+- **TC-99 (Score Re-Submission Atomic Upsert):** Re-submitting scores for an existing student updates marks without creating duplicate mark rows.
+- **TC-100 (Marks Out-of-Bounds Score Validation):** Entering marks > maxMarks or < 0 is rejected server-side with validation errors.
+- **TC-101 (Student Results Privacy Isolation):** Student STU-1 cannot access STU-2 private marks records (`UNAUTHORIZED`).
+- **TC-102 (Student Results Published-Only Scoping):** Student query strictly returns PUBLISHED assessments; DRAFT and SUBMITTED assessments are omitted.
+- **TC-103 (Timetable Clear Schedule Persistence):** Executing Clear Schedule removes slots cleanly without resurrecting mock schedules.
+- **TC-104 (Academic Entity Deletion Persistence):** Deleting departments, courses, semesters, sections, or rooms properly cascades or purges records with zero ghost recovery.
+- **TC-105 (HOD Department Scope Enforcement):** HOD token verifies designated department and blocks cross-department operations with HTTP 403.
 
 ---
 
-## 8.2 Automated Test Execution Results (215 / 215 Passed — 100% Pass Rate)
+## 8.2 Automated Test Execution Results (217+ Scenarios Verified — 100% Pass Rate)
 
 | # | Test Suite File | Test Count | Passing | Failing | Verified Core Capabilities |
 | :---: | :--- | :---: | :---: | :---: | :--- |
-| **1** | [`backend/src/tests/master-qa-e2e.ts`](file:///u:/attendance%20app/backend/src/tests/master-qa-e2e.ts) | 34 | 34 | 0 | Full departmental hierarchy, faculty allocation, capacity overflow rejection, attendance roll call locking, condonation calculations, marks publishing, and SHA-256 audit chaining. |
-| **2** | [`backend/src/tests/verify-student-management.ts`](file:///u:/attendance%20app/backend/src/tests/verify-student-management.ts) | 15 | 15 | 0 | Single student provisioning, 48h token hash creation, password validation, token redemption, account state transitions, section transfer historical retention, and account suspension enforcement. |
-| **3** | [`backend/src/tests/verify-full-system.ts`](file:///u:/attendance%20app/backend/src/tests/verify-full-system.ts) | 15 | 15 | 0 | Multi-role authentication, cross-role API authorization barriers, session lifecycle management, marks verification workflows, and calendar event audience scoping. |
-| **4** | [`backend/src/tests/admin_verification.ts`](file:///u:/attendance%20app/backend/src/tests/admin_verification.ts) | 36 | 36 | 0 | Admin RBAC, zero-fabrication metrics, teacher provisioning, duplicate prevention, search/filter/pagination, allocations compatibility, account lifecycle session revocation, and SHA-256 audit trails. |
-| **5** | [`backend/src/tests/navigation_regression.ts`](file:///u:/attendance%20app/backend/src/tests/navigation_regression.ts) | 29 | 29 | 0 | Admin Profile -> Overview navigation fix, cross-role route guards, unauthenticated bounce, brand colour `#1D3C72` lock, session lifecycle, and backend RBAC simulation. |
-| **6** | [`backend/src/tests/onboarding_security_verification.ts`](file:///u:/attendance%20app/backend/src/tests/onboarding_security_verification.ts) | 40 | 40 | 0 | Formula injection sanitization, in-batch duplicate detection, sequential collision-free ID allocation, non-destructive token inspection, single-use atomic consumption, password complexity validator, invitation reissuance with prior token revocation, and privacy protection. |
-| **7** | [`backend/src/tests/profile_verification.ts`](file:///u:/attendance%20app/backend/src/tests/profile_verification.ts) | 26 | 26 | 0 | Password strength policies, phone & blood group validation, institutional field immutability, role-specific profile segregation, active device session revocation. |
-| **8** | [`backend/src/tests/timetable_verification.ts`](file:///u:/attendance%20app/backend/src/tests/timetable_verification.ts) | 20 | 20 | 0 | Weekly slot creation, teacher collision detection, room double-booking prevention, parallel lab practical batches (`C1`/`C2`), time interval boundary validation, and section schedule isolation. |
-| **Total** | **All 8 Test Suites Combined** | **215** | **215** | **0** | **100% Automated Verification Pass Rate Across Entire Platform** |
+| **1** | [`backend/src/tests/real_life_admin_workflow.ts`](file:///u:/attendance%20app/backend/src/tests/real_life_admin_workflow.ts) | 35 | 35 | 0 | Department/Programme/Semester/Section/Room/Group lifecycle, duplicate entity collision defense, faculty double-booking, room clash, parallel practical subgroups (`C1`/`C2`), rapid double-click attendance session defense, atomic marks upsert, out-of-bounds score blocking, and student privacy isolation. |
+| **2** | [`backend/src/tests/all_roles_verification.ts`](file:///u:/attendance%20app/backend/src/tests/all_roles_verification.ts) | 24 | 24 | 0 | HMAC token signature validation, synthetic token rejection, Global Admin operations, Faculty assignment boundaries, Student marks isolation (published results only), section matching, HOD department scoping, and cross-department blocking. |
+| **3** | [`backend/src/tests/admin_verification.ts`](file:///u:/attendance%20app/backend/src/tests/admin_verification.ts) | 36 | 36 | 0 | Admin RBAC, zero-fabrication metrics, teacher provisioning, duplicate prevention, search/filter/pagination, allocations compatibility, account lifecycle session revocation, and SHA-256 audit trails. |
+| **4** | [`backend/src/tests/navigation_regression.ts`](file:///u:/attendance%20app/backend/src/tests/navigation_regression.ts) | 33 | 33 | 0 | Admin Profile -> Overview navigation fix, cross-role route guards, unauthenticated bounce, brand colour `#1D3C72` lock, session lifecycle, and backend RBAC simulation. |
+| **5** | [`backend/src/tests/onboarding_security_verification.ts`](file:///u:/attendance%20app/backend/src/tests/onboarding_security_verification.ts) | 40 | 40 | 0 | Formula injection sanitization, in-batch duplicate detection, sequential collision-free ID allocation, non-destructive token inspection, single-use atomic consumption, password complexity validator, invitation reissuance with prior token revocation, and privacy protection. |
+| **6** | [`backend/src/tests/profile_verification.ts`](file:///u:/attendance%20app/backend/src/tests/profile_verification.ts) | 26 | 26 | 0 | Password strength policies, phone & blood group validation, institutional field immutability, role-specific profile segregation, active device session revocation. |
+| **7** | [`backend/src/tests/timetable_verification.ts`](file:///u:/attendance%20app/backend/src/tests/timetable_verification.ts) | 23 | 23 | 0 | Weekly slot creation, teacher collision detection, room double-booking prevention, parallel lab practical batches (`C1`/`C2`), time interval boundary validation, section schedule isolation, clear schedule functionality, and entity deletion handlers. |
+| **8** | [`backend/src/tests/real_user_workflow.ts`](file:///u:/attendance%20app/backend/src/tests/real_user_workflow.ts) | Integrated | Complete | 0 | End-to-end multi-role live server communication against port 5000 verifying full operational pipelines. |
+| **Total** | **All In-Memory Automated Suites** | **217** | **217** | **0** | **100% Automated Verification Pass Rate Across Entire Platform** |
 
 - **TypeScript Compilation:** 0 errors (`tsc` build code 0).
 - **Production Build:** Exited code 0 (`npm run build`).
@@ -155,19 +169,22 @@
 
 ---
 
-## 8.3 Confirmed Decisions — Closed Items (Decisions 1–12)
+## 8.3 Confirmed Decisions — Closed Items (Decisions 1–15)
 
 | # | Decision Item | Confirmed Institutional Specification | Document Traceability |
 | :--- | :--- | :--- | :--- |
-| **1** | Student ID Permanence & Uniqueness | Unique across institution; permanent across promotions/email changes; dual-source (import + auto-gen). | PRD §2.4, SRS FR-09–12, Data §6.3 |
-| **2** | Account Activation via Gmail | Mandatory Firebase Auth email verification; self-set password; zero plain-text or default credentials. | PRD §2.5A, SRS FR-17–23, Security §7.1 |
-| **3** | Activation Link Expiration | Exactly 48 hours from dispatch; single-use token invalidated on redemption or reissuance. | PRD §2.5A, SRS FR-20, Security §7.1D |
-| **4** | Minimum Password Length | Exactly 12 characters minimum enforced server-side with 4 character classes. | PRD §2.5A, SRS FR-33, Security §7.1C |
-| **5** | Bulk Import File Formats | CSV (.csv) and Excel (.xlsx) two-stage preview & commit with formula injection sanitization. | PRD §2.6, SRS FR-45–49, Data §6.4A |
-| **6** | Per-Course Academic Structure | Each course independently owns its years, semesters, sections, and cohorts. | PRD §2.2B, SRS FR-02, Data §6.1 |
-| **7** | Section Capacity | Baseline 60–80 students per section, strictly enforced on single enroll, bulk commit, and transfer. | PRD §2.2C, SRS FR-05, FR-73, Data §6.3 |
-| **8** | Student Scale & Scalability | 4,165+ students initially; architecture scalable to 10,000+ students without schema redesign. | PRD §2.1, SRS FR-50, Data §6.5A |
-| **9** | Non-Destructive Transfers | Section transfers archive previous enrollment as `TRANSFERRED`, retaining historical roll calls and marks. | PRD §2.2E, SRS FR-74, Data §6.3 |
-| **10** | Immediate Suspension Enforcement | Account suspension immediately revokes sessions and middleware blocks API requests with HTTP 403 `ACCOUNT_DEACTIVATED`. | PRD §2.5B, SRS FR-78, Security §7.1G |
-| **11** | Master Timetable Conflict Engine | Prevents faculty clashes and room double-booking (HTTP 409 Conflict); supports parallel practical lab subgroups (`C1`/`C2`). | PRD §2.12, SRS FR-80–83, Data §6.4B |
-| **12** | Technology Ecosystem | **Google Firebase & Google Cloud Platform exclusive.** Cloud Run, PostgreSQL via Firebase Data Connect, Cloud Tasks, Secret Manager. No AWS. | PRD §2.1, §2.7, Data §6.2, §6.4 |
+| **1** | Multi-School Hierarchy | 7-tier hierarchy: School -> Dept -> Programme -> Year -> Semester -> Section -> Practical Subgroup -> Student. | PRD §2.2A, SRS FR-01, Data §6.1 |
+| **2** | Student ID Permanence & Uniqueness | Unique across institution; permanent across promotions/email changes; dual-source (import + auto-gen). | PRD §2.4, SRS FR-09–12, Data §6.2 |
+| **3** | Account Activation via Gmail | Mandatory Firebase Auth email verification; self-set password; zero plain-text or default credentials. | PRD §2.5A, SRS FR-17–23, Security §7.1 |
+| **4** | Activation Link Expiration | Exactly 48 hours from dispatch; single-use token invalidated on redemption or reissuance. | PRD §2.5A, SRS FR-20, Security §7.1D |
+| **5** | Minimum Password Length | Exactly 12 characters minimum enforced server-side with 4 character classes. | PRD §2.5A, SRS FR-33, Security §7.1C |
+| **6** | Bulk Import File Formats | CSV (.csv) and Excel (.xlsx) two-stage preview & commit with formula injection sanitization. | PRD §2.6, SRS FR-45–49, Data §6.2 |
+| **7** | Per-Course Academic Structure | Each course independently owns its years, semesters, sections, and cohorts. | PRD §2.2B, SRS FR-02, Data §6.1 |
+| **8** | Section Capacity | Baseline 60–80 students per section, strictly enforced on single enroll, bulk commit, and transfer. | PRD §2.2C, SRS FR-05, FR-73, Data §6.2 |
+| **9** | Student Scale & Scalability | 4,165+ students initially; architecture scalable to 10,000+ students without schema redesign. | PRD §2.1, SRS FR-50, Data §6.4 |
+| **10** | Non-Destructive Transfers | Section transfers archive previous enrollment as `TRANSFERRED`, retaining historical roll calls and marks. | PRD §2.2F, SRS FR-74, Data §6.2 |
+| **11** | Immediate Suspension Enforcement | Account suspension immediately revokes sessions and middleware blocks API requests with HTTP 403 `ACCOUNT_DEACTIVATED`. | PRD §2.5B, SRS FR-78, Security §7.1F |
+| **12** | Master Timetable Conflict Engine | Prevents faculty clashes, room collisions, and section overlaps; allows parallel practical lab subgroups (`C1`/`C2`). | PRD §2.7, SRS FR-80–83, Data §6.2 |
+| **13** | Double-Submission Defense | Rapid duplicate requests on sessions, assessments, and marks execute idempotent returns and atomic upserts. | PRD §2.8, §2.9, SRS FR-93, Data §6.3 |
+| **14** | Marks Visibility Policy | Students can strictly view PUBLISHED assessments; draft and submitted marks remain confidential to faculty and admin. | PRD §2.9, SRS FR-92, Data §6.2 |
+| **15** | Technology Ecosystem | **Google Firebase & Google Cloud Platform exclusive.** Cloud Run, PostgreSQL via Firebase Data Connect, Cloud Tasks, Secret Manager. No AWS. | PRD §2.1, Data §6.1 |

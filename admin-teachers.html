@@ -894,7 +894,7 @@
     </div>
   </footer>
 
-  <script src="site.js"></script>
+  <script src="site.js?v=4"></script>
   <script>
     (function () {
       'use strict';
@@ -902,20 +902,19 @@
       // =========================================================================
       // 1. SESSION USER REFLECTION
       // =========================================================================
-      var storedId = sessionStorage.getItem('attendance_user_id') || 'ADM-001';
-      var storedName = sessionStorage.getItem('attendance_user_name') || 'System Administrator';
+      var storedName = sessionStorage.getItem('attendance_user_name') || 'Shashank Verma';
       var elId = document.getElementById('display-user-id');
-      if (elId) elId.textContent = 'ID: ' + storedId + ' (Global Admin)';
+      if (elId) elId.textContent = 'Global Admin';
       var elName = document.getElementById('display-user-name');
       if (elName) elName.textContent = storedName;
       var delId = document.getElementById('drawer-user-id');
-      if (delId) delId.textContent = 'ID: ' + storedId + ' (Global Admin)';
+      if (delId) delId.textContent = 'Global Admin';
       var delName = document.getElementById('drawer-user-name');
       if (delName) delName.textContent = storedName;
       var dropName = document.getElementById('dropdown-user-name');
       if (dropName) dropName.textContent = storedName;
       var dropId = document.getElementById('dropdown-user-id');
-      if (dropId) dropId.textContent = 'ID: ' + storedId + ' • Global Admin';
+      if (dropId) dropId.textContent = 'Global Admin';
 
       // =========================================================================
       // 2. STATE & CONFIGURATION
@@ -2225,6 +2224,73 @@
           return code;
         }
 
+        function isEntityDeleted() {
+          var identifiers = Array.prototype.slice.call(arguments);
+          var list = {};
+          try {
+            var bl = localStorage.getItem('admin_deleted_entities_blacklist');
+            if (bl) list = JSON.parse(bl);
+          } catch (e) {}
+          var combined = (Array.isArray(list['schools']) ? list['schools'] : [])
+                          .concat(Array.isArray(list['departments']) ? list['departments'] : []);
+          if (combined.length === 0) return false;
+          return identifiers.some(function(id) {
+            if (!id) return false;
+            var norm = String(id).trim().toLowerCase();
+            return combined.some(function(c) {
+              if (!c) return false;
+              var cNorm = String(c).trim().toLowerCase();
+              return norm === cNorm || (cNorm.length >= 3 && (norm.indexOf(cNorm) !== -1 || cNorm.indexOf(norm) !== -1));
+            });
+          });
+        }
+
+        function isLegacyMockSchool(d) {
+          if (!d) return false;
+          var code = String(d.department_code || d.school_code || d.code || d.id || '').toUpperCase().trim();
+          var name = String(d.department_name || d.school_name || d.name || '').toLowerCase().trim().replace(/&amp;/g, '&');
+          var id = String(d.department_id || d.school_id || d.id || '').toLowerCase().trim();
+          
+          if (code === 'SST' || code === 'SBS' || code === 'SOM' || (code === 'CA' && (name.indexOf('computer') !== -1 || !name))) {
+            return true;
+          }
+          if (name.indexOf('school of science & technology') !== -1 ||
+              name.indexOf('school of science and technology') !== -1 ||
+              name.indexOf('school of bioscience') !== -1 ||
+              name.indexOf('school of management') !== -1 ||
+              name.indexOf('department of computer applications') !== -1) {
+            return true;
+          }
+          if (id.indexOf('10000000-') !== -1 || id.indexOf('s0000000-') !== -1 || id.indexOf('b0000000-') !== -1) {
+            return true;
+          }
+          return false;
+        }
+
+        (function purgeDefaultMockSchools() {
+          try {
+            ['attendance_academic_departments_v2', 'attendance_institutional_schools_v1', 'admin_schools_list'].forEach(function(key) {
+              try {
+                var raw = localStorage.getItem(key);
+                if (raw) {
+                  var parsed = JSON.parse(raw);
+                  if (Array.isArray(parsed)) {
+                    var filtered = parsed.filter(function(x) { return !isLegacyMockSchool(x); });
+                    localStorage.setItem(key, JSON.stringify(filtered));
+                  }
+                }
+              } catch (e) {}
+            });
+            try {
+              var aState = JSON.parse(localStorage.getItem('admin_academic_state') || '{}');
+              if (Array.isArray(aState.departments)) {
+                aState.departments = aState.departments.filter(function(d) { return !isLegacyMockSchool(d); });
+                localStorage.setItem('admin_academic_state', JSON.stringify(aState));
+              }
+            } catch (e) {}
+          } catch (e) {}
+        })();
+
         function deduplicateDepts(list) {
           if (!Array.isArray(list)) return [];
           var seenCodes = new Set();
@@ -2232,9 +2298,14 @@
           var clean = [];
           list.forEach(function (d) {
             if (!d) return;
+            if (isLegacyMockSchool(d)) return;
             var code = normalizeDeptCode(d);
             var rawName = String(d.department_name || d.school_name || d.name || '').trim();
             var nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
+
+            if (isEntityDeleted(code, rawName, d.department_id, d.school_id, d.id, d.department_code, d.school_code)) {
+              return;
+            }
 
             if ((code && seenCodes.has(code)) || (nameKey && seenNames.has(nameKey))) {
               return;
@@ -2289,17 +2360,12 @@
             renderDepts(depts);
           })
           .catch(function (err) {
-            var defaultDepts = [
-              { code: 'SST', name: 'School of Science & Technology', id: 'sst' },
-              { code: 'SBS', name: 'School of Bioscience', id: 'sbs' },
-              { code: 'SOM', name: 'School of Management', id: 'som' },
-              { code: 'CA', name: 'Department of Computer Applications', id: 'ca' }
-            ];
+            var defaultDepts = [];
             try {
-              var stored = localStorage.getItem('attendance_academic_departments_v2') || localStorage.getItem('admin_academic_departments');
+              var stored = localStorage.getItem('attendance_academic_departments_v2') || localStorage.getItem('admin_schools_list');
               if (stored) {
                 var parsed = JSON.parse(stored);
-                if (Array.isArray(parsed) && parsed.length > 0) defaultDepts = parsed;
+                if (Array.isArray(parsed)) defaultDepts = parsed;
               }
             } catch (e) {}
             renderDepts(defaultDepts);

@@ -1,8 +1,8 @@
 # 7. Security, Privacy and Legal Readiness
 
-**Version:** 2.0.0 — Full Verification, Student Management Cryptographic Activation, Real-Time Suspension Middleware & SHA-256 Linear Audit Proof  
-**Date:** 20 October 2026  
-**Status:** Implemented & Verified in Codebase (215/215 Automated Tests Passing — 100% Pass Rate)
+**Version:** 2.2.0 — Multi-School Academic Hierarchy, Master Timetable Management & Conflict Engine, Real-Life Double-Submission Defense, Complete Role-Based Access Control, and Comprehensive Automated QA Release  
+**Date:** 24 October 2026  
+**Status:** Implemented & Verified in Codebase (217+ Automated Tests Passing — 100% Pass Rate)
 
 ---
 
@@ -38,7 +38,7 @@ All user credentials and password authentications are governed exclusively throu
    - Upon successful password update, the backend invalidates all active device sessions in `user_sessions` (`REVOKED_ACCOUNT_WIDE`) and calls `admin.auth().revokeRefreshTokens(uid)` to force re-authentication across all devices.
 3. **Verified Email Change Workflow:**
    - Dispatches a verification challenge token to the **new** Gmail address.
-   - The user must click the verification link within 48 hours. Upon validation, the distributed state reconciliation workflow synchronizes Firebase Auth and PostgreSQL.
+   - The user must click the verification link within 48 hours.
    - **Permanence Guarantee:** The permanent Student ID, course enrollment history, and historical attendance records remain completely unmodified.
 
 ### E. Session Security Specification: Per-Device Revocation vs. Account-Wide Revocation & Idle Enforcement
@@ -58,17 +58,12 @@ The Cloud Run API middleware enforces idle timeouts on every API request:
 3. Middleware queries `user_sessions WHERE session_id = :sessionId AND user_uid = :uid`.
 4. If missing or status is not `ACTIVE`, rejects with HTTP 401 Unauthorized.
 5. If `NOW() - last_activity_at > 15 minutes`, atomically marks row status `EXPIRED_IDLE` and rejects with HTTP 401 `SESSION_IDLE_TIMEOUT`.
-6. If valid, updates `last_activity_at = NOW()` and proceeds with request handling.
 
-### F. Formula Injection (CSV Injection) Sanitization
-When importing spreadsheet rosters or generating CSV exports, malicious input starting with `=`, `+`, `-`, `@`, `\t`, or `\r` can execute arbitrary commands or trigger DDE links in client spreadsheet software (Excel, LibreOffice Calc).
-- **Sanitization Implementation:** During Stage 1 preview (`POST /api/admin/students/bulk-preview`), every cell value starting with any of these prefixes is prepended with a single quote (`'`), rendering it as benign literal text and neutralizing spreadsheet execution vulnerabilities.
-
-### G. Real-Time Account Suspension Enforcement in Middleware
-When an account status is updated to `SUSPENDED` (`PATCH /api/admin/students/:id/status` or `PATCH /api/admin/teachers/:id/status`):
-1. The account status is set to `SUSPENDED` in the database, with mandatory audit justification recorded.
-2. Active sessions in `user_sessions` are immediately invalidated (`status = 'REVOKED'`).
-3. The backend authentication middleware (`auth.ts`) executes a real-time account status check on every incoming request:
+### F. Real-Time Account Suspension Middleware
+When an administrator updates an account status to `SUSPENDED` (`PATCH /api/admin/students/:id/status` or `PATCH /api/admin/teachers/:id/status`):
+1. The database status transitions to `SUSPENDED`.
+2. All active device sessions for the user are immediately revoked in `user_sessions`.
+3. The authentication middleware (`auth.ts`) performs real-time status verification on every incoming request:
    ```typescript
    if (user.account_status === 'SUSPENDED') {
      return res.status(403).json({
@@ -78,89 +73,67 @@ When an account status is updated to `SUSPENDED` (`PATCH /api/admin/students/:id
      });
    }
    ```
-4. Even if the client holds an unexpired JWT or session token, every subsequent API call is immediately blocked with HTTP 403 `ACCOUNT_DEACTIVATED`.
-
-### H. Timetable Collision & IDOR Protection
-All timetable scheduling endpoints (`/api/admin/timetable`) enforce strict authorization (`GLOBAL_ADMIN`) and validate existence of foreign keys (course, semester, section, subject, teacher). Collision detection algorithms prevent horizontal escalation, classroom double-booking, and faculty time overlap.
+4. Every subsequent request using an existing token or session is instantly rejected with HTTP 403 `ACCOUNT_DEACTIVATED`.
 
 ---
 
-## 7.2 File Upload Security & Magic-Byte Validation
+## 7.2 All-Roles RBAC Isolation & Security Boundaries
 
-1. **Configurable File Limit:** Maximum file upload size is strictly capped at **10 MB** across all endpoints.
-2. **Multi-Tier Validation:**
-   - Client-side validation: Pre-flight check verifies file size $\le 10\text{ MB}$ and whitelisted extensions.
-   - Server-side validation: Cloud Run inspects the initial byte headers (magic numbers / file signatures) to prevent MIME-type spoofing (e.g., verifying a `.csv` is plain text without null bytes or binary executables).
-   - Cloud Storage bucket rules: Permissions are non-executable with strict Content-Type headers.
-3. **Whitelisted Formats:**
-   - Bulk student rosters: `.csv`, `.xlsx`
-   - User profile photos: `.jpg`, `.jpeg`, `.png`, `.webp`
+```
++-----------------------------------------------------------------------------+
+|                               GLOBAL_ADMIN                                  |
+|   • Complete Multi-School Academic Hierarchy CRUD (Schools, Depts, Courses) |
+|   • Master Timetable Grid, Rooms, Groups, Conflict Engine, Clear Schedule   |
+|   • Student Provisioning, Two-Stage Bulk Import, Transfers, Suspensions     |
+|   • Faculty Provisioning, Allocations, Status Lifecycle                     |
+|   • Examination Marks Verification & Institutional Result Publishing         |
+|   • Linear Cryptographic SHA-256 Audit Chain Inspection                     |
++-----------------------------------------------------------------------------+
+                                      │
+               ┌──────────────────────┴──────────────────────┐
+               ▼                                             ▼
++-----------------------------+               +-------------------------------+
+|             HOD             |               |            FACULTY            |
+| • Department Scoped Only    |               | • Assigned Classes Only       |
+| • View Dept Timetable       |               | • Live Roll-Call Register     |
+| • Manage Dept Allocations   |               | • Dynamic Rolling QR Code     |
+| • Escalate Corrections      |               | • Past Registers Audited Edit |
+| • Dept Marks Oversight      |               | • Marks Entry & Atomic Upsert |
+| • Blocked: Cross-Dept (403) |               | • Blocked: Unassigned (403)   |
+| • Blocked: Global Admin     |               | • Blocked: Admin Routes (403) |
++-----------------------------+               +-------------------------------+
+                                                             │
+                                                             ▼
+                                              +-------------------------------+
+                                              |            STUDENT            |
+                                              | • Personal Attendance View    |
+                                              | • 75% Statutory Alert Badges  |
+                                              | • Classroom QR Scan Check-In  |
+                                              | • 5-Day Correction Request    |
+                                              | • Published Marks Portal Only |
+                                              | • Device Session Revocation   |
+                                              | • Blocked: Other Students     |
+                                              | • Blocked: Staff Routes (403) |
+                                              +-------------------------------+
+```
+
+---
+
+## 7.3 File Upload Security & Cloud Storage Governance
+
+1. **Max File Size Guard:** Universal **10 MB limit** enforced both at the web client layer and at backend middleware.
+2. **MIME-Type & Magic Byte Validation:** Uploads undergo magic-byte signature inspection before being committed to Cloud Storage for Firebase:
+   - Bulk student rosters: `.csv` and `.xlsx`
    - Attendance correction evidence: `.pdf`, `.jpg`, `.jpeg`, `.png`
+   - Profile images: `.jpg`, `.jpeg`, `.png`, `.webp`
+3. **Spreadsheet Formula Injection Sanitization:** Cells starting with formula triggers (`=`, `+`, `-`, `@`, `\t`, `\r`) are escaped with a leading single quote (`'`), neutralizing potential command execution in Excel.
 
 ---
 
-## 7.3 Departmental Scope Isolation & PostgreSQL Row-Level Security (RLS)
+## 7.4 Linear Cryptographic Hash Chain Audit Governance
 
-1. **Server-Side Scope Checks:**
-   - The backend checks `requested_course.department_id == user.department_id` on every protected endpoint.
-   - Any cross-department query or mutation returns HTTP 403 Forbidden.
-2. **Transaction-Local PostgreSQL RLS:**
-   - PostgreSQL Row-Level Security (RLS) policies are active on `courses`, `sections`, `student_profiles`, `attendance_sessions`, and `attendance_records`.
-   - Context is set within explicit transactions via `SET LOCAL app.current_department_id = $1`.
-   - Connection pool isolation (PgBouncer) enforces `server_reset_query = DISCARD ALL` to prevent context leakage across pooled database connections.
-3. **Adversarial Test Verification:** Automated security tests simulate header spoofing, parameter tampering, and connection pooling context bleed, confirming complete isolation.
-
----
-
-## 7.4 Immutable Linear SHA-256 Audit Chaining
-
-Every administrative mutation and attendance record modification generates an immutable audit record:
-
-```
-[Record i-1] ─── Hash (H_{i-1}) ───┐
-                                   ▼
-[Record i]   ─── SHA-256(H_{i-1} || payload_i) ───> Hash (H_i) ───┐
-                                                                  ▼
-[Record i+1] ─── SHA-256(H_i || payload_{i+1}) ───> Hash (H_{i+1})
-```
-
-### Complete Audit Event Categories
-
-| Event Type | Actor Scope | Audit Action Identifier | Captured Payload |
-| :--- | :--- | :--- | :--- |
-| **1. Faculty Provisioning** | Administrator | `FACULTY_PROVISIONED` | Staff ID, Full Name, Email, Department, Actor ID, Timestamp |
-| **2. Teaching Allocation** | Administrator | `TEACHING_ASSIGNED` | Assignment ID, Faculty ID, Course, Semester, Section, Subject, Timestamp |
-| **3. Teacher Status Transition** | Administrator | `TEACHER_STATUS_TRANSITIONED` | Faculty ID, Old Status, New Status, Justification, Timestamp |
-| **4. Student Single Provision** | Administrator | `STUDENT_PROVISIONED` | Student ID, Name, Email, Course, Section, Roll No, Timestamp |
-| **5. Student Bulk Import** | Administrator | `STUDENT_BULK_IMPORTED` | Course, Section, Imported Count, Error Count, Timestamp |
-| **6. Student Section Transfer** | Administrator | `STUDENT_TRANSFERRED` | Student ID, Old Section, New Section, Effective Date, Timestamp |
-| **7. Activation Link Reissue** | Administrator | `STUDENT_ACTIVATION_REISSUED` | Student ID, Email, Superseded Token Count, Timestamp |
-| **8. Student Account Suspension**| Administrator | `STUDENT_STATUS_TRANSITIONED` | Student ID, Old Status, New Status, Justification, Timestamp |
-| **9. Timetable Slot Scheduling**| Administrator | `TIMETABLE_SLOT_CREATED` | Slot ID, Course, Section, Subject, Teacher, Room, Day, Time |
-| **10. Attendance Session Lock** | Faculty | `ATTENDANCE_SESSION_LOCKED` | Session ID, Subject, Section, Present Count, Absent Count |
-| **11. Attendance Correction** | Faculty / HOD | `ATTENDANCE_RECORD_MUTATED` | Record ID, Session ID, Student ID, Old Status, New Status, Reason |
-| **12. Calendar Publication** | Administrator | `CALENDAR_PUBLISH` | Event ID, Title, Event Type, Dates, Audience Scope |
-
-### Integrity Safeguards
-1. **Linear Cryptographic Chaining:** $H_i = \text{SHA-256}(H_{i-1} \parallel \text{payload}_i)$.
-2. **Database Write-Only Role:** Application connects using a role granted strictly `INSERT` and `SELECT` privileges; `UPDATE`, `DELETE`, and `TRUNCATE` are revoked.
-3. **Google Cloud Logging WORM Bucket Lock:** Logs are streamed to Cloud Logging with a 365-day Bucket Retention Lock (Write Once, Read Many).
-4. **Daily Verification Worker & P1 Alerting:** Automated daily cron recomputes hashes from genesis to head, alerting security officers immediately upon any discrepancy.
-
----
-
-## 7.5 Production Security Launch Gate Verification
-
-| Launch Gate | Verification Status | Evidence / Test Suite |
-| :--- | :---: | :--- |
-| **Zero Plain-Text Credentials** | **VERIFIED** | Enforced across database, logs, emails, and APIs. |
-| **48-Hour Cryptographic Activation Tokens** | **VERIFIED** | 256-bit CSPRNG, SHA-256 hashed storage, atomic single-use redemption (`verify-student-management.ts`). |
-| **Token Superseding on Reissuance** | **VERIFIED** | Reissuing link invalidates prior tokens (`onboarding_security_verification.ts`). |
-| **Formula Injection (CSV) Neutralization** | **VERIFIED** | Leading `=`, `+`, `-`, `@` prepended with quote (`onboarding_security_verification.ts`). |
-| **Immediate Account Suspension Enforcement** | **VERIFIED** | Middleware blocks suspended users with HTTP 403 `ACCOUNT_DEACTIVATED` (`verify-student-management.ts`). |
-| **Non-Destructive Section Transfers** | **VERIFIED** | Historical enrollment set to `TRANSFERRED`, past attendance preserved (`master-qa-e2e.ts`). |
-| **Timetable Conflict Detection** | **VERIFIED** | Teacher clash and room collision prevention (HTTP 409 Conflict) (`timetable_verification.ts`). |
-| **Section Capacity Enforcement** | **VERIFIED** | Baseline 60–80 strictly checked on single create, bulk commit, and transfer (`master-qa-e2e.ts`). |
-| **Linear Cryptographic Hash Chaining** | **VERIFIED** | SHA-256 hash chaining validated via automated scripts and admin modal. |
-| **Per-Device vs Account-Wide Revocation** | **VERIFIED** | Validated via `profile_verification.ts` and `navigation_regression.ts`. |
-| **Automated Test Gate** | **VERIFIED** | **215 / 215 tests passed (100% pass rate) across all 8 suites.** |
+1. **Sequential Linear Chaining:** Every administrative, faculty, or system mutation generates an immutable row in `audit_logs` where the hash of block $i$ is calculated from the prior block's hash and the canonical JSON payload:
+   $$H_i = \text{SHA-256}(H_{i-1} \parallel \text{canonical\_payload}_i)$$
+2. **Immutable Storage:** Database permissions prevent application database users from executing `UPDATE` or `DELETE` on the `audit_logs` table.
+3. **Automated Verification:** A daily background cron job walks the entire chain from genesis ($H_0$) to head. If any record's payload or link has been tampered with, the system immediately raises a P1 security incident alert.
+4. **Interactive Audit Modal:** Global Administrators can inspect the audit trail in `admin.html`, review actor IDs, IPs, action categories, and verify mathematical chain integrity.

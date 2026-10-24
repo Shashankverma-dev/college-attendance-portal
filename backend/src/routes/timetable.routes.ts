@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { z } from 'zod';
 import { authenticate, requireRole } from '../middleware/auth';
+import { pool } from '../config/db';
 import {
   TimetableEngine,
   TimetableImportService,
@@ -186,36 +187,56 @@ router.post('/academic/department', adminAuth, async (req: Request, res: Respons
 router.delete('/academic/department/:id', adminAuth, async (req: Request, res: Response): Promise<void> => {
   const targetId = req.params.id;
   const targetUpper = targetId.toUpperCase();
-  const idx = localDepartments.findIndex(
-    (d) =>
+  const targetLower = targetId.toLowerCase().trim();
+
+  let removedDept: any = null;
+  let removedSchool: any = null;
+
+  // In-memory removal: clean all matching departments
+  for (let i = localDepartments.length - 1; i >= 0; i--) {
+    const d = localDepartments[i];
+    if (
       d.department_id === targetId ||
       d.department_code.toUpperCase() === targetUpper ||
       targetUpper.includes(d.department_code.toUpperCase()) ||
       d.department_code.toUpperCase().includes(targetUpper) ||
-      d.department_name.toLowerCase().trim() === targetId.toLowerCase().trim()
-  );
-  if (idx === -1) {
-    // Check if target matches in localSchools
-    const schoolIdx = localSchools.findIndex(
-      (s) => s.school_id === targetId || s.school_code.toUpperCase() === targetUpper || targetUpper.includes(s.school_code.toUpperCase())
-    );
-    if (schoolIdx !== -1) {
-      const removedSchool = localSchools.splice(schoolIdx, 1)[0];
-      res.json({ success: true, message: `School / Department "${removedSchool.school_name}" deleted successfully.` });
-      return;
+      d.department_name.toLowerCase().trim() === targetLower
+    ) {
+      removedDept = localDepartments.splice(i, 1)[0];
     }
-    res.status(404).json({ success: false, message: 'Department not found.' });
-    return;
   }
-  const removed = localDepartments.splice(idx, 1)[0];
-  // Synchronize removal from localSchools
-  const schoolIdx = localSchools.findIndex(
-    (s) => s.school_id === removed.department_id || s.school_code.toUpperCase() === removed.department_code.toUpperCase()
-  );
-  if (schoolIdx !== -1) {
-    localSchools.splice(schoolIdx, 1);
+
+  // In-memory removal: clean all matching schools
+  for (let sIdx = localSchools.length - 1; sIdx >= 0; sIdx--) {
+    const s = localSchools[sIdx];
+    if (
+      s.school_id === targetId ||
+      s.school_code.toUpperCase() === targetUpper ||
+      targetUpper.includes(s.school_code.toUpperCase()) ||
+      s.school_code.toUpperCase().includes(targetUpper) ||
+      s.school_name.toLowerCase().trim() === targetLower ||
+      (removedDept && (s.school_id === removedDept.department_id || s.school_code.toUpperCase() === removedDept.department_code.toUpperCase()))
+    ) {
+      removedSchool = localSchools.splice(sIdx, 1)[0];
+    }
   }
-  res.json({ success: true, message: `Department "${removed.department_name}" (${removed.department_code}) deleted successfully.` });
+
+  // DB update
+  if (pool) {
+    try {
+      await pool.query(
+        `UPDATE departments SET is_active = FALSE WHERE department_id = $1 OR UPPER(department_code) = $2 OR LOWER(department_name) = $3`,
+        [targetId, targetUpper, targetLower]
+      );
+      await pool.query(
+        `UPDATE schools SET is_active = FALSE, updated_at = CURRENT_TIMESTAMP WHERE school_id = $1 OR UPPER(school_code) = $2 OR LOWER(school_name) = $3`,
+        [targetId, targetUpper, targetLower]
+      );
+    } catch (_dbErr) {}
+  }
+
+  const displayName = removedDept?.department_name || removedSchool?.school_name || targetId;
+  res.json({ success: true, message: `School / Department "${displayName}" deleted successfully.` });
 });
 
 // Admin Creation: Programme / Course

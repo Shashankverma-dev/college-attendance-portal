@@ -67,31 +67,17 @@ async function isDbConnected(): Promise<boolean> {
 
 // Ensure localStudents entries have complete default fields
 localStudents.forEach((stu, idx) => {
-  if (!stu.school_id) {
-    stu.school_id = '10000000-0000-0000-0000-000000000001';
-    stu.school_code = 'SST';
-    stu.school_name = 'School of Science & Technology';
-  }
   if (!stu.enrollment_no) {
     stu.enrollment_no = stu.student_id;
   }
   if (!stu.registration_no) {
     stu.registration_no = stu.registration_id || null;
   }
-  if (!stu.department_code) {
-    stu.department_id = 'b0000000-0000-0000-0000-000000000001';
-    stu.department_code = 'CA';
-    stu.department_name = 'Department of Computer Applications';
-    stu.course_id = 'c0000000-0000-0000-0000-000000000001';
-    stu.course_name = 'Bachelor of Computer Applications';
-    stu.semester_id = 'e0000000-0000-0000-0000-000000000001';
-    stu.section_id = 'f0000000-0000-0000-0000-000000000001';
+  if (!stu.admission_academic_year) {
     stu.admission_academic_year = '2026-2027';
+  }
+  if (!stu.academic_calendar_term) {
     stu.academic_calendar_term = 'Autumn 2026';
-    stu.enrollment_status = 'ACTIVE';
-    stu.invitation_status = stu.status === 'ACTIVE' ? 'ACCEPTED' : 'SENT';
-    stu.invitation_sent_at = stu.created_at;
-    stu.last_login_at = stu.status === 'ACTIVE' ? '2026-10-19T14:30:00Z' : null;
   }
 });
 

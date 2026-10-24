@@ -369,7 +369,7 @@ router.get('/me', authenticate, async (req: Request, res: Response): Promise<voi
       },
       personalInfo: {
         fullName: staff.full_name || (role === 'GLOBAL_ADMIN' ? 'System Administrator' : 'Head of Department'),
-        identifier: staff.administrative_staff_id || (role === 'GLOBAL_ADMIN' ? 'ADM-001' : 'HOD-CA-01'),
+        identifier: staff.administrative_staff_id || (role === 'GLOBAL_ADMIN' ? '' : 'HOD-CA-01'),
         designation: staff.administrative_designation || (role === 'GLOBAL_ADMIN' ? 'Dean of Academic Affairs' : 'Head of Department'),
         email: userRow.email,
       },

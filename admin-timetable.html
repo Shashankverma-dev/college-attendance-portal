@@ -573,9 +573,9 @@
 
     <!-- Print Header Banner (Active in Landscape Print) -->
     <div class="print-header-banner" style="display: none;">
-      <h2>Swami Rama Himalayan University</h2>
-      <h3 id="print-timetable-title">Himalayan School of Science & Technology — Academic Timetable</h3>
-      <p id="print-timetable-meta">Programme: BCA (Semester 5, Section C) • Academic Term: Autumn 2026 • Published Timetable</p>
+      <h2>University Academic Timetable Portal</h2>
+      <h3 id="print-timetable-title">Constituent School & Department — Academic Timetable</h3>
+      <p id="print-timetable-meta">Programme: Academic Term • Published Timetable</p>
     </div>
 
     <!-- Breadcrumb & Title Area (Screen Only) -->
@@ -697,9 +697,9 @@
 
     <!-- Print Only Header -->
     <div class="print-header-banner">
-      <h2>Swami Rama Himalayan University</h2>
-      <h3>Himalayan School of Science & Technology • Department of Computer Applications</h3>
-      <p id="print-meta-text">Programme: BCA • Semester 5 • Section C • Academic Term: Autumn 2026</p>
+      <h2>University Academic Timetable Portal</h2>
+      <h3>Academic Structure & Department Timetable</h3>
+      <p id="print-meta-text">Academic Operations • Institutional Schedule</p>
     </div>
 
     <!-- TAB 2: Academic Entities & Rooms -->
@@ -729,7 +729,7 @@
         </div>
       </div>
 
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 20px;">
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 20px;">
         <!-- Departments Panel -->
         <div style="background: var(--slate-surface); border: 1px solid var(--slate-border); border-radius: var(--radius); padding: 18px;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
@@ -893,7 +893,7 @@
         <p style="font-size: 13px; color: var(--slate-text-sub); margin-bottom: 16px;">
           Subgroups partition a section into concurrent laboratory sessions (e.g., C1 in Turing Lab, C2 in Web Lab) without triggering cross-teacher conflicts.
         </p>
-        <div id="subgroups-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+        <div id="subgroups-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px;">
           <!-- Rendered dynamically -->
         </div>
       </div>
@@ -944,7 +944,7 @@
       </div>
 
       <!-- Schools Grid Container -->
-      <div id="schools-cards-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; margin-bottom: 24px;">
+      <div id="schools-cards-container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(340px, 100%), 1fr)); gap: 18px; margin-bottom: 24px;">
         <!-- Rendered dynamically via loadSchoolsGrid() -->
       </div>
     </section>
@@ -1247,16 +1247,16 @@
         <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 12px; margin-bottom: 14px;">
           <div>
             <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Code *</label>
-            <input type="text" id="new-dept-code" required placeholder="e.g. SST, CA" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border); text-transform: uppercase; font-weight: 700;">
+            <input type="text" id="new-dept-code" required placeholder="e.g. CS, ENG, MGMT" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border); text-transform: uppercase; font-weight: 700;">
           </div>
           <div>
             <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">School / Department Name *</label>
-            <input type="text" id="new-dept-name" required placeholder="e.g. School of Science & Technology" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+            <input type="text" id="new-dept-name" required placeholder="e.g. Department of Computer Science" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
           </div>
         </div>
         <div style="margin-bottom: 14px;">
           <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Degree Programmes Offered *</label>
-          <input type="text" id="new-dept-programs" required placeholder="e.g. BCA, MCA & B.Tech Programs" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
+          <input type="text" id="new-dept-programs" required placeholder="e.g. B.Tech, M.Tech, PhD" style="width: 100%; padding: 8px 10px; border-radius: 4px; border: 1px solid var(--slate-border);">
         </div>
 
         <!-- Optional HOD Provisioning -->
@@ -1487,7 +1487,7 @@
     </div>
   </div>
 
-  <script src="site.js"></script>
+  <script src="site.js?v=4"></script>
   <script>
     // State management
     let currentTimetable = null;
@@ -1539,9 +1539,56 @@
       return identifiers.some(id => {
         if (!id) return false;
         const norm = String(id).trim().toLowerCase();
-        return deletedSet.includes(norm);
+        return deletedSet.some(c => norm === c || (c.length >= 3 && (norm.indexOf(c) !== -1 || c.indexOf(norm) !== -1)));
       });
     }
+
+    function isLegacyMockSchool(d) {
+      if (!d) return false;
+      const code = String(d.department_code || d.school_code || d.code || d.id || '').toUpperCase().trim();
+      const name = String(d.department_name || d.school_name || d.name || '').toLowerCase().trim().replace(/&amp;/g, '&');
+      const id = String(d.department_id || d.school_id || d.id || '').toLowerCase().trim();
+      
+      if (code === 'SST' || code === 'SBS' || code === 'SOM' || (code === 'CA' && (name.indexOf('computer') !== -1 || !name))) {
+        return true;
+      }
+      if (name.indexOf('school of science & technology') !== -1 ||
+          name.indexOf('school of science and technology') !== -1 ||
+          name.indexOf('school of bioscience') !== -1 ||
+          name.indexOf('school of management') !== -1 ||
+          name.indexOf('department of computer applications') !== -1) {
+        return true;
+      }
+      if (id.indexOf('10000000-') !== -1 || id.indexOf('s0000000-') !== -1 || id.indexOf('b0000000-') !== -1) {
+        return true;
+      }
+      return false;
+    }
+
+    (function purgeDefaultMockSchools() {
+      try {
+        ['attendance_academic_departments_v2', 'attendance_institutional_schools_v1', 'admin_schools_list'].forEach(key => {
+          try {
+            const raw = localStorage.getItem(key);
+            if (raw) {
+              const parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) {
+                const filtered = parsed.filter(x => !isLegacyMockSchool(x));
+                localStorage.setItem(key, JSON.stringify(filtered));
+              }
+            }
+          } catch (e) {}
+        });
+
+        try {
+          const aState = JSON.parse(localStorage.getItem('admin_academic_state') || '{}');
+          if (Array.isArray(aState.departments)) {
+            aState.departments = aState.departments.filter(d => !isLegacyMockSchool(d));
+            localStorage.setItem('admin_academic_state', JSON.stringify(aState));
+          }
+        } catch (e) {}
+      } catch (e) {}
+    })();
 
     const defaultInstitutionalState = {
       departments: [],
@@ -1861,7 +1908,7 @@
           const data = await res.json();
           if (data.success && Array.isArray(data.schools)) {
             const cleanSchools = deduplicateSchoolsList(data.schools)
-              .filter(s => !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
+              .filter(s => !isLegacyMockSchool(s) && !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
             renderSchoolsData(cleanSchools);
             return;
           }
@@ -1876,7 +1923,7 @@
       } catch (e) {}
 
       storedSchools = deduplicateSchoolsList(storedSchools)
-        .filter(s => !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
+        .filter(s => !isLegacyMockSchool(s) && !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
       try { localStorage.setItem('admin_schools_list', JSON.stringify(storedSchools)); } catch (e) {}
 
       renderSchoolsData(storedSchools);
@@ -1885,7 +1932,7 @@
     function renderSchoolsData(schools) {
       const container = document.getElementById('schools-cards-container');
       if (!container) return;
-      loadedSchools = deduplicateSchoolsList(schools).filter(s => !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
+      loadedSchools = deduplicateSchoolsList(schools).filter(s => !isLegacyMockSchool(s) && !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
 
       const kpiSchools = document.getElementById('kpi-schools-count');
       if (kpiSchools) kpiSchools.textContent = loadedSchools.length;
@@ -2176,28 +2223,17 @@
     async function deleteSchoolPermanently(schoolId, schoolName) {
       if (!confirm(`Are you sure you want to permanently delete "${schoolName}"?\n\nThis will remove the school and its academic records.`)) return;
 
-      addToDeletedBlacklist('schools', schoolId);
-      addToDeletedBlacklist('schools', schoolName);
-      addToDeletedBlacklist('departments', schoolId);
-      addToDeletedBlacklist('departments', schoolName);
+      const targetSchool = loadedSchools.find(s => s.school_id === schoolId || s.school_code === schoolId || s.school_name === schoolName);
+      const code = targetSchool ? (targetSchool.school_code || targetSchool.code || targetSchool.school_id) : schoolId;
+      const name = targetSchool ? (targetSchool.school_name || targetSchool.name) : schoolName;
 
-      const targetSchool = loadedSchools.find(s => s.school_id === schoolId || s.school_code === schoolId);
-      if (targetSchool) {
-        if (targetSchool.school_id) {
-          addToDeletedBlacklist('schools', targetSchool.school_id);
-          addToDeletedBlacklist('departments', targetSchool.school_id);
-        }
-        if (targetSchool.school_code) {
-          addToDeletedBlacklist('schools', targetSchool.school_code);
-          addToDeletedBlacklist('departments', targetSchool.school_code);
-        }
-        if (targetSchool.school_name) {
-          addToDeletedBlacklist('schools', targetSchool.school_name);
-          addToDeletedBlacklist('departments', targetSchool.school_name);
-        }
-      }
+      const ids = [schoolId, schoolName, code, name].filter(Boolean);
+      ids.forEach(id => {
+        addToDeletedBlacklist('schools', id);
+        addToDeletedBlacklist('departments', id);
+      });
 
-      loadedSchools = loadedSchools.filter(s => !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name));
+      loadedSchools = loadedSchools.filter(s => !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name, s.id, s.code, s.name));
       loadedSchools = deduplicateSchoolsList(loadedSchools);
       try { localStorage.setItem('admin_schools_list', JSON.stringify(loadedSchools)); } catch (e) {}
 
@@ -2209,6 +2245,23 @@
         try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
       }
 
+      // FIX: Also purge the school from admin.html localStorage keys so it cannot resurrect on the dashboard
+      try {
+        const depts2 = JSON.parse(localStorage.getItem('attendance_academic_departments_v2') || '[]');
+        const filteredDepts = depts2.filter(d => !isEntityDeleted('schools', d.id, d.code, d.department_code, d.school_code, d.department_id, d.school_id, d.name, d.department_name, d.school_name) && !isEntityDeleted('departments', d.id, d.code, d.department_code, d.school_code, d.department_id, d.school_id, d.name, d.department_name, d.school_name));
+        localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(filteredDepts));
+      } catch (e) {}
+      try {
+        const schList = JSON.parse(localStorage.getItem('attendance_institutional_schools_v1') || '[]');
+        const filteredSch = schList.filter(s => !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name, s.id, s.code, s.name) && !isEntityDeleted('departments', s.school_id, s.school_code, s.school_name, s.id, s.code, s.name));
+        localStorage.setItem('attendance_institutional_schools_v1', JSON.stringify(filteredSch));
+      } catch (e) {}
+      try {
+        const hods = JSON.parse(localStorage.getItem('attendance_hod_accounts_v2') || '[]');
+        const filteredHods = hods.filter(h => !isEntityDeleted('departments', h.deptId, h.deptCode, h.deptName) && !isEntityDeleted('schools', h.deptId, h.deptCode, h.deptName));
+        localStorage.setItem('attendance_hod_accounts_v2', JSON.stringify(filteredHods));
+      } catch (e) {}
+
       renderSchoolsData(loadedSchools);
       renderDepartmentsTable();
       populateAcademicDropdowns();
@@ -2219,17 +2272,31 @@
             method: 'DELETE',
             headers: getAuthHeaders()
           });
+          await fetch(getApiBase() + '/api/admin/academic/departments/' + encodeURIComponent(schoolId), {
+            method: 'DELETE',
+            headers: getAuthHeaders()
+          }).catch(() => {});
           await fetch(getApiBase() + '/api/timetable/academic/department/' + encodeURIComponent(schoolId), {
             method: 'DELETE',
             headers: getAuthHeaders()
           }).catch(() => {});
+          if (code && code !== schoolId) {
+            await fetch(getApiBase() + '/api/admin/schools/' + encodeURIComponent(code) + '?force=true', {
+              method: 'DELETE',
+              headers: getAuthHeaders()
+            }).catch(() => {});
+            await fetch(getApiBase() + '/api/timetable/academic/department/' + encodeURIComponent(code), {
+              method: 'DELETE',
+              headers: getAuthHeaders()
+            }).catch(() => {});
+          }
           await loadSchoolsGrid();
           await loadAcademicEntities();
         }
       } catch (err) {
         console.warn('Backend offline, deleted school locally:', err);
       }
-      showSuccessBanner(`School "${schoolName}" deleted successfully.`);
+      showSuccessBanner(`School "${schoolName}" permanently deleted.`);
     }
 
     async function loadScheduleGrid() {
@@ -2871,7 +2938,7 @@
                   name: d.name || d.department_name
                 })))
               : (academicState.departments || defaultInstitutionalState.departments)
-            ).filter(d => !isEntityDeleted('departments', d.id, d.code, d.name) && !isEntityDeleted('schools', d.id, d.code, d.name));
+            ).filter(d => !isLegacyMockSchool(d) && !isEntityDeleted('departments', d.id, d.code, d.name) && !isEntityDeleted('schools', d.id, d.code, d.name));
 
             academicState.courses = (Array.isArray(data.courses)
               ? data.courses.map(c => ({
@@ -2960,7 +3027,7 @@
 
       if (savedState && typeof savedState === 'object') {
         savedState.departments = deduplicateDepartmentsList(savedState.departments || [])
-          .filter(d => !isEntityDeleted('departments', d.id, d.code, d.name) && !isEntityDeleted('schools', d.id, d.code, d.name));
+          .filter(d => !isLegacyMockSchool(d) && !isEntityDeleted('departments', d.id, d.code, d.name) && !isEntityDeleted('schools', d.id, d.code, d.name));
         savedState.courses = (savedState.courses || [])
           .filter(c => !isEntityDeleted('courses', c.id, c.code, c.name));
         savedState.semesters = (savedState.semesters || [])
@@ -3030,31 +3097,75 @@
         return;
       }
 
-      addToDeletedBlacklist('departments', deptId);
-      addToDeletedBlacklist('departments', deptName);
-      addToDeletedBlacklist('schools', deptId);
-      addToDeletedBlacklist('schools', deptName);
+      const targetDept = academicState.departments.find(d => d.id === deptId || d.code === deptId || d.name === deptName);
+      const code = targetDept ? (targetDept.code || targetDept.id) : '';
+
+      const ids = [deptId, deptName, code].filter(Boolean);
+      ids.forEach(id => {
+        addToDeletedBlacklist('departments', id);
+        addToDeletedBlacklist('schools', id);
+      });
 
       // Optimistic local deletion
       academicState.departments = academicState.departments.filter(d => 
         d.id !== deptId && d.code !== deptId && 
         String(d.id).toLowerCase() !== String(deptId).toLowerCase() &&
-        !isEntityDeleted('departments', d.id, d.code, d.name)
+        !isEntityDeleted('departments', d.id, d.code, d.name) &&
+        !isEntityDeleted('schools', d.id, d.code, d.name)
       );
       try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch(e){}
+
+      loadedSchools = loadedSchools.filter(s => !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name, s.id, s.code, s.name));
+      try { localStorage.setItem('admin_schools_list', JSON.stringify(loadedSchools)); } catch(e){}
+
+      try {
+        const depts2 = JSON.parse(localStorage.getItem('attendance_academic_departments_v2') || '[]');
+        const filteredDepts = depts2.filter(d => !isEntityDeleted('schools', d.id, d.code, d.department_code, d.school_code, d.department_id, d.school_id, d.name, d.department_name, d.school_name) && !isEntityDeleted('departments', d.id, d.code, d.department_code, d.school_code, d.department_id, d.school_id, d.name, d.department_name, d.school_name));
+        localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(filteredDepts));
+      } catch (e) {}
+
+      try {
+        const schList = JSON.parse(localStorage.getItem('attendance_institutional_schools_v1') || '[]');
+        const filteredSch = schList.filter(s => !isEntityDeleted('schools', s.school_id, s.school_code, s.school_name, s.id, s.code, s.name) && !isEntityDeleted('departments', s.school_id, s.school_code, s.school_name, s.id, s.code, s.name));
+        localStorage.setItem('attendance_institutional_schools_v1', JSON.stringify(filteredSch));
+      } catch (e) {}
+
+      try {
+        const hods = JSON.parse(localStorage.getItem('attendance_hod_accounts_v2') || '[]');
+        const filteredHods = hods.filter(h => !isEntityDeleted('departments', h.deptId, h.deptCode, h.deptName) && !isEntityDeleted('schools', h.deptId, h.deptCode, h.deptName));
+        localStorage.setItem('attendance_hod_accounts_v2', JSON.stringify(filteredHods));
+      } catch (e) {}
+
       renderDepartmentsTable();
+      renderSchoolsData(loadedSchools);
       populateAcademicDropdowns();
 
       try {
         if (getApiBase() !== null) {
-          const res = await fetch(getApiBase() + `/api/timetable/academic/department/${encodeURIComponent(deptId)}`, {
+          await fetch(getApiBase() + `/api/timetable/academic/department/${encodeURIComponent(deptId)}`, {
             method: 'DELETE',
             headers: getAuthHeaders({ 'Content-Type': 'application/json' })
           });
-          const data = await res.json();
-          if (data && data.success) {
-            await loadAcademicEntities();
+          await fetch(getApiBase() + `/api/admin/academic/departments/${encodeURIComponent(deptId)}`, {
+            method: 'DELETE',
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' })
+          }).catch(() => {});
+          await fetch(getApiBase() + `/api/admin/schools/${encodeURIComponent(deptId)}?force=true`, {
+            method: 'DELETE',
+            headers: getAuthHeaders({ 'Content-Type': 'application/json' })
+          }).catch(() => {});
+          if (code && code !== deptId) {
+            await fetch(getApiBase() + `/api/timetable/academic/department/${encodeURIComponent(code)}`, {
+              method: 'DELETE',
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' })
+            }).catch(() => {});
+            await fetch(getApiBase() + `/api/admin/schools/${encodeURIComponent(code)}?force=true`, {
+              method: 'DELETE',
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' })
+            }).catch(() => {});
           }
+          await loadAcademicEntities();
+          if (typeof loadSchoolsGrid === 'function') await loadSchoolsGrid();
         }
       } catch (err) {
         console.warn('Backend unavailable, department deleted locally:', err);

@@ -841,12 +841,12 @@
         <div class="modal-body" style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
           <div>
             <label style="display: block; font-size: 13px; font-weight: 700; color: var(--card-ink); margin-bottom: 4px;">School / Academic Department Name *</label>
-            <input type="text" id="dept-new-name" required placeholder="e.g. School of Science & Technology, Department of Computer Applications" style="width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; background: var(--bg-dark); color: var(--card-ink);">
+            <input type="text" id="dept-new-name" required placeholder="e.g. Faculty of Engineering, Department of Computer Science" style="width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; background: var(--bg-dark); color: var(--card-ink);">
           </div>
           <div class="form-row-2col">
             <div>
               <label style="display: block; font-size: 13px; font-weight: 700; color: var(--card-ink); margin-bottom: 4px;">School / Department Code *</label>
-              <input type="text" id="dept-new-code" required placeholder="e.g. SST, ME, AI&DS" style="width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; text-transform: uppercase; background: var(--bg-dark); color: var(--card-ink);">
+              <input type="text" id="dept-new-code" required placeholder="e.g. FOE, CS, LAW" style="width: 100%; height: 38px; padding: 0 12px; border: 1px solid var(--line); border-radius: 6px; font-size: 14px; text-transform: uppercase; background: var(--bg-dark); color: var(--card-ink);">
             </div>
             <div>
               <label style="display: block; font-size: 13px; font-weight: 700; color: var(--card-ink); margin-bottom: 4px;">Degree Programs *</label>
@@ -1041,7 +1041,7 @@
     </div>
   </footer>
 
-  <script src="site.js?v=3.1"></script>
+  <script src="site.js?v=4"></script>
   <script>
 
     var cachedDashboardData = null;
@@ -1255,6 +1255,77 @@
       return result;
     }
 
+    function isLegacyMockSchool(d) {
+      if (!d) return false;
+      var code = String(d.department_code || d.school_code || d.code || d.id || '').toUpperCase().trim();
+      var name = String(d.department_name || d.school_name || d.name || '').toLowerCase().trim().replace(/&amp;/g, '&');
+      var id = String(d.department_id || d.school_id || d.id || '').toLowerCase().trim();
+      
+      if (code === 'SST' || code === 'SBS' || code === 'SOM' || (code === 'CA' && (name.indexOf('computer') !== -1 || !name))) {
+        return true;
+      }
+      if (name.indexOf('school of science & technology') !== -1 ||
+          name.indexOf('school of science and technology') !== -1 ||
+          name.indexOf('school of bioscience') !== -1 ||
+          name.indexOf('school of management') !== -1 ||
+          name.indexOf('department of computer applications') !== -1) {
+        return true;
+      }
+      if (id.indexOf('10000000-') !== -1 || id.indexOf('s0000000-') !== -1 || id.indexOf('b0000000-') !== -1) {
+        return true;
+      }
+      return false;
+    }
+
+    // Auto-purge default mock schools from local storage on startup
+    (function purgeDefaultMockSchools() {
+      try {
+        ['attendance_academic_departments_v2', 'attendance_institutional_schools_v1', 'admin_schools_list'].forEach(function(key) {
+          try {
+            var raw = localStorage.getItem(key);
+            if (raw) {
+              var parsed = JSON.parse(raw);
+              if (Array.isArray(parsed)) {
+                var filtered = parsed.filter(function(x) { return !isLegacyMockSchool(x); });
+                localStorage.setItem(key, JSON.stringify(filtered));
+              }
+            }
+          } catch (e) {}
+        });
+
+        try {
+          var aState = JSON.parse(localStorage.getItem('admin_academic_state') || '{}');
+          if (Array.isArray(aState.departments)) {
+            aState.departments = aState.departments.filter(function(d) { return !isLegacyMockSchool(d); });
+            localStorage.setItem('admin_academic_state', JSON.stringify(aState));
+          }
+        } catch (e) {}
+      } catch (e) {}
+    })();
+
+    // Read the deletion blacklist shared with admin-timetable.html
+    function isAdminEntityDeleted() {
+      var identifiers = Array.prototype.slice.call(arguments);
+      var list = {};
+      try {
+        var bl = localStorage.getItem('admin_deleted_entities_blacklist');
+        if (bl) list = JSON.parse(bl);
+      } catch (e) {}
+      var combined = (Array.isArray(list['schools']) ? list['schools'] : [])
+                      .concat(Array.isArray(list['departments']) ? list['departments'] : []);
+      if (combined.length === 0) return false;
+      return identifiers.some(function(id) {
+        if (!id) return false;
+        var norm = String(id).trim().toLowerCase();
+        if (!norm) return false;
+        return combined.some(function(c) {
+          if (!c) return false;
+          var cNorm = String(c).trim().toLowerCase();
+          return norm === cNorm || (cNorm.length >= 3 && (norm.indexOf(cNorm) !== -1 || cNorm.indexOf(norm) !== -1));
+        });
+      });
+    }
+
     function getStoredDepartments() {
       var rawList = [];
       try {
@@ -1290,9 +1361,35 @@
         }
       });
 
+      // Filter out deleted entities and legacy mock schools
+      rawList = rawList.filter(function(d) {
+        if (!d) return false;
+        if (isLegacyMockSchool(d)) return false;
+        var code = (d.department_code || d.school_code || d.code || d.id || '').toLowerCase();
+        var name = (d.department_name || d.school_name || d.name || '').toLowerCase().trim();
+        var sid  = (d.department_id  || d.school_id   || d.id  || '').toLowerCase();
+        var normCode = normalizeDeptCode(d).toLowerCase();
+        var normName = normalizeDeptName(d);
+        return !isAdminEntityDeleted(code, name, sid, normCode, normName, d.school_name, d.department_name);
+      });
+
       var deduplicated = deduplicateDepartments(rawList);
       try {
+        // Persist cleaned list back to BOTH keys so deleted entries can't resurface
         localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(deduplicated));
+        var cleanedSchools = deduplicated.map(function(d) {
+          return {
+            school_id:    d.department_id || d.school_id || d.id || (d.code || d.department_code || '').toLowerCase(),
+            school_code:  d.department_code || d.school_code || d.code || '',
+            school_name:  d.department_name || d.school_name || d.name || '',
+            programs:     d.programs || '',
+            hod_name:     d.hod_name  || d.hodName  || '',
+            hod_email:    d.hod_email || d.hodEmail || '',
+            faculty_count: d.facultyCount || d.faculty_count || 0,
+            student_count: d.student_count || 0,
+          };
+        });
+        localStorage.setItem('attendance_institutional_schools_v1', JSON.stringify(cleanedSchools));
       } catch (e) {}
 
       return deduplicated;
@@ -1336,6 +1433,17 @@
         combined = storedDepts;
       }
 
+      // Filter API-returned data through legacy mock checker and deletion blacklist
+      combined = combined.filter(function(d) {
+        if (!d) return false;
+        if (isLegacyMockSchool(d)) return false;
+        var code = (d.department_code || d.school_code || d.code || d.id || '').toLowerCase();
+        var name = (d.department_name || d.school_name || d.name || '').toLowerCase().trim();
+        var sid  = (d.department_id  || d.school_id   || d.id  || '').toLowerCase();
+        var normCode = normalizeDeptCode(d).toLowerCase();
+        var normName = normalizeDeptName(d);
+        return !isAdminEntityDeleted(code, name, sid, normCode, normName, d.school_name, d.department_name);
+      });
       var mergedDepts = deduplicateDepartments(combined);
 
       if (mergedDepts.length === 0) {
@@ -1421,6 +1529,9 @@
           '      <a class="action-btn-sm" href="admin-teachers.html?dept=' + encodeURIComponent(deptId) + '">',
           '        Manage Teachers',
           '      </a>',
+          '      <button type="button" class="action-btn-sm" onclick="deleteDepartmentFromDashboard(\'' + deptId + '\', \'' + deptName.replace(/'/g, "\\'") + '\', \'' + deptCode + '\')" style="color: #DC2626; border-color: rgba(239, 68, 68, 0.4); cursor: pointer; font-weight: 600;" title="Permanently delete this school / academic department">',
+          '        Delete',
+          '      </button>',
           '    </div>',
           '  </td>',
           '</tr>'
@@ -1782,13 +1893,121 @@
       });
     }
 
+    function deleteDepartmentFromDashboard(deptId, deptName, deptCode) {
+      if (!confirm('Are you sure you want to permanently delete "' + deptName + '"?\n\nThis will remove the school / academic department from the dashboard, timetable, teacher management, students directory, and academic structure.')) {
+        return;
+      }
+
+      function addToDeletedBlacklist(category, identifier) {
+        if (!identifier) return;
+        try {
+          var item = localStorage.getItem('admin_deleted_entities_blacklist');
+          var list = item ? JSON.parse(item) : {};
+          if (!Array.isArray(list[category])) list[category] = [];
+          var norm = String(identifier).trim().toLowerCase();
+          if (!list[category].includes(norm)) {
+            list[category].push(norm);
+          }
+          localStorage.setItem('admin_deleted_entities_blacklist', JSON.stringify(list));
+        } catch (e) {}
+      }
+
+      var identifiers = [deptId, deptCode, deptName];
+      if (deptCode) {
+        identifiers.push(deptCode.toLowerCase());
+        identifiers.push(deptCode.toUpperCase());
+      }
+      if (deptName) {
+        identifiers.push(deptName.toLowerCase().trim());
+      }
+      identifiers.forEach(function(id) {
+        addToDeletedBlacklist('schools', id);
+        addToDeletedBlacklist('departments', id);
+      });
+
+      // Purge from all local storage repositories
+      try {
+        var depts = JSON.parse(localStorage.getItem('attendance_academic_departments_v2') || '[]');
+        var fDepts = depts.filter(function(d) {
+          return !isAdminEntityDeleted(d.code, d.name, d.department_code, d.department_name, d.id, d.department_id, d.school_id, d.school_code);
+        });
+        localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(fDepts));
+      } catch (e) {}
+
+      try {
+        var schs = JSON.parse(localStorage.getItem('attendance_institutional_schools_v1') || '[]');
+        var fSchs = schs.filter(function(s) {
+          return !isAdminEntityDeleted(s.school_code, s.school_name, s.school_id, s.code, s.name, s.id);
+        });
+        localStorage.setItem('attendance_institutional_schools_v1', JSON.stringify(fSchs));
+      } catch (e) {}
+
+      try {
+        var aSchs = JSON.parse(localStorage.getItem('admin_schools_list') || '[]');
+        var fASchs = aSchs.filter(function(s) {
+          return !isAdminEntityDeleted(s.school_code, s.school_name, s.school_id, s.code, s.name, s.id);
+        });
+        localStorage.setItem('admin_schools_list', JSON.stringify(fASchs));
+      } catch (e) {}
+
+      try {
+        var aState = JSON.parse(localStorage.getItem('admin_academic_state') || '{}');
+        if (Array.isArray(aState.departments)) {
+          aState.departments = aState.departments.filter(function(d) {
+            return !isAdminEntityDeleted(d.code, d.name, d.id);
+          });
+          localStorage.setItem('admin_academic_state', JSON.stringify(aState));
+        }
+      } catch (e) {}
+
+      try {
+        var hods = JSON.parse(localStorage.getItem('attendance_hod_accounts_v2') || '[]');
+        var fHods = hods.filter(function(h) {
+          return !isAdminEntityDeleted(h.deptId, h.deptCode, h.deptName);
+        });
+        localStorage.setItem('attendance_hod_accounts_v2', JSON.stringify(fHods));
+      } catch (e) {}
+
+      // Dispatch delete calls to backend API
+      var authHeaders = getAuthHeaders({ 'Content-Type': 'application/json' });
+      fetch(getApiBase() + '/api/admin/schools/' + encodeURIComponent(deptId) + '?force=true', {
+        method: 'DELETE',
+        headers: authHeaders
+      }).catch(function() {});
+
+      fetch(getApiBase() + '/api/admin/academic/departments/' + encodeURIComponent(deptId), {
+        method: 'DELETE',
+        headers: authHeaders
+      }).catch(function() {});
+
+      fetch(getApiBase() + '/api/timetable/academic/department/' + encodeURIComponent(deptId), {
+        method: 'DELETE',
+        headers: authHeaders
+      }).catch(function() {});
+
+      if (deptCode && deptCode !== deptId) {
+        fetch(getApiBase() + '/api/admin/schools/' + encodeURIComponent(deptCode) + '?force=true', {
+          method: 'DELETE',
+          headers: authHeaders
+        }).catch(function() {});
+
+        fetch(getApiBase() + '/api/timetable/academic/department/' + encodeURIComponent(deptCode), {
+          method: 'DELETE',
+          headers: authHeaders
+        }).catch(function() {});
+      }
+
+      showToast('School / Academic Department "' + deptName + '" permanently deleted.', 'success');
+      loadDashboardMetrics(false);
+    }
+
     // Offline verified fallback if backend API is offline during local development
     function useOfflineDashboardFallback(isManualRefresh) {
       var offlineData = {
         academicTerm: 'Autumn Term 2026',
         todayDate: new Date().toISOString().split('T')[0],
         totalStudents: 0,
-        totalPrograms: 4,
+        totalPrograms: 0,
         totalFaculty: 0,
         activeFaculty: 0,
         pendingFaculty: 0,

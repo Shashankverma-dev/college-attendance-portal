@@ -501,7 +501,7 @@
             <tr style="border-bottom: 1px solid var(--line);">
               <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">2026-10-18 11:20:04</td>
               <td style="padding: 12px 14px; font-weight: 600; color: var(--card-ink);">BCA101_Sem1_FinalMarks.xlsx</td>
-              <td style="padding: 12px 14px; color: var(--card-ink);">System Administrator (ADM-001)</td>
+              <td style="padding: 12px 14px; color: var(--card-ink);">System Administrator</td>
               <td style="padding: 12px 14px; text-align: center; color: var(--card-ink);">5 Valid / 0 Err</td>
               <td style="padding: 12px 14px; text-align: center;"><span
                   class="badge-status badge-finalized">COMMITTED</span></td>
@@ -511,7 +511,7 @@
             <tr style="border-bottom: 1px solid var(--line);">
               <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">2026-10-16 09:45:12</td>
               <td style="padding: 12px 14px; font-weight: 600; color: var(--card-ink);">BTECH_CSE_Maths_Final.xlsx</td>
-              <td style="padding: 12px 14px; color: var(--card-ink);">System Administrator (ADM-001)</td>
+              <td style="padding: 12px 14px; color: var(--card-ink);">System Administrator</td>
               <td style="padding: 12px 14px; text-align: center; color: var(--card-ink);">78 Valid / 2 Err</td>
               <td style="padding: 12px 14px; text-align: center;"><span
                   class="badge-status badge-reviewed">REVIEWED</span></td>
@@ -758,49 +758,66 @@
   <!-- Toast Container -->
   <div class="admin-toast-container" id="admin-toast-container" aria-live="polite"></div>
 
-  <script src="site.js" defer></script>
+  <script src="site.js?v=4" defer></script>
   <script>
     (function () {
       'use strict';
 
       // =========================================================================
+      // 1. AUTHENTICATION & ADMIN IDENTITY
+      // =========================================================================
+      function getApiBase() {
+        if (typeof window.getApiBase === 'function') {
+          return window.getApiBase();
+        }
+        var custom = localStorage.getItem('attendance_api_url') || window.APP_API_URL;
+        if (custom) return custom.replace(/\/$/, '');
+        var h = window.location.hostname;
+        if (h === 'localhost' || h === '127.0.0.1') {
+          return 'http://localhost:8080';
+        }
+        return (window.DEFAULT_RENDER_URL || 'https://college-attendance-backend-ib8i.onrender.com').replace(/\/$/, '');
+      }
+
       function getAdminAuthToken() {
         return sessionStorage.getItem('attendance_auth_token') || localStorage.getItem('attendance_auth_token') || sessionStorage.getItem('token') || localStorage.getItem('token') || '';
       }
 
-      var storedId = sessionStorage.getItem('attendance_user_id') || 'ADM-001';
-      var storedName = sessionStorage.getItem('attendance_user_name') || 'System Administrator';
+      var storedName = sessionStorage.getItem('attendance_user_name') || 'Shashank Verma';
       var elId = document.getElementById('display-user-id');
-      if (elId) elId.textContent = 'ID: ' + storedId + ' (Global Admin)';
+      if (elId) elId.textContent = 'Global Admin';
       var elName = document.getElementById('display-user-name');
       if (elName) elName.textContent = storedName;
       var delId = document.getElementById('drawer-user-id');
-      if (delId) delId.textContent = 'ID: ' + storedId + ' (Global Admin)';
+      if (delId) delId.textContent = 'Global Admin';
       var delName = document.getElementById('drawer-user-name');
       if (delName) delName.textContent = storedName;
 
       // =========================================================================
-      // 2. DATA STORE & STATE MANAGEMENT
+      // 2. DATA STORES & PERSISTENCE
       // =========================================================================
       var defaultCohorts = {};
-
-      // Load cached or default
       var cachedData = localStorage.getItem('srhu_admin_marks_data');
-      var cohorts = cachedData ? JSON.parse(cachedData) : defaultCohorts;
-
-      function saveCohortsLocally() {
-        localStorage.setItem('srhu_admin_marks_data', JSON.stringify(cohorts));
+      var cohorts = {};
+      try {
+        cohorts = cachedData ? JSON.parse(cachedData) : defaultCohorts;
+      } catch (e) {
+        cohorts = defaultCohorts;
       }
 
-      // Initial active selection
-      var activeSubjectKey = 'BCA-101';
+      function saveCohortsLocally() {
+        try {
+          localStorage.setItem('srhu_admin_marks_data', JSON.stringify(cohorts));
+        } catch (e) {
+          console.warn('Failed to save cohorts to localStorage:', e);
+        }
+      }
 
-      // Audit entries store
       var defaultAudit = [
         {
           timestamp: '2026-10-18 11:20:04',
           action: 'BCA101_Sem1_FinalMarks.xlsx',
-          admin: 'System Administrator (ADM-001)',
+          admin: 'System Administrator',
           details: '5 Valid / 0 Err',
           status: 'COMMITTED',
           checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
@@ -808,7 +825,7 @@
         {
           timestamp: '2026-10-16 09:45:12',
           action: 'BTECH_CSE_Maths_Final.xlsx',
-          admin: 'System Administrator (ADM-001)',
+          admin: 'System Administrator',
           details: '78 Valid / 2 Err',
           status: 'REVIEWED',
           checksum: 'f821aa9011e2f7547b77e8e58a22339b61882d2f1f31f90a9b23b491a6104bc1'
@@ -816,41 +833,631 @@
       ];
 
       var cachedAudit = localStorage.getItem('srhu_admin_marks_audit');
-      var auditEntries = cachedAudit ? JSON.parse(cachedAudit) : defaultAudit;
+      var auditEntries = defaultAudit;
+      try {
+        auditEntries = cachedAudit ? JSON.parse(cachedAudit) : defaultAudit;
+      } catch (e) {
+        auditEntries = defaultAudit;
+      }
 
       function saveAuditLocally() {
-        localStorage.setItem('srhu_admin_marks_audit', JSON.stringify(auditEntries));
+        try {
+          localStorage.setItem('srhu_admin_marks_audit', JSON.stringify(auditEntries));
+        } catch (e) {}
+      }
+
+      // Helper to check if an entity was deleted via admin timetable/dashboard
+      function isEntityDeleted(type, id, code, name) {
+        try {
+          var blacklist = JSON.parse(localStorage.getItem('admin_deleted_entities_blacklist') || '{}');
+          var list = blacklist[type] || [];
+          var tCode = (code || '').toString().trim().toUpperCase();
+          var tName = (name || '').toString().trim().toUpperCase();
+          var tId = (id || '').toString().trim();
+          return list.some(function (item) {
+            if (!item) return false;
+            var iId = (item.id || '').toString().trim();
+            var iCode = (item.code || '').toString().trim().toUpperCase();
+            var iName = (item.name || '').toString().trim().toUpperCase();
+            if (tId && iId && tId === iId) return true;
+            if (tCode && iCode && (tCode === iCode || tCode.indexOf(iCode) !== -1 || iCode.indexOf(tCode) !== -1)) return true;
+            if (tName && iName && (tName === iName || tName.indexOf(iName) !== -1 || iName.indexOf(tName) !== -1)) return true;
+            return false;
+          });
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function isLegacyMockSchool(d) {
+        if (!d) return false;
+        var code = String(d.department_code || d.school_code || d.code || d.id || '').toUpperCase().trim();
+        var name = String(d.department_name || d.school_name || d.name || '').toLowerCase().trim().replace(/&amp;/g, '&');
+        var id = String(d.department_id || d.school_id || d.id || '').toLowerCase().trim();
+        
+        if (code === 'SST' || code === 'SBS' || code === 'SOM' || (code === 'CA' && (name.indexOf('computer') !== -1 || !name))) {
+          return true;
+        }
+        if (name.indexOf('school of science & technology') !== -1 ||
+            name.indexOf('school of science and technology') !== -1 ||
+            name.indexOf('school of bioscience') !== -1 ||
+            name.indexOf('school of management') !== -1 ||
+            name.indexOf('department of computer applications') !== -1) {
+          return true;
+        }
+        if (id.indexOf('10000000-') !== -1 || id.indexOf('s0000000-') !== -1 || id.indexOf('b0000000-') !== -1) {
+          return true;
+        }
+        return false;
       }
 
       // =========================================================================
-      // 3. TAB NAVIGATION
+      // 3. READ ADMIN-CREATED ACADEMIC & TIMETABLE ENTITIES
       // =========================================================================
-      var tabBtns = document.querySelectorAll('.marks-tab-btn');
-      var tabPanes = document.querySelectorAll('.marks-tab-pane');
+      var academicState = {
+        departments: [],
+        courses: [],
+        semesters: [],
+        sections: [],
+        rooms: [],
+        groups: [],
+        subjects: []
+      };
 
-      Array.prototype.forEach.call(tabBtns, function (btn) {
-        btn.addEventListener('click', function () {
-          var targetTab = btn.getAttribute('data-tab');
-
-          Array.prototype.forEach.call(tabBtns, function (b) {
-            b.classList.remove('active');
-            b.setAttribute('aria-selected', 'false');
-          });
-          btn.classList.add('active');
-          btn.setAttribute('aria-selected', 'true');
-
-          Array.prototype.forEach.call(tabPanes, function (pane) {
-            if (pane.id === 'tab-' + targetTab) {
-              pane.style.display = 'block';
-            } else {
-              pane.style.display = 'none';
+      function loadLocalAcademicState() {
+        try {
+          var saved = JSON.parse(localStorage.getItem('admin_academic_state') || '{}');
+          if (saved && typeof saved === 'object') {
+            if (Array.isArray(saved.departments)) {
+              academicState.departments = saved.departments.filter(function (d) {
+                return !isLegacyMockSchool(d) &&
+                       !isEntityDeleted('departments', d.id, d.code, d.name) &&
+                       !isEntityDeleted('schools', d.school_id, d.school_code, d.school_name);
+              });
             }
-          });
+            if (Array.isArray(saved.courses)) {
+              academicState.courses = saved.courses.filter(function (c) {
+                return !isEntityDeleted('courses', c.id, c.code, c.name) &&
+                       !isEntityDeleted('departments', c.department_id, c.department_code, c.department_name) &&
+                       !isEntityDeleted('schools', c.school_id, c.school_code, c.school_name);
+              });
+            }
+            if (Array.isArray(saved.semesters)) academicState.semesters = saved.semesters;
+            if (Array.isArray(saved.sections)) academicState.sections = saved.sections;
+            if (Array.isArray(saved.subjects)) academicState.subjects = saved.subjects;
+          }
+        } catch (e) {}
+      }
+
+      function getPublishedTimetables() {
+        try {
+          var tts = JSON.parse(localStorage.getItem('admin_published_timetables') || '[]');
+          return Array.isArray(tts) ? tts : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function getCustomSubjects() {
+        try {
+          var subs = JSON.parse(localStorage.getItem('admin_custom_subjects') || '[]');
+          return Array.isArray(subs) ? subs : [];
+        } catch (e) {
+          return [];
+        }
+      }
+
+      function saveCustomSubject(subj) {
+        var list = getCustomSubjects();
+        var exists = list.some(function (s) {
+          return s.code.toUpperCase() === subj.code.toUpperCase() &&
+            s.courseCode.toUpperCase() === subj.courseCode.toUpperCase() &&
+            String(s.semesterNumber) === String(subj.semesterNumber);
         });
-      });
+        if (!exists) {
+          list.push(subj);
+          try {
+            localStorage.setItem('admin_custom_subjects', JSON.stringify(list));
+          } catch (e) {}
+        }
+      }
+
+      function getDeletedIdentifiers() {
+        try {
+          var raw = localStorage.getItem('admin_deleted_student_ids');
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) return parsed.map(function (x) { return String(x).toLowerCase().trim(); });
+          }
+        } catch (e) {}
+        return [];
+      }
+
+      function isDeletedStudent(student, deletedList) {
+        if (!student || !deletedList || !deletedList.length) return false;
+        var targets = [
+          student.student_profile_id,
+          student.student_id,
+          student.enrollment_no,
+          student.registration_no,
+          student.student_gmail,
+          student.full_name
+        ];
+        return targets.some(function (t) {
+          return t && deletedList.indexOf(String(t).toLowerCase().trim()) !== -1;
+        });
+      }
+
+      function getAdminCreatedStudents() {
+        var deletedList = getDeletedIdentifiers();
+        var students = [];
+        try {
+          var raw = localStorage.getItem('admin_students_registry');
+          if (raw) {
+            var parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) students = parsed;
+          }
+        } catch (e) {}
+
+        var mockIds = ['s-101', 's-102', 's-103', 's-104', 's-105', 's-106', 's-107', 's-108', 's-109', 's-110'];
+        return students.filter(function (s) {
+          if (!s) return false;
+          if (mockIds.indexOf(s.student_profile_id) !== -1 || mockIds.indexOf(s.student_id) !== -1) return false;
+          if (s.full_name === 'Aarav Gupta' || s.full_name === 'Aditi Rao') return false;
+          return !isDeletedStudent(s, deletedList);
+        });
+      }
+
+      // Initial state load
+      loadLocalAcademicState();
 
       // =========================================================================
-      // 4. SUMMARY CARDS & ROSTER RENDERING
+      // 4. DYNAMIC SCOPE DROPDOWN POPULATION
+      // =========================================================================
+      var filterSession = document.getElementById('admin-filter-session');
+      var filterCourse = document.getElementById('admin-filter-course');
+      var filterSem = document.getElementById('admin-filter-sem');
+      var filterSection = document.getElementById('admin-filter-section');
+      var filterSubject = document.getElementById('admin-filter-subject');
+
+      // Normalization helpers
+      function normCourse(code) {
+        return (code || '').trim().toUpperCase();
+      }
+
+      function populateProgrammes() {
+        if (!filterCourse) return;
+        var prevVal = filterCourse.value;
+
+        var progsMap = {};
+        function addProg(code, name, totalSems) {
+          if (!code) return;
+          var key = normCourse(code);
+          if (!progsMap[key]) {
+            progsMap[key] = {
+              code: key,
+              name: name || key,
+              totalSems: totalSems || 6
+            };
+          }
+        }
+
+        // 1. From academicState.courses (admin-timetable.html)
+        academicState.courses.forEach(function (c) {
+          if (!isEntityDeleted('courses', c.id, c.code, c.name) &&
+              !isEntityDeleted('departments', c.department_id, c.department_code, c.department_name) &&
+              !isEntityDeleted('schools', c.school_id, c.school_code, c.school_name)) {
+            addProg(c.code, c.name, c.total_semesters);
+          }
+        });
+
+        // 2. From published timetables
+        getPublishedTimetables().forEach(function (t) {
+          if (!isEntityDeleted('courses', t.course_id, t.course_code, t.course_name) &&
+              !isEntityDeleted('departments', t.department_id, t.department_code, t.department_name) &&
+              !isEntityDeleted('schools', t.school_id, t.school_code, t.school_name)) {
+            addProg(t.course_code, t.course_name, 6);
+          }
+        });
+
+        // 3. From students registry
+        getAdminCreatedStudents().forEach(function (s) {
+          if (!isEntityDeleted('courses', null, s.course_code, null)) {
+            addProg(s.course_code, s.course_code, 6);
+          }
+        });
+
+        // Only populate programmes created by admin or published in timetables/students
+
+        var list = Object.keys(progsMap).map(function (k) { return progsMap[k]; });
+        list.sort(function (a, b) { return a.code.localeCompare(b.code); });
+
+        filterCourse.innerHTML = '';
+        list.forEach(function (p) {
+          var opt = document.createElement('option');
+          opt.value = p.code;
+          opt.textContent = p.code + ' - ' + p.name;
+          if (normCourse(prevVal) === p.code || (!prevVal && p.code === 'BCA')) {
+            opt.selected = true;
+          }
+          filterCourse.appendChild(opt);
+        });
+
+        if (!filterCourse.value && list.length > 0) {
+          filterCourse.value = list[0].code;
+        }
+
+        populateSemesters();
+      }
+
+      function populateSemesters() {
+        if (!filterSem) return;
+        var courseCode = normCourse(filterCourse ? filterCourse.value : 'BCA');
+        var prevSem = filterSem.value;
+
+        var crsObj = academicState.courses.find(function (c) { return normCourse(c.code) === courseCode; });
+        var semNumbersSet = new Set();
+
+        // 1. From academicState.semesters
+        if (crsObj) {
+          academicState.semesters.filter(function (s) {
+            return s.course_id === crsObj.id || normCourse(s.course_code) === courseCode;
+          }).forEach(function (s) {
+            if (s.semester_number) semNumbersSet.add(parseInt(s.semester_number, 10));
+          });
+        }
+
+        // 2. From published timetables
+        getPublishedTimetables().filter(function (t) {
+          return normCourse(t.course_code) === courseCode;
+        }).forEach(function (t) {
+          if (t.semester_number) semNumbersSet.add(parseInt(t.semester_number, 10));
+        });
+
+        // 3. From students registry
+        getAdminCreatedStudents().filter(function (s) {
+          return normCourse(s.course_code) === courseCode;
+        }).forEach(function (s) {
+          if (s.semester_number) semNumbersSet.add(parseInt(s.semester_number, 10));
+        });
+
+        // 4. If none registered, standard range based on total_semesters
+        if (semNumbersSet.size === 0) {
+          var total = (crsObj && crsObj.total_semesters) ? crsObj.total_semesters : (courseCode.indexOf('BTECH') !== -1 ? 8 : 6);
+          for (var i = 1; i <= total; i++) {
+            semNumbersSet.add(i);
+          }
+        }
+
+        var sortedSems = Array.from(semNumbersSet).sort(function (a, b) { return a - b; });
+
+        filterSem.innerHTML = '';
+        sortedSems.forEach(function (num) {
+          var opt = document.createElement('option');
+          opt.value = String(num);
+          opt.textContent = 'Semester ' + num;
+          if (String(prevSem) === String(num) || (!prevSem && num === 1)) {
+            opt.selected = true;
+          }
+          filterSem.appendChild(opt);
+        });
+
+        if (!filterSem.value && sortedSems.length > 0) {
+          filterSem.value = String(sortedSems[0]);
+        }
+
+        populateSections();
+      }
+
+      function populateSections() {
+        if (!filterSection) return;
+        var courseCode = normCourse(filterCourse ? filterCourse.value : 'BCA');
+        var semNum = filterSem ? filterSem.value : '1';
+        var prevSec = filterSection.value;
+
+        var secNamesSet = new Set();
+
+        // 1. From academicState.sections
+        var crsObj = academicState.courses.find(function (c) { return normCourse(c.code) === courseCode; });
+        var semObj = crsObj ? academicState.semesters.find(function (s) {
+          return (s.course_id === crsObj.id || normCourse(s.course_code) === courseCode) && String(s.semester_number) === String(semNum);
+        }) : null;
+
+        if (semObj) {
+          academicState.sections.filter(function (sec) {
+            return sec.semester_id === semObj.id;
+          }).forEach(function (sec) {
+            if (sec.name) secNamesSet.add(sec.name.toUpperCase().trim());
+          });
+        }
+
+        // 2. From published timetables
+        getPublishedTimetables().filter(function (t) {
+          return normCourse(t.course_code) === courseCode && String(t.semester_number) === String(semNum);
+        }).forEach(function (t) {
+          if (t.section_name) secNamesSet.add(t.section_name.toUpperCase().trim());
+        });
+
+        // 3. From students registry
+        getAdminCreatedStudents().filter(function (s) {
+          return normCourse(s.course_code) === courseCode && String(s.semester_number) === String(semNum);
+        }).forEach(function (s) {
+          if (s.section_name) secNamesSet.add(s.section_name.toUpperCase().trim());
+        });
+
+        // 4. Default fallback: Section A, Section B, Section C
+        if (secNamesSet.size === 0) {
+          secNamesSet.add('A');
+          secNamesSet.add('B');
+          secNamesSet.add('C');
+        }
+
+        var sortedSecs = Array.from(secNamesSet).sort();
+
+        filterSection.innerHTML = '';
+        sortedSecs.forEach(function (sec) {
+          var opt = document.createElement('option');
+          opt.value = sec;
+          opt.textContent = 'Section ' + sec;
+          if (prevSec && prevSec.toUpperCase() === sec) {
+            opt.selected = true;
+          }
+          filterSection.appendChild(opt);
+        });
+
+        if (!filterSection.value && sortedSecs.length > 0) {
+          filterSection.value = sortedSecs[0];
+        }
+
+        populateSubjects();
+      }
+
+      function getStandardDefaultSubjects(courseCode, semNum) {
+        if (courseCode === 'BCA') {
+          if (semNum === '1') {
+            return [
+              { code: 'BCA-101', name: 'Programming Fundamentals using C' },
+              { code: 'BCA-102', name: 'Computer Architecture & Digital Logic' },
+              { code: 'BCA-103', name: 'Discrete Mathematics' },
+              { code: 'BCA-104', name: 'Technical Communication' }
+            ];
+          }
+          if (semNum === '5') {
+            return [
+              { code: 'BCA-501', name: 'Python Programming' },
+              { code: 'BCA-502', name: 'Software Engineering & Agile' },
+              { code: 'BCA-503', name: 'Computer Networks' },
+              { code: 'BCA-504', name: 'Web Technologies & Applications' }
+            ];
+          }
+        }
+        if (courseCode === 'BTECH') {
+          if (semNum === '1') {
+            return [
+              { code: 'BTECH-101', name: 'Engineering Mathematics I' },
+              { code: 'BTECH-102', name: 'Engineering Physics' },
+              { code: 'BTECH-103', name: 'Basic Electrical Engineering' },
+              { code: 'BTECH-104', name: 'Problem Solving & C Programming' }
+            ];
+          }
+          if (semNum === '3') {
+            return [
+              { code: 'BTECH-301', name: 'Data Structures & Algorithms' },
+              { code: 'BTECH-302', name: 'Object Oriented Programming in Java' },
+              { code: 'BTECH-303', name: 'Database Management Systems' },
+              { code: 'BTECH-304', name: 'Discrete Mathematical Structures' }
+            ];
+          }
+        }
+        return [
+          { code: courseCode + '-' + semNum + '01', name: 'Core Theory & Computation I' },
+          { code: courseCode + '-' + semNum + '02', name: 'Core Theory & Computation II' }
+        ];
+      }
+
+      function populateSubjects() {
+        if (!filterSubject) return;
+        var courseCode = normCourse(filterCourse ? filterCourse.value : 'BCA');
+        var semNum = filterSem ? filterSem.value : '1';
+        var secName = filterSection ? filterSection.value : 'A';
+        var prevSubj = filterSubject.value;
+
+        var subjectsMap = {};
+        function addSubject(code, name) {
+          if (!code) return;
+          var key = code.trim().toUpperCase();
+          if (!subjectsMap[key]) {
+            subjectsMap[key] = {
+              code: key,
+              name: name || key
+            };
+          }
+        }
+
+        // 1. From published timetables for this course & semester & section
+        getPublishedTimetables().filter(function (t) {
+          return normCourse(t.course_code) === courseCode && String(t.semester_number) === String(semNum);
+        }).forEach(function (t) {
+          if (Array.isArray(t.entries)) {
+            t.entries.forEach(function (ent) {
+              if (ent.subject_code) {
+                addSubject(ent.subject_code, ent.subject_name || ent.subject_code);
+              }
+            });
+          }
+        });
+
+        // 2. From academicState.subjects
+        academicState.subjects.forEach(function (s) {
+          if (s.code) addSubject(s.code, s.name || s.code);
+        });
+
+        // 3. From admin_custom_subjects
+        getCustomSubjects().filter(function (cs) {
+          return normCourse(cs.courseCode) === courseCode && String(cs.semesterNumber) === String(semNum);
+        }).forEach(function (cs) {
+          addSubject(cs.code, cs.name);
+        });
+
+        // 4. From existing saved cohorts matching course & sem
+        Object.keys(cohorts).forEach(function (k) {
+          var c = cohorts[k];
+          if (c && normCourse(c.course) === courseCode && String(c.semester) === String(semNum) && c.code) {
+            addSubject(c.code, c.name);
+          }
+        });
+
+        // 5. Standard defaults if none found
+        if (Object.keys(subjectsMap).length === 0) {
+          getStandardDefaultSubjects(courseCode, semNum).forEach(function (s) {
+            addSubject(s.code, s.name);
+          });
+        }
+
+        var sortedSubs = Object.keys(subjectsMap).map(function (k) { return subjectsMap[k]; });
+        sortedSubs.sort(function (a, b) { return a.code.localeCompare(b.code); });
+
+        filterSubject.innerHTML = '';
+        sortedSubs.forEach(function (s) {
+          var opt = document.createElement('option');
+          opt.value = s.code;
+          opt.textContent = s.code + ': ' + s.name;
+          if (prevSubj && prevSubj.toUpperCase() === s.code) {
+            opt.selected = true;
+          }
+          filterSubject.appendChild(opt);
+        });
+
+        if (!filterSubject.value && sortedSubs.length > 0) {
+          filterSubject.value = sortedSubs[0].code;
+        }
+
+        loadActiveCohort();
+      }
+
+      // Filter change event bindings
+      if (filterCourse) filterCourse.addEventListener('change', populateSemesters);
+      if (filterSem) filterSem.addEventListener('change', populateSections);
+      if (filterSection) filterSection.addEventListener('change', populateSubjects);
+      if (filterSubject) filterSubject.addEventListener('change', loadActiveCohort);
+      if (filterSession) filterSession.addEventListener('change', loadActiveCohort);
+
+      // =========================================================================
+      // 5. ACTIVE COHORT RESOLUTION & REAL STUDENT DATA BINDING
+      // =========================================================================
+      var activeCohortKey = '';
+
+      function getCohortStorageKey(courseCode, semNum, secName, subjCode) {
+        return [normCourse(courseCode), semNum, secName.toUpperCase(), subjCode.toUpperCase()].join('_');
+      }
+
+      function loadActiveCohort() {
+        var courseCode = normCourse(filterCourse ? filterCourse.value : 'BCA');
+        var semNum = filterSem ? filterSem.value : '1';
+        var secName = (filterSection ? filterSection.value : 'A').toUpperCase();
+        var subjCode = (filterSubject ? filterSubject.value : 'BCA-101').toUpperCase();
+        var sessionTerm = filterSession ? filterSession.value : 'Autumn 2026';
+
+        var subjText = filterSubject && filterSubject.selectedIndex >= 0 ? filterSubject.options[filterSubject.selectedIndex].text : subjCode;
+        var subjName = subjText.indexOf(':') !== -1 ? subjText.split(':')[1].trim() : subjText;
+        var crsText = filterCourse && filterCourse.selectedIndex >= 0 ? filterCourse.options[filterCourse.selectedIndex].text : courseCode;
+        var crsName = crsText.indexOf('-') !== -1 ? crsText.split('-')[1].trim() : crsText;
+
+        activeCohortKey = getCohortStorageKey(courseCode, semNum, secName, subjCode);
+
+        // Fetch or create cohort
+        var cohort = cohorts[activeCohortKey];
+        if (!cohort) {
+          // Check backward compatibility key (e.g. 'BCA-101')
+          if (cohorts[subjCode]) {
+            cohort = cohorts[subjCode];
+            cohort.key = activeCohortKey;
+            cohort.course = courseCode;
+            cohort.courseName = crsName;
+            cohort.semester = semNum;
+            cohort.section = secName;
+            cohort.sem = 'Semester ' + semNum + ' (Sec ' + secName + ')';
+            cohort.term = sessionTerm;
+            cohorts[activeCohortKey] = cohort;
+          } else {
+            cohort = {
+              key: activeCohortKey,
+              course: courseCode,
+              courseName: crsName,
+              semester: semNum,
+              section: secName,
+              sem: 'Semester ' + semNum + ' (Sec ' + secName + ')',
+              code: subjCode,
+              name: subjName,
+              term: sessionTerm,
+              maxMarks: 100.0,
+              status: 'DRAFT',
+              students: []
+            };
+            cohorts[activeCohortKey] = cohort;
+          }
+        } else {
+          cohort.code = subjCode;
+          cohort.name = subjName;
+          cohort.course = courseCode;
+          cohort.courseName = crsName;
+          cohort.semester = semNum;
+          cohort.section = secName;
+          cohort.sem = 'Semester ' + semNum + ' (Sec ' + secName + ')';
+          cohort.term = sessionTerm;
+          if (!cohort.students) cohort.students = [];
+        }
+
+        // SYNC WITH REAL ADMIN-CREATED STUDENTS FROM STUDENT MANAGEMENT
+        var enrolledStudents = getAdminCreatedStudents().filter(function (s) {
+          var sCourse = normCourse(s.course_code);
+          var matchCourse = (sCourse === courseCode) || (courseCode.indexOf(sCourse) !== -1) || (sCourse.indexOf(courseCode) !== -1);
+          var matchSem = String(s.semester_number || '') === String(semNum);
+          var matchSec = !s.section_name || s.section_name.toUpperCase().trim() === secName;
+          return matchCourse && matchSem && matchSec;
+        });
+
+        // Sort students naturally by roll number then name
+        enrolledStudents.sort(function (a, b) {
+          var rollA = parseInt(a.roll_number, 10);
+          var rollB = parseInt(b.roll_number, 10);
+          if (!isNaN(rollA) && !isNaN(rollB)) return rollA - rollB;
+          return (a.full_name || '').localeCompare(b.full_name || '');
+        });
+
+        // Merge student records
+        var existingStudentsMap = {};
+        cohort.students.forEach(function (st) {
+          if (st.id) existingStudentsMap[st.id.toUpperCase().trim()] = st;
+        });
+
+        if (enrolledStudents.length > 0) {
+          var mergedStudents = enrolledStudents.map(function (s, idx) {
+            var sId = (s.student_id || s.enrollment_no || ('STU-' + (idx + 1))).trim();
+            var existing = existingStudentsMap[sId.toUpperCase()];
+            var rollNum = s.roll_number || (idx + 1 < 10 ? '0' + (idx + 1) : String(idx + 1));
+
+            return {
+              id: sId,
+              profileId: s.student_profile_id || '',
+              roll: rollNum,
+              name: s.full_name || s.name || ('Student ' + sId),
+              status: existing ? (existing.status || 'PRESENT') : 'PRESENT',
+              marks: (existing && existing.marks !== undefined) ? existing.marks : null,
+              remarks: existing ? (existing.remarks || '') : ''
+            };
+          });
+
+          cohort.students = mergedStudents;
+        }
+
+        saveCohortsLocally();
+        renderCohortTable();
+        updateSummaryCards();
+      }
+
+      // =========================================================================
+      // 6. SUMMARY CARDS & ROSTER RENDERING
       // =========================================================================
       function getBadgeClass(status) {
         switch (status) {
@@ -864,17 +1471,17 @@
       }
 
       function updateSummaryCards() {
-        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+        var cohort = cohorts[activeCohortKey];
         if (!cohort) return;
 
         var targetEl = document.getElementById('admin-meta-subject-name');
         if (targetEl) targetEl.textContent = cohort.code + ' Final Exam';
 
         var subEl = document.getElementById('admin-meta-subject-sub');
-        if (subEl) subEl.textContent = cohort.sem + ' - ' + cohort.term;
+        if (subEl) subEl.textContent = cohort.course + ' • ' + cohort.sem + ' • ' + cohort.term;
 
         var maxEl = document.getElementById('admin-meta-max-marks');
-        if (maxEl) maxEl.textContent = Number(cohort.maxMarks).toFixed(2);
+        if (maxEl) maxEl.textContent = Number(cohort.maxMarks || 100).toFixed(2);
 
         var badgeEl = document.getElementById('admin-meta-status-badge');
         if (badgeEl) {
@@ -884,10 +1491,10 @@
 
         var statusSubEl = document.getElementById('admin-meta-status-sub');
         if (statusSubEl) {
-          if (cohort.status === 'PUBLISHED') statusSubEl.textContent = 'Visible to students on portal';
+          if (cohort.status === 'PUBLISHED') statusSubEl.textContent = 'Visible to students on examination portal';
           else if (cohort.status === 'FINALIZED') statusSubEl.textContent = 'Locked for faculty; ready for portal release';
-          else if (cohort.status === 'REVIEWED') statusSubEl.textContent = 'Verified by department evaluator';
-          else statusSubEl.textContent = 'Awaiting completion by faculty';
+          else if (cohort.status === 'REVIEWED') statusSubEl.textContent = 'Verified by department examination committee';
+          else statusSubEl.textContent = 'Open for manual marks entry or spreadsheet import';
         }
 
         // Stats calculation
@@ -905,16 +1512,18 @@
         if (compEl) compEl.textContent = validMarks.length + ' / ' + total;
 
         if (compSubEl) {
-          var avg = validMarks.length > 0
-            ? (validMarks.reduce(function (a, b) { return a + b; }, 0) / validMarks.length).toFixed(1)
-            : '0.0';
-          var top = validMarks.length > 0 ? Math.max.apply(null, validMarks).toFixed(1) : '0.0';
-          compSubEl.textContent = 'Avg: ' + avg + '% • Top: ' + top;
+          if (validMarks.length > 0) {
+            var avg = (validMarks.reduce(function (a, b) { return a + b; }, 0) / validMarks.length).toFixed(1);
+            var top = Math.max.apply(null, validMarks).toFixed(1);
+            compSubEl.textContent = 'Avg: ' + avg + '% • Top: ' + top;
+          } else {
+            compSubEl.textContent = 'No marks evaluated yet';
+          }
         }
 
         var finalizeLabel = document.getElementById('finalize-target-label');
         if (finalizeLabel) {
-          finalizeLabel.textContent = cohort.code + ' (' + cohort.name + ') ' + cohort.term + ' Final Examination';
+          finalizeLabel.textContent = cohort.code + ' (' + cohort.name + ') ' + cohort.course + ' ' + cohort.sem + ' Final Examination';
         }
       }
 
@@ -922,11 +1531,36 @@
         var tbody = document.getElementById('admin-roster-tbody');
         if (!tbody) return;
 
-        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+        var cohort = cohorts[activeCohortKey];
+        if (!cohort) return;
+
         var maxMarks = cohort.maxMarks || 100.0;
         var students = cohort.students || [];
 
         tbody.innerHTML = '';
+
+        if (students.length === 0) {
+          tbody.innerHTML =
+            '<tr id="empty-marks-row">' +
+            '  <td colspan="9" style="text-align: center; padding: 48px 20px; color: var(--card-muted);">' +
+            '    <div style="font-size: 32px; margin-bottom: 10px;">🎓</div>' +
+            '    <div style="font-size: 16px; font-weight: 700; color: var(--card-ink); margin-bottom: 6px;">No Students Enrolled in this Cohort</div>' +
+            '    <div style="font-size: 13px; max-width: 480px; margin: 0 auto 16px; line-height: 1.5;">' +
+            '      There are currently no students registered in Student Management for <strong>' + cohort.course + '</strong> ' + cohort.sem + '.' +
+            '    </div>' +
+            '    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">' +
+            '      <a href="admin-students.html" class="btn btn-sm btn-outline" style="text-decoration: none;">' +
+            '        Register Students in Student Management' +
+            '      </a>' +
+            '      <button type="button" class="btn btn-sm" onclick="document.querySelector(\'[data-tab=\\\'bulk-import\\\']\').click()" style="background: var(--bg); color: #fff;">' +
+            '        Bulk Import Spreadsheet' +
+            '      </button>' +
+            '    </div>' +
+            '  </td>' +
+            '</tr>';
+          updateSummaryCards();
+          return;
+        }
 
         students.forEach(function (s, idx) {
           var tr = document.createElement('tr');
@@ -935,8 +1569,8 @@
           tr.style.borderBottom = '1px solid var(--line)';
 
           var isPresent = (s.status === 'PRESENT');
-          var pctVal = (isPresent && s.marks !== null) ? ((Number(s.marks) / maxMarks) * 100).toFixed(1) + '%' : 'N/A';
-          var pctColor = (isPresent && s.marks !== null)
+          var pctVal = (isPresent && s.marks !== null && !isNaN(s.marks)) ? ((Number(s.marks) / maxMarks) * 100).toFixed(1) + '%' : 'N/A';
+          var pctColor = (isPresent && s.marks !== null && !isNaN(s.marks))
             ? (Number(s.marks) >= 75 ? '#10B981' : (Number(s.marks) >= 60 ? '#2563EB' : '#F59E0B'))
             : '#94A3B8';
 
@@ -954,7 +1588,7 @@
             '  </select>' +
             '</td>' +
             '<td style="padding: 10px 14px; text-align: right;">' +
-            '  <input type="number" class="admin-row-marks-input" data-id="' + s.id + '" min="0" max="' + maxMarks + '" step="0.5" value="' + (isPresent && s.marks !== null ? s.marks : '') + '"' + (!isPresent ? ' disabled' : '') + ' placeholder="0.0">' +
+            '  <input type="number" class="admin-row-marks-input" data-id="' + s.id + '" min="0" max="' + maxMarks + '" step="0.5" value="' + (isPresent && s.marks !== null && !isNaN(s.marks) ? s.marks : '') + '"' + (!isPresent ? ' disabled' : '') + ' placeholder="0.0">' +
             '</td>' +
             '<td style="padding: 10px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">' + maxMarks.toFixed(1) + '</td>' +
             '<td style="padding: 10px 14px; text-align: center; font-weight: 700; font-size: 14px; color: ' + pctColor + ';" class="row-pct-cell">' + pctVal + '</td>' +
@@ -987,7 +1621,8 @@
             var tr = sel.closest('tr');
             var marksInput = tr.querySelector('.admin-row-marks-input');
             var pctCell = tr.querySelector('.row-pct-cell');
-            var cohort = cohorts[activeSubjectKey];
+            var cohort = cohorts[activeCohortKey];
+            if (!cohort) return;
             var student = cohort.students.find(function (s) { return s.id === studentId; });
 
             if (sel.value === 'PRESENT') {
@@ -1027,7 +1662,8 @@
             var studentId = inp.getAttribute('data-id');
             var tr = inp.closest('tr');
             var pctCell = tr.querySelector('.row-pct-cell');
-            var cohort = cohorts[activeSubjectKey];
+            var cohort = cohorts[activeCohortKey];
+            if (!cohort) return;
             var student = cohort.students.find(function (s) { return s.id === studentId; });
             var marksNum = parseFloat(inp.value);
 
@@ -1062,7 +1698,8 @@
         remarksInputs.forEach(function (rinp) {
           rinp.addEventListener('change', function () {
             var studentId = rinp.getAttribute('data-id');
-            var cohort = cohorts[activeSubjectKey];
+            var cohort = cohorts[activeCohortKey];
+            if (!cohort) return;
             var student = cohort.students.find(function (s) { return s.id === studentId; });
             if (student) student.remarks = rinp.value.trim();
           });
@@ -1077,12 +1714,12 @@
       }
 
       // =========================================================================
-      // 5. SAVE CHANGES BUTTON HANDLER
+      // 7. SAVE ROSTER CHANGES
       // =========================================================================
       var saveChangesBtn = document.getElementById('btn-admin-save-draft');
       if (saveChangesBtn) {
         saveChangesBtn.addEventListener('click', function () {
-          var cohort = cohorts[activeSubjectKey];
+          var cohort = cohorts[activeCohortKey];
           if (!cohort) return;
 
           saveChangesBtn.disabled = true;
@@ -1091,13 +1728,14 @@
           var rows = document.querySelectorAll('#admin-roster-tbody tr');
           rows.forEach(function (tr) {
             var sId = tr.getAttribute('data-student-id');
-            var sStatus = tr.querySelector('.admin-row-status-select').value;
+            if (!sId) return;
+            var sStatus = tr.querySelector('.admin-row-status-select') ? tr.querySelector('.admin-row-status-select').value : 'PRESENT';
             var sMarksInput = tr.querySelector('.admin-row-marks-input');
             var sRemarksInput = tr.querySelector('.admin-row-remarks-input');
             var student = cohort.students.find(function (s) { return s.id === sId; });
             if (student) {
               student.status = sStatus;
-              student.marks = (sStatus === 'PRESENT' && sMarksInput.value !== '') ? parseFloat(sMarksInput.value) : null;
+              student.marks = (sStatus === 'PRESENT' && sMarksInput && sMarksInput.value !== '') ? parseFloat(sMarksInput.value) : null;
               student.remarks = sRemarksInput ? sRemarksInput.value.trim() : student.remarks;
             }
             tr.classList.remove('table-row-modified');
@@ -1108,7 +1746,7 @@
           var now = new Date().toISOString().replace('T', ' ').substring(0, 19);
           var auditRecord = {
             timestamp: now,
-            action: 'Manual Roster Save: ' + cohort.code,
+            action: 'Manual Roster Save: ' + cohort.code + ' (' + cohort.course + ' ' + cohort.sem + ')',
             admin: storedName + ' (' + storedId + ')',
             details: cohort.students.length + ' Students Updated',
             status: 'COMMITTED',
@@ -1118,6 +1756,7 @@
           saveAuditLocally();
           renderAuditTrail();
 
+          // Sync to backend if reachable
           fetch(getApiBase() + '/api/marks/teacher/marks/bulk', {
             method: 'POST',
             headers: {
@@ -1128,7 +1767,7 @@
               assessmentId: 'a1000000-0000-0000-0000-000000000001',
               marks: cohort.students.map(function (s) {
                 return {
-                  studentProfileId: 's1000000-0000-0000-0000-000000000001',
+                  studentProfileId: s.profileId || s.id,
                   marksObtained: s.marks,
                   status: s.status,
                   remarks: s.remarks
@@ -1143,48 +1782,100 @@
             saveChangesBtn.style.background = '';
             saveChangesBtn.style.color = '';
             saveChangesBtn.style.fontWeight = '';
-            showAdminToast('All examination marks for ' + cohort.code + ' saved and committed successfully.', 'success');
+            showAdminToast('Examination marks for ' + cohort.code + ' (' + cohort.sem + ') saved successfully.', 'success');
             updateSummaryCards();
           }, 350);
         });
       }
 
       // =========================================================================
-      // 6. SCOPE FILTER CONTROLS
+      // 8. QUICK ADD SUBJECT WORKFLOW
       // =========================================================================
-      var filterCourse = document.getElementById('admin-filter-course');
-      var filterSubject = document.getElementById('admin-filter-subject');
+      var quickAddBtn = document.getElementById('btn-quick-add-subject');
+      var addSubjModal = document.getElementById('modal-add-subject');
+      var quickSubjContext = document.getElementById('quick-subject-context');
+      var newSubjCode = document.getElementById('new-subject-code');
+      var newSubjName = document.getElementById('new-subject-name');
+      var newSubjMax = document.getElementById('new-subject-max');
+      var addSubjError = document.getElementById('add-subject-error');
 
-      if (filterCourse) {
-        filterCourse.addEventListener('change', function () {
-          var val = filterCourse.value;
-          if (val === 'btech-cse') {
-            filterSubject.innerHTML =
-              '<option value="BTECH-CSE-101" selected>BTECH-101: Advanced Data Structures & Algorithms</option>';
-            activeSubjectKey = 'BTECH-CSE-101';
-          } else {
-            filterSubject.innerHTML =
-              '<option value="BCA-101" selected>BCA-101: Programming Fundamentals using C</option>' +
-              '<option value="BCA-102">BCA-102: Computer Architecture & Digital Logic</option>' +
-              '<option value="BCA-103">BCA-103: Discrete Mathematics</option>' +
-              '<option value="BCA-104">BCA-104: Technical Communication</option>';
-            activeSubjectKey = 'BCA-101';
+      window.openAddSubjectModal = function () {
+        var courseCode = normCourse(filterCourse ? filterCourse.value : 'BCA');
+        var semNum = filterSem ? filterSem.value : '1';
+        if (quickSubjContext) {
+          quickSubjContext.textContent = courseCode + ' Semester ' + semNum;
+        }
+        if (newSubjCode) newSubjCode.value = '';
+        if (newSubjName) newSubjName.value = '';
+        if (newSubjMax) newSubjMax.value = '100';
+        if (addSubjError) addSubjError.style.display = 'none';
+
+        if (addSubjModal) {
+          addSubjModal.classList.add('is-open');
+          addSubjModal.style.display = 'flex';
+        }
+      };
+
+      window.closeAddSubjectModal = function () {
+        if (addSubjModal) {
+          addSubjModal.classList.remove('is-open');
+          addSubjModal.style.display = 'none';
+        }
+      };
+
+      if (quickAddBtn) {
+        quickAddBtn.addEventListener('click', window.openAddSubjectModal);
+      }
+
+      window.handleQuickAddSubjectSubmit = function (e) {
+        e.preventDefault();
+        var code = (newSubjCode ? newSubjCode.value : '').trim().toUpperCase();
+        var name = (newSubjName ? newSubjName.value : '').trim();
+        var maxMarks = parseFloat(newSubjMax ? newSubjMax.value : '100') || 100;
+        var courseCode = normCourse(filterCourse ? filterCourse.value : 'BCA');
+        var semNum = filterSem ? filterSem.value : '1';
+
+        if (!code || !name) {
+          if (addSubjError) {
+            addSubjError.textContent = 'Both Subject Code and Subject Name are required.';
+            addSubjError.style.display = 'block';
           }
-          renderCohortTable();
-          showAdminToast('Loaded ' + filterCourse.options[filterCourse.selectedIndex].text + ' roster.', 'info');
-        });
-      }
+          return;
+        }
 
-      if (filterSubject) {
-        filterSubject.addEventListener('change', function () {
-          activeSubjectKey = filterSubject.value;
-          renderCohortTable();
-          showAdminToast('Switched assessment target to ' + activeSubjectKey + '.', 'info');
+        saveCustomSubject({
+          code: code,
+          name: name,
+          courseCode: courseCode,
+          semesterNumber: semNum,
+          maxMarks: maxMarks
         });
-      }
+
+        // Add to academicState.subjects if not present
+        if (!academicState.subjects.some(function (s) { return s.code === code; })) {
+          academicState.subjects.push({
+            id: 'sub-' + code.toLowerCase(),
+            code: code,
+            name: name
+          });
+          try {
+            localStorage.setItem('admin_academic_state', JSON.stringify(academicState));
+          } catch (err) {}
+        }
+
+        window.closeAddSubjectModal();
+        populateSubjects();
+
+        if (filterSubject) {
+          filterSubject.value = code;
+          loadActiveCohort();
+        }
+
+        showAdminToast('Subject ' + code + ' registered for ' + courseCode + ' Sem ' + semNum + '.', 'success');
+      };
 
       // =========================================================================
-      // 7. MARKS CORRECTION MODAL WORKFLOW
+      // 9. MARKS CORRECTION MODAL WORKFLOW
       // =========================================================================
       var correctModal = document.getElementById('modal-correction');
       var correctStudentSelect = document.getElementById('correct-student-select');
@@ -1195,14 +1886,17 @@
       var headerCorrectBtn = document.getElementById('btn-open-correction-modal');
 
       window.openCorrectionModal = function (preselectStudentId) {
-        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
-        if (!cohort) return;
+        var cohort = cohorts[activeCohortKey];
+        if (!cohort || !cohort.students || cohort.students.length === 0) {
+          showAdminToast('No students enrolled in this cohort to correct.', 'error');
+          return;
+        }
 
         correctStudentSelect.innerHTML = '';
         cohort.students.forEach(function (s) {
           var opt = document.createElement('option');
           opt.value = s.id;
-          opt.textContent = s.name + ' (' + s.id + ') • Current: ' + (s.status === 'PRESENT' ? s.marks + ' pts' : s.status);
+          opt.textContent = s.name + ' (' + s.id + ') • Current: ' + (s.status === 'PRESENT' ? (s.marks !== null ? s.marks + ' pts' : 'No marks') : s.status);
           correctStudentSelect.appendChild(opt);
         });
 
@@ -1224,7 +1918,8 @@
       };
 
       window.onCorrectionStudentChange = function () {
-        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+        var cohort = cohorts[activeCohortKey];
+        if (!cohort) return;
         var sId = correctStudentSelect.value;
         var student = cohort.students.find(function (s) { return s.id === sId; });
         if (!student) return;
@@ -1246,7 +1941,8 @@
 
       window.handleCorrectionSubmit = function (e) {
         e.preventDefault();
-        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+        var cohort = cohorts[activeCohortKey];
+        if (!cohort) return;
         var sId = correctStudentSelect.value;
         var student = cohort.students.find(function (s) { return s.id === sId; });
         if (!student) return;
@@ -1293,7 +1989,7 @@
           },
           body: JSON.stringify({
             assessmentId: 'a1000000-0000-0000-0000-000000000001',
-            studentProfileId: 's1000000-0000-0000-0000-000000000001',
+            studentProfileId: student.profileId || student.id,
             newMarks: newMarksNum,
             newStatus: newStat,
             reason: reason
@@ -1313,16 +2009,19 @@
       }
 
       // =========================================================================
-      // 8. FINALIZATION & PUBLICATION MODAL WORKFLOW
+      // 10. FINALIZATION & PUBLICATION MODAL WORKFLOW
       // =========================================================================
       var finalizeModal = document.getElementById('modal-finalize-pub');
       var openFinalizeBtn = document.getElementById('btn-open-finalize-modal');
       var confirmFinalizeBtn = document.getElementById('finalize-confirm-btn');
 
       window.openFinalizeModal = function () {
-        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+        var cohort = cohorts[activeCohortKey];
+        if (!cohort) return;
         var label = document.getElementById('finalize-target-label');
-        if (label) label.textContent = cohort.code + ' (' + cohort.name + ') ' + cohort.term + ' Final Examination';
+        if (label) {
+          label.textContent = cohort.code + ' (' + cohort.name + ') • ' + cohort.course + ' ' + cohort.sem + ' Final Examination';
+        }
 
         finalizeModal.classList.add('is-open');
         finalizeModal.style.display = 'flex';
@@ -1339,7 +2038,8 @@
 
       if (confirmFinalizeBtn) {
         confirmFinalizeBtn.addEventListener('click', function () {
-          var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+          var cohort = cohorts[activeCohortKey];
+          if (!cohort) return;
           var selectedAction = document.querySelector('input[name="admin_lifecycle_action"]:checked').value;
           confirmFinalizeBtn.disabled = true;
           confirmFinalizeBtn.textContent = 'Executing...';
@@ -1357,9 +2057,9 @@
 
               var auditRecord = {
                 timestamp: now,
-                action: 'Results Published: ' + cohort.code,
+                action: 'Results Published: ' + cohort.code + ' (' + cohort.course + ' ' + cohort.sem + ')',
                 admin: storedName + ' (' + storedId + ')',
-                details: 'Official results published to student portal',
+                details: 'Official results released to student portal for ' + cohort.students.length + ' students',
                 status: 'PUBLISHED',
                 checksum: 'd' + Date.now().toString(16) + '...3a9'
               };
@@ -1378,9 +2078,9 @@
 
               var auditRecord = {
                 timestamp: now,
-                action: 'Cycle Finalized: ' + cohort.code,
+                action: 'Cycle Finalized: ' + cohort.code + ' (' + cohort.course + ' ' + cohort.sem + ')',
                 admin: storedName + ' (' + storedId + ')',
-                details: 'Assessment locked against non-admin editing',
+                details: 'Assessment locked against further non-admin editing',
                 status: 'FINALIZED',
                 checksum: 'f' + Date.now().toString(16) + '...8b2'
               };
@@ -1402,7 +2102,7 @@
       }
 
       // =========================================================================
-      // 9. BULK SPREADSHEET IMPORT ENGINE
+      // 11. BULK SPREADSHEET IMPORT ENGINE
       // =========================================================================
       var dropzone = document.getElementById('bulk-upload-dropzone');
       var fileInput = document.getElementById('file-import-input');
@@ -1421,16 +2121,27 @@
 
       if (downloadBtn) {
         downloadBtn.addEventListener('click', function () {
-          var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
-          var csv = 'Student_ID,Subject_Code,Marks_Obtained,Status,Remarks\n';
-          cohort.students.forEach(function (s) {
-            csv += s.id + ',' + cohort.code + ',' + (s.marks !== null ? s.marks : '') + ',' + s.status + ',' + (s.remarks || 'Final Examination') + '\n';
-          });
+          var cohort = cohorts[activeCohortKey];
+          if (!cohort) return;
+
+          var csv = 'Student_ID,Student_Name,Subject_Code,Marks_Obtained,Status,Remarks\n';
+          var students = cohort.students || [];
+
+          if (students.length === 0) {
+            csv += 'STU-1001,Demo Student,' + cohort.code + ',85,PRESENT,Final Examination\n';
+          } else {
+            students.forEach(function (s) {
+              var safeName = (s.name || '').replace(/"/g, '""');
+              var safeRemarks = (s.remarks || 'Final Examination').replace(/"/g, '""');
+              csv += s.id + ',"' + safeName + '",' + cohort.code + ',' + (s.marks !== null && !isNaN(s.marks) ? s.marks : '') + ',' + s.status + ',"' + safeRemarks + '"\n';
+            });
+          }
+
           var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
           var url = URL.createObjectURL(blob);
           var a = document.createElement('a');
           a.href = url;
-          a.download = cohort.code + '_Final_Marks_Template.csv';
+          a.download = cohort.course + '_Sem' + cohort.semester + '_Sec' + cohort.section + '_' + cohort.code + '_Template.csv';
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
@@ -1454,7 +2165,8 @@
       }
 
       function processImportFile(file) {
-        var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
+        var cohort = cohorts[activeCohortKey];
+        if (!cohort) return;
         previewFilename.textContent = file.name;
 
         var reader = new FileReader();
@@ -1466,17 +2178,20 @@
 
           if (lines.length > 1 && lines[0].toLowerCase().indexOf('student') !== -1) {
             for (var i = 1; i < lines.length; i++) {
-              var parts = lines[i].split(',').map(function (p) { return p.trim(); });
+              var parts = lines[i].split(',').map(function (p) { return p.trim().replace(/^["']|["']$/g, ''); });
               var sId = parts[0];
               var marksVal = parts[2] !== undefined && parts[2] !== '' ? parseFloat(parts[2]) : null;
               var stat = (parts[3] || 'PRESENT').toUpperCase();
               var rem = parts[4] || 'Imported via ' + file.name;
 
-              var foundInCohort = cohort.students.find(function (s) { return s.id.toUpperCase() === sId.toUpperCase(); });
+              var foundInCohort = cohort.students.find(function (s) {
+                return s.id.toUpperCase() === sId.toUpperCase();
+              });
+
               if (!sId) {
                 errors.push({ row: i + 1, id: 'N/A', error: 'Student ID missing' });
               } else if (!foundInCohort) {
-                errors.push({ row: i + 1, id: sId, error: 'Student not enrolled in active cohort' });
+                errors.push({ row: i + 1, id: sId, error: 'Student ID not enrolled in active cohort (' + cohort.course + ' ' + cohort.sem + ')' });
               } else if (stat === 'PRESENT' && (marksVal === null || isNaN(marksVal) || marksVal < 0 || marksVal > cohort.maxMarks)) {
                 errors.push({ row: i + 1, id: sId, error: 'Invalid marks [' + parts[2] + '], must be 0 to ' + cohort.maxMarks });
               } else {
@@ -1485,7 +2200,7 @@
             }
           } else {
             cohort.students.forEach(function (s, idx) {
-              valid.push({ id: s.id, name: s.name, marks: 80 + idx * 3, status: 'PRESENT', remarks: 'Bulk imported from ' + file.name });
+              valid.push({ id: s.id, name: s.name, marks: 80 + idx * 2, status: 'PRESENT', remarks: 'Bulk imported from ' + file.name });
             });
           }
 
@@ -1546,29 +2261,31 @@
           commitBtn.textContent = 'Committing Batch...';
 
           setTimeout(function () {
-            var cohort = cohorts[activeSubjectKey] || cohorts['BCA-101'];
-            pendingImportRows.forEach(function (imp) {
-              var student = cohort.students.find(function (s) { return s.id === imp.id; });
-              if (student) {
-                student.marks = imp.marks;
-                student.status = imp.status;
-                student.remarks = imp.remarks;
-              }
-            });
+            var cohort = cohorts[activeCohortKey];
+            if (cohort) {
+              pendingImportRows.forEach(function (imp) {
+                var student = cohort.students.find(function (s) { return s.id === imp.id; });
+                if (student) {
+                  student.marks = imp.marks;
+                  student.status = imp.status;
+                  student.remarks = imp.remarks;
+                }
+              });
 
-            saveCohortsLocally();
+              saveCohortsLocally();
 
-            var now = new Date().toISOString().replace('T', ' ').substring(0, 19);
-            var auditRecord = {
-              timestamp: now,
-              action: previewFilename.textContent,
-              admin: storedName + ' (' + storedId + ')',
-              details: pendingImportRows.length + ' Valid Rows Committed',
-              status: 'COMMITTED',
-              checksum: 'a98f2' + Date.now().toString(16) + '...11b'
-            };
-            auditEntries.unshift(auditRecord);
-            saveAuditLocally();
+              var now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+              var auditRecord = {
+                timestamp: now,
+                action: previewFilename.textContent,
+                admin: storedName + ' (' + storedId + ')',
+                details: pendingImportRows.length + ' Valid Rows Committed (' + cohort.code + ')',
+                status: 'COMMITTED',
+                checksum: 'a98f2' + Date.now().toString(16) + '...11b'
+              };
+              auditEntries.unshift(auditRecord);
+              saveAuditLocally();
+            }
 
             commitBtn.disabled = false;
             commitBtn.textContent = 'Commit Valid Batch';
@@ -1587,7 +2304,34 @@
       }
 
       // =========================================================================
-      // 10. TAB 3: AUDIT TRAIL RENDERING
+      // 12. TAB NAVIGATION
+      // =========================================================================
+      var tabBtns = document.querySelectorAll('.marks-tab-btn');
+      var tabPanes = document.querySelectorAll('.marks-tab-pane');
+
+      Array.prototype.forEach.call(tabBtns, function (btn) {
+        btn.addEventListener('click', function () {
+          var targetTab = btn.getAttribute('data-tab');
+
+          Array.prototype.forEach.call(tabBtns, function (b) {
+            b.classList.remove('active');
+            b.setAttribute('aria-selected', 'false');
+          });
+          btn.classList.add('active');
+          btn.setAttribute('aria-selected', 'true');
+
+          Array.prototype.forEach.call(tabPanes, function (pane) {
+            if (pane.id === 'tab-' + targetTab) {
+              pane.style.display = 'block';
+            } else {
+              pane.style.display = 'none';
+            }
+          });
+        });
+      });
+
+      // =========================================================================
+      // 13. TAB 3: AUDIT TRAIL RENDERING
       // =========================================================================
       function renderAuditTrail() {
         var tbody = document.getElementById('admin-audit-tbody');
@@ -1616,7 +2360,7 @@
       }
 
       // =========================================================================
-      // 11. TOAST NOTIFICATION HELPER
+      // 14. TOAST NOTIFICATIONS & MODAL CONTROLS
       // =========================================================================
       function showAdminToast(msg, type) {
         var container = document.getElementById('admin-toast-container');
@@ -1643,15 +2387,14 @@
         }, 3500);
       }
 
-      // Close modal on Escape key
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
           window.closeCorrectionModal();
           window.closeFinalizeModal();
+          window.closeAddSubjectModal();
         }
       });
 
-      // Close modal on backdrop click
       if (correctModal) {
         correctModal.addEventListener('click', function (e) {
           if (e.target === correctModal) window.closeCorrectionModal();
@@ -1662,9 +2405,50 @@
           if (e.target === finalizeModal) window.closeFinalizeModal();
         });
       }
+      if (addSubjModal) {
+        addSubjModal.addEventListener('click', function (e) {
+          if (e.target === addSubjModal) window.closeAddSubjectModal();
+        });
+      }
 
-      // Initial Roster & Audit Render
-      renderCohortTable();
+      // Async fetch backend academic entities in background to enrich if available
+      try {
+        fetch(getApiBase() + '/api/timetable/academic/all')
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            if (data && data.success) {
+              if (Array.isArray(data.courses) && data.courses.length > 0) {
+                data.courses.forEach(function (c) {
+                  if (!isEntityDeleted('courses', c.id, c.code, c.name) &&
+                      !isEntityDeleted('departments', c.department_id, c.department_code, c.department_name) &&
+                      !isEntityDeleted('schools', c.school_id, c.school_code, c.school_name) &&
+                      !academicState.courses.some(function (x) { return x.id === c.id || x.code === c.code; })) {
+                    academicState.courses.push(c);
+                  }
+                });
+              }
+              if (Array.isArray(data.semesters) && data.semesters.length > 0) {
+                data.semesters.forEach(function (s) {
+                  if (!academicState.semesters.some(function (x) { return x.id === s.id; })) {
+                    academicState.semesters.push(s);
+                  }
+                });
+              }
+              if (Array.isArray(data.sections) && data.sections.length > 0) {
+                data.sections.forEach(function (sec) {
+                  if (!academicState.sections.some(function (x) { return x.id === sec.id; })) {
+                    academicState.sections.push(sec);
+                  }
+                });
+              }
+              populateProgrammes();
+            }
+          })
+          .catch(function () {});
+      } catch (err) {}
+
+      // Initialize
+      populateProgrammes();
       renderAuditTrail();
 
     })();

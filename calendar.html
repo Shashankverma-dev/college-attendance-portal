@@ -159,7 +159,7 @@
               '    <div class="user-avatar-circle" id="display-user-avatar">AS</div>' +
               '    <div class="user-avatar-info">' +
               '      <span class="user-avatar-name" id="display-user-name">' + adminName + '</span>' +
-              '      <span class="user-avatar-role" id="display-user-id">ID: ADM-001 (Global Admin)</span>' +
+              '      <span class="user-avatar-role" id="display-user-id">Global Admin</span>' +
               '    </div>' +
               '    <svg class="user-avatar-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
               '      <polyline points="6 9 12 15 18 9"></polyline>' +
@@ -168,7 +168,7 @@
               '  <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">' +
               '    <div class="user-dropdown-header">' +
               '      <strong id="dropdown-user-name">' + adminName + '</strong>' +
-              '      <span id="dropdown-user-id">ID: ADM-001 • Global Admin</span>' +
+              '      <span id="dropdown-user-id">Global Admin</span>' +
               '    </div>' +
               '    <a class="user-dropdown-item" href="profile.html" role="menuitem">' +
               '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>' +
@@ -204,7 +204,7 @@
           }
           if (drawerUserInfo) {
             drawerUserInfo.style.display = 'block';
-            drawerUserInfo.innerHTML = '<strong id="drawer-user-name">' + adminName + '</strong><span id="drawer-user-id">ID: ADM-001 (Global Admin)</span>';
+            drawerUserInfo.innerHTML = '<strong id="drawer-user-name">' + adminName + '</strong><span id="drawer-user-id">Global Admin</span>';
           }
           if (drawerNavLinks) {
             drawerNavLinks.innerHTML = '<a class="drawer-nav-link" href="admin.html" onclick="closeNavDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg><span>Dashboard</span></a>' +
@@ -621,7 +621,7 @@
     </div>
   </footer>
 
-  <script src="site.js" defer></script>
+  <script src="site.js?v=4" defer></script>
   <script>
     (function () {
       'use strict';
@@ -709,10 +709,24 @@
         localStorage.setItem('srhu_academic_events', JSON.stringify(calendarEvents));
       }
 
+      function getCalendarAuthHeaders(extra) {
+        var headers = Object.assign({}, extra || {});
+        var token = sessionStorage.getItem('attendance_auth_token') ||
+                    localStorage.getItem('attendance_auth_token') ||
+                    sessionStorage.getItem('token') ||
+                    localStorage.getItem('token') || '';
+        if (token) {
+          headers['Authorization'] = 'Bearer ' + token;
+        }
+        return headers;
+      }
+
       // Sync from backend
       function fetchEventsFromBackend() {
         var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
-        fetch(apiBase + '/api/academic/calendar')
+        fetch(apiBase + '/api/academic/calendar', {
+          headers: getCalendarAuthHeaders({ 'Accept': 'application/json' })
+        })
           .then(function (res) { return res.ok ? res.json() : null; })
           .then(function (data) {
             if (data && Array.isArray(data) && data.length > 0) {
@@ -1143,10 +1157,9 @@
 
         fetch(url, {
           method: method,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + (sessionStorage.getItem('attendance_auth_token') || '')
-          },
+          headers: getCalendarAuthHeaders({
+            'Content-Type': 'application/json'
+          }),
           body: JSON.stringify(payload)
         })
           .then(function (res) {
@@ -1230,9 +1243,7 @@
         var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
         fetch(apiBase + '/api/academic/calendar/' + id, {
           method: 'DELETE',
-          headers: {
-            'Authorization': 'Bearer ' + (sessionStorage.getItem('attendance_auth_token') || '')
-          }
+          headers: getCalendarAuthHeaders()
         })
           .then(function () {
             // Remove from array

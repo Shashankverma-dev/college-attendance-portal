@@ -533,7 +533,7 @@ router.get('/me', authenticate, async (req: Request, res: Response): Promise<voi
       };
     } else if (role === 'GLOBAL_ADMIN') {
       profileData = {
-        administrative_staff_id: 'ADM-001',
+        administrative_staff_id: '',
         full_name: 'Dr. Arvind Sharma',
         designation: 'Dean of Academic Affairs & Global Admin',
       };

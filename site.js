@@ -375,7 +375,7 @@
             '  <div class="user-dropdown-menu" id="user-dropdown-menu" role="menu">',
             '    <div class="user-dropdown-header">',
             '      <strong id="dropdown-user-name">' + _admName + '</strong>',
-            '      <span id="dropdown-user-id">ID: ' + activeId + ' \u2022 ' + _admRoleTitle + '</span>',
+            '      <span id="dropdown-user-id">' + _admRoleTitle + '</span>',
             '    </div>',
             '    <a class="user-dropdown-item' + (isProf ? ' active' : '') + '" href="profile.html" role="menuitem">',
             '      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
@@ -413,7 +413,7 @@
 
         if (drawerUserInfo) {
           drawerUserInfo.style.display = 'block';
-          drawerUserInfo.innerHTML = '<strong id="drawer-user-name">' + _admName + '</strong><span id="drawer-user-id">ID: ' + activeId + ' (' + _admRoleTitle + ')</span>';
+          drawerUserInfo.innerHTML = '<strong id="drawer-user-name">' + _admName + '</strong><span id="drawer-user-id">' + _admRoleTitle + '</span>';
         }
         if (drawerNavLinks) {
           drawerNavLinks.innerHTML = [
@@ -656,9 +656,9 @@
       if (idEl) idEl.textContent = roleLabel;
       if (circleEl) circleEl.textContent = displayInitials;
       if (dropdownNameEl) dropdownNameEl.textContent = displayName;
-      if (dropdownIdEl) dropdownIdEl.textContent = 'ID: ' + displayId + ' \u2022 ' + roleLabel;
+      if (dropdownIdEl) dropdownIdEl.textContent = activeRole === 'admin' ? roleLabel : ('ID: ' + displayId + ' \u2022 ' + roleLabel);
       if (drawerNameEl) drawerNameEl.textContent = displayName;
-      if (drawerIdEl) drawerIdEl.textContent = 'ID: ' + displayId + ' (' + roleLabel + ')';
+      if (drawerIdEl) drawerIdEl.textContent = activeRole === 'admin' ? roleLabel : ('ID: ' + displayId + ' (' + roleLabel + ')');
     }
   }
 

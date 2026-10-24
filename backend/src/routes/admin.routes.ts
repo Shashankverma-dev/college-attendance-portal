@@ -54,64 +54,7 @@ export interface InMemSchool {
   updated_at: string;
 }
 
-export const localSchools: InMemSchool[] = [
-  {
-    school_id: '10000000-0000-0000-0000-000000000001',
-    school_code: 'SST',
-    school_name: 'School of Science & Technology',
-    description: 'Faculty of Science, Engineering & Computing',
-    programs: 'BCA, MCA & B.Tech Programs',
-    dean_name: 'Dr. Rajesh Sharma',
-    hod_name: 'Dr. Rajesh Sharma',
-    contact_email: 'hod.sst@college.edu',
-    hod_email: 'hod.sst@college.edu',
-    is_active: true,
-    created_at: '2026-01-01T00:00:00Z',
-    updated_at: '2026-01-01T00:00:00Z',
-  },
-  {
-    school_id: '10000000-0000-0000-0000-000000000002',
-    school_code: 'SBS',
-    school_name: 'School of Bioscience',
-    description: 'Faculty of Biosciences, Biotechnology & Life Sciences',
-    programs: 'Biotechnology & Microbiology',
-    dean_name: 'Dr. Priya Verma',
-    hod_name: 'Dr. Priya Verma',
-    contact_email: 'hod.sbs@college.edu',
-    hod_email: 'hod.sbs@college.edu',
-    is_active: true,
-    created_at: '2026-01-01T00:00:00Z',
-    updated_at: '2026-01-01T00:00:00Z',
-  },
-  {
-    school_id: '10000000-0000-0000-0000-000000000003',
-    school_code: 'SOM',
-    school_name: 'School of Management',
-    description: 'Faculty of Management Studies, Commerce & Business',
-    programs: 'BBA & MBA Programs',
-    dean_name: 'Dr. Amit Patel',
-    hod_name: 'Dr. Amit Patel',
-    contact_email: 'hod.som@college.edu',
-    hod_email: 'hod.som@college.edu',
-    is_active: true,
-    created_at: '2026-01-01T00:00:00Z',
-    updated_at: '2026-01-01T00:00:00Z',
-  },
-  {
-    school_id: '10000000-0000-0000-0000-000000000004',
-    school_code: 'CA',
-    school_name: 'Department of Computer Applications',
-    description: 'Computer Applications & Information Technology Faculty',
-    programs: 'BCA & MCA Programs',
-    dean_name: 'Dr. Rajesh Sharma',
-    hod_name: 'Dr. Rajesh Sharma',
-    contact_email: 'hod.ca@college.edu',
-    hod_email: 'hod.ca@college.edu',
-    is_active: true,
-    created_at: '2026-01-01T00:00:00Z',
-    updated_at: '2026-01-01T00:00:00Z',
-  },
-];
+export const localSchools: InMemSchool[] = [];
 
 export interface InMemDepartment {
   department_id: string;
@@ -192,99 +135,12 @@ export interface InMemAssignment {
   is_active: boolean;
 }
 
-// Unified Schools and Academic Departments (Parent Institutional School and Department are the same entity)
-export const localDepartments: InMemDepartment[] = [
-  {
-    department_id: '10000000-0000-0000-0000-000000000001',
-    school_id: '10000000-0000-0000-0000-000000000001',
-    department_code: 'SST',
-    department_name: 'School of Science & Technology',
-    programs: 'BCA, MCA & B.Tech Programs',
-    hod_name: 'Dr. Rajesh Sharma',
-    hod_email: 'hod.sst@college.edu',
-  },
-  {
-    department_id: '10000000-0000-0000-0000-000000000002',
-    school_id: '10000000-0000-0000-0000-000000000002',
-    department_code: 'SBS',
-    department_name: 'School of Bioscience',
-    programs: 'Biotechnology & Microbiology',
-    hod_name: 'Dr. Priya Verma',
-    hod_email: 'hod.sbs@college.edu',
-  },
-  {
-    department_id: '10000000-0000-0000-0000-000000000003',
-    school_id: '10000000-0000-0000-0000-000000000003',
-    department_code: 'SOM',
-    department_name: 'School of Management',
-    programs: 'BBA & MBA Programs',
-    hod_name: 'Dr. Amit Patel',
-    hod_email: 'hod.som@college.edu',
-  },
-  {
-    department_id: '10000000-0000-0000-0000-000000000004',
-    school_id: '10000000-0000-0000-0000-000000000001',
-    department_code: 'CA',
-    department_name: 'Department of Computer Applications',
-    programs: 'BCA & MCA Programs',
-    hod_name: 'Dr. Rajesh Sharma',
-    hod_email: 'hod.ca@college.edu',
-  },
-];
-
-// Foundational Institutional Degree Programmes
-export const localCourses: InMemCourse[] = [
-  {
-    course_id: 'prog-bca',
-    department_id: '10000000-0000-0000-0000-000000000004',
-    course_code: 'BCA',
-    course_name: 'Bachelor of Computer Applications',
-    total_semesters: 6,
-  },
-  {
-    course_id: 'prog-mca',
-    department_id: '10000000-0000-0000-0000-000000000004',
-    course_code: 'MCA',
-    course_name: 'Master of Computer Applications',
-    total_semesters: 4,
-  },
-  {
-    course_id: 'prog-btech',
-    department_id: '10000000-0000-0000-0000-000000000001',
-    course_code: 'BTECH',
-    course_name: 'Bachelor of Technology (CSE)',
-    total_semesters: 8,
-  },
-];
-
-// Foundational Academic Semesters
-export const localSemesters: InMemSemester[] = [
-  { semester_id: 'sem-bca-1', course_id: 'prog-bca', semester_number: 1, display_label: 'Semester 1' },
-  { semester_id: 'sem-bca-2', course_id: 'prog-bca', semester_number: 2, display_label: 'Semester 2' },
-  { semester_id: 'sem-bca-3', course_id: 'prog-bca', semester_number: 3, display_label: 'Semester 3' },
-  { semester_id: 'sem-bca-4', course_id: 'prog-bca', semester_number: 4, display_label: 'Semester 4' },
-  { semester_id: 'sem-bca-5', course_id: 'prog-bca', semester_number: 5, display_label: 'Semester 5' },
-  { semester_id: 'sem-bca-6', course_id: 'prog-bca', semester_number: 6, display_label: 'Semester 6' },
-  { semester_id: 'sem-mca-1', course_id: 'prog-mca', semester_number: 1, display_label: 'Semester 1' },
-  { semester_id: 'sem-mca-2', course_id: 'prog-mca', semester_number: 2, display_label: 'Semester 2' },
-  { semester_id: 'sem-mca-3', course_id: 'prog-mca', semester_number: 3, display_label: 'Semester 3' },
-  { semester_id: 'sem-mca-4', course_id: 'prog-mca', semester_number: 4, display_label: 'Semester 4' },
-];
-
-// Foundational Academic Sections
-export const localSections: InMemSection[] = [
-  { section_id: 'sec-bca-5a', semester_id: 'sem-bca-5', section_name: 'A', max_capacity: 80, academic_calendar_term: 'Autumn 2026' },
-  { section_id: 'sec-bca-5b', semester_id: 'sem-bca-5', section_name: 'B', max_capacity: 80, academic_calendar_term: 'Autumn 2026' },
-  { section_id: 'sec-bca-5c', semester_id: 'sem-bca-5', section_name: 'C', max_capacity: 80, academic_calendar_term: 'Autumn 2026' },
-];
-
-export const localSubjects: InMemSubject[] = [
-  { subject_id: 'subj-501', course_id: 'prog-bca', semester_id: 'sem-bca-5', subject_code: 'BCA-501', subject_name: 'Java Programming', planned_hours: 45, credit_value: 4 },
-  { subject_id: 'subj-502', course_id: 'prog-bca', semester_id: 'sem-bca-5', subject_code: 'BCA-502', subject_name: 'Operating Systems', planned_hours: 45, credit_value: 4 },
-  { subject_id: 'subj-503', course_id: 'prog-bca', semester_id: 'sem-bca-5', subject_code: 'BCA-503', subject_name: 'Computer Networks', planned_hours: 45, credit_value: 4 },
-  { subject_id: 'subj-504', course_id: 'prog-bca', semester_id: 'sem-bca-5', subject_code: 'BCA-504', subject_name: 'Database Management', planned_hours: 45, credit_value: 4 },
-  { subject_id: 'subj-505', course_id: 'prog-bca', semester_id: 'sem-bca-5', subject_code: 'BCA-505', subject_name: 'Web Frameworks', planned_hours: 45, credit_value: 4 },
-];
+// Academic entities initialized empty; populated dynamically via admin creation or import
+export const localDepartments: InMemDepartment[] = [];
+export const localCourses: InMemCourse[] = [];
+export const localSemesters: InMemSemester[] = [];
+export const localSections: InMemSection[] = [];
+export const localSubjects: InMemSubject[] = [];
 
 export const localTeachers: InMemTeacher[] = [];
 
@@ -296,6 +152,34 @@ async function isDbConnected(): Promise<boolean> {
     return res.rowCount === 1;
   } catch {
     return false;
+  }
+}
+
+let dbCleaned = false;
+async function purgeSeedMockDataFromDb(): Promise<void> {
+  if (dbCleaned) return;
+  try {
+    await pool.query(`
+      UPDATE schools SET is_active = FALSE 
+      WHERE school_id LIKE 's0000000-%' OR school_id LIKE '10000000-%'
+         OR school_code IN ('SST', 'SBS', 'SOM')
+         OR school_name ILIKE '%science & technology%'
+         OR school_name ILIKE '%bioscience%'
+         OR school_name ILIKE '%school of management%';
+      UPDATE departments SET is_active = FALSE 
+      WHERE department_id LIKE 'b0000000-%' OR department_id LIKE '10000000-%'
+         OR department_code IN ('SST', 'SBS', 'SOM')
+         OR (department_code IN ('CA', 'CSE') AND (department_id LIKE 'b0000000-%' OR department_name ILIKE '%computer application%'))
+         OR department_name ILIKE '%science & technology%'
+         OR department_name ILIKE '%bioscience%'
+         OR department_name ILIKE '%school of management%';
+      UPDATE courses SET is_active = FALSE 
+      WHERE course_id LIKE 'c0000000-%' OR course_id LIKE 'prog-%'
+         OR school_id LIKE 's0000000-%' OR department_id LIKE 'b0000000-%';
+    `);
+    dbCleaned = true;
+  } catch {
+    // non-fatal
   }
 }
 
@@ -312,6 +196,7 @@ router.get(
       const dbOnline = await isDbConnected();
 
       if (dbOnline) {
+        await purgeSeedMockDataFromDb();
         const studentCountRes = await pool.query(`SELECT COUNT(*)::int as total FROM student_profiles`);
         const facultyCountRes = await pool.query(`SELECT COUNT(*)::int as total FROM faculty_profiles`);
         const activeFacultyRes = await pool.query(
@@ -346,9 +231,10 @@ router.get(
             COUNT(DISTINCT fp.faculty_profile_id)::int as faculty_count,
             COUNT(DISTINCT c.course_id)::int as course_count
           FROM departments d
+          LEFT JOIN schools s ON d.school_id = s.school_id
           LEFT JOIN faculty_profiles fp ON d.department_id = fp.department_id
           LEFT JOIN courses c ON d.department_id = c.department_id
-          WHERE d.is_active = TRUE
+          WHERE d.is_active = TRUE AND (s.is_active IS NULL OR s.is_active = TRUE)
           GROUP BY d.department_id, d.department_code, d.department_name
           ORDER BY d.department_code ASC
         `);
@@ -1977,6 +1863,7 @@ router.get(
     try {
       const dbOnline = await isDbConnected();
       if (dbOnline) {
+        await purgeSeedMockDataFromDb();
         const result = await pool.query(
           `SELECT department_id, department_code, department_name FROM departments WHERE is_active = TRUE ORDER BY department_name ASC`
         );
@@ -2120,36 +2007,51 @@ router.delete(
   async (req: Request, res: Response): Promise<void> => {
     try {
       const targetId = req.params.id;
+      const targetUpper = targetId.toUpperCase();
+      const targetLower = targetId.toLowerCase().trim();
+
       const idx = localDepartments.findIndex(
-        (d) => d.department_id === targetId || d.department_code.toUpperCase() === targetId.toUpperCase()
+        (d) =>
+          d.department_id === targetId ||
+          d.department_code.toUpperCase() === targetUpper ||
+          d.department_name.toLowerCase().trim() === targetLower
       );
 
-      if (idx === -1) {
-        res.status(404).json({ error: 'DEPARTMENT_NOT_FOUND', message: 'Department not found.' });
-        return;
+      let removed: any = null;
+      if (idx !== -1) {
+        removed = localDepartments.splice(idx, 1)[0];
       }
 
-      const removed = localDepartments.splice(idx, 1)[0];
-      const schoolIdx = localSchools.findIndex(
-        (s) => s.school_id === removed.department_id || s.school_code.toUpperCase() === removed.department_code.toUpperCase()
-      );
-      if (schoolIdx !== -1) {
-        localSchools.splice(schoolIdx, 1);
+      // Also clean up any matching schools in memory
+      for (let sIdx = localSchools.length - 1; sIdx >= 0; sIdx--) {
+        const s = localSchools[sIdx];
+        if (
+          s.school_id === targetId ||
+          s.school_code.toUpperCase() === targetUpper ||
+          s.school_name.toLowerCase().trim() === targetLower ||
+          (removed && (s.school_id === removed.department_id || s.school_code.toUpperCase() === removed.department_code.toUpperCase() || s.school_name.toLowerCase().trim() === removed.department_name.toLowerCase().trim()))
+        ) {
+          localSchools.splice(sIdx, 1);
+        }
       }
 
       const dbOnline = await isDbConnected();
       if (dbOnline) {
         try {
           await pool.query(
-            `UPDATE departments SET is_active = FALSE WHERE department_id = $1 OR department_code = $2`,
-            [targetId, targetId]
+            `UPDATE departments SET is_active = FALSE WHERE department_id = $1 OR UPPER(department_code) = $2 OR LOWER(department_name) = $3`,
+            [targetId, targetUpper, targetLower]
+          );
+          await pool.query(
+            `UPDATE schools SET is_active = FALSE, updated_at = CURRENT_TIMESTAMP WHERE school_id = $1 OR UPPER(school_code) = $2 OR LOWER(school_name) = $3`,
+            [targetId, targetUpper, targetLower]
           );
         } catch (_dbErr) {}
       }
 
       res.json({
         success: true,
-        message: `Department "${removed.department_name}" (${removed.department_code}) deleted successfully.`,
+        message: `Department / School "${removed?.department_name || targetId}" deleted successfully.`,
         department: removed,
       });
     } catch (err: any) {
@@ -2210,6 +2112,7 @@ router.get(
     try {
       const dbOnline = await isDbConnected();
       if (dbOnline) {
+        await purgeSeedMockDataFromDb();
         const schoolsRes = await pool.query(`
           SELECT 
             s.school_id,
@@ -2436,33 +2339,35 @@ router.delete(
         );
 
         const totalDeps = (depCheck.rows[0]?.count || 0) + (courseCheck.rows[0]?.count || 0) + (studentCheck.rows[0]?.count || 0);
-        if (totalDeps > 0 && force !== 'true') {
-          // Controlled archival / deactivation workflow per Phase 3 requirement
-          await pool.query(`UPDATE schools SET is_active = FALSE, updated_at = CURRENT_TIMESTAMP WHERE school_id = $1`, [id]);
-          res.json({ success: true, message: 'School deactivated safely to preserve historical records and dependent entities.' });
-          return;
-        }
-
-        await pool.query(`UPDATE schools SET is_active = FALSE, updated_at = CURRENT_TIMESTAMP WHERE school_id = $1`, [id]);
-        res.json({ success: true, message: 'School deactivated successfully.' });
+        await pool.query(`UPDATE schools SET is_active = FALSE, updated_at = CURRENT_TIMESTAMP WHERE school_id = $1 OR UPPER(school_code) = $2 OR LOWER(school_name) = $3`, [id, id.toUpperCase(), id.toLowerCase()]);
+        await pool.query(`UPDATE departments SET is_active = FALSE WHERE school_id = $1 OR UPPER(department_code) = $2 OR LOWER(department_name) = $3`, [id, id.toUpperCase(), id.toLowerCase()]);
+        res.json({ success: true, message: 'School and associated academic departments deactivated successfully.' });
         return;
       }
 
       const idUpper = id.toUpperCase();
-      const idx = localSchools.findIndex((s) => s.school_id === id || s.school_code.toUpperCase() === idUpper);
-      if (idx === -1) {
-        res.status(404).json({ error: 'SCHOOL_NOT_FOUND', message: 'School not found.' });
-        return;
+      const idLower = id.toLowerCase().trim();
+      const idx = localSchools.findIndex((s) => s.school_id === id || s.school_code.toUpperCase() === idUpper || s.school_name.toLowerCase().trim() === idLower);
+      let removed: any = null;
+      if (idx !== -1) {
+        removed = localSchools.splice(idx, 1)[0];
       }
 
-      const removed = localSchools.splice(idx, 1)[0];
-      const deptIdx = localDepartments.findIndex(
-        (d) => d.department_id === removed.school_id || d.department_code.toUpperCase() === removed.school_code.toUpperCase()
-      );
-      if (deptIdx !== -1) {
-        localDepartments.splice(deptIdx, 1);
+      // Remove all matching departments in memory
+      for (let dIdx = localDepartments.length - 1; dIdx >= 0; dIdx--) {
+        const d = localDepartments[dIdx];
+        if (
+          d.school_id === id ||
+          d.department_id === id ||
+          d.department_code.toUpperCase() === idUpper ||
+          d.department_name.toLowerCase().trim() === idLower ||
+          (removed && (d.school_id === removed.school_id || d.department_id === removed.school_id || d.department_code.toUpperCase() === removed.school_code.toUpperCase() || d.department_name.toLowerCase().trim() === removed.school_name.toLowerCase().trim()))
+        ) {
+          localDepartments.splice(dIdx, 1);
+        }
       }
-      res.json({ success: true, message: `School "${removed.school_name}" deleted successfully.` });
+
+      res.json({ success: true, message: `School "${removed?.school_name || id}" and associated departments deleted successfully.` });
     } catch (err: any) {
       res.status(500).json({ error: 'DELETE_SCHOOL_FAILED', message: err.message });
     }

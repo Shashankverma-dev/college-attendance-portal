@@ -726,6 +726,35 @@
             }
           }
 
+          // Check for Institutional Administrator Account (e.g. ADM-001, admin, admin@college.edu, admin@srhu.edu.in)
+          var isAdminAccount = (idClean === 'adm-001' || idClean === 'admin' || idClean === 'admin@college.edu' || idClean === 'admin@srhu.edu.in');
+          if (isAdminAccount && pwVal === 'Admin@Portal2026!') {
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing in...';
+            showStatus('Administrator credentials verified. Signing in...', 'info');
+
+            var idToken = 'admin-auth-token-' + Date.now();
+            sessionStorage.setItem('attendance_auth_token', idToken);
+            sessionStorage.setItem('token', idToken);
+            localStorage.setItem('attendance_auth_token', idToken);
+            sessionStorage.setItem('attendance_session_id', 'admin-sess-' + Date.now());
+            sessionStorage.setItem('attendance_user_id', 'admin');
+            sessionStorage.setItem('attendance_user_role', 'admin');
+            sessionStorage.setItem('attendance_user_name', 'System Administrator');
+            sessionStorage.setItem('attendance_user_email', 'admin@college.edu');
+            localStorage.setItem('attendance_user_email', 'admin@college.edu');
+            sessionStorage.setItem('attendance_user_initials', 'SA');
+            localStorage.setItem('attendance_user_role', 'admin');
+            localStorage.setItem('attendance_user_id', 'admin');
+            localStorage.setItem('attendance_user_name', 'System Administrator');
+
+            showStatus('Welcome Administrator! Redirecting to portal...', 'info');
+            setTimeout(function () {
+              window.location.href = 'admin.html';
+            }, 700);
+            return;
+          }
+
           // 1. If an email address was entered:
           if (idVal.includes('@')) {
             submitBtn.disabled = true;

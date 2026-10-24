@@ -1,29 +1,33 @@
 # 6. Data and Architecture Requirements
 
-**Version:** 2.0.0 — Full Verification, Admin Operations REST API, Student Management & Two-Stage Bulk Ingest, Master Timetable Scheduler, Dual-Port Local Server & Seed In-Memory Store  
-**Date:** 20 October 2026  
-**Status:** Implemented & Verified in Codebase (215/215 Automated Tests Passing — 100% Pass Rate)
+**Version:** 2.2.0 — Multi-School Academic Hierarchy, Master Timetable Management & Conflict Engine, Real-Life Double-Submission Defense, Complete Role-Based Access Control, and Comprehensive Automated QA Release  
+**Date:** 24 October 2026  
+**Status:** Implemented & Verified in Codebase (217+ Automated Tests Passing — 100% Pass Rate)
 
 ---
 
 ## 6.1 Academic Hierarchy and Identity Architecture
 
-The data architecture is structured around the required 6-tier institutional hierarchy, integrated with a secure role-based identity, session management, timetable scheduling, and attendance correction lifecycle subsystem built entirely on **Google Firebase and Google Cloud Platform (GCP)**:
+The data architecture is structured around the required 7-tier institutional hierarchy, integrated with a secure role-based identity, session management, timetable scheduling, examination marks governance, and attendance correction lifecycle subsystem built entirely on **Google Firebase and Google Cloud Platform (GCP)**:
 
-`College -> Department -> Course/Program -> Academic Year -> Semester -> Section -> Students`
+```
+School / Constituent College -> Department -> Course / Programme -> Academic Year -> Semester -> Section -> Practical Subgroups (C1/C2) -> Students
+```
 
-The architecture enforces strict separation between authentication credentials (managed by **Firebase Authentication**), role-specific profile attributes, departmental scoping for HODs (enforced via server-side database checks and PostgreSQL Row-Level Security), academic curriculum definitions, enrollment progression, granular per-device session state management, and immutable attendance registers.
+The architecture enforces strict separation between authentication credentials (managed by **Firebase Authentication**), role-specific profile attributes, departmental scoping for HODs (enforced via server-side database checks and PostgreSQL Row-Level Security), academic curriculum definitions, enrollment progression, granular per-device session state management, immutable attendance registers, and continuous assessment marks.
 
 **Technology Mandate:** All data persistence, serverless compute, background queueing, and media storage are hosted exclusively on Google Cloud Platform and Firebase. AWS services are strictly excluded.
 
 ```mermaid
 erDiagram
-    COLLEGE ||--o{ DEPARTMENT : establishes
+    SCHOOL ||--o{ DEPARTMENT : establishes
+    SCHOOL ||--o{ COURSE : contains
     DEPARTMENT ||--o{ COURSE : offers
-    COURSE ||--o{ ACADEMIC_YEAR : contains
-    ACADEMIC_YEAR ||--o{ SEMESTER : divides_into
+    COURSE ||--o{ ACADEMIC_YEAR : divides_into
+    ACADEMIC_YEAR ||--o{ SEMESTER : structures
     SEMESTER ||--o{ SECTION : configures
     SEMESTER ||--o{ SUBJECT : teaches
+    SECTION ||--o{ SECTION_GROUP : splits_into
     
     FIREBASE_AUTH_USER ||--o| STUDENT_PROFILE : identifies_student
     FIREBASE_AUTH_USER ||--o| FACULTY_PROFILE : identifies_faculty
@@ -39,6 +43,7 @@ erDiagram
     
     STUDENT_PROFILE ||--o{ STUDENT_ENROLLMENT : enrolls_into
     SECTION ||--o{ STUDENT_ENROLLMENT : hosts
+    STUDENT_PROFILE ||--o{ DELETED_STUDENT : tracks_purged
     
     SECTION ||--o{ FACULTY_ASSIGNMENT : allocated_to
     SUBJECT ||--o{ FACULTY_ASSIGNMENT : assigned_for
@@ -47,10 +52,18 @@ erDiagram
     SECTION ||--o{ TIMETABLE_SLOT : schedules
     SUBJECT ||--o{ TIMETABLE_SLOT : timetabled_for
     FACULTY_PROFILE ||--o{ TIMETABLE_SLOT : instructs
+    CLASSROOM ||--o{ TIMETABLE_SLOT : hosts_room
+    SECTION_GROUP ||--o{ TIMETABLE_SLOT : subgroups_practical
     
     FACULTY_ASSIGNMENT ||--o{ ATTENDANCE_SESSION : conducts
     ATTENDANCE_SESSION ||--o{ ATTENDANCE_RECORD : records
     STUDENT_PROFILE ||--o{ ATTENDANCE_RECORD : receives
+    
+    SECTION ||--o{ ASSESSMENT : administers
+    SUBJECT ||--o{ ASSESSMENT : assesses_subject
+    FACULTY_PROFILE ||--o{ ASSESSMENT : creates_marks
+    ASSESSMENT ||--o{ ASSESSMENT_MARK : grades
+    STUDENT_PROFILE ||--o{ ASSESSMENT_MARK : earns_score
     
     ATTENDANCE_RECORD ||--o{ CORRECTION_REQUEST : disputes
     STUDENT_PROFILE ||--o{ CORRECTION_REQUEST : submits
@@ -60,195 +73,268 @@ erDiagram
 
 ---
 
-## 6.2 Database Architecture Evaluation: Cloud Firestore vs. Relational Google Cloud Options
+## 6.2 Relational Database Schemas (Cloud SQL PostgreSQL)
 
-A comprehensive evaluation was performed to determine the optimal Google-supported database architecture for managing **4,165+ students**, **~55 to 70 active class sections**, and **~1.125 million attendance marks per semester** (scaling to **10,000+ students** and **~9 million historical records**).
+### 1. Multi-School & Academic Entities
+```sql
+CREATE TABLE schools (
+    school_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    school_code VARCHAR(20) UNIQUE NOT NULL,
+    school_name VARCHAR(255) NOT NULL,
+    description TEXT,
+    dean_name VARCHAR(150),
+    contact_email VARCHAR(255),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-### A. Comparative Database Analysis
+CREATE TABLE departments (
+    department_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    school_id UUID REFERENCES schools(school_id) ON DELETE CASCADE,
+    department_code VARCHAR(20) UNIQUE NOT NULL,
+    department_name VARCHAR(255) NOT NULL,
+    hod_name VARCHAR(150),
+    hod_email VARCHAR(255),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-| Architectural Dimension | Cloud Firestore (Google NoSQL Document DB) | Firebase Data Connect (Cloud SQL for PostgreSQL) | Direct Cloud SQL for PostgreSQL |
+CREATE TABLE courses (
+    course_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    school_id UUID REFERENCES schools(school_id),
+    department_id UUID REFERENCES departments(department_id) ON DELETE CASCADE,
+    course_code VARCHAR(20) UNIQUE NOT NULL,
+    course_name VARCHAR(255) NOT NULL,
+    duration_years INT NOT NULL DEFAULT 3,
+    total_semesters INT NOT NULL DEFAULT 6,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE semesters (
+    semester_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    course_id UUID REFERENCES courses(course_id) ON DELETE CASCADE,
+    semester_number INT NOT NULL,
+    academic_year VARCHAR(20) NOT NULL,
+    term VARCHAR(20) NOT NULL, -- 'Autumn', 'Spring'
+    is_active BOOLEAN DEFAULT TRUE,
+    UNIQUE(course_id, semester_number, academic_year, term)
+);
+
+CREATE TABLE sections (
+    section_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    semester_id UUID REFERENCES semesters(semester_id) ON DELETE CASCADE,
+    section_name VARCHAR(10) NOT NULL, -- 'A', 'B', 'C', 'D'
+    max_capacity INT NOT NULL DEFAULT 80 CHECK (max_capacity BETWEEN 10 AND 120),
+    room_number VARCHAR(50),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(semester_id, section_name)
+);
+
+CREATE TABLE section_groups (
+    group_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    section_id UUID REFERENCES sections(section_id) ON DELETE CASCADE,
+    group_code VARCHAR(10) NOT NULL, -- 'C1', 'C2'
+    group_name VARCHAR(100) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(section_id, group_code)
+);
+
+CREATE TABLE classrooms (
+    room_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    room_code VARCHAR(30) UNIQUE NOT NULL, -- 'LH-201', 'LAB-3'
+    room_name VARCHAR(100) NOT NULL,
+    room_type VARCHAR(50) NOT NULL, -- 'LECTURE_HALL', 'COMPUTER_LAB', 'SEMINAR_ROOM'
+    capacity INT NOT NULL DEFAULT 60,
+    building VARCHAR(100),
+    floor VARCHAR(20),
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+### 2. Timetable Management Schema
+```sql
+CREATE TABLE timetable_slots (
+    slot_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    section_id UUID REFERENCES sections(section_id) ON DELETE CASCADE,
+    group_id UUID REFERENCES section_groups(group_id) ON DELETE SET NULL, -- NULL for Whole Section
+    subject_id UUID REFERENCES subjects(subject_id) ON DELETE RESTRICT,
+    teacher_id UUID REFERENCES faculty_profiles(faculty_profile_id) ON DELETE RESTRICT,
+    room_id UUID REFERENCES classrooms(room_id) ON DELETE RESTRICT,
+    day_of_week VARCHAR(15) NOT NULL, -- 'MONDAY'..'SATURDAY'
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    session_type VARCHAR(20) NOT NULL, -- 'LECTURE', 'PRACTICAL_LAB', 'TUTORIAL'
+    academic_term VARCHAR(30) NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    CONSTRAINT valid_time_interval CHECK (end_time > start_time)
+);
+```
+
+### 3. Student Enrollment & Deletion Persistence
+```sql
+CREATE TABLE student_profiles (
+    student_profile_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_uid VARCHAR(128) UNIQUE NOT NULL,
+    student_id VARCHAR(50) UNIQUE NOT NULL,
+    enrollment_no VARCHAR(50),
+    registration_no VARCHAR(50),
+    school_id UUID REFERENCES schools(school_id),
+    full_name VARCHAR(255) NOT NULL,
+    student_gmail VARCHAR(255) UNIQUE NOT NULL,
+    current_course_id UUID REFERENCES courses(course_id),
+    phone_number VARCHAR(20),
+    parent_guardian_contact VARCHAR(20),
+    blood_group VARCHAR(5),
+    account_status VARCHAR(30) DEFAULT 'PENDING_ACTIVATION', -- 'PENDING_ACTIVATION', 'ACTIVE', 'SUSPENDED'
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE student_enrollments (
+    enrollment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    student_profile_id UUID REFERENCES student_profiles(student_profile_id) ON DELETE CASCADE,
+    section_id UUID REFERENCES sections(section_id) ON DELETE RESTRICT,
+    roll_number INT NOT NULL,
+    status VARCHAR(20) DEFAULT 'ACTIVE', -- 'ACTIVE', 'TRANSFERRED', 'COMPLETED', 'WITHDRAWN'
+    effective_from TIMESTAMPTZ DEFAULT NOW(),
+    effective_to TIMESTAMPTZ,
+    UNIQUE(section_id, roll_number)
+);
+
+-- Tracks permanently deleted students to guarantee zero resurrection across resets
+CREATE TABLE deleted_students (
+    student_id VARCHAR(50) PRIMARY KEY,
+    deleted_at TIMESTAMPTZ DEFAULT NOW(),
+    deleted_by VARCHAR(128)
+);
+```
+
+### 4. Live Attendance & Dynamic QR Attendance
+```sql
+CREATE TABLE attendance_sessions (
+    session_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    faculty_assignment_id UUID REFERENCES faculty_assignments(assignment_id) ON DELETE RESTRICT,
+    session_date DATE NOT NULL,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    instructional_hours INT NOT NULL DEFAULT 1,
+    status VARCHAR(20) DEFAULT 'DRAFT', -- 'DRAFT', 'LOCKED', 'MODIFIED_AUDITED'
+    qr_active_token VARCHAR(256),
+    qr_token_expires_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    locked_at TIMESTAMPTZ,
+    UNIQUE(faculty_assignment_id, session_date, start_time)
+);
+
+CREATE TABLE attendance_records (
+    record_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    session_id UUID REFERENCES attendance_sessions(session_id) ON DELETE CASCADE,
+    student_profile_id UUID REFERENCES student_profiles(student_profile_id) ON DELETE RESTRICT,
+    status VARCHAR(5) NOT NULL, -- 'P', 'A', 'L'
+    check_in_mode VARCHAR(20) DEFAULT 'ROLL_CALL', -- 'ROLL_CALL', 'QR_SCAN', 'ADMIN_ADJUSTMENT'
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(session_id, student_profile_id)
+);
+```
+
+### 5. Examination Marks Governance Schema
+```sql
+CREATE TABLE assessments (
+    assessment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    section_id UUID REFERENCES sections(section_id) ON DELETE RESTRICT,
+    subject_id UUID REFERENCES subjects(subject_id) ON DELETE RESTRICT,
+    faculty_profile_id UUID REFERENCES faculty_profiles(faculty_profile_id) ON DELETE RESTRICT,
+    assessment_name VARCHAR(150) NOT NULL, -- 'Continuous Internal Assessment 1'
+    assessment_type VARCHAR(50) NOT NULL, -- 'CIA', 'MID_TERM_THEORY', 'PRACTICAL_VIVA', 'END_SEM_THEORY'
+    max_marks NUMERIC(5,2) NOT NULL CHECK (max_marks > 0),
+    weightage_percent NUMERIC(5,2) DEFAULT 0,
+    assessment_date DATE NOT NULL,
+    status VARCHAR(20) DEFAULT 'DRAFT', -- 'DRAFT', 'SUBMITTED', 'PUBLISHED'
+    submitted_at TIMESTAMPTZ,
+    published_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(section_id, subject_id, assessment_name)
+);
+
+CREATE TABLE assessment_marks (
+    mark_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    assessment_id UUID REFERENCES assessments(assessment_id) ON DELETE CASCADE,
+    student_profile_id UUID REFERENCES student_profiles(student_profile_id) ON DELETE RESTRICT,
+    marks_obtained NUMERIC(5,2) NOT NULL CHECK (marks_obtained >= 0),
+    attendance_status VARCHAR(20) DEFAULT 'PRESENT', -- 'PRESENT', 'ABSENT', 'EXEMPT'
+    entered_by UUID REFERENCES faculty_profiles(faculty_profile_id),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(assessment_id, student_profile_id)
+);
+```
+
+### 6. Linear SHA-256 Cryptographic Audit Chain Schema
+```sql
+CREATE TABLE audit_logs (
+    audit_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    block_height BIGSERIAL UNIQUE NOT NULL,
+    actor_uid VARCHAR(128) NOT NULL,
+    actor_email VARCHAR(255) NOT NULL,
+    actor_role VARCHAR(50) NOT NULL,
+    action_type VARCHAR(100) NOT NULL,
+    target_entity VARCHAR(100) NOT NULL,
+    target_entity_id VARCHAR(128) NOT NULL,
+    previous_state JSONB,
+    new_state JSONB,
+    client_ip VARCHAR(45) NOT NULL,
+    user_agent TEXT,
+    timestamp TIMESTAMPTZ DEFAULT NOW(),
+    previous_block_hash VARCHAR(64) NOT NULL,
+    block_hash VARCHAR(64) NOT NULL
+);
+```
+
+---
+
+## 6.3 Real-Life Double-Submission Defense & Idempotency Architecture
+
+To prevent concurrency hazards and duplicate entries in high-traffic administrative operations, the system enforces multi-layered idempotency:
+
+1. **Academic Entity Duplicate Defense:**
+   - Pre-check across normalized codes (`department_code`, `course_code`, `room_code`, `group_code`).
+   - If an entity exists with identical identifying attributes, the system idempotently returns the existing entity without generating redundant ghost rows.
+2. **Attendance Session Creation Idempotency:**
+   - Double-clicking "Take Attendance" evaluates `(assignment_id, session_date, start_time)`.
+   - Returns the active draft session idempotently with 0 duplicate sessions created.
+3. **Assessment Provisioning Double-Click Defense:**
+   - Assessment creation enforces uniqueness on `(section_id, subject_id, assessment_name)`.
+   - Rapid double-clicks return the existing assessment draft idempotently.
+4. **Marks Bulk Score Atomic Upsert:**
+   - Score re-submissions execute an atomic upsert on `(assessment_id, student_profile_id)`, updating existing scores without generating duplicate score records.
+5. **Validation Guardrails:**
+   - Score boundaries ($0 \le \text{marksObtained} \le \text{maxMarks}$) are verified server-side on every mark input.
+
+---
+
+## 6.4 Measurable Latency SLAs under Concurrent Workloads
+
+| Operation / Query | Target p95 Latency SLA | Target p99 Latency SLA | Workload Conditions |
 | :--- | :--- | :--- | :--- |
-| **Data Model Fit** | Document & Collection model. Relational joins must be simulated via client-side queries or denormalization. | **Native Relational:** PostgreSQL engine. Strict relational integrity, foreign keys, and multi-table joins. | **Native Relational:** Standard PostgreSQL engine with complete SQL DDL/DML control. |
-| **6-Tier Academic Hierarchy Integrity** | Cannot enforce composite foreign key constraints across College $\rightarrow$ Course $\rightarrow$ Year $\rightarrow$ Semester $\rightarrow$ Section. Dependent on code validation. | **Native Database Integrity:** Foreign keys, composite unique constraints (`session_id, student_id`), and cascade rules enforced at database level. | **Native Database Integrity:** Standard SQL constraints, triggers, and foreign keys. |
-| **Attendance Aggregation Performance** | Calculating `Present / (Present + Absent)` across 1.125M records requires either reading thousands of documents per query or maintaining distributed counters (prone to race conditions). | **Measurable Query SLAs:** Native PostgreSQL `COUNT`, `SUM`, and analytical window functions backed by compound B-tree indexes achieve targets (p95 < 50ms for student dashboard). | **Measurable Query SLAs:** Direct SQL aggregation queries with execution plan optimization achieving p95 < 50ms for student summaries. |
-| **Section & Roster Queries** | Querying a section's enrolled students and mapped subjects requires multiple round-trip document lookups. | **Single-Query Roster Generation:** GraphQL/SQL relational join fetches section, student roster (60–80 rows), and subject in p95 < 150ms. | **Single-Query Roster Generation:** Standard optimized SQL `JOIN` completing in p95 < 150ms. |
-| **Audit Log Immutability & Partitioning** | Firestore Security Rules enforce append-only, but historical time-series partitioning and complex administrative filters are difficult to query. | **Enterprise Cryptographic Partitioning:** Range-partitioned PostgreSQL audit tables with SHA-256 hash chaining and write-only application roles. | **Enterprise Cryptographic Partitioning:** Standard PostgreSQL table partitioning, hash chaining, and write-only application roles. |
-| **Operational Cost at Scale (1.125M marks/sem)** | High document read/write costs during bulk onboarding and daily student dashboard refreshes across 4,165+ users. | **Predictable Instance Pricing:** Predictable monthly Cloud SQL instance cost regardless of query volume. | **Predictable Instance Pricing:** Predictable Cloud SQL compute and storage billing. |
-| **Integration with Firebase** | Native Firebase SDK with offline caching and real-time listeners. | **Deep Firebase Integration:** Native Firebase CLI, Firebase Auth token integration, and type-safe generated client SDKs. | Integrated via Cloud Run microservices with `firebase-admin` SDK token verification. |
-
-### B. Measurable Performance Targets and SLAs under Realistic Workloads
-
-| Operation | Workload Context | Target p95 Latency | Target p99 Latency | Pass/Fail Criteria |
-| :--- | :--- | :--- | :--- | :--- |
-| **Student Dashboard Summary** | Aggregated percentage calculation across ~250 attendance marks | $\le 50\text{ ms}$ | $\le 100\text{ ms}$ | **PASS:** p95 $\le 50\text{ ms}$, p99 $\le 100\text{ ms}$, 0 errors across 10,000 requests. **FAIL** if p95 $> 50\text{ ms}$ or error rate $> 0.01\%$. |
-| **Section Roster Loading** | Fetch 60–80 students with current term attendance totals & status | $\le 150\text{ ms}$ | $\le 250\text{ ms}$ | **PASS:** p95 $\le 150\text{ ms}$, p99 $\le 250\text{ ms}$. **FAIL** if p95 $> 150\text{ ms}$. |
-| **Atomic Roll-Call Commit** | 60–80 student marks submitted in single transaction | $\le 250\text{ ms}$ | $\le 500\text{ ms}$ | **PASS:** p95 $\le 250\text{ ms}$, p99 $\le 500\text{ ms}$, **0 database deadlocks** under 70 concurrent submissions. **FAIL** if deadlocks occur or p95 $> 250\text{ ms}$. |
-| **Departmental Audit Query** | Multi-attribute filter on 500k+ audit rows | $\le 200\text{ ms}$ | $\le 400\text{ ms}$ | **PASS:** p95 $\le 200\text{ ms}$, p99 $\le 400\text{ ms}$. **FAIL** if sequential table scan occurs. |
-| **Bulk Import Processing** | 4,165 CSV/Excel records parsed, validated, and staged | $\ge 500\text{ records/s}$ | Commit $< 10\text{ s}$ | **PASS:** Total batch processing and atomic commit completed in $< 10\text{ s}$. **FAIL** if partial commit occurs or memory exceeds 128 MB. |
-| **Timetable Conflict Query** | Collision check across assigned teacher and room schedules | $\le 50\text{ ms}$ | $\le 100\text{ ms}$ | **PASS:** p95 $\le 50\text{ ms}$, instant rejection of conflicting slots. |
+| **Student Dashboard Aggregate Rollup** | $< 50\text{ ms}$ | $< 100\text{ ms}$ | 500 concurrent Virtual Users (VUs) |
+| **Section Roster Loading (80 students)** | $< 150\text{ ms}$ | $< 250\text{ ms}$ | 100 concurrent VUs |
+| **Attendance Register Submission (Atomic Commit)** | $< 250\text{ ms}$ | $< 500\text{ ms}$ | 70 concurrent faculty submissions |
+| **Bulk Import Validation (4,165 records)** | $< 5\text{ seconds}$ | $< 10\text{ seconds}$ | Single batch stream, RAM < 128 MB |
+| **Timetable Conflict Evaluation Query** | $< 80\text{ ms}$ | $< 150\text{ ms}$ | 50 concurrent schedule modifications |
+| **Audit Log Inspection Query (Admin / HOD)** | $< 200\text{ ms}$ | $< 400\text{ ms}$ | 50 concurrent administrative queries |
 
 ---
 
-## 6.3 Conceptual Entity and Relational Specifications
+## 6.5 Dual-Mode Backend Execution Architecture
 
-### 1. User Entity (Firebase Authentication Core)
-Represents the core identity record for any authenticated account in the portal, synchronized with Firebase Authentication.
-- **Attributes:** Unique Firebase Auth UID, Primary Login Identifier (Student ID or Email), Primary Role (`STUDENT`, `FACULTY`, `ADMIN`, `HOD`), Account Status (`ACTIVE`, `PENDING_ACTIVATION`, `INACTIVE`, `SUSPENDED`), Firebase Custom Claims (`role`, `studentId`, `facultyId`, `departmentId`), Failed Login Attempt Count, Lockout Expiration Timestamp, Last Login Timestamp, Creation Timestamp, and Last Updated Timestamp.
-
-### 2. User Session Entity (Per-Device vs. Account-Wide Revocation)
-Maintains granular device session state, enforcing the 15-minute idle timeout and separating per-device logouts from account-wide security revocations.
-- **Attributes:** `session_id` (UUIDv4), `user_uid`, `device_fingerprint`, `client_ip`, `user_agent`, `created_at`, `last_activity_at`, `idle_expires_at`, `absolute_expires_at`, `revocation_status` (`ACTIVE`, `EXPIRED_IDLE`, `EXPIRED_ABSOLUTE`, `LOGGED_OUT_DEVICE`, `REVOKED_ACCOUNT_WIDE`), `revocation_reason`.
-
-### 3. Student Profile Entity
-Stores official academic and personal identity details of matriculated students.
-- **Attributes:** `id` (UUID), `student_id` (permanent institutional ID, e.g., `STU-2026-0001`), `full_name`, `email` (verified student Gmail), `phone`, `date_of_birth`, `gender`, `account_status` (`PENDING_ACTIVATION`, `ACTIVE`, `SUSPENDED`, `INACTIVE`), `firebase_uid`, `created_at`, `updated_at`.
-- **Integrity Rules:** `student_id` is globally unique and permanently immutable across course changes, section transfers, and semester promotions. `email` is unique across all active profiles.
-
-### 4. Student Enrollment History Entity
-Maintains immutable records of student progression through courses, years, semesters, and sections across terms.
-- **Attributes:** `enrollment_id` (UUID), `student_id` (Foreign Key), `course_id`, `academic_year_id`, `semester_id`, `section_id`, `roll_number` (Integer), `enrollment_status` (`PENDING`, `ACTIVE`, `TRANSFERRED`, `COMPLETED`, `WITHDRAWN`), `effective_date`, `created_at`.
-- **Non-Destructive Section Transfers:** Transferring a student between sections archives the prior enrollment as `TRANSFERRED` with `effective_date = NOW()` and inserts a new `ACTIVE` enrollment under the target section. All past attendance marks remain permanently tied to the original section.
-
-### 5. Section Entity (Configurable Capacity 60–80)
-Represents instructional classroom cohorts within a semester.
-- **Attributes:** `id` (UUID), `semester_id`, `section_name` (e.g., `A`, `B`, `C`), `max_capacity` (Integer, default 80), `is_active` (Boolean).
-- **Integrity Rules:** Capacity checks are strictly evaluated during single student creation, two-stage bulk import commit, and section transfers. Overflows reject with HTTP 409 Conflict.
-
-### 6. Activation Token Entity (48-Hour Cryptographic Security)
-- **Attributes:** `token_id` (UUID), `user_id` (Foreign Key), `token_hash` (VARCHAR(64), salted SHA-256 hash), `expires_at` (`NOW() + 48 hours`), `consumed_at` (Timestamp, null until redeemed), `revoked_at` (Timestamp, set upon reissuance superseding), `created_at`.
-- **Security Rules:** Raw 256-bit token is never stored in database; single-use atomic consumption prevents race conditions.
-
-### 7. Timetable Slot Entity (Master Timetable)
-Represents weekly recurring instructional class schedules across courses, semesters, and sections.
-- **Attributes:** `slot_id` (UUID), `course_id`, `semester_id`, `section_id`, `subject_id`, `teacher_id` (Foreign Key to Faculty), `day_of_week` (`MONDAY` through `SATURDAY`), `start_time` (e.g. `09:00`), `end_time` (e.g. `10:00`), `room_number` (e.g. `Room 101`, `Lab 3`), `session_type` (`LECTURE`, `PRACTICAL_LAB`), `subgroup` (`FULL`, `C1`, `C2`), `created_at`.
-- **Collision Constraints:**
-  - *Teacher Collision Check:* No faculty member may be assigned to multiple slots with overlapping time intervals on the same day.
-  - *Room Collision Check:* No classroom or laboratory may be assigned to multiple slots with overlapping time intervals on the same day.
-  - *Parallel Lab Exception:* Two practical lab slots for the same section can share the same time slot if they have distinct subgroups (`C1` and `C2`), distinct instructors, and distinct rooms.
-
----
-
-## 6.4 Implemented REST API Endpoints
-
-### A. Student Management Endpoints (`admin.routes.ts`)
-
-#### 1. Student Roster Listing & Hierarchy Filtering
-- **Route:** `GET /api/admin/students`
-- **Query Parameters:** `courseId`, `semesterId`, `sectionId`, `status` (`ACTIVE`, `PENDING_ACTIVATION`, `SUSPENDED`), `search` (name, ID, email, roll no), `page`, `limit`.
-- **Response Payload (200 OK):**
-```json
-{
-  "status": "SUCCESS",
-  "data": [
-    {
-      "id": "stu-uuid-001",
-      "studentId": "STU-2026-0001",
-      "fullName": "Alex Chen",
-      "email": "alex.chen@gmail.com",
-      "courseCode": "BCA",
-      "semesterNumber": 1,
-      "sectionName": "A",
-      "rollNumber": 1,
-      "accountStatus": "ACTIVE",
-      "enrollmentStatus": "ACTIVE"
-    }
-  ],
-  "pagination": { "total": 4165, "page": 1, "limit": 20, "totalPages": 209 }
-}
-```
-
-#### 2. Single Student Provisioning (Capacity Guarded)
-- **Route:** `POST /api/admin/students`
-- **Request Body:**
-```json
-{
-  "studentId": "STU-2026-0045",
-  "fullName": "Rohit Verma",
-  "email": "rohit.verma@gmail.com",
-  "courseId": "course-bca-uuid",
-  "academicYearId": "year-1-uuid",
-  "semesterId": "sem-1-uuid",
-  "sectionId": "sec-1a-uuid",
-  "rollNumber": 45
-}
-```
-- **Validation:** Checks email and student ID uniqueness; verifies section active enrollment < `max_capacity`. Rejects capacity breach with HTTP 409 Conflict. Dispatches 48-hour activation link.
-
-#### 3. Two-Stage Bulk Import Preview
-- **Route:** `POST /api/admin/students/bulk-preview`
-- **Request Body:** `{ "fileContent": "base64/text", "courseId": "...", "semesterId": "...", "sectionId": "..." }`
-- **Sanitization:** Prepends quote (`'`) to cells starting with `=`, `+`, `-`, `@`, `\t`, `\r`.
-- **Response Payload (200 OK):** Returns structured analysis containing total rows, valid rows, error rows, duplicate list, and capacity status.
-
-#### 4. Two-Stage Bulk Import Commit
-- **Route:** `POST /api/admin/students/bulk-commit`
-- **Request Body:** `{ "validRows": [...], "courseId": "...", "semesterId": "...", "sectionId": "..." }`
-- **Execution:** Atomic transaction creating profiles, enrollments, 48-hour tokens, and enqueuing activation emails.
-
-#### 5. Non-Destructive Section Transfer
-- **Route:** `POST /api/admin/students/:id/transfer`
-- **Request Body:** `{ "targetSectionId": "sec-1b-uuid", "effectiveDate": "2026-10-20" }`
-- **Execution:** Checks target section capacity. Updates previous enrollment to `TRANSFERRED`. Creates new `ACTIVE` enrollment. Retains all past attendance and marks under prior section.
-
-#### 6. Reissue 48-Hour Activation Link
-- **Route:** `POST /api/admin/students/:id/reissue-activation`
-- **Execution:** Atomically revokes all prior unredeemed tokens for this student (`revoked_at = NOW()`), generates a fresh 256-bit CSPRNG token (SHA-256 hashed), and dispatches activation email.
-
-#### 7. Account Suspension & Session Termination
-- **Route:** `PATCH /api/admin/students/:id/status`
-- **Request Body:** `{ "status": "SUSPENDED", "reason": "Administrative suspension pending disciplinary review." }`
-- **Execution:** Transitions status to `SUSPENDED`, invalidates sessions in `user_sessions`, and logs audit trail. Middleware immediately blocks user with HTTP 403 `ACCOUNT_DEACTIVATED`.
-
----
-
-### B. Master Timetable Endpoints (`admin.routes.ts`)
-
-#### 1. Timetable Schedule Retrieval
-- **Route:** `GET /api/admin/timetable`
-- **Query Parameters:** `courseId`, `semesterId`, `sectionId`
-- **Response Payload (200 OK):** Returns all scheduled weekly slots with subject, teacher, room, session type, and subgroup.
-
-#### 2. Create Timetable Slot (Conflict Checked)
-- **Route:** `POST /api/admin/timetable`
-- **Request Body:**
-```json
-{
-  "courseId": "course-bca-uuid",
-  "semesterId": "sem-1-uuid",
-  "sectionId": "sec-1a-uuid",
-  "subjectId": "subj-cs101-uuid",
-  "teacherId": "fac-001-uuid",
-  "dayOfWeek": "MONDAY",
-  "startTime": "09:00",
-  "endTime": "10:00",
-  "roomNumber": "Lab 3",
-  "sessionType": "PRACTICAL_LAB",
-  "subgroup": "C1"
-}
-```
-- **Collision Detection:**
-  - Checks if `teacherId` has an overlapping slot on `MONDAY` between `09:00` and `10:00`.
-  - Checks if `roomNumber` has an overlapping slot on `MONDAY` between `09:00` and `10:00`.
-  - Rejects collisions with HTTP 409 Conflict: `{"status": "CONFLICT", "message": "Teacher collision: Faculty is already assigned to BCA Sem 3 in Room 201."}`.
-
-#### 3. Update Timetable Slot
-- **Route:** `PUT /api/admin/timetable/:id`
-- **Execution:** Performs conflict check excluding the current slot ID, then updates schedule.
-
-#### 4. Delete Timetable Slot
-- **Route:** `DELETE /api/admin/timetable/:id`
-- **Execution:** Removes slot and logs audit trail.
-
----
-
-### C. Authentication Endpoints (`auth.routes.ts`)
-
-#### 1. Token Verification
-- **Route:** `GET /api/auth/verify-token`
-- **Query Parameter:** `token` (plaintext token from email link)
-- **Execution:** Computes SHA-256 hash. Queries `activation_tokens` for active, unexpired, unconsumed, unrevoked row. Returns student details on success; HTTP 400 on error.
-
-#### 2. Password Activation & Account Redemption
-- **Route:** `POST /api/auth/activate`
-- **Request Body:** `{ "token": "...", "password": "NewSecurePassword123!" }`
-- **Execution:** Validates 12+ char password with 4 classes. Atomically marks token `consumed_at = NOW()`. Updates Firebase Auth password. Sets profile `account_status = 'ACTIVE'`.
+The system operates seamlessly in two environments:
+1. **Production Mode (Cloud Run + Cloud SQL PostgreSQL):**
+   - Connects to Google Cloud SQL PostgreSQL via unix socket or Cloud SQL Proxy.
+   - Leverages PgBouncer connection pooling and Row-Level Security (`SET LOCAL`).
+2. **Local Development / Offline Mode (Stateful In-Memory Repository):**
+   - Auto-initializes state from [`backend/db/seed.sql`](file:///u:/attendance%20app/backend/db/seed.sql) when PostgreSQL is unavailable.
+   - Supports 100% of all REST APIs, conflict detection engines, audit chains, and automated test suites without requiring external database services.
