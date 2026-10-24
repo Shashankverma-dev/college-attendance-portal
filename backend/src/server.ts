@@ -25,8 +25,8 @@ if (process.env.NODE_ENV === 'production') {
   const requiredEnvVars = ['DATABASE_URL', 'GOOGLE_CLOUD_PROJECT'];
   const missing = requiredEnvVars.filter((v) => !process.env[v]);
   if (missing.length > 0 && (!process.env.DB_HOST || !process.env.DB_NAME)) {
-    console.error(`🚨 FATAL: Missing mandatory production environment variables: ${missing.join(', ')}`);
-    // Fail readiness rather than crashing abruptly to allow container diagnostics
+    console.warn(`⚠️ CONFIGURATION NOTICE: Missing production environment variables: ${missing.join(', ')}`);
+    console.warn('👉 Configure DATABASE_URL in your Render Dashboard (Environment -> Environment Variables) to enable PostgreSQL persistence.');
   }
 }
 
@@ -184,12 +184,12 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 async function startServer() {
   const dbOnline = await isDbConnected();
   if (process.env.NODE_ENV === 'production') {
-    try {
-      assertProductionDbAvailable(dbOnline);
+    if (dbOnline) {
       console.log('✅ PostgreSQL connection verified for production environment.');
-    } catch (err: any) {
-      console.error('🚨 FATAL STARTUP ERROR:', err.message);
-      process.exit(1);
+    } else {
+      console.warn('⚠️ CONFIGURATION NOTICE: PostgreSQL connection not established in production.');
+      console.warn('👉 Set DATABASE_URL in Render Dashboard (Environment -> Environment Variables) to connect your PostgreSQL instance.');
+      console.warn('🔒 Readiness probe (/ready) will return HTTP 503 and database routes will fail closed until DATABASE_URL is configured.');
     }
   } else {
     console.log(`ℹ️ Database status: ${dbOnline ? 'PostgreSQL CONNECTED' : 'In-memory fallback (development mode)'}`);
