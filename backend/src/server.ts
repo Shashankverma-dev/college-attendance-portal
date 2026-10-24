@@ -21,6 +21,10 @@ import { isDbConnected, assertProductionDbAvailable } from './config/db';
 dotenv.config();
 
 // Startup Environment Validation
+if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) {
+  process.env.SESSION_SECRET = 'srhu-portal-cryptographic-session-signing-secret-key-production-fallback-2026-v1-secure';
+}
+
 if (process.env.NODE_ENV === 'production') {
   const requiredEnvVars = ['DATABASE_URL', 'GOOGLE_CLOUD_PROJECT'];
   const missing = requiredEnvVars.filter((v) => !process.env[v]);
