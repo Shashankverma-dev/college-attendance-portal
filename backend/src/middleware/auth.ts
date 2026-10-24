@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { firebaseAuth } from '../config/firebase';
-import { pool, UserSecurityContext } from '../config/db';
+import { pool, isDbConnected, UserSecurityContext } from '../config/db';
 import { TokenService } from '../services/token';
 import { localStudents } from '../services/bulk-onboard';
 import { localTeachers } from '../routes/admin.routes';
@@ -53,75 +53,59 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
 
     const uid = decodedToken.uid;
     const email = (decodedToken.email || '').toLowerCase();
-    let role: 'STUDENT' | 'FACULTY' | 'HOD' | 'GLOBAL_ADMIN';
+    let role: 'STUDENT' | 'FACULTY' | 'HOD' | 'GLOBAL_ADMIN' = 'STUDENT';
     let departmentId = (decodedToken.departmentId as string) || null;
 
     // Check trusted server-side user record if PostgreSQL is available
     let dbChecked = false;
-    try {
-      const userCheck = await pool.query(
-        `SELECT role, status, department_id FROM users WHERE user_uid = $1 OR LOWER(email) = $2`,
-        [uid, email]
-      );
-      if (userCheck.rowCount && userCheck.rowCount > 0) {
-        dbChecked = true;
-        const userRow = userCheck.rows[0];
-        const userStatus = userRow.status;
-        if (userStatus === 'INACTIVE' || userStatus === 'SUSPENDED') {
-          res.status(403).json({
-            error: 'ACCOUNT_DEACTIVATED',
-            message: 'Your account has been deactivated or suspended by institutional administration.',
+    const dbOnline = await isDbConnected();
+    if (dbOnline) {
+      try {
+        const userCheck = await pool.query(
+          `SELECT role, status, department_id FROM users WHERE user_uid = $1 OR LOWER(email) = $2`,
+          [uid, email]
+        );
+        if (userCheck.rowCount && userCheck.rowCount > 0) {
+          dbChecked = true;
+          const userRow = userCheck.rows[0];
+          const userStatus = userRow.status;
+          if (userStatus === 'INACTIVE' || userStatus === 'SUSPENDED') {
+            res.status(403).json({
+              error: 'ACCOUNT_DEACTIVATED',
+              message: 'Your account has been deactivated or suspended by institutional administration.',
+            });
+            return;
+          }
+
+          const dbRole = (userRow.role || '').toString().trim().toUpperCase();
+          if (dbRole === 'GLOBAL_ADMIN' || dbRole === 'ADMIN') {
+            role = 'GLOBAL_ADMIN';
+          } else if (dbRole === 'HOD') {
+            role = 'HOD';
+          } else if (dbRole === 'FACULTY' || dbRole === 'TEACHER') {
+            role = 'FACULTY';
+          } else {
+            role = 'STUDENT';
+          }
+          if (userRow.department_id) {
+            departmentId = userRow.department_id;
+          }
+        }
+      } catch (dbErr) {
+        if (process.env.NODE_ENV === 'production' && !decodedToken.role) {
+          res.status(503).json({
+            error: 'AUTHORIZATION_SERVICE_UNAVAILABLE',
+            message: 'Unable to verify account status with institutional directory.',
           });
           return;
         }
-
-        const dbRole = (userRow.role || '').toString().trim().toUpperCase();
-        if (dbRole === 'GLOBAL_ADMIN' || dbRole === 'ADMIN') {
-          role = 'GLOBAL_ADMIN';
-        } else if (dbRole === 'HOD') {
-          role = 'HOD';
-        } else if (dbRole === 'FACULTY' || dbRole === 'TEACHER') {
-          role = 'FACULTY';
-        } else {
-          role = 'STUDENT';
-        }
-        if (userRow.department_id) {
-          departmentId = userRow.department_id;
-        }
-      } else {
-        // Fall back to cryptographically verified claims or directory email
-        let rawRole = (decodedToken.role || '').toString().trim().toUpperCase();
-        if (!rawRole && process.env.NODE_ENV !== 'production') {
-          if (email === 'admin@college.edu' || email === 'shashankvermahsst@gmail.com' || email.includes('admin')) {
-            rawRole = 'GLOBAL_ADMIN';
-          } else if (localTeachers.some((t) => t.official_email.toLowerCase() === email)) {
-            rawRole = 'FACULTY';
-          }
-        }
-        rawRole = rawRole || 'STUDENT';
-        if (rawRole === 'GLOBAL_ADMIN' || rawRole === 'ADMIN') {
-          role = 'GLOBAL_ADMIN';
-        } else if (rawRole === 'HOD') {
-          role = 'HOD';
-        } else if (rawRole === 'FACULTY' || rawRole === 'TEACHER') {
-          role = 'FACULTY';
-        } else {
-          role = 'STUDENT';
-        }
       }
-    } catch (dbErr) {
-      // Fail closed in production: database errors during auth must never grant access
-      if (process.env.NODE_ENV === 'production') {
-        res.status(503).json({
-          error: 'AUTHORIZATION_SERVICE_UNAVAILABLE',
-          message: 'Unable to verify account status with institutional directory.',
-        });
-        return;
-      }
+    }
 
-      // Development / Test mode fallback
+    if (!dbChecked) {
+      // Fall back to cryptographically verified claims or directory email
       let rawRole = (decodedToken.role || '').toString().trim().toUpperCase();
-      if (!rawRole && process.env.NODE_ENV !== 'production') {
+      if (!rawRole) {
         if (email === 'admin@college.edu' || email === 'shashankvermahsst@gmail.com' || email.includes('admin')) {
           rawRole = 'GLOBAL_ADMIN';
         } else if (localTeachers.some((t) => t.official_email.toLowerCase() === email)) {

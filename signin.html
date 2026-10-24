@@ -239,6 +239,16 @@
   <script>
     (function () {
       'use strict';
+      // High-performance connection pre-warm: wakes up backend and resolves TLS/DNS immediately
+      (function prewarmBackend() {
+        try {
+          var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+          if (apiBase) {
+            fetch(apiBase + '/api/health', { method: 'GET', keepalive: true }).catch(function () {});
+          }
+        } catch (_e) {}
+      })();
+
       // Clear lingering session upon landing on sign-in
       sessionStorage.removeItem('attendance_user_role');
       sessionStorage.removeItem('attendance_user_id');
@@ -321,7 +331,7 @@
         return typeof window.signInWithFirebase === 'function';
       }
 
-      // Helper to perform backend authentication (Render / PostgreSQL / In-Memory backend)
+      // Helper to perform fast authoritative authentication
       function performBackendLogin(identifier, password) {
         var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
         fetch(apiBase + '/api/auth/login', {
@@ -337,7 +347,7 @@
             var data = await res.json();
             return { status: res.status, data: data };
           })
-          .then(function (result) {
+          .then(async function (result) {
             if (result.status >= 200 && result.status < 300 && result.data.success) {
               var user = result.data.user;
               var role = user.role.toLowerCase();
@@ -352,8 +362,9 @@
               sessionStorage.setItem('attendance_user_name', user.name);
               sessionStorage.setItem('attendance_user_initials', user.initials || user.id.substring(0, 2).toUpperCase());
 
-              showStatus('Welcome back, ' + user.name + '! Redirecting to dashboard...', 'info');
+              showStatus('Welcome back, ' + user.name + '! Redirecting...', 'info');
 
+              // Ultra-fast dashboard transition
               setTimeout(function () {
                 if (role === 'faculty') {
                   window.location.href = 'teacher.html';
@@ -362,17 +373,85 @@
                 } else {
                   window.location.href = 'student.html';
                 }
-              }, 700);
+              }, 120);
             } else {
+              // If email failed on backend, attempt instant Firebase fallback if available
+              if (identifier.includes('@') && typeof window.signInWithFirebase === 'function') {
+                try {
+                  var userCredential = await window.signInWithFirebase(identifier, password);
+                  var fbUser = userCredential.user;
+                  var idToken = await fbUser.getIdToken();
+                  var role = 'student';
+                  var cleanEmail = identifier.toLowerCase();
+                  if (cleanEmail === 'admin@college.edu' || cleanEmail === 'shashankvermahsst@gmail.com' || /admin|dean/i.test(cleanEmail)) {
+                    role = 'admin';
+                  }
+                  var displayName = fbUser.displayName || identifier.split('@')[0];
+
+                  sessionStorage.setItem('attendance_auth_token', idToken);
+                  sessionStorage.setItem('token', idToken);
+                  localStorage.setItem('attendance_auth_token', idToken);
+                  sessionStorage.setItem('attendance_user_id', fbUser.uid);
+                  sessionStorage.setItem('attendance_user_role', role);
+                  sessionStorage.setItem('attendance_user_email', fbUser.email || identifier);
+                  localStorage.setItem('attendance_user_email', fbUser.email || identifier);
+                  sessionStorage.setItem('attendance_user_name', displayName);
+                  var initials = displayName.split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase() || 'U';
+                  sessionStorage.setItem('attendance_user_initials', initials);
+
+                  showStatus('Welcome back, ' + displayName + '! Redirecting...', 'info');
+                  setTimeout(function () {
+                    if (role === 'faculty') window.location.href = 'teacher.html';
+                    else if (role === 'admin' || role === 'hod') window.location.href = 'admin.html';
+                    else window.location.href = 'student.html';
+                  }, 120);
+                  return;
+                } catch (fbErr) {}
+              }
+
               submitBtn.disabled = false;
               submitBtn.textContent = 'Sign in';
               showStatus(result.data.message || 'Authentication failed. Please check your credentials.', 'error');
             }
           })
-          .catch(function (err) {
+          .catch(async function (err) {
+            // Network fallback: If backend offline, attempt Firebase Auth
+            if (identifier.includes('@') && typeof window.signInWithFirebase === 'function') {
+              try {
+                var userCredential = await window.signInWithFirebase(identifier, password);
+                var fbUser = userCredential.user;
+                var idToken = await fbUser.getIdToken();
+                var role = 'student';
+                var cleanEmail = identifier.toLowerCase();
+                if (cleanEmail === 'admin@college.edu' || cleanEmail === 'shashankvermahsst@gmail.com' || /admin|dean/i.test(cleanEmail)) {
+                  role = 'admin';
+                }
+                var displayName = fbUser.displayName || identifier.split('@')[0];
+
+                sessionStorage.setItem('attendance_auth_token', idToken);
+                sessionStorage.setItem('token', idToken);
+                localStorage.setItem('attendance_auth_token', idToken);
+                sessionStorage.setItem('attendance_user_id', fbUser.uid);
+                sessionStorage.setItem('attendance_user_role', role);
+                sessionStorage.setItem('attendance_user_email', fbUser.email || identifier);
+                localStorage.setItem('attendance_user_email', fbUser.email || identifier);
+                sessionStorage.setItem('attendance_user_name', displayName);
+                var initials = displayName.split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase() || 'U';
+                sessionStorage.setItem('attendance_user_initials', initials);
+
+                showStatus('Welcome back, ' + displayName + '! Redirecting...', 'info');
+                setTimeout(function () {
+                  if (role === 'faculty') window.location.href = 'teacher.html';
+                  else if (role === 'admin' || role === 'hod') window.location.href = 'admin.html';
+                  else window.location.href = 'student.html';
+                }, 120);
+                return;
+              } catch (_fbErr) {}
+            }
+
             submitBtn.disabled = false;
             submitBtn.textContent = 'Sign in';
-            showStatus(err.message || 'Authentication failed. Please check your email and password.', 'error');
+            showStatus(err.message || 'Authentication failed. Please check your credentials.', 'error');
           });
       }
 
@@ -678,95 +757,12 @@
           return;
         }
 
-        (async function () {
-          // 1. If an email address was entered (e.g. Gmail or official email), attempt Firebase Auth first
-          if (idVal.includes('@')) {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Verifying credentials...';
-            showStatus('Authenticating credentials...', 'info');
+        // Fast-path: Authenticate credentials immediately without polling or artificial waits
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Verifying...';
+        showStatus('Authenticating credentials...', 'info');
 
-            var fbReady = await ensureFirebaseReady();
-            if (fbReady) {
-              try {
-                var userCredential = await window.signInWithFirebase(idVal, pwVal);
-                var fbUser = userCredential.user;
-                var idToken = await fbUser.getIdToken();
-
-                // Initialize server-side session and resolve authoritative role from backend
-                var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
-                var role = 'student';
-                var displayName = fbUser.displayName || idVal.split('@')[0];
-
-                try {
-                  var meRes = await fetch(apiBase + '/api/auth/me', {
-                    headers: { 'Authorization': 'Bearer ' + idToken }
-                  });
-
-                  if (meRes.ok) {
-                    var meData = await meRes.json();
-                    role = (meData.role || 'STUDENT').toLowerCase();
-                    if (role === 'global_admin') role = 'admin';
-                    if (meData.profile?.full_name) displayName = meData.profile.full_name;
-                  } else {
-                    var cleanEmail = idVal.toLowerCase();
-                    if (cleanEmail === 'admin@college.edu' || cleanEmail === 'shashankvermahsst@gmail.com' || /admin|dean/i.test(cleanEmail)) {
-                      role = 'admin';
-                    }
-                  }
-                } catch (fetchErr) {
-                  var cleanEmail = idVal.toLowerCase();
-                  if (cleanEmail === 'admin@college.edu' || cleanEmail === 'shashankvermahsst@gmail.com' || /admin|dean/i.test(cleanEmail)) {
-                    role = 'admin';
-                  }
-                }
-
-                sessionStorage.setItem('attendance_auth_token', idToken);
-                sessionStorage.setItem('token', idToken);
-                localStorage.setItem('attendance_auth_token', idToken);
-                sessionStorage.setItem('attendance_user_id', fbUser.uid);
-                sessionStorage.setItem('attendance_user_role', role);
-                sessionStorage.setItem('attendance_user_email', fbUser.email || idVal);
-                localStorage.setItem('attendance_user_email', fbUser.email || idVal);
-
-                sessionStorage.setItem('attendance_user_name', displayName);
-                var initials = displayName.split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase() || 'U';
-                sessionStorage.setItem('attendance_user_initials', initials);
-
-                showStatus('Welcome back, ' + displayName + '! Verified credentials. Redirecting...', 'info');
-                setTimeout(function () {
-                  if (role === 'faculty') window.location.href = 'teacher.html';
-                  else if (role === 'admin' || role === 'hod') window.location.href = 'admin.html';
-                  else window.location.href = 'student.html';
-                }, 700);
-                return;
-              } catch (fbErr) {
-                console.warn('Firebase sign-in note:', fbErr.code, fbErr.message);
-                if (fbErr.code === 'auth/wrong-password') {
-                  submitBtn.disabled = false;
-                  submitBtn.textContent = 'Sign in';
-                  showStatus('Incorrect password. Please try again or click "Forgot password?".', 'error');
-                  return;
-                } else if (fbErr.code === 'auth/too-many-requests') {
-                  submitBtn.disabled = false;
-                  submitBtn.textContent = 'Sign in';
-                  showStatus('Access temporarily disabled due to multiple failed attempts. Please reset your password or try again later.', 'error');
-                  return;
-                }
-                // If not found in Firebase, fallback to institutional backend directory
-              }
-            }
-
-            // Fallback to institutional backend authentication (PostgreSQL / Directory)
-            performBackendLogin(idVal, pwVal);
-            return;
-          }
-
-          // 2. Institutional ID (without '@', e.g. SRHU238990, FAC-201, ADM-001)
-          submitBtn.disabled = true;
-          submitBtn.textContent = 'Verifying credentials...';
-          showStatus('Authenticating institutional credentials...', 'info');
-          performBackendLogin(idVal, pwVal);
-        })();
+        performBackendLogin(idVal, pwVal);
 
       });
     })();

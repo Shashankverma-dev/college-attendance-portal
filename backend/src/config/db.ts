@@ -68,13 +68,29 @@ export async function runWithTransactionContext<T>(
     client.release();
   }
 }
+let lastDbCheckTime = 0;
+let cachedDbStatus = false;
+const DB_CHECK_TTL_MS = 10000; // 10-second TTL cache to eliminate sequential connection hangs
+
 export async function isDbConnected(): Promise<boolean> {
-  try {
-    const res = await pool.query('SELECT 1');
-    return res.rowCount === 1;
-  } catch {
-    return false;
+  const now = Date.now();
+  if (now - lastDbCheckTime < DB_CHECK_TTL_MS) {
+    return cachedDbStatus;
   }
+
+  try {
+    // Fast 1000ms timeout for connectivity ping
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error('DB_PING_TIMEOUT')), 1000)
+    );
+    const queryPromise = pool.query('SELECT 1');
+    const res = await Promise.race([queryPromise, timeoutPromise]);
+    cachedDbStatus = (res as any)?.rowCount === 1;
+  } catch {
+    cachedDbStatus = false;
+  }
+  lastDbCheckTime = now;
+  return cachedDbStatus;
 }
 
 export function assertProductionDbAvailable(dbOnline: boolean): void {
