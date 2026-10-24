@@ -68,3 +68,17 @@ export async function runWithTransactionContext<T>(
     client.release();
   }
 }
+export async function isDbConnected(): Promise<boolean> {
+  try {
+    const res = await pool.query('SELECT 1');
+    return res.rowCount === 1;
+  } catch {
+    return false;
+  }
+}
+
+export function assertProductionDbAvailable(dbOnline: boolean): void {
+  if (process.env.NODE_ENV === 'production' && !dbOnline) {
+    throw new Error('DATABASE_UNAVAILABLE: Production Cloud SQL PostgreSQL connection is required. Silent fallback to in-memory storage is prohibited.');
+  }
+}

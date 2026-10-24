@@ -87,11 +87,12 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
   // 1. Administrator
   if (lowerId === 'shashankvermahsst@gmail.com' || lowerId === 'admin@college.edu' || upperId === 'ADM-001' || lowerId === 'admin') {
+    const isDevEmail = lowerId === 'shashankvermahsst@gmail.com';
     matchedUser = {
       uid: 'usr-admin-001',
       id: 'ADM-001',
-      name: 'Shashank Verma',
-      email: 'Shashankvermahsst@gmail.com',
+      name: isDevEmail ? 'Shashank Verma' : 'Dr. Arvind Sharma',
+      email: isDevEmail ? 'shashankvermahsst@gmail.com' : 'admin@college.edu',
       role: 'GLOBAL_ADMIN',
       departmentId: null,
       status: 'ACTIVE',

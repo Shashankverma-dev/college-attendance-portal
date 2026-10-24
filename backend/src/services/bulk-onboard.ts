@@ -43,13 +43,35 @@ export interface BulkImportResult {
 }
 
 /**
- * Sanitizes input values against CSV/Excel Formula Injection attacks.
- * If a string begins with '=', '+', '-', or '@', it is escaped with a leading single quote.
+ * Sanitizes input values against CSV/Excel Formula Injection attacks without corrupting valid data.
+ * During ingestion into database / internal data models, legitimate identifiers, valid phone numbers
+ * (e.g. starting with '+91'), and negative numbers are preserved in their true form.
+ * Dangerous spreadsheet calculation triggers ('=', '@', or command execution sequences) are neutralized.
  */
 export function sanitizeFormulaValue(val: any): string {
   if (val === undefined || val === null) return '';
   const str = String(val).trim();
-  if (str.length > 0 && ['=', '+', '-', '@'].includes(str.charAt(0))) {
+  if (str.length === 0) return '';
+
+  // If the value is a valid international phone number (e.g. +91 9876543210) or pure signed number (e.g. -5), preserve it
+  if (/^\+\d{1,4}[\s\d\-]{6,16}$/.test(str) || /^[+-]?\d+(\.\d+)?$/.test(str)) {
+    return str;
+  }
+
+  // Escape formula injection prefixes when not pure numeric or standard phone
+  if (['=', '@', '+', '-'].includes(str.charAt(0))) {
+    return `'` + str;
+  }
+  return str;
+}
+
+/**
+ * Escapes values specifically during CSV / Excel export generation to prevent formula execution in client spreadsheets.
+ */
+export function sanitizeForExport(val: any): string {
+  if (val === undefined || val === null) return '';
+  const str = String(val).trim();
+  if (str.length > 0 && ['=', '+', '-', '@', '\t', '\r'].includes(str.charAt(0))) {
     return `'` + str;
   }
   return str;
@@ -102,6 +124,78 @@ export interface InMemStudentProfile {
 }
 
 export const localStudents: InMemStudentProfile[] = [];
+
+export function initializeSeedStudents(): void {
+  if (localStudents.length === 0) {
+    localStudents.push(
+      {
+        student_profile_id: 'stu-prof-101',
+        user_uid: 'usr-stu-101',
+        student_id: 'STU-101',
+        enrollment_no: 'SRHU2026101',
+        registration_no: 'REG2026101',
+        registration_id: 'REG2026101',
+        full_name: 'Alex Chen',
+        student_gmail: 'alex.chen@college.edu',
+        course_code: 'BCA',
+        semester_number: 1,
+        section_name: 'A',
+        roll_number: '01',
+        phone_number: '+91 9876543201',
+        parent_guardian_contact: '+91 9876543200',
+        status: 'ACTIVE',
+        enrollment_status: 'ACTIVE',
+        invitation_status: 'ACCEPTED',
+        created_at: '2026-08-01T00:00:00Z',
+        activated_at: '2026-08-01T00:00:00Z',
+      },
+      {
+        student_profile_id: 'stu-prof-102',
+        user_uid: 'usr-stu-102',
+        student_id: 'STU-102',
+        enrollment_no: 'SRHU2026102',
+        registration_no: 'REG2026102',
+        registration_id: 'REG2026102',
+        full_name: 'Brian Patel',
+        student_gmail: 'brian.patel@college.edu',
+        course_code: 'BCA',
+        semester_number: 1,
+        section_name: 'A',
+        roll_number: '02',
+        phone_number: '+91 9876543202',
+        parent_guardian_contact: '+91 9876543200',
+        status: 'ACTIVE',
+        enrollment_status: 'ACTIVE',
+        invitation_status: 'ACCEPTED',
+        created_at: '2026-08-01T00:00:00Z',
+        activated_at: '2026-08-01T00:00:00Z',
+      },
+      {
+        student_profile_id: 'stu-prof-103',
+        user_uid: 'usr-stu-103',
+        student_id: 'STU-103',
+        enrollment_no: 'SRHU2026103',
+        registration_no: 'REG2026103',
+        registration_id: 'REG2026103',
+        full_name: 'Claire Zhang',
+        student_gmail: 'claire.zhang@college.edu',
+        course_code: 'BCA',
+        semester_number: 1,
+        section_name: 'A',
+        roll_number: '03',
+        phone_number: '+91 9876543203',
+        parent_guardian_contact: '+91 9876543200',
+        status: 'ACTIVE',
+        enrollment_status: 'ACTIVE',
+        invitation_status: 'ACCEPTED',
+        created_at: '2026-08-01T00:00:00Z',
+        activated_at: '2026-08-01T00:00:00Z',
+      }
+    );
+  }
+}
+
+initializeSeedStudents();
 
 async function isDbConnected(): Promise<boolean> {
   try {

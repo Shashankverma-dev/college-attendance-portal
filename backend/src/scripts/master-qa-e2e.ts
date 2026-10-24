@@ -1,25 +1,51 @@
 // Master QA & E2E Test Suite: Complete Real-World System Verification
-export {};
+import { TokenService } from '../services/token';
 
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = process.env.API_BASE_URL || 'http://localhost:5000/api';
+
+const adminToken = TokenService.createSessionToken({
+  uid: 'usr-admin-001',
+  email: 'admin@college.edu',
+  role: 'GLOBAL_ADMIN',
+});
+
+const hodToken = TokenService.createSessionToken({
+  uid: 'usr-hod-ca-001',
+  email: 'hod.ca@college.edu',
+  role: 'HOD',
+  departmentId: 'b0000000-0000-0000-0000-000000000001',
+});
+
+const facultyToken = TokenService.createSessionToken({
+  uid: 'usr-fac-201',
+  email: 'm.sundaram@college.edu',
+  role: 'FACULTY',
+  departmentId: 'b0000000-0000-0000-0000-000000000001',
+});
+
+const studentToken = TokenService.createSessionToken({
+  uid: 'usr-stu-101',
+  email: 'aarav.sharma@college.edu',
+  role: 'STUDENT',
+});
 
 const adminHeaders: Record<string, string> = {
-  Authorization: 'Bearer test-admin',
+  Authorization: `Bearer ${adminToken}`,
   'Content-Type': 'application/json',
 };
 
 const hodHeaders: Record<string, string> = {
-  Authorization: 'Bearer test-hod',
+  Authorization: `Bearer ${hodToken}`,
   'Content-Type': 'application/json',
 };
 
 const facultyHeaders: Record<string, string> = {
-  Authorization: 'Bearer test-faculty',
+  Authorization: `Bearer ${facultyToken}`,
   'Content-Type': 'application/json',
 };
 
 const studentHeaders: Record<string, string> = {
-  Authorization: 'Bearer test-student',
+  Authorization: `Bearer ${studentToken}`,
   'Content-Type': 'application/json',
 };
 
@@ -262,7 +288,7 @@ async function main() {
       });
       throw new Error('Should have rejected duplicate student ID');
     } catch (err: any) {
-      if (err.status === 400 && (err.data?.error === 'DUPLICATE_STUDENT_ID' || err.message.includes('already exists'))) {
+      if (err.status === 400 && (err.data?.error === 'DUPLICATE_STUDENT_ID' || err.data?.error === 'DUPLICATE_ENROLLMENT_NO' || err.message.includes('already registered') || err.message.includes('already exists'))) {
         return `Successfully rejected duplicate Student ID '${createdStudentId}' (HTTP 400).`;
       }
       throw err;

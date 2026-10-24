@@ -40,7 +40,14 @@ export class EmailService {
   private static tasksClient: CloudTasksClient | null = null;
 
   private static hasSmtpConfig(): boolean {
-    return !!(process.env.SMTP_PASSWORD && process.env.SMTP_PROVIDER !== 'local');
+    const pwd = process.env.SMTP_PASSWORD;
+    return !!(
+      pwd &&
+      pwd !== 'your_app_password' &&
+      pwd !== 'placeholder' &&
+      pwd !== 'CHANGE_ME' &&
+      process.env.SMTP_PROVIDER !== 'local'
+    );
   }
 
   private static getTransporter(): nodemailer.Transporter {
@@ -126,7 +133,18 @@ export class EmailService {
       }
     }
 
-    // 3. Institutional Local Fallback Provider (Development & Test Execution)
+    // 3. Operational Blocker in Production
+    if (process.env.NODE_ENV === 'production') {
+      const err = new Error(
+        'PRODUCTION_DEPLOYMENT_BLOCKER: Outbound email delivery is not configured. Real SMTP relay credentials (SMTP_HOST, SMTP_USER, SMTP_PASSWORD) are required in production.'
+      );
+      (err as any).code = 'EMAIL_SERVICE_UNCONFIGURED';
+      console.error(`[EmailService] ${err.message}`);
+      await IdempotencyService.fail(null, options.idempotencyKey, { error: err.message });
+      throw err;
+    }
+
+    // 4. Institutional Local Fallback Provider (Development & Test Execution Only)
     const simulatedMessageId = `local-msg-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
     localSentEmails.unshift({
       to: options.to,

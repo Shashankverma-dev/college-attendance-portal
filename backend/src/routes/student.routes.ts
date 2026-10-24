@@ -81,20 +81,11 @@ localStudents.forEach((stu, idx) => {
   }
 });
 
-// Flexible admin authentication for local and production environments
+// Authoritative administrative authentication guard
 const adminAuth = (req: Request, res: Response, next: any) => {
-  if (req.headers.authorization) {
-    return authenticate(req, res, () => {
-      requireRole(['GLOBAL_ADMIN', 'HOD'])(req, res, next);
-    });
-  }
-  req.user = {
-    uid: 'firebase-uid-admin-001',
-    email: 'admin@srhu.edu.in',
-    role: 'GLOBAL_ADMIN',
-    sessionId: 'default-admin-session',
-  };
-  next();
+  return authenticate(req, res, () => {
+    requireRole(['GLOBAL_ADMIN', 'HOD'])(req, res, next);
+  });
 };
 
 // =============================================================================

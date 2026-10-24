@@ -47,21 +47,11 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
 });
 
-// Flexible admin authentication for local and production environments
+// Authoritative administrative authentication guard
 const adminAuth = (req: Request, res: Response, next: any) => {
-  if (req.headers.authorization) {
-    return authenticate(req, res, () => {
-      requireRole(['GLOBAL_ADMIN', 'HOD'])(req, res, next);
-    });
-  }
-  // Local environment default to global admin
-  req.user = {
-    uid: 'firebase-uid-admin-001',
-    email: 'admin@college.edu',
-    role: 'GLOBAL_ADMIN',
-    sessionId: 'sess-local-admin',
-  };
-  next();
+  return authenticate(req, res, () => {
+    requireRole(['GLOBAL_ADMIN', 'HOD'])(req, res, next);
+  });
 };
 
 // =============================================================================

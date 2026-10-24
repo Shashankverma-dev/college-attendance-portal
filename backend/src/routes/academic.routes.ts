@@ -214,24 +214,27 @@ router.get('/courses', authenticate, async (req: Request, res: Response): Promis
  * Accessible to all authenticated users (students, faculty, admins).
  */
 router.get('/calendar', async (req: Request, res: Response): Promise<void> => {
-  const { courseId, semesterId, sectionId } = req.query;
+  const { courseId, academicYearId, semesterId, sectionId } = req.query;
 
   try {
-    if (pool) {
+    const dbOnline = await isDbConnected();
+    if (dbOnline && pool) {
       const query = `
         SELECT * FROM academic_calendar_events
         WHERE audience_tier = 'INSTITUTION'
            OR (audience_tier = 'COURSE' AND course_id = $1::uuid)
-           OR (audience_tier = 'SEMESTER' AND semester_id = $2::uuid)
-           OR (audience_tier = 'SECTION' AND section_id = $3::uuid)
+           OR (audience_tier = 'YEAR' AND academic_year_id = $2::uuid)
+           OR (audience_tier = 'SEMESTER' AND semester_id = $3::uuid)
+           OR (audience_tier = 'SECTION' AND section_id = $4::uuid)
         ORDER BY start_date ASC
       `;
       const resData = await pool.query(query, [
         courseId || null,
+        academicYearId || null,
         semesterId || null,
         sectionId || null,
       ]);
-      if (resData.rows && resData.rows.length > 0) {
+      if (resData.rows) {
         res.json(resData.rows);
         return;
       }
@@ -240,8 +243,18 @@ router.get('/calendar', async (req: Request, res: Response): Promise<void> => {
     // Fall back to in-memory store
   }
 
-  // Return in-memory events filtered by dates or tier
-  const sorted = [...inMemoryEvents].sort((a, b) => a.start_date.localeCompare(b.start_date));
+  // Filter in-memory events by 5-tier audience scope:
+  const filtered = inMemoryEvents.filter((e) => {
+    if (e.audience_tier === 'INSTITUTION') return true;
+    if (e.audience_tier === 'COURSE' && courseId && e.course_id === courseId) return true;
+    if (e.audience_tier === 'YEAR' && academicYearId && e.academic_year_id === academicYearId) return true;
+    if (e.audience_tier === 'SEMESTER' && semesterId && e.semester_id === semesterId) return true;
+    if (e.audience_tier === 'SECTION' && sectionId && e.section_id === sectionId) return true;
+    // If no specific filters requested, return all visible general events
+    return !courseId && !academicYearId && !semesterId && !sectionId;
+  });
+
+  const sorted = filtered.sort((a, b) => a.start_date.localeCompare(b.start_date));
   res.json(sorted);
 });
 

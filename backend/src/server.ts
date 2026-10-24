@@ -16,8 +16,19 @@ import { AuditService } from './services/audit';
 import { ReconciliationWorker } from './services/reconciliation';
 import path from 'path';
 import { authenticate, requireRole } from './middleware/auth';
+import { isDbConnected } from './config/db';
 
 dotenv.config();
+
+// Startup Environment Validation
+if (process.env.NODE_ENV === 'production') {
+  const requiredEnvVars = ['DATABASE_URL', 'GOOGLE_CLOUD_PROJECT'];
+  const missing = requiredEnvVars.filter((v) => !process.env[v]);
+  if (missing.length > 0 && (!process.env.DB_HOST || !process.env.DB_NAME)) {
+    console.error(`🚨 FATAL: Missing mandatory production environment variables: ${missing.join(', ')}`);
+    // Fail readiness rather than crashing abruptly to allow container diagnostics
+  }
+}
 
 const app = express();
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
@@ -77,10 +88,26 @@ try {
 } catch (_e) {}
 
 // Liveness & Readiness Probes for Cloud Run & Firebase Hosting Rewrites
-app.get(['/health', '/api/health'], (_req, res) => {
+app.get(['/health', '/api/health'], async (_req, res) => {
+  const dbOnline = await isDbConnected();
+  const isProd = process.env.NODE_ENV === 'production';
+
+  if (isProd && !dbOnline) {
+    res.status(503).json({
+      status: 'UNHEALTHY',
+      service: 'attendance-backend',
+      database: 'DISCONNECTED',
+      error: 'DATABASE_UNAVAILABLE: Production database connection required.',
+      timestamp: new Date().toISOString(),
+      version: '1.8.0',
+    });
+    return;
+  }
+
   res.json({
     status: 'HEALTHY',
     service: 'attendance-backend',
+    database: dbOnline ? 'CONNECTED' : 'STANDBY_LOCAL',
     timestamp: new Date().toISOString(),
     version: '1.8.0',
   });

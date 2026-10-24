@@ -154,6 +154,104 @@ export const localSectionGroups: SectionGroup[] = [];
 
 export const localTimetables: TimetableMaster[] = [];
 
+export function initializeMasterTimetables(): void {
+  if (localClassrooms.length === 0) {
+    localClassrooms.push(
+      {
+        room_id: 'room-lh-101',
+        room_code: 'LH-101',
+        room_name: 'Lecture Hall 101',
+        room_type: 'LECTURE_HALL',
+        capacity: 90,
+        department_id: 'b0000000-0000-0000-0000-000000000001',
+        is_active: true,
+      },
+      {
+        room_id: 'room-lh-102',
+        room_code: 'LH-102',
+        room_name: 'Lecture Hall 102',
+        room_type: 'LECTURE_HALL',
+        capacity: 90,
+        department_id: 'b0000000-0000-0000-0000-000000000001',
+        is_active: true,
+      },
+      {
+        room_id: 'room-lab-1',
+        room_code: 'LAB-1',
+        room_name: 'Computer Applications Lab 1',
+        room_type: 'LABORATORY',
+        capacity: 45,
+        department_id: 'b0000000-0000-0000-0000-000000000001',
+        is_active: true,
+      }
+    );
+  }
+
+  if (localSectionGroups.length === 0) {
+    const secAId = 'f0000000-0000-0000-0000-000000000001';
+    localSectionGroups.push(
+      {
+        group_id: 'g0000000-0000-0000-0000-000000000001',
+        section_id: secAId,
+        group_name: 'C1',
+        description: 'Practical Lab Group C1 (Roll 1-30)',
+        enrolled_student_ids: ['STU-101', 'STU-102'],
+      },
+      {
+        group_id: 'g0000000-0000-0000-0000-000000000002',
+        section_id: secAId,
+        group_name: 'C2',
+        description: 'Practical Lab Group C2 (Roll 31-60)',
+        enrolled_student_ids: ['STU-103'],
+      }
+    );
+  }
+
+  if (localTimetables.length === 0) {
+    localTimetables.push({
+      timetable_id: 'tt000000-0000-0000-0000-000000000001',
+      academic_calendar_term: 'Autumn 2026',
+      department_id: 'b0000000-0000-0000-0000-000000000001',
+      department_code: 'CA',
+      department_name: 'Department of Computer Applications',
+      course_id: 'c0000000-0000-0000-0000-000000000001',
+      course_code: 'BCA',
+      course_name: 'Bachelor of Computer Applications',
+      semester_id: 'e0000000-0000-0000-0000-000000000001',
+      semester_number: 1,
+      section_id: 'f0000000-0000-0000-0000-000000000001',
+      section_name: 'A',
+      effective_date: '2026-08-01',
+      version_number: 1,
+      status: 'PUBLISHED',
+      created_by: 'usr-admin-001',
+      created_at: '2026-08-01T00:00:00Z',
+      published_at: '2026-08-01T00:00:00Z',
+      entries: [
+        {
+          entry_id: 'tte00000-0000-0000-0000-000000000001',
+          timetable_id: 'tt000000-0000-0000-0000-000000000001',
+          day_of_week: 'MONDAY',
+          period_index: 1,
+          start_time: '09:00',
+          end_time: '09:55',
+          subject_id: '10000000-0000-0000-0000-000000000001',
+          subject_code: 'BCA-101',
+          subject_name: 'Programming Fundamentals using C',
+          class_type: 'THEORY',
+          room_id: 'room-lh-101',
+          room_code: 'LH-101',
+          primary_faculty_id: 'usr-fac-201',
+          faculty_name: 'Dr. Meenakshi Sundaram',
+          faculty_staff_id: 'FAC-201',
+        },
+      ],
+    });
+  }
+}
+
+initializeMasterTimetables();
+
 // =============================================================================
 // CONFLICT DETECTION & VALIDATION ENGINE
 // =============================================================================
@@ -195,17 +293,46 @@ export class TimetableEngine {
       }
     });
 
+    // Helper to evaluate half-open interval [start, end) overlap
+    const checkIntervalOverlap = (
+      e1: { period_index: number; start_time: string; end_time: string },
+      e2: { period_index: number; start_time: string; end_time: string }
+    ): boolean => {
+      if (e1.period_index === e2.period_index) return true;
+      if (e1.start_time && e1.end_time && e2.start_time && e2.end_time) {
+        return e1.start_time < e2.end_time && e2.start_time < e1.end_time;
+      }
+      return false;
+    };
+
     // 1. In-Batch & Cross-Timetable Validation
     for (let i = 0; i < candidateEntries.length; i++) {
       const a = candidateEntries[i];
       if (a.is_cancelled) continue;
+
+      // Validate that end_time is strictly later than start_time
+      if (a.start_time && a.end_time && a.start_time >= a.end_time) {
+        conflicts.push({
+          type: 'TIME_BOUNDARY',
+          severity: 'CRITICAL',
+          message: `Session end time (${a.end_time}) must be strictly later than start time (${a.start_time}).`,
+          day: a.day_of_week,
+          period_index: a.period_index,
+          timeSlot: `${a.start_time} - ${a.end_time}`,
+          conflictingEntity: a.subject_code,
+          details: {
+            firstClass: a.subject_code,
+            secondClass: 'Invalid Time Boundary',
+          },
+        });
+      }
 
       // Check intra-batch collisions with subsequent entries
       for (let j = i + 1; j < candidateEntries.length; j++) {
         const b = candidateEntries[j];
         if (b.is_cancelled) continue;
 
-        if (a.day_of_week === b.day_of_week && a.period_index === b.period_index) {
+        if (a.day_of_week === b.day_of_week && checkIntervalOverlap(a, b)) {
           const timeSlot = `${a.start_time} - ${a.end_time}`;
 
           // A. Teacher Double Booking
@@ -277,7 +404,7 @@ export class TimetableEngine {
       // Check external published timetables (cross-section collisions)
       for (const other of otherPublishedEntries) {
         const b = other.entry;
-        if (a.day_of_week === b.day_of_week && a.period_index === b.period_index) {
+        if (a.day_of_week === b.day_of_week && checkIntervalOverlap(a, b)) {
           const timeSlot = `${a.start_time} - ${a.end_time}`;
 
           // Teacher clash across different sections/courses

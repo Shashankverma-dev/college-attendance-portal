@@ -1,9 +1,15 @@
-export {};
+import { TokenService } from '../services/token';
 
-const BASE_URL = 'http://localhost:5000/api';
+const BASE_URL = process.env.API_BASE_URL || 'http://localhost:5000/api';
+
+const adminToken = TokenService.createSessionToken({
+  uid: 'usr-admin-001',
+  email: 'admin@college.edu',
+  role: 'GLOBAL_ADMIN',
+});
 
 const adminHeaders: Record<string, string> = {
-  Authorization: 'Bearer test-admin',
+  Authorization: `Bearer ${adminToken}`,
   'Content-Type': 'application/json',
 };
 

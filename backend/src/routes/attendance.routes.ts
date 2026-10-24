@@ -641,8 +641,8 @@ router.get(
               COUNT(CASE WHEN ar.attendance_status = 'P' THEN 1 END) AS attended_sessions,
               COUNT(CASE WHEN ar.attendance_status = 'L' THEN 1 END) AS approved_leave_sessions,
               ROUND(
-                (COUNT(CASE WHEN ar.attendance_status IN ('P', 'L') THEN 1 END)::numeric / 
-                 NULLIF(COUNT(ar.record_id), 0)) * 100, 
+                (COUNT(CASE WHEN ar.attendance_status = 'P' THEN 1 END)::numeric / 
+                 NULLIF(COUNT(CASE WHEN ar.attendance_status IN ('P', 'A') THEN 1 END), 0)) * 100, 
                 1
               ) AS attendance_percentage
             FROM attendance_records ar
@@ -726,8 +726,10 @@ router.get(
     const lockedSessions = localAttendanceSessions.filter((s) => s.submission_status === 'LOCKED');
     const totalRecords = localAttendanceRecords.length;
     const presentRecords = localAttendanceRecords.filter((r) => r.attendance_status === 'P').length;
+    const absentRecords = localAttendanceRecords.filter((r) => r.attendance_status === 'A').length;
     const leaveRecords = localAttendanceRecords.filter((r) => r.attendance_status === 'L').length;
-    const attendancePct = totalRecords > 0 ? (((presentRecords + leaveRecords) / totalRecords) * 100).toFixed(1) : '92.4';
+    const totalValid = presentRecords + absentRecords;
+    const attendancePct = totalValid > 0 ? ((presentRecords / totalValid) * 100).toFixed(1) : '92.4';
 
     res.json({
       success: true,

@@ -1,14 +1,27 @@
-export {};
+import { TokenService } from '../services/token';
 
-const BASE_URL = 'http://localhost:8080/api';
+const BASE_URL = process.env.API_BASE_URL || 'http://localhost:5000/api';
+
+const adminToken = TokenService.createSessionToken({
+  uid: 'usr-admin-001',
+  email: 'admin@college.edu',
+  role: 'GLOBAL_ADMIN',
+});
+
+const teacherToken = TokenService.createSessionToken({
+  uid: 'usr-fac-201',
+  email: 'm.sundaram@college.edu',
+  role: 'FACULTY',
+  departmentId: 'b0000000-0000-0000-0000-000000000001',
+});
 
 const adminHeaders: Record<string, string> = {
-  Authorization: 'Bearer test-admin',
+  Authorization: `Bearer ${adminToken}`,
   'Content-Type': 'application/json',
 };
 
 const teacherHeaders: Record<string, string> = {
-  Authorization: 'Bearer test-faculty',
+  Authorization: `Bearer ${teacherToken}`,
   'Content-Type': 'application/json',
 };
 
@@ -268,10 +281,50 @@ async function runAllTests() {
   let activeToken = '';
   let activeBackupCode = '';
 
+  const alexToken = TokenService.createSessionToken({
+    uid: 'usr-stu-101',
+    email: 'alex.chen@college.edu',
+    role: 'STUDENT',
+  });
+  const alexHeaders = {
+    Authorization: `Bearer ${alexToken}`,
+    'Content-Type': 'application/json',
+  };
+
+  const brianToken = TokenService.createSessionToken({
+    uid: 'usr-stu-102',
+    email: 'brian.patel@college.edu',
+    role: 'STUDENT',
+  });
+  const brianHeaders = {
+    Authorization: `Bearer ${brianToken}`,
+    'Content-Type': 'application/json',
+  };
+
+  const claireToken = TokenService.createSessionToken({
+    uid: 'usr-stu-103',
+    email: 'claire.zhang@college.edu',
+    role: 'STUDENT',
+  });
+  const claireHeaders = {
+    Authorization: `Bearer ${claireToken}`,
+    'Content-Type': 'application/json',
+  };
+
+  const ineligibleToken = TokenService.createSessionToken({
+    uid: 'usr-stu-999',
+    email: 'ineligible@college.edu',
+    role: 'STUDENT',
+  });
+  const ineligibleHeaders = {
+    Authorization: `Bearer ${ineligibleToken}`,
+    'Content-Type': 'application/json',
+  };
+
   // Step 4.1: Teacher launches Live QR Session
   try {
     const startPayload = {
-      timetableEntryId: 'tte00000-0000-0000-0000-000000000001', // BCA 1-A Dr. Jenkins
+      timetableEntryId: 'tte00000-0000-0000-0000-000000000001', // BCA 1-A Dr. Meenakshi Sundaram
       intervalSeconds: 20,
       durationMinutes: 60,
     };
@@ -317,10 +370,6 @@ async function runAllTests() {
   // Step 4.3: Eligible Student Scans QR Token
   try {
     // Alex Chen: STU-101 in BCA Sem 1 Sec A
-    const alexHeaders = {
-      Authorization: 'Bearer test-student-STU-101',
-      'Content-Type': 'application/json',
-    };
     const scanPayload = {
       sessionId: activeSessionId,
       token: activeToken,
@@ -341,10 +390,6 @@ async function runAllTests() {
 
   // Step 4.4: Anti-Replay / Duplicate Scan Idempotency
   try {
-    const alexHeaders = {
-      Authorization: 'Bearer test-student-STU-101',
-      'Content-Type': 'application/json',
-    };
     const scanPayload = {
       sessionId: activeSessionId,
       token: activeToken,
@@ -365,10 +410,6 @@ async function runAllTests() {
   // Step 4.5: 6-Digit Backup Code Verification
   try {
     // Brian Patel: STU-102 in BCA Sem 1 Sec A
-    const brianHeaders = {
-      Authorization: 'Bearer test-student-STU-102',
-      'Content-Type': 'application/json',
-    };
     const scanPayload = {
       sessionId: activeSessionId,
       backupCode: activeBackupCode,
@@ -390,10 +431,6 @@ async function runAllTests() {
   // Step 4.6: Invalid / Forged Token Rejection
   try {
     // Claire Zhang: STU-103
-    const claireHeaders = {
-      Authorization: 'Bearer test-student-STU-103',
-      'Content-Type': 'application/json',
-    };
     const scanPayload = {
       sessionId: activeSessionId,
       token: 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff', // invalid HMAC
@@ -413,10 +450,6 @@ async function runAllTests() {
 
   // Step 4.7: Cross-Section / Ineligible Student Rejection
   try {
-    const ineligibleHeaders = {
-      Authorization: 'Bearer test-student-ineligible-999',
-      'Content-Type': 'application/json',
-    };
     const scanPayload = {
       sessionId: activeSessionId,
       token: activeToken,
@@ -474,10 +507,6 @@ async function runAllTests() {
 
   // Step 4.10: Rejection of Scans after Session Closure
   try {
-    const claireHeaders = {
-      Authorization: 'Bearer test-student-STU-103',
-      'Content-Type': 'application/json',
-    };
     const scanPayload = {
       sessionId: activeSessionId,
       backupCode: activeBackupCode,

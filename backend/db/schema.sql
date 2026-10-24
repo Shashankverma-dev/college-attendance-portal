@@ -216,7 +216,7 @@ CREATE TABLE faculty_assignments (
     CONSTRAINT uq_faculty_subject_section_term UNIQUE (faculty_profile_id, subject_id, section_id, academic_calendar_term)
 );
 
-CREATE TYPE enrollment_status_enum AS ENUM ('ACTIVE', 'PROMOTED', 'COMPLETED', 'WITHDRAWN');
+CREATE TYPE enrollment_status_enum AS ENUM ('PENDING', 'ACTIVE', 'TRANSFERRED', 'PROMOTED', 'COMPLETED', 'WITHDRAWN');
 
 CREATE TABLE student_enrollment_history (
     enrollment_id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

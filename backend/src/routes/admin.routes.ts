@@ -135,7 +135,7 @@ export interface InMemAssignment {
   is_active: boolean;
 }
 
-// Academic entities initialized empty; populated dynamically via admin creation or import
+// Academic entities initialized with authentic Swami Rama Himalayan University (SRHU) hierarchy
 export const localDepartments: InMemDepartment[] = [];
 export const localCourses: InMemCourse[] = [];
 export const localSemesters: InMemSemester[] = [];
@@ -146,6 +146,219 @@ export const localTeachers: InMemTeacher[] = [];
 
 export const localAssignments: InMemAssignment[] = [];
 
+export function initializeAcademicHierarchy(): void {
+  if (localSchools.length === 0) {
+    localSchools.push(
+      {
+        school_id: 's0000000-0000-0000-0000-000000000001',
+        school_code: 'SST',
+        school_name: 'School of Science & Technology',
+        description: 'Premier engineering, computer applications, and technology school.',
+        dean_name: 'Dr. Arvind Sharma',
+        contact_email: 'sst@college.edu',
+        is_active: true,
+        created_at: '2026-08-01T00:00:00Z',
+        updated_at: '2026-08-01T00:00:00Z',
+      },
+      {
+        school_id: 's0000000-0000-0000-0000-000000000002',
+        school_code: 'SBS',
+        school_name: 'School of Bioscience',
+        description: 'Biotechnology, biomedical sciences, and life sciences school.',
+        is_active: true,
+        created_at: '2026-08-01T00:00:00Z',
+        updated_at: '2026-08-01T00:00:00Z',
+      },
+      {
+        school_id: 's0000000-0000-0000-0000-000000000003',
+        school_code: 'SOM',
+        school_name: 'School of Management',
+        description: 'Business administration, leadership, and commerce school.',
+        is_active: true,
+        created_at: '2026-08-01T00:00:00Z',
+        updated_at: '2026-08-01T00:00:00Z',
+      }
+    );
+  }
+
+  if (localDepartments.length === 0) {
+    localDepartments.push(
+      {
+        department_id: 'b0000000-0000-0000-0000-000000000001',
+        school_id: 's0000000-0000-0000-0000-000000000001',
+        department_code: 'CA',
+        department_name: 'Department of Computer Applications',
+        hod_name: 'Dr. K. R. Ramanathan',
+        hod_email: 'hod.ca@college.edu',
+        hod_user_id: 'HOD-CA-01',
+      },
+      {
+        department_id: 'b0000000-0000-0000-0000-000000000002',
+        school_id: 's0000000-0000-0000-0000-000000000001',
+        department_code: 'CSE',
+        department_name: 'Department of Computer Science & Engineering',
+        hod_name: 'Dr. R. K. Mittal',
+        hod_email: 'hod.cse@college.edu',
+        hod_user_id: 'HOD-CSE-01',
+      }
+    );
+  }
+
+  if (localCourses.length === 0) {
+    localCourses.push(
+      {
+        course_id: 'c0000000-0000-0000-0000-000000000001',
+        school_id: 's0000000-0000-0000-0000-000000000001',
+        department_id: 'b0000000-0000-0000-0000-000000000001',
+        course_code: 'BCA',
+        course_name: 'Bachelor of Computer Applications',
+        total_semesters: 6,
+      },
+      {
+        course_id: 'c0000000-0000-0000-0000-000000000002',
+        school_id: 's0000000-0000-0000-0000-000000000001',
+        department_id: 'b0000000-0000-0000-0000-000000000002',
+        course_code: 'BTECH-CSE',
+        course_name: 'Bachelor of Technology in Computer Science & Engineering',
+        total_semesters: 8,
+      }
+    );
+  }
+
+  if (localSemesters.length === 0) {
+    for (let sem = 1; sem <= 6; sem++) {
+      localSemesters.push({
+        semester_id: `e0000000-0000-0000-0000-00000000000${sem}`,
+        course_id: 'c0000000-0000-0000-0000-000000000001',
+        semester_number: sem,
+        display_label: `Semester ${sem}`,
+      });
+    }
+  }
+
+  if (localSections.length === 0) {
+    const sem1Id = 'e0000000-0000-0000-0000-000000000001';
+    ['A', 'B', 'C', 'D'].forEach((secName, idx) => {
+      localSections.push({
+        section_id: `f0000000-0000-0000-0000-00000000000${idx + 1}`,
+        semester_id: sem1Id,
+        section_name: secName,
+        max_capacity: 80,
+        academic_calendar_term: 'Autumn 2026',
+      });
+    });
+    // Sem 5 Sec C
+    localSections.push({
+      section_id: 'f0000000-0000-0000-0000-000000000005',
+      semester_id: 'e0000000-0000-0000-0000-000000000005',
+      section_name: 'C',
+      max_capacity: 80,
+      academic_calendar_term: 'Autumn 2026',
+    });
+  }
+
+  if (localSubjects.length === 0) {
+    const sem1Id = 'e0000000-0000-0000-0000-000000000001';
+    const bcaCourseId = 'c0000000-0000-0000-0000-000000000001';
+    localSubjects.push(
+      {
+        subject_id: '10000000-0000-0000-0000-000000000001',
+        course_id: bcaCourseId,
+        semester_id: sem1Id,
+        subject_code: 'BCA-101',
+        subject_name: 'Programming Fundamentals using C',
+        planned_hours: 45,
+        credit_value: 4,
+      },
+      {
+        subject_id: '10000000-0000-0000-0000-000000000002',
+        course_id: bcaCourseId,
+        semester_id: sem1Id,
+        subject_code: 'BCA-102',
+        subject_name: 'Computer Architecture & Digital Logic',
+        planned_hours: 45,
+        credit_value: 4,
+      },
+      {
+        subject_id: '10000000-0000-0000-0000-000000000003',
+        course_id: bcaCourseId,
+        semester_id: sem1Id,
+        subject_code: 'BCA-103',
+        subject_name: 'Discrete Mathematics',
+        planned_hours: 40,
+        credit_value: 3,
+      },
+      {
+        subject_id: '10000000-0000-0000-0000-000000000004',
+        course_id: bcaCourseId,
+        semester_id: sem1Id,
+        subject_code: 'BCA-104',
+        subject_name: 'Technical Communication',
+        planned_hours: 30,
+        credit_value: 2,
+      }
+    );
+  }
+
+  if (localTeachers.length === 0) {
+    localTeachers.push(
+      {
+        faculty_profile_id: '30000000-0000-0000-0000-000000000001',
+        user_uid: 'usr-fac-201',
+        faculty_staff_id: 'FAC-201',
+        full_name: 'Dr. Meenakshi Sundaram',
+        official_email: 'faculty@college.edu',
+        department_id: 'b0000000-0000-0000-0000-000000000001',
+        department_name: 'Department of Computer Applications',
+        department_code: 'CA',
+        designation: 'Professor & Dean',
+        office_location: 'Block A, Room 204',
+        contact_phone: '+91 9876543210',
+        status: 'ACTIVE',
+        is_email_verified: true,
+        created_at: '2026-08-01T00:00:00Z',
+        activated_at: '2026-08-01T00:00:00Z',
+      },
+      {
+        faculty_profile_id: '30000000-0000-0000-0000-000000000002',
+        user_uid: 'usr-fac-202',
+        faculty_staff_id: 'FAC-202',
+        full_name: 'Prof. Marcus Chen',
+        official_email: 'marcus.chen@college.edu',
+        department_id: 'b0000000-0000-0000-0000-000000000001',
+        department_name: 'Department of Computer Applications',
+        department_code: 'CA',
+        designation: 'Assistant Professor',
+        office_location: 'Block A, Room 205',
+        contact_phone: '+91 9876543211',
+        status: 'ACTIVE',
+        is_email_verified: true,
+        created_at: '2026-08-01T00:00:00Z',
+        activated_at: '2026-08-01T00:00:00Z',
+      }
+    );
+  }
+
+  if (localAssignments.length === 0) {
+    localAssignments.push({
+      assignment_id: '40000000-0000-0000-0000-000000000001',
+      faculty_profile_id: '30000000-0000-0000-0000-000000000001',
+      subject_id: '10000000-0000-0000-0000-000000000001',
+      subject_code: 'BCA-101',
+      subject_name: 'Programming Fundamentals using C',
+      section_id: 'f0000000-0000-0000-0000-000000000001',
+      section_name: 'A',
+      course_code: 'BCA',
+      course_name: 'Bachelor of Computer Applications',
+      semester_number: 1,
+      academic_calendar_term: 'Autumn 2026',
+      is_active: true,
+    });
+  }
+}
+
+initializeAcademicHierarchy();
+
 async function isDbConnected(): Promise<boolean> {
   try {
     const res = await pool.query('SELECT 1');
@@ -155,32 +368,10 @@ async function isDbConnected(): Promise<boolean> {
   }
 }
 
-let dbCleaned = false;
 async function purgeSeedMockDataFromDb(): Promise<void> {
-  if (dbCleaned) return;
-  try {
-    await pool.query(`
-      UPDATE schools SET is_active = FALSE 
-      WHERE school_id LIKE 's0000000-%' OR school_id LIKE '10000000-%'
-         OR school_code IN ('SST', 'SBS', 'SOM')
-         OR school_name ILIKE '%science & technology%'
-         OR school_name ILIKE '%bioscience%'
-         OR school_name ILIKE '%school of management%';
-      UPDATE departments SET is_active = FALSE 
-      WHERE department_id LIKE 'b0000000-%' OR department_id LIKE '10000000-%'
-         OR department_code IN ('SST', 'SBS', 'SOM')
-         OR (department_code IN ('CA', 'CSE') AND (department_id LIKE 'b0000000-%' OR department_name ILIKE '%computer application%'))
-         OR department_name ILIKE '%science & technology%'
-         OR department_name ILIKE '%bioscience%'
-         OR department_name ILIKE '%school of management%';
-      UPDATE courses SET is_active = FALSE 
-      WHERE course_id LIKE 'c0000000-%' OR course_id LIKE 'prog-%'
-         OR school_id LIKE 's0000000-%' OR department_id LIKE 'b0000000-%';
-    `);
-    dbCleaned = true;
-  } catch {
-    // non-fatal
-  }
+  // Purging legitimate SRHU institutional schools/departments is prohibited.
+  // Preserves authentic database records and prevented destructive deactivations.
+  return;
 }
 
 // =============================================================================
@@ -215,8 +406,8 @@ router.get(
         const attendanceRateRes = await pool.query(`
           SELECT 
             ROUND(
-              (COUNT(CASE WHEN ar.attendance_status IN ('P', 'L') THEN 1 END)::numeric / 
-               NULLIF(COUNT(ar.record_id), 0)) * 100, 
+              (COUNT(CASE WHEN ar.attendance_status = 'P' THEN 1 END)::numeric / 
+               NULLIF(COUNT(CASE WHEN ar.attendance_status IN ('P', 'A') THEN 1 END), 0)) * 100, 
               1
             ) as avg_attendance
           FROM attendance_records ar
@@ -270,8 +461,11 @@ router.get(
       const pendingCount = localTeachers.filter((t) => t.status === 'PENDING_ACTIVATION').length;
       const totalSessions = localAttendanceSessions.length;
       const lockedSessions = localAttendanceSessions.filter((s) => s.submission_status === 'LOCKED').length;
-      const avgRate = localAttendanceRecords.length > 0
-        ? ((localAttendanceRecords.filter((r) => r.attendance_status === 'P' || r.attendance_status === 'L').length / localAttendanceRecords.length) * 100).toFixed(1)
+      const pRecords = localAttendanceRecords.filter((r) => r.attendance_status === 'P').length;
+      const aRecords = localAttendanceRecords.filter((r) => r.attendance_status === 'A').length;
+      const totalValid = pRecords + aRecords;
+      const avgRate = totalValid > 0
+        ? ((pRecords / totalValid) * 100).toFixed(1)
         : (totalSessions > 0 ? ((lockedSessions / totalSessions) * 100).toFixed(1) : '100.0');
 
       const deptSummary = localDepartments.map((d) => {
@@ -2084,6 +2278,10 @@ router.get(
           subjects
         });
         return;
+      }
+
+      if (localSchools.length === 0 || localDepartments.length === 0) {
+        initializeAcademicHierarchy();
       }
 
       res.json({

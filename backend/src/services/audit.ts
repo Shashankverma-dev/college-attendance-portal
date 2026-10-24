@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { PoolClient } from 'pg';
 import { pool } from '../config/db';
 
@@ -12,7 +13,14 @@ export interface AuditLogEntry {
   changeDetails: Record<string, any>;
 }
 
-export const localAuditLogs: Array<AuditLogEntry & { timestamp: string }> = [];
+export interface InMemAuditLogEntry extends AuditLogEntry {
+  log_id: number;
+  timestamp: string;
+  previous_hash: string;
+  record_hash: string;
+}
+
+export const localAuditLogs: InMemAuditLogEntry[] = [];
 
 async function isDbConnected(): Promise<boolean> {
   try {
@@ -27,7 +35,7 @@ async function isDbConnected(): Promise<boolean> {
  * Append-Only Audit Logging Service
  * Backed by PostgreSQL `audit_logs` table with database-level triggers enforcing
  * a sequential linear SHA-256 cryptographic hash chain ($H_i = SHA-256(H_{i-1} || data_i)).
- * Supports in-memory dual-mode fallback when database is disconnected.
+ * Supports in-memory dual-mode fallback with equivalent cryptographic verification.
  */
 export class AuditService {
   /**
@@ -61,9 +69,20 @@ export class AuditService {
       // In-memory fallback
     }
 
+    const prevHash = localAuditLogs.length > 0 
+      ? localAuditLogs[localAuditLogs.length - 1].record_hash 
+      : '0000000000000000000000000000000000000000000000000000000000000000';
+    const logId = localAuditLogs.length + 1;
+    const timestamp = new Date().toISOString();
+    const payload = `${prevHash}|${logId}|${entry.actorUid}|${entry.actionCategory}|${entry.targetEntityName}|${entry.targetEntityId}|${JSON.stringify(entry.changeDetails)}|${timestamp}`;
+    const recordHash = crypto.createHash('sha256').update(payload).digest('hex');
+
     localAuditLogs.push({
       ...entry,
-      timestamp: new Date().toISOString(),
+      log_id: logId,
+      timestamp,
+      previous_hash: prevHash,
+      record_hash: recordHash,
     });
   }
 
@@ -95,7 +114,34 @@ export class AuditService {
       // In-memory fallback
     }
 
-    return { isValid: true, details: `Verified ${localAuditLogs.length} audit records in linear memory chain.` };
+    for (let i = 0; i < localAuditLogs.length; i++) {
+      const current = localAuditLogs[i];
+      const expectedPrev = i === 0 
+        ? '0000000000000000000000000000000000000000000000000000000000000000' 
+        : localAuditLogs[i - 1].record_hash;
+
+      if (current.previous_hash !== expectedPrev) {
+        return {
+          isValid: false,
+          details: `Tampering detected at log ${current.log_id}: broken previous hash link (expected ${expectedPrev}, got ${current.previous_hash})`,
+        };
+      }
+
+      const payload = `${current.previous_hash}|${current.log_id}|${current.actorUid}|${current.actionCategory}|${current.targetEntityName}|${current.targetEntityId}|${JSON.stringify(current.changeDetails)}|${current.timestamp}`;
+      const recalculatedHash = crypto.createHash('sha256').update(payload).digest('hex');
+
+      if (current.record_hash !== recalculatedHash) {
+        return {
+          isValid: false,
+          details: `Tampering detected at log ${current.log_id}: invalid record hash (expected ${recalculatedHash}, got ${current.record_hash})`,
+        };
+      }
+    }
+
+    return { 
+      isValid: true, 
+      details: `Verified ${localAuditLogs.length} audit records in SHA-256 linear cryptographic memory chain.` 
+    };
   }
 }
 

@@ -3,8 +3,8 @@ import { PoolClient } from 'pg';
 import { pool } from '../config/db';
 import { AuditService } from './audit';
 import { localAttendanceSessions, localAttendanceRecords, InMemAttendanceSession, InMemAttendanceRecord } from '../routes/attendance.routes';
-import { localStudents, InMemStudentProfile } from './bulk-onboard';
-import { localTimetables, localSectionGroups, TimetableEntry } from './timetable';
+import { localStudents, InMemStudentProfile, initializeSeedStudents } from './bulk-onboard';
+import { localTimetables, localSectionGroups, TimetableEntry, initializeMasterTimetables } from './timetable';
 
 export interface LiveQRSession {
   qr_session_id: string;
@@ -95,6 +95,13 @@ export class QRAttendanceService {
   }> {
     const interval = params.intervalSeconds || 20;
     const duration = params.durationMinutes || 60; // default 60 min lecture
+
+    if (localTimetables.length === 0) {
+      initializeMasterTimetables();
+    }
+    if (localStudents.length === 0) {
+      initializeSeedStudents();
+    }
 
     // 1. Locate Timetable Entry
     let targetEntry: TimetableEntry | undefined;
@@ -362,6 +369,9 @@ export class QRAttendanceService {
     }
 
     // 3. Find Authenticated Student
+    if (localStudents.length === 0) {
+      initializeSeedStudents();
+    }
     const student = localStudents.find(
       (s) => s.user_uid === params.studentUid || s.student_id === params.studentUid
     );
@@ -428,13 +438,20 @@ export class QRAttendanceService {
     }
 
     // 6. Idempotent Duplicate Check
-    const existingRecord = localAttendanceRecords.find(
-      (r) => r.session_id === params.sessionId && r.student_profile_id === student.student_profile_id
+    const alreadyScannedInThisQrSession = localLiveQRScans.some(
+      (s) =>
+        (s.qr_session_id === qrSession.qr_session_id || s.session_id === qrSession.session_id) &&
+        (s.student_profile_id === student.student_profile_id || s.student_id === student.student_id)
     );
 
     const now = new Date().toISOString();
 
-    if (existingRecord && existingRecord.attendance_status === 'P') {
+    if (alreadyScannedInThisQrSession) {
+      const priorScan = localLiveQRScans.find(
+        (s) =>
+          (s.qr_session_id === qrSession.qr_session_id || s.session_id === qrSession.session_id) &&
+          (s.student_profile_id === student.student_profile_id || s.student_id === student.student_id)
+      );
       return {
         success: true,
         alreadyRecorded: true,
@@ -447,9 +464,15 @@ export class QRAttendanceService {
           rollNumber: student.roll_number,
         },
         subjectName: baseSession.subject_name || baseSession.subject_code || 'Lecture',
-        scannedAt: existingRecord.updated_at,
+        scannedAt: priorScan?.scanned_at || now,
       };
     }
+
+    const existingRecord = localAttendanceRecords.find(
+      (r) =>
+        (r.session_id === qrSession.session_id || r.session_id === params.sessionId) &&
+        r.student_profile_id === student.student_profile_id
+    );
 
     // 7. Update Attendance Record to Present ('P')
     if (existingRecord) {
@@ -531,6 +554,7 @@ export class QRAttendanceService {
     totalEligible: number;
     totalPresent: number;
     totalAbsent: number;
+    totalLeave: number;
     recentScans: LiveQRScanRecord[];
     roster: InMemAttendanceRecord[];
   } {
@@ -542,15 +566,19 @@ export class QRAttendanceService {
     }
 
     const records = localAttendanceRecords.filter((r) => r.session_id === qrSession.session_id);
-    const totalPresent = records.filter((r) => r.attendance_status === 'P' || r.attendance_status === 'L').length;
+    const totalPresent = records.filter((r) => r.attendance_status === 'P').length;
     const totalAbsent = records.filter((r) => r.attendance_status === 'A').length;
-    const recentScans = localLiveQRScans.filter((s) => s.session_id === qrSession.session_id).slice(0, 15);
+    const totalLeave = records.filter((r) => r.attendance_status === 'L').length;
+    const recentScans = localLiveQRScans
+      .filter((s) => s.session_id === qrSession.session_id || s.qr_session_id === qrSession.qr_session_id)
+      .slice(0, 15);
 
     return {
       session: qrSession,
       totalEligible: records.length,
       totalPresent,
       totalAbsent,
+      totalLeave,
       recentScans,
       roster: records,
     };
