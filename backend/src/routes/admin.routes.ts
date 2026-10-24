@@ -331,75 +331,104 @@ router.post(
   requireRole(['GLOBAL_ADMIN']),
   async (req: Request, res: Response): Promise<void> => {
     try {
-      const { department_code, department_name, programs, school_id, hod_name, hod_email, hod_password } = req.body;
-      if (!department_code || !department_name) {
+      const codeInput = req.body.department_code || req.body.code;
+      const nameInput = req.body.department_name || req.body.name;
+      const idInput = req.body.department_id || req.body.id || req.body.school_id;
+      const programsInput = req.body.programs || req.body.description || '';
+      const hodNameInput = req.body.hod_name || req.body.dean_name;
+      const hodEmailInput = req.body.hod_email || req.body.contact_email;
+      const hodPasswordInput = req.body.hod_password;
+
+      if (!codeInput || !nameInput) {
         res.status(400).json({ error: 'MISSING_FIELDS', message: 'Department code and name are required.' });
         return;
       }
 
-      const code = String(department_code).toUpperCase().trim();
-      const name = String(department_name).trim();
-      const deptId = `dept-${code.toLowerCase()}`;
+      const code = String(codeInput).toUpperCase().trim();
+      const name = String(nameInput).trim();
+      const deptId = idInput ? String(idInput).trim() : `dept-${code.toLowerCase()}`;
 
       let existing = localDepartments.find((d) => d.department_code === code || d.department_id === deptId);
       if (existing) {
         existing.department_name = name;
-        if (programs) existing.programs = programs;
-        if (hod_name) existing.hod_name = hod_name;
-        if (hod_email) existing.hod_email = hod_email;
-        if (hod_password) existing.hod_password = hod_password;
-        if (hod_email) existing.hod_user_id = hod_email;
+        if (programsInput) existing.programs = programsInput;
+        if (hodNameInput) existing.hod_name = hodNameInput;
+        if (hodEmailInput) existing.hod_email = hodEmailInput;
+        if (hodPasswordInput) existing.hod_password = hodPasswordInput;
+        if (hodEmailInput) existing.hod_user_id = hodEmailInput;
       } else {
         existing = {
           department_id: deptId,
           school_id: deptId,
           department_code: code,
           department_name: name,
-          programs: programs || `${code} Programs`,
-          hod_name: hod_name || undefined,
-          hod_email: hod_email || undefined,
-          hod_password: hod_password || undefined,
-          hod_user_id: hod_email || `HOD-${code}`,
+          programs: programsInput || `${code} Programs`,
+          hod_name: hodNameInput || undefined,
+          hod_email: hodEmailInput || undefined,
+          hod_password: hodPasswordInput || undefined,
+          hod_user_id: hodEmailInput || `HOD-${code}`,
         };
         localDepartments.push(existing);
       }
 
-      // Sync to localSchools (School and Department are the same entity created by admin)
+      // Sync to localSchools (School and Department represent the same organizational unit)
       let existingSchool = localSchools.find((s) => s.school_code === code || s.school_id === deptId);
       if (existingSchool) {
         existingSchool.school_name = name;
-        if (programs) existingSchool.description = programs;
-        if (hod_name) {
-          existingSchool.hod_name = hod_name;
-          existingSchool.dean_name = hod_name;
+        if (programsInput) existingSchool.description = programsInput;
+        if (hodNameInput) {
+          existingSchool.hod_name = hodNameInput;
+          existingSchool.dean_name = hodNameInput;
         }
-        if (hod_email) {
-          existingSchool.hod_email = hod_email;
-          existingSchool.contact_email = hod_email;
+        if (hodEmailInput) {
+          existingSchool.hod_email = hodEmailInput;
+          existingSchool.contact_email = hodEmailInput;
         }
-        if (hod_password) existingSchool.hod_password = hod_password;
+        if (hodPasswordInput) existingSchool.hod_password = hodPasswordInput;
       } else {
-        localSchools.push({
+        existingSchool = {
           school_id: deptId,
           school_code: code,
           school_name: name,
-          description: programs || `School / Department of ${name}`,
-          programs: programs || `${code} Programs`,
+          description: programsInput || `School / Department of ${name}`,
+          programs: programsInput || `${code} Programs`,
           is_active: true,
-          hod_name: hod_name || undefined,
-          dean_name: hod_name || undefined,
-          hod_email: hod_email || undefined,
-          contact_email: hod_email || undefined,
-          hod_password: hod_password || undefined,
+          hod_name: hodNameInput || undefined,
+          dean_name: hodNameInput || undefined,
+          hod_email: hodEmailInput || undefined,
+          contact_email: hodEmailInput || undefined,
+          hod_password: hodPasswordInput || undefined,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-        });
+        };
+        localSchools.push(existingSchool);
       }
 
-      if (hod_password) {
-        userPasswords.set(`usr-hod-${deptId}`, hod_password);
-        if (hod_email) {
-          userPasswords.set(hod_email.toLowerCase().trim(), hod_password);
+      const dbOnline = await isDbConnected();
+      if (dbOnline) {
+        try {
+          await pool.query(
+            `INSERT INTO departments (department_id, school_id, department_code, department_name, is_active)
+             VALUES ($1, $2, $3, $4, TRUE)
+             ON CONFLICT (department_code) DO UPDATE SET department_name = EXCLUDED.department_name, is_active = TRUE`,
+            [deptId, deptId, code, name]
+          );
+        } catch (_dbErr) {}
+
+        try {
+          await pool.query(
+            `INSERT INTO schools (school_id, school_code, school_name, description, is_active)
+             VALUES ($1, $2, $3, $4, TRUE)
+             ON CONFLICT (school_code) DO UPDATE SET school_name = EXCLUDED.school_name, is_active = TRUE`,
+            [deptId, code, name, programsInput || null]
+          );
+        } catch (_schErr) {}
+      }
+
+      if (hodPasswordInput) {
+        userPasswords.set(`usr-hod-${deptId}`, hodPasswordInput);
+        if (hodEmailInput) {
+          userPasswords.set(hodEmailInput.toLowerCase().trim(), hodPasswordInput);
         }
       }
 
@@ -1929,106 +1958,6 @@ router.get(
   }
 );
 
-router.post(
-  '/academic/departments',
-  authenticate,
-  requireRole(['GLOBAL_ADMIN']),
-  async (req: Request, res: Response): Promise<void> => {
-    try {
-      const id = req.body.department_id || req.body.id;
-      const code = req.body.department_code || req.body.code;
-      const name = req.body.department_name || req.body.name;
-      const programs = req.body.programs || req.body.description || '';
-      const hod_name = req.body.hod_name || req.body.dean_name;
-      const hod_email = req.body.hod_email || req.body.contact_email;
-      const hod_password = req.body.hod_password;
-
-      if (!code || !name) {
-        res.status(400).json({ error: 'MISSING_FIELDS', message: 'Department code and full name are required.' });
-        return;
-      }
-
-      const cleanCode = String(code).trim().toUpperCase();
-      const cleanName = String(name).trim();
-      const cleanId = id ? String(id).trim() : crypto.randomUUID();
-
-      const exists = localDepartments.find(
-        (d) => d.department_id === cleanId || d.department_code.toUpperCase() === cleanCode || d.department_name.toLowerCase() === cleanName.toLowerCase()
-      );
-      if (exists) {
-        res.status(200).json({
-          success: true,
-          message: `School / Department "${cleanName}" (${cleanCode}) already exists.`,
-          department: exists,
-        });
-        return;
-      }
-
-      const newDeptId = cleanId;
-      const newDept: InMemDepartment = {
-        department_id: newDeptId,
-        school_id: newDeptId,
-        department_code: cleanCode,
-        department_name: cleanName,
-        programs: programs || `${cleanCode} Programs`,
-        hod_name: hod_name || undefined,
-        hod_email: hod_email || undefined,
-        hod_password: hod_password || undefined,
-        hod_user_id: hod_email || `HOD-${cleanCode}`,
-      };
-
-      const dbOnline = await isDbConnected();
-      if (dbOnline) {
-        try {
-          await pool.query(
-            `INSERT INTO departments (department_id, school_id, department_code, department_name, is_active)
-             VALUES ($1, $2, $3, $4, TRUE)
-             ON CONFLICT (department_code) DO UPDATE SET department_name = EXCLUDED.department_name, is_active = TRUE`,
-            [newDeptId, newDeptId, cleanCode, cleanName]
-          );
-        } catch (_dbErr) {}
-
-        try {
-          await pool.query(
-            `INSERT INTO schools (school_id, school_code, school_name, description, is_active)
-             VALUES ($1, $2, $3, $4, TRUE)
-             ON CONFLICT (school_code) DO UPDATE SET school_name = EXCLUDED.school_name, is_active = TRUE`,
-            [newDeptId, cleanCode, cleanName, programs || null]
-          );
-        } catch (_schErr) {}
-      }
-
-      localDepartments.push(newDept);
-
-      // Also sync to localSchools
-      if (!localSchools.some((s) => s.school_code === cleanCode || s.school_id === newDeptId)) {
-        localSchools.push({
-          school_id: newDeptId,
-          school_code: cleanCode,
-          school_name: cleanName,
-          description: programs || `School / Department of ${cleanName}`,
-          programs: programs || `${cleanCode} Programs`,
-          is_active: true,
-          dean_name: hod_name,
-          hod_name: hod_name,
-          contact_email: hod_email,
-          hod_email: hod_email,
-          hod_password: hod_password,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        });
-      }
-
-      res.status(201).json({
-        success: true,
-        message: `School / Academic Department "${cleanName}" (${cleanCode}) created successfully.`,
-        department: newDept,
-      });
-    } catch (err: any) {
-      res.status(500).json({ error: 'CREATE_DEPARTMENT_FAILED', message: err.message });
-    }
-  }
-);
 
 router.delete(
   '/academic/departments/:id',

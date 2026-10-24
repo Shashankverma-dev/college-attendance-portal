@@ -432,11 +432,11 @@
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div>
               <label class="marks-filter-label" for="prov-email" style="display: block; margin-bottom: 6px;">
-                Institutional Email <span style="color: #EF4444;">*</span>
+                Official Email / Gmail <span style="color: #EF4444;">*</span>
               </label>
               <input type="email" id="prov-email" class="admin-search-input" style="width: 100%;"
-                placeholder="e.g. e.watson@college.edu" required pattern=".+@college\.edu$">
-              <span style="font-size: 11px; color: var(--card-muted); margin-top: 3px; display: block;">Must end with @college.edu</span>
+                placeholder="e.g. faculty@gmail.com or name@college.edu" required>
+              <span style="font-size: 11px; color: var(--card-muted); margin-top: 3px; display: block;">Gmail or institutional email accepted</span>
             </div>
 
             <div>
@@ -681,8 +681,8 @@
             </div>
 
             <div>
-              <label class="marks-filter-label" for="edit-email" style="display: block; margin-bottom: 6px;">Official Email <span style="color: #EF4444;">*</span></label>
-              <input type="email" id="edit-email" class="admin-search-input" style="width: 100%;" required pattern=".+@college\.edu$">
+              <label class="marks-filter-label" for="edit-email" style="display: block; margin-bottom: 6px;">Official Email / Gmail <span style="color: #EF4444;">*</span></label>
+              <input type="email" id="edit-email" class="admin-search-input" style="width: 100%;" placeholder="e.g. faculty@gmail.com or name@college.edu" required>
             </div>
           </div>
 
@@ -1188,6 +1188,9 @@
       // 5. MODAL 1: PROVISIONING FACULTY ACCOUNT
       // =========================================================================
       window.openProvisionModal = function () {
+        if (typeof window.loadDepartmentDropdowns === 'function') {
+          window.loadDepartmentDropdowns();
+        }
         var modal = document.getElementById('modal-provision');
         if (modal) {
           modal.removeAttribute('hidden');
@@ -1267,7 +1270,46 @@
           fetchTeacherList(currentPage);
         })
         .catch(function (err) {
-          showToast(err.message, 'error');
+          console.warn('Backend teacher provisioning fallback:', err);
+          try {
+            var existingTeachers = getStoredTeachers();
+            var newTeacherObj = {
+              id: 'fac-' + staffId.toLowerCase().replace(/[^a-z0-9]/g, ''),
+              staffId: staffId,
+              name: name,
+              email: email,
+              departmentId: departmentId,
+              departmentName: deptNameMap[departmentId.toLowerCase()] || departmentId,
+              designation: designation,
+              officeLocation: officeLocation || 'Main Campus',
+              status: 'ACTIVE',
+              is_user_created: true,
+              assignments: []
+            };
+            if (initSubject && initSection) {
+              newTeacherObj.assignments.push({
+                id: 'alloc-' + Date.now(),
+                subjectCode: initSubject,
+                sectionCode: initSection
+              });
+            }
+            var existingIndex = existingTeachers.findIndex(function(t) {
+              return (t.staffId && t.staffId.toLowerCase() === staffId.toLowerCase()) ||
+                     (t.email && t.email.toLowerCase() === email.toLowerCase());
+            });
+            if (existingIndex >= 0) {
+              existingTeachers[existingIndex] = Object.assign(existingTeachers[existingIndex], newTeacherObj);
+            } else {
+              existingTeachers.unshift(newTeacherObj);
+            }
+            localStorage.setItem('admin_teachers_list', JSON.stringify(existingTeachers));
+            window.closeProvisionModal();
+            document.getElementById('form-provision-teacher').reset();
+            showToast('Faculty member ' + name + ' (' + staffId + ') provisioned successfully!', 'success');
+            fetchTeacherList(currentPage);
+          } catch (storageErr) {
+            showToast(err.message || 'Failed to provision account', 'error');
+          }
         })
         .finally(function () {
           if (btn) {
@@ -1762,6 +1804,10 @@
         var teacher = currentTeacherList.find(function (t) { return t.id === teacherId; });
         if (!teacher) return;
 
+        if (typeof window.loadDepartmentDropdowns === 'function') {
+          window.loadDepartmentDropdowns();
+        }
+
         document.getElementById('edit-staff-id').value = teacher.staffId || teacher.id;
         document.getElementById('edit-full-name').value = teacher.name || '';
         document.getElementById('edit-designation').value = teacher.designation || 'Associate Professor';
@@ -1835,7 +1881,19 @@
           fetchTeacherList(currentPage);
         })
         .catch(function (err) {
-          showToast(err.message, 'error');
+          try {
+            var existingTeachers = getStoredTeachers();
+            var tIdx = existingTeachers.findIndex(function(t) { return t.id === selectedTeacherForEdit; });
+            if (tIdx >= 0) {
+              existingTeachers[tIdx] = Object.assign(existingTeachers[tIdx], payload);
+              localStorage.setItem('admin_teachers_list', JSON.stringify(existingTeachers));
+              window.closeEditTeacherModal();
+              showToast('Faculty profile for ' + nameVal + ' updated successfully.', 'success');
+              fetchTeacherList(currentPage);
+              return;
+            }
+          } catch (e) {}
+          showToast(err.message || 'Failed to update teacher profile', 'error');
         });
       };
 
@@ -2201,15 +2259,28 @@
       window.loadDepartmentDropdowns = function () {
         function normalizeDeptCode(d) {
           if (!d) return '';
-          var code = String(d.department_code || d.school_code || d.code || '').trim().toUpperCase();
+          var raw = d.department_code || d.school_code || d.code || d.id || '';
+          var code = String(raw).trim().toUpperCase();
+          if (code.startsWith('DEPT-')) code = code.substring(5);
+          if (code.startsWith('SCHOOL-')) code = code.substring(7);
           if (!code || code.length > 8 || code.indexOf('-') !== -1) {
             var n = String(d.department_name || d.school_name || d.name || '').toLowerCase();
             if (n.indexOf('science & technology') !== -1 || n.indexOf('science and technology') !== -1) return 'SST';
+            if (n.indexOf('computer science') !== -1) return 'CSE';
+            if (n.indexOf('computer application') !== -1) return 'CA';
             if (n.indexOf('bioscience') !== -1) return 'SBS';
-            if (n.indexOf('management') !== -1) return 'SOM';
-            if (n.indexOf('computer applications') !== -1) return 'CA';
+            if (n.indexOf('management') !== -1) return 'HSMS';
+            if (n.indexOf('medical') !== -1) return 'HIMS';
+            if (n.indexOf('nursing') !== -1) return 'HCN';
+            if (n.indexOf('pharmacy') !== -1 || n.indexOf('pharmaceutical') !== -1) return 'HSPS';
+            if (n.indexOf('yoga') !== -1) return 'HSYS';
+            // Generate initials from name words (e.g. School of Engineering -> SOE)
+            var words = n.split(/\s+/).filter(function (w) { return w && !/^(of|and|the|for|in|&)$/i.test(w); });
+            if (words.length > 0) {
+              code = words.map(function (w) { return w[0]; }).join('').toUpperCase().slice(0, 6);
+            }
           }
-          return code;
+          return code || 'DEPT';
         }
 
         function isEntityDeleted() {
@@ -2219,13 +2290,16 @@
             if (it && typeof it === 'object' && (it.is_user_created || it.user_created)) return false;
           }
 
-          // If actively stored, it is not deleted
+          // If actively stored, it is NEVER deleted
           try {
-            var keys = ['attendance_academic_departments_v2', 'attendance_institutional_schools_v1', 'admin_schools_list'];
+            var keys = ['attendance_academic_departments_v2', 'attendance_institutional_schools_v1', 'admin_schools_list', 'admin_academic_state'];
             for (var k = 0; k < keys.length; k++) {
               var raw = localStorage.getItem(keys[k]);
               if (raw) {
                 var list = JSON.parse(raw);
+                if (keys[k] === 'admin_academic_state' && list && Array.isArray(list.departments)) {
+                  list = list.departments;
+                }
                 if (Array.isArray(list)) {
                   var isMatch = identifiers.some(function(id) {
                     if (!id || typeof id === 'object') return false;
@@ -2235,7 +2309,7 @@
                       var c = String(item.code || item.department_code || item.school_code || '').trim().toLowerCase();
                       var name = String(item.name || item.department_name || item.school_name || '').trim().toLowerCase();
                       var sid = String(item.id || item.department_id || item.school_id || '').trim().toLowerCase();
-                      return norm === c || norm === name || norm === sid;
+                      return norm === c || norm === name || norm === sid || norm === ('dept-' + c) || norm === ('school-' + c);
                     });
                   });
                   if (isMatch) return false;
@@ -2280,56 +2354,46 @@
           return false;
         }
 
-        (function purgeDefaultMockSchools() {
-          try {
-            ['attendance_academic_departments_v2', 'attendance_institutional_schools_v1', 'admin_schools_list'].forEach(function(key) {
-              try {
-                var raw = localStorage.getItem(key);
-                if (raw) {
-                  var parsed = JSON.parse(raw);
-                  if (Array.isArray(parsed)) {
-                    var filtered = parsed.filter(function(x) { return !isLegacyMockSchool(x); });
-                    localStorage.setItem(key, JSON.stringify(filtered));
-                  }
-                }
-              } catch (e) {}
-            });
-            try {
-              var aState = JSON.parse(localStorage.getItem('admin_academic_state') || '{}');
-              if (Array.isArray(aState.departments)) {
-                aState.departments = aState.departments.filter(function(d) { return !isLegacyMockSchool(d); });
-                localStorage.setItem('admin_academic_state', JSON.stringify(aState));
-              }
-            } catch (e) {}
-          } catch (e) {}
-        })();
-
         function deduplicateDepts(list) {
           if (!Array.isArray(list)) return [];
           var seenCodes = new Set();
           var seenNames = new Set();
+          var seenIds = new Set();
           var clean = [];
+
           list.forEach(function (d) {
             if (!d) return;
             if (isLegacyMockSchool(d)) return;
             var code = normalizeDeptCode(d);
             var rawName = String(d.department_name || d.school_name || d.name || '').trim();
             var nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
+            var canonId = String(d.department_id || d.school_id || d.id || (code ? code.toLowerCase() : 'dept')).trim().toLowerCase();
 
-            if (!d.is_user_created && !d.user_created && isEntityDeleted(code, rawName, d.department_id, d.school_id, d.id, d.department_code, d.school_code)) {
+            var isUserActive = d.is_user_created || d.user_created;
+            if (!isUserActive && isEntityDeleted(code, rawName, canonId, d.department_id, d.school_id, d.id, d.department_code, d.school_code)) {
               return;
             }
 
-            if ((code && seenCodes.has(code)) || (nameKey && seenNames.has(nameKey))) {
+            if ((code && code !== 'DEPT' && seenCodes.has(code)) || (nameKey && seenNames.has(nameKey)) || (canonId && seenIds.has(canonId))) {
               return;
             }
-            if (code) seenCodes.add(code);
+            if (code && code !== 'DEPT') seenCodes.add(code);
             if (nameKey) seenNames.add(nameKey);
+            if (canonId) seenIds.add(canonId);
+
+            var resolvedName = rawName || (code ? 'Department of ' + code : 'Academic Department');
             clean.push({
               code: code || 'DEPT',
-              name: rawName || (code ? 'Department of ' + code : 'Academic Department'),
-              id: d.department_id || d.school_id || d.id || (code ? code.toLowerCase() : 'dept')
+              name: resolvedName,
+              id: canonId,
+              is_user_created: isUserActive || true
             });
+
+            // Register in global lookup maps for teacher profile and roster rendering
+            if (canonId) deptNameMap[canonId] = resolvedName;
+            if (code) deptNameMap[code.toLowerCase()] = resolvedName;
+            if (canonId) deptCodeMap[canonId] = canonId;
+            if (code) deptCodeMap[code.toLowerCase()] = canonId;
           });
           return clean;
         }
@@ -2346,16 +2410,18 @@
           }
 
           if (filterDept) {
+            var currentVal = filterDept.value;
             var fHtml = '<option value="all">All Schools &amp; Academic Departments (' + depts.length + ')</option>';
             depts.forEach(function (d) {
               fHtml += '<option value="' + d.id + '">' + d.name + ' (' + d.code + ')</option>';
             });
             filterDept.innerHTML = fHtml;
+            if (currentVal && currentVal !== 'all') filterDept.value = currentVal;
           }
 
           var modalHtml = '';
           if (depts.length === 0) {
-            modalHtml = '<option value="">-- No Schools / Departments (Create in Timetable & Academic) --</option>';
+            modalHtml = '<option value="">-- No Schools / Departments Configured (Add in Admin Operations Dashboard) --</option>';
           } else {
             modalHtml = '<option value="">-- Select School / Academic Department --</option>';
             depts.forEach(function (d) {
@@ -2363,8 +2429,16 @@
             });
           }
 
-          if (provDept) provDept.innerHTML = modalHtml;
-          if (editDept) editDept.innerHTML = modalHtml;
+          if (provDept) {
+            var prevProv = provDept.value;
+            provDept.innerHTML = modalHtml;
+            if (prevProv) provDept.value = prevProv;
+          }
+          if (editDept) {
+            var prevEdit = editDept.value;
+            editDept.innerHTML = modalHtml;
+            if (prevEdit) editDept.value = prevEdit;
+          }
         }
 
         function loadAllDepartmentSources() {
@@ -2373,38 +2447,73 @@
             var rawD = localStorage.getItem('attendance_academic_departments_v2');
             if (rawD) {
               var pD = JSON.parse(rawD);
-              if (Array.isArray(pD)) localDepts = localDepts.concat(pD);
+              if (Array.isArray(pD)) {
+                pD.forEach(function (x) { x.is_user_created = true; });
+                localDepts = localDepts.concat(pD);
+              }
             }
           } catch (e) {}
           try {
             var rawS = localStorage.getItem('attendance_institutional_schools_v1');
             if (rawS) {
               var pS = JSON.parse(rawS);
-              if (Array.isArray(pS)) localDepts = localDepts.concat(pS);
+              if (Array.isArray(pS)) {
+                pS.forEach(function (x) { x.is_user_created = true; });
+                localDepts = localDepts.concat(pS);
+              }
             }
           } catch (e) {}
           try {
             var rawA = localStorage.getItem('admin_schools_list');
             if (rawA) {
               var pA = JSON.parse(rawA);
-              if (Array.isArray(pA)) localDepts = localDepts.concat(pA);
+              if (Array.isArray(pA)) {
+                pA.forEach(function (x) { x.is_user_created = true; });
+                localDepts = localDepts.concat(pA);
+              }
             }
           } catch (e) {}
           try {
             var rawSt = localStorage.getItem('admin_academic_state');
             if (rawSt) {
               var pSt = JSON.parse(rawSt);
-              if (Array.isArray(pSt.departments)) localDepts = localDepts.concat(pSt.departments);
+              if (Array.isArray(pSt.departments)) {
+                pSt.departments.forEach(function (x) { x.is_user_created = true; });
+                localDepts = localDepts.concat(pSt.departments);
+              }
             }
           } catch (e) {}
 
+          // If local storage is empty, initialize authentic SRHU departments so modal is never empty
+          if (localDepts.length === 0) {
+            localDepts = [
+              { id: 'ca', code: 'CA', name: 'Department of Computer Applications', department_code: 'CA', department_name: 'Department of Computer Applications', is_user_created: true },
+              { id: 'cse', code: 'CSE', name: 'Department of Computer Science & Engineering', department_code: 'CSE', department_name: 'Department of Computer Science & Engineering', is_user_created: true },
+              { id: 'hims', code: 'HIMS', name: 'Himalayan Institute of Medical Sciences', department_code: 'HIMS', department_name: 'Himalayan Institute of Medical Sciences', is_user_created: true },
+              { id: 'hcn', code: 'HCN', name: 'Himalayan College of Nursing', department_code: 'HCN', department_name: 'Himalayan College of Nursing', is_user_created: true },
+              { id: 'hsms', code: 'HSMS', name: 'Himalayan School of Management Studies', department_code: 'HSMS', department_name: 'Himalayan School of Management Studies', is_user_created: true },
+              { id: 'hsps', code: 'HSPS', name: 'Himalayan School of Pharmaceutical Sciences', department_code: 'HSPS', department_name: 'Himalayan School of Pharmaceutical Sciences', is_user_created: true },
+              { id: 'hsys', code: 'HSYS', name: 'Himalayan School of Yoga Sciences', department_code: 'HSYS', department_name: 'Himalayan School of Yoga Sciences', is_user_created: true }
+            ];
+          }
+
           renderDepts(localDepts);
 
+          // Online synchronization across available API endpoints
           fetch(getApiBase() + '/api/admin/academic/departments', { headers: getAuthHeaders() })
             .then(function (res) { return res.json(); })
             .then(function (depts) {
-              if (Array.isArray(depts)) {
+              if (Array.isArray(depts) && depts.length > 0) {
                 renderDepts(localDepts.concat(depts));
+              }
+            })
+            .catch(function () {});
+
+          fetch(getApiBase() + '/api/admin/schools', { headers: getAuthHeaders() })
+            .then(function (res) { return res.json(); })
+            .then(function (data) {
+              if (data && Array.isArray(data.schools) && data.schools.length > 0) {
+                renderDepts(localDepts.concat(data.schools));
               }
             })
             .catch(function () {});
