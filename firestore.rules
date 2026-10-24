@@ -2,7 +2,7 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
-    // Authentication helpers
+    // Authentication & authorization helpers
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -12,15 +12,14 @@ service cloud.firestore {
     }
     
     function getUserRole() {
-      return request.auth.token.role != null ? request.auth.token.role : 'student';
+      return request.auth.token.role != null ? request.auth.token.role.lower() : 'student';
     }
 
     function isAdmin() {
       return isAuthenticated() && (
         getUserRole() == 'admin' || 
         getUserRole() == 'global_admin' || 
-        getUserRole() == 'hod' ||
-        request.auth.token.email == 'shashankvermahsst@gmail.com'
+        getUserRole() == 'hod'
       );
     }
     
@@ -32,42 +31,41 @@ service cloud.firestore {
       );
     }
 
-    // User profiles & auth mappings
+    // User profiles & auth mappings: users can read their own profile, admins can manage all
     match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow write: if isUser(userId) || isAdmin();
+      allow read: if isAuthenticated() && (isUser(userId) || isAdmin() || isFaculty());
+      allow write: if isAdmin();
     }
 
-    // Student roster and enrollment records
+    // Student roster and enrollment records: read by authenticated users, admin write
     match /students/{studentId} {
       allow read: if isAuthenticated();
-      allow write: if isFaculty() || isAdmin();
+      allow write: if isAdmin();
     }
 
-    // Faculty directory & teaching assignments
+    // Faculty directory & teaching assignments: public directory read, admin write
     match /teachers/{teacherId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin();
     }
 
-    // Live Attendance Sessions & QR registers
+    // Live Attendance Sessions & QR registers: faculty/admin manage, authenticated can read active sessions
     match /attendance_sessions/{sessionId} {
       allow read: if isAuthenticated();
       allow write: if isFaculty() || isAdmin();
       
-      // Attendance scans inside a session
+      // Attendance scans inside a session (students scan with valid auth, faculty/admin manage)
       match /scans/{scanId} {
-        allow read: if isAuthenticated();
+        allow read: if isAuthenticated() && (isFaculty() || isAdmin() || (request.auth.uid == resource.data.student_uid));
         allow create: if isAuthenticated();
         allow update, delete: if isFaculty() || isAdmin();
       }
     }
 
-    // Individual attendance marks
+    // Individual attendance records: managed strictly by Faculty or Admin; students can read
     match /attendance_records/{recordId} {
       allow read: if isAuthenticated();
-      allow create, update: if isAuthenticated();
-      allow delete: if isAdmin();
+      allow create, update, delete: if isFaculty() || isAdmin();
     }
 
     // Academic structure (Departments, Courses, Semesters, Sections)
@@ -76,35 +74,34 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // Timetable & schedules
+    // Timetable & schedules: managed strictly by Admin/Faculty; students read
     match /timetable/{slotId} {
       allow read: if isAuthenticated();
       allow write: if isAdmin() || isFaculty();
     }
 
-    // Internal & Final Examination marks
+    // Internal & Final Examination marks: managed strictly by Faculty/Admin; students read published
     match /marks/{markId} {
       allow read: if isAuthenticated();
       allow write: if isFaculty() || isAdmin();
     }
 
-    // Attendance correction requests
+    // Attendance correction requests: students/faculty can submit requests; faculty/admin approve/manage
     match /corrections/{correctionId} {
       allow read: if isAuthenticated();
       allow create: if isAuthenticated();
       allow update, delete: if isFaculty() || isAdmin();
     }
 
-    // Immutable Audit Logs (Append-only)
+    // Immutable Audit Logs: append-only via server/admin SDK, strictly read-only for admin, never client-writable
     match /audit_logs/{logId} {
       allow read: if isAdmin();
-      allow create: if isAuthenticated();
-      allow update, delete: if false; // strictly immutable
+      allow write: if false;
     }
 
-    // Catch-all authenticated access for application operational collections
+    // Deny-by-default for any unmapped collections
     match /{document=**} {
-      allow read, write: if isAuthenticated();
+      allow read, write: if false;
     }
   }
 }

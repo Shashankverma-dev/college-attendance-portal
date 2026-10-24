@@ -59,6 +59,22 @@ export const localAttendanceSessions: InMemAttendanceSession[] = [];
 export const localAttendanceRecords: InMemAttendanceRecord[] = [];
 
 /**
+ * Institutional Formula Requirement:
+ * Attendance percentage = Present / (Present + Absent) * 100
+ * Approved Leave (L) is strictly excluded from both numerator and denominator.
+ * Returns null when denominator is 0.
+ */
+export function calculateAttendancePercentage(records: Array<{ attendance_status: 'P' | 'A' | 'L' }>): string | null {
+  const present = records.filter((r) => r.attendance_status === 'P').length;
+  const absent = records.filter((r) => r.attendance_status === 'A').length;
+  const denominator = present + absent;
+  if (denominator === 0) {
+    return null;
+  }
+  return ((present / denominator) * 100).toFixed(1);
+}
+
+/**
  * GET /api/attendance/teacher/timetable
  * Returns authorized daily and weekly timetable entries for the authenticated teacher.
  */
@@ -103,9 +119,8 @@ router.get(
             const isAssigned =
               e.primary_faculty_id === teacherUid ||
               e.faculty_staff_id === teacherUid ||
-              req.user?.role === 'GLOBAL_ADMIN' ||
-              (teacherUid && teacherUid.includes('jenkins') && e.faculty_staff_id === 'FAC-201') ||
-              (teacherUid && teacherUid.includes('fac'));
+              (e.faculty_staff_id && teacherUid && e.faculty_staff_id.toLowerCase() === teacherUid.toLowerCase()) ||
+              req.user?.role === 'GLOBAL_ADMIN';
 
             if (isAssigned) {
               const existingSess = localAttendanceSessions.find(
@@ -767,13 +782,106 @@ router.get(
   async (req: Request, res: Response): Promise<void> => {
     const { section, subject, teacher, term } = req.query;
 
+    const dbOnline = await isDbConnected();
+
+    if (dbOnline) {
+      try {
+        const summaryRes = await pool.query(`
+          SELECT 
+            COUNT(DISTINCT s.session_id)::int as total_conducted_sessions,
+            COUNT(ar.record_id)::int as total_attendance_entries,
+            COUNT(CASE WHEN ar.attendance_status = 'P' THEN 1 END)::int as present_count,
+            COUNT(CASE WHEN ar.attendance_status = 'A' THEN 1 END)::int as absent_count,
+            COUNT(CASE WHEN ar.attendance_status = 'L' THEN 1 END)::int as leave_count
+          FROM attendance_sessions s
+          LEFT JOIN attendance_records ar ON s.session_id = ar.session_id
+          WHERE s.submission_status = 'LOCKED'
+        `);
+        const row = summaryRes.rows[0];
+        const validDenom = (row?.present_count || 0) + (row?.absent_count || 0);
+        const overallRate = validDenom > 0 
+          ? `${(((row.present_count || 0) / validDenom) * 100).toFixed(1)}%` 
+          : 'N/A';
+
+        const sectionRes = await pool.query(`
+          SELECT 
+            sec.section_name as section,
+            COUNT(DISTINCT sp.student_profile_id)::int as enrolled_count,
+            ROUND(
+              (COUNT(CASE WHEN ar.attendance_status = 'P' THEN 1 END)::numeric / 
+               NULLIF(COUNT(CASE WHEN ar.attendance_status IN ('P', 'A') THEN 1 END), 0)) * 100, 
+              1
+            ) as avg_attendance
+          FROM sections sec
+          LEFT JOIN student_profiles sp ON sec.section_id = sp.current_section_id
+          LEFT JOIN attendance_sessions s ON sec.section_id = s.section_id AND s.submission_status = 'LOCKED'
+          LEFT JOIN attendance_records ar ON s.session_id = ar.session_id AND sp.student_profile_id = ar.student_profile_id
+          GROUP BY sec.section_id, sec.section_name
+          ORDER BY sec.section_name ASC
+        `);
+
+        const sectionBreakdown = sectionRes.rows.map((r: any) => ({
+          section: r.section,
+          enrolledCount: r.enrolled_count,
+          averageAttendance: r.avg_attendance ? `${r.avg_attendance}%` : 'N/A',
+          complianceStatus: r.avg_attendance && parseFloat(r.avg_attendance) >= 75.0 ? 'COMPLIANT' : 'DEFICIENT',
+        }));
+
+        res.json({
+          success: true,
+          term: term || 'Autumn 2026',
+          summary: {
+            totalConductedSessions: row?.total_conducted_sessions || 0,
+            totalAttendanceEntries: row?.total_attendance_entries || 0,
+            overallAttendanceRate: overallRate,
+            shortageThreshold: 75.0,
+          },
+          sectionBreakdown,
+        });
+        return;
+      } catch (dbErr: any) {
+        if (process.env.NODE_ENV === 'production') {
+          res.status(500).json({ error: 'DATABASE_QUERY_ERROR', message: dbErr.message });
+          return;
+        }
+      }
+    }
+
     const lockedSessions = localAttendanceSessions.filter((s) => s.submission_status === 'LOCKED');
     const totalRecords = localAttendanceRecords.length;
     const presentRecords = localAttendanceRecords.filter((r) => r.attendance_status === 'P').length;
     const absentRecords = localAttendanceRecords.filter((r) => r.attendance_status === 'A').length;
     const leaveRecords = localAttendanceRecords.filter((r) => r.attendance_status === 'L').length;
     const totalValid = presentRecords + absentRecords;
-    const attendancePct = totalValid > 0 ? ((presentRecords / totalValid) * 100).toFixed(1) : '92.4';
+    const attendancePct = totalValid > 0 ? `${((presentRecords / totalValid) * 100).toFixed(1)}%` : 'N/A';
+
+    // Calculate dynamic section breakdown from local in-memory records
+    const sectionMap = new Map<string, { present: number; totalValid: number; enrolled: Set<string> }>();
+    for (const rec of localAttendanceRecords) {
+      const sess = localAttendanceSessions.find((s) => s.session_id === rec.session_id);
+      const secName = sess?.section_name || 'General';
+      if (!sectionMap.has(secName)) {
+        sectionMap.set(secName, { present: 0, totalValid: 0, enrolled: new Set() });
+      }
+      const entry = sectionMap.get(secName)!;
+      entry.enrolled.add(rec.student_id);
+      if (rec.attendance_status === 'P') {
+        entry.present++;
+        entry.totalValid++;
+      } else if (rec.attendance_status === 'A') {
+        entry.totalValid++;
+      }
+    }
+
+    const sectionBreakdown = Array.from(sectionMap.entries()).map(([secName, data]) => {
+      const avg = data.totalValid > 0 ? ((data.present / data.totalValid) * 100).toFixed(1) : null;
+      return {
+        section: secName,
+        enrolledCount: data.enrolled.size,
+        averageAttendance: avg ? `${avg}%` : 'N/A',
+        complianceStatus: avg && parseFloat(avg) >= 75.0 ? 'COMPLIANT' : 'DEFICIENT',
+      };
+    });
 
     res.json({
       success: true,
@@ -781,14 +889,10 @@ router.get(
       summary: {
         totalConductedSessions: lockedSessions.length,
         totalAttendanceEntries: totalRecords,
-        overallAttendanceRate: `${attendancePct}%`,
+        overallAttendanceRate: attendancePct,
         shortageThreshold: 75.0,
       },
-      sectionBreakdown: [
-        { section: 'BCA Sem 5 Sec C', enrolledCount: 80, averageAttendance: '91.8%', complianceStatus: 'COMPLIANT' },
-        { section: 'BCA Sem 1 Sec A', enrolledCount: 80, averageAttendance: '94.2%', complianceStatus: 'COMPLIANT' },
-        { section: 'B.Tech CSE Sem 1 Sec A', enrolledCount: 80, averageAttendance: '89.5%', complianceStatus: 'COMPLIANT' },
-      ],
+      sectionBreakdown,
     });
   }
 );

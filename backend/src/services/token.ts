@@ -255,7 +255,7 @@ export class TokenService {
    */
   static getSessionSecret(): string {
     const isProd = process.env.NODE_ENV === 'production';
-    const envSecret = process.env.SESSION_SECRET;
+    const envSecret = process.env.SESSION_SECRET || process.env.SESSION_SIGNING_SECRET;
 
     if (isProd) {
       if (

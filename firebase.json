@@ -20,7 +20,8 @@
       "docs/**",
       "*.zip",
       "*.docx",
-      "*.xlsx"
+      "*.xlsx",
+      "accounts.json"
     ],
     "cleanUrls": false
   }

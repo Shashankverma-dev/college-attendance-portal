@@ -1,21 +1,6 @@
+import { calculateAttendancePercentage } from '../routes/attendance.routes';
+
 describe('Phase 8: Attendance Business Logic & Calculations', () => {
-  /**
-   * Institutional Formula Requirement (Phase 8.3):
-   * Attendance percentage = Present / (Present + Absent) * 100
-   * Approved Leave (L) MUST be excluded from both numerator and denominator.
-   */
-  function calculateAttendanceRate(records: Array<{ attendance_status: 'P' | 'A' | 'L' }>): string | null {
-    const present = records.filter((r) => r.attendance_status === 'P').length;
-    const absent = records.filter((r) => r.attendance_status === 'A').length;
-    const leave = records.filter((r) => r.attendance_status === 'L').length;
-
-    const denominator = present + absent;
-    if (denominator === 0) {
-      return null; // Safe handling: no instructional sessions conducted or only Approved Leave
-    }
-
-    return ((present / denominator) * 100).toFixed(1);
-  }
 
   it('correctly calculates percentage using Present / (Present + Absent) * 100', () => {
     const records: Array<{ attendance_status: 'P' | 'A' | 'L' }> = [
@@ -26,7 +11,7 @@ describe('Phase 8: Attendance Business Logic & Calculations', () => {
     ];
 
     // 3 Present, 1 Absent => 3 / (3 + 1) * 100 = 75.0%
-    const rate = calculateAttendanceRate(records);
+    const rate = calculateAttendancePercentage(records);
     expect(rate).toBe('75.0');
   });
 
@@ -43,20 +28,20 @@ describe('Phase 8: Attendance Business Logic & Calculations', () => {
     // Numerator: 3
     // Denominator: 3 + 1 = 4 (Leave excluded)
     // Rate: 3/4 * 100 = 75.0%
-    const rate = calculateAttendanceRate(records);
+    const rate = calculateAttendancePercentage(records);
     expect(rate).toBe('75.0');
   });
 
   it('handles zero denominator safely without returning NaN or Infinity', () => {
     // Case 1: No attendance records at all
-    expect(calculateAttendanceRate([])).toBeNull();
+    expect(calculateAttendancePercentage([])).toBeNull();
 
     // Case 2: Only Approved Leave records (no instructional attendance sessions)
     const onlyLeave: Array<{ attendance_status: 'P' | 'A' | 'L' }> = [
       { attendance_status: 'L' },
       { attendance_status: 'L' },
     ];
-    expect(calculateAttendanceRate(onlyLeave)).toBeNull();
+    expect(calculateAttendancePercentage(onlyLeave)).toBeNull();
   });
 
   it('detects and prevents duplicate attendance for the same student in the same session', () => {

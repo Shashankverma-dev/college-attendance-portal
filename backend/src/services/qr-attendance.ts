@@ -3,6 +3,7 @@ import { PoolClient } from 'pg';
 import { pool } from '../config/db';
 import { AuditService } from './audit';
 import { localAttendanceSessions, localAttendanceRecords, InMemAttendanceSession, InMemAttendanceRecord } from '../routes/attendance.routes';
+import { localTeachers } from '../routes/admin.routes';
 import { localStudents, InMemStudentProfile, initializeSeedStudents } from './bulk-onboard';
 import { localTimetables, localSectionGroups, TimetableEntry, initializeMasterTimetables } from './timetable';
 
@@ -128,12 +129,14 @@ export class QRAttendanceService {
     }
 
     // 2. Authorize Teacher Assignment
+    const teacher = localTeachers.find(
+      (t) => t.user_uid === params.teacherUid || t.faculty_staff_id === params.teacherUid
+    );
     const isAuthorized =
+      params.teacherRole === 'GLOBAL_ADMIN' ||
       targetEntry.primary_faculty_id === params.teacherUid ||
       targetEntry.faculty_staff_id === params.teacherUid ||
-      params.teacherRole === 'GLOBAL_ADMIN' ||
-      (params.teacherUid && params.teacherUid.includes('jenkins') && targetEntry.faculty_staff_id === 'FAC-201') ||
-      (params.teacherUid && params.teacherUid.includes('fac'));
+      (teacher && (targetEntry.primary_faculty_id === teacher.faculty_profile_id || targetEntry.faculty_staff_id === teacher.faculty_staff_id));
 
     if (!isAuthorized) {
       throw {

@@ -749,7 +749,7 @@ router.post(
             fa.subject_id === assessment.subject_id &&
             fa.is_active
         );
-        if (!hasAssignment && !uid.startsWith('test-') && !uid.startsWith('mock-')) {
+        if (!hasAssignment) {
           res.status(403).json({ error: 'UNAUTHORIZED', message: 'Access denied for this section and subject.' });
           return;
         }
@@ -918,7 +918,7 @@ router.post(
             fa.subject_id === assessment.subject_id &&
             fa.is_active
         );
-        if (!hasAssignment && !uid.startsWith('test-') && !uid.startsWith('mock-')) {
+        if (!hasAssignment) {
           res.status(403).json({ error: 'UNAUTHORIZED', message: 'Access denied for this section and subject.' });
           return;
         }

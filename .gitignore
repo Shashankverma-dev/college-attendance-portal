@@ -8,6 +8,9 @@ node_modules/
 **/.env
 .env.local
 .env.*.local
+accounts.json
+*credentials*.json
+*serviceAccount*.json
 
 # Build outputs
 dist/
