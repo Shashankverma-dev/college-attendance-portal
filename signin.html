@@ -37,26 +37,6 @@
       Use your Gmail, Institutional ID, or Username to access your attendance records.
     </p>
 
-    <!-- 1-Click Google / Gmail Sign-In -->
-    <div id="google-signin-wrap" style="margin-bottom: 18px;">
-      <button type="button" class="btn google-signin-btn" id="google-signin-btn" style="width: 100%; display: inline-flex; align-items: center; justify-content: center; gap: 12px; background: #FFFFFF; color: #1E293B; border: 1.5px solid #CBD5E1; font-weight: 600; font-size: 15px; padding: 11px 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.06); cursor: pointer; transition: all 0.2s ease;">
-        <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"/>
-          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/>
-          <path fill="#FBBC05" d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 10.04 0 12s.45 3.82 1.25 5.42l4.03-3.15z"/>
-          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
-        </svg>
-        <span>Sign in with Google / Gmail</span>
-      </button>
-    </div>
-
-    <!-- Divider -->
-    <div id="signin-divider" style="display: flex; align-items: center; text-align: center; margin: 18px 0 20px 0; color: #64748B; font-size: 13px;">
-      <span style="flex: 1; border-bottom: 1px solid #E2E8F0;"></span>
-      <span style="padding: 0 14px; font-weight: 500;">or enter credentials</span>
-      <span style="flex: 1; border-bottom: 1px solid #E2E8F0;"></span>
-    </div>
-
     <!-- Sign In / Activation / Reset Form -->
     <form class="form" id="signin-form" novalidate>
       <!-- User ID / Gmail / Username Field -->
@@ -333,10 +313,10 @@
 
       // Helper to ensure Firebase module is fully initialized
       async function ensureFirebaseReady() {
-        if (typeof window.signInWithFirebase === 'function' && typeof window.signInWithGoogle === 'function') return true;
+        if (typeof window.signInWithFirebase === 'function') return true;
         for (var i = 0; i < 40; i++) {
           await new Promise(function (r) { setTimeout(r, 100); });
-          if (typeof window.signInWithFirebase === 'function' && typeof window.signInWithGoogle === 'function') return true;
+          if (typeof window.signInWithFirebase === 'function') return true;
         }
         return typeof window.signInWithFirebase === 'function';
       }
@@ -396,92 +376,6 @@
           });
       }
 
-      // 1-Click Google / Gmail Sign-In Handler
-      var googleBtn = document.getElementById('google-signin-btn');
-      if (googleBtn) {
-        googleBtn.addEventListener('click', async function (e) {
-          e.preventDefault();
-          status.hidden = true;
-          showStatus('Connecting to Google / Gmail...', 'info');
-          googleBtn.disabled = true;
-
-          try {
-            var fbReady = await ensureFirebaseReady();
-            if (!fbReady || typeof window.signInWithGoogle !== 'function') {
-              throw new Error('Google Sign-In is initializing. Please wait a moment and try again.');
-            }
-
-            var result = await window.signInWithGoogle();
-            var fbUser = result.user;
-            var email = (fbUser.email || '').toLowerCase();
-            var idToken = await fbUser.getIdToken();
-            var displayName = fbUser.displayName || email.split('@')[0] || 'User';
-
-            showStatus('Signed in with Google (' + email + '). Verifying institutional profile...', 'info');
-
-            var role = 'student';
-            var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
-
-            try {
-              var meRes = await fetch(apiBase + '/api/auth/me', {
-                headers: { 'Authorization': 'Bearer ' + idToken }
-              });
-              if (meRes.ok) {
-                var meData = await meRes.json();
-                role = (meData.role || 'STUDENT').toLowerCase();
-                if (role === 'global_admin') role = 'admin';
-                if (meData.profile?.full_name) displayName = meData.profile.full_name;
-              } else {
-                if (email === 'admin@college.edu' || email === 'shashankvermahsst@gmail.com' || /admin|dean/i.test(email)) {
-                  role = 'admin';
-                }
-              }
-            } catch (err) {
-              if (email === 'admin@college.edu' || email === 'shashankvermahsst@gmail.com' || /admin|dean/i.test(email)) {
-                role = 'admin';
-              }
-            }
-
-            sessionStorage.setItem('attendance_auth_token', idToken);
-            sessionStorage.setItem('token', idToken);
-            localStorage.setItem('attendance_auth_token', idToken);
-            sessionStorage.setItem('attendance_user_id', fbUser.uid);
-            localStorage.setItem('attendance_user_id', fbUser.uid);
-            sessionStorage.setItem('attendance_user_role', role);
-            localStorage.setItem('attendance_user_role', role);
-            sessionStorage.setItem('attendance_user_email', email);
-            localStorage.setItem('attendance_user_email', email);
-            sessionStorage.setItem('attendance_user_name', displayName);
-            localStorage.setItem('attendance_user_name', displayName);
-            var initials = displayName.split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase() || 'U';
-            sessionStorage.setItem('attendance_user_initials', initials);
-
-            showStatus('Welcome back, ' + displayName + '! Signed in with Google. Redirecting...', 'info');
-
-            setTimeout(function () {
-              if (role === 'faculty') {
-                window.location.href = 'teacher.html';
-              } else if (role === 'admin' || role === 'hod') {
-                window.location.href = 'admin.html';
-              } else {
-                window.location.href = 'student.html';
-              }
-            }, 700);
-          } catch (gErr) {
-            console.warn('Google Sign-In note:', gErr);
-            googleBtn.disabled = false;
-            if (gErr.code === 'auth/popup-closed-by-user') {
-              showStatus('Google sign-in cancelled. You can sign in using your Gmail or Institutional ID below.', 'info');
-            } else if (gErr.code === 'auth/popup-blocked') {
-              showStatus('Popup was blocked by your browser. Please allow popups or enter your credentials below.', 'error');
-            } else if (gErr.code === 'auth/unauthorized-domain') {
-              showStatus('This domain is not yet authorized for Google sign-in in Firebase Console. Please sign in with your credentials below.', 'error');
-            } else {
-              showStatus(gErr.message || 'Unable to complete Google sign-in.', 'error');
-            }
-          }
-        });
-      }
 
 
       // Forgot Password Modal
@@ -641,13 +535,6 @@
       var urlParams = new URLSearchParams(window.location.search);
       var mode = urlParams.get('mode');
       var token = urlParams.get('token');
-      var googleWrap = document.getElementById('google-signin-wrap');
-      var signinDivider = document.getElementById('signin-divider');
-
-      if (mode === 'activate' || mode === 'reset') {
-        if (googleWrap) googleWrap.style.display = 'none';
-        if (signinDivider) signinDivider.style.display = 'none';
-      }
 
       if (mode === 'activate') {
         document.querySelector('h1.display').textContent = 'Activate Account';
