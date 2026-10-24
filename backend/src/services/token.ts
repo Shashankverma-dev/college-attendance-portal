@@ -246,6 +246,42 @@ export class TokenService {
     };
   }
 
+  private static ephemeralSecret: string | null = null;
+
+  /**
+   * Retrieves or derives the cryptographic signing secret for portal session tokens.
+   * In production, a cryptographically strong SESSION_SECRET (min 32 chars) is strictly enforced.
+   * In development/testing, an ephemeral CSPRNG secret is generated if unconfigured.
+   */
+  static getSessionSecret(): string {
+    const isProd = process.env.NODE_ENV === 'production';
+    const envSecret = process.env.SESSION_SECRET;
+
+    if (isProd) {
+      if (
+        !envSecret ||
+        envSecret.length < 32 ||
+        envSecret === 'portal-session-secret-key-institution-2026' ||
+        envSecret === 'CHANGE_ME' ||
+        envSecret.includes('placeholder')
+      ) {
+        throw new Error(
+          'FATAL_SECURITY_CONFIG: Production deployment requires a cryptographically strong SESSION_SECRET of at least 32 characters. Known fallback secrets are strictly prohibited.'
+        );
+      }
+      return envSecret;
+    }
+
+    if (envSecret && envSecret !== 'portal-session-secret-key-institution-2026') {
+      return envSecret;
+    }
+
+    if (!this.ephemeralSecret) {
+      this.ephemeralSecret = crypto.randomBytes(32).toString('hex');
+    }
+    return this.ephemeralSecret;
+  }
+
   /**
    * Generates a tamper-proof cryptographically signed session token.
    * Signed with HMAC-SHA256 using server-side institutional key.
@@ -259,13 +295,17 @@ export class TokenService {
     },
     expiryHours: number = 8
   ): string {
-    const secret = process.env.SESSION_SECRET || 'portal-session-secret-key-institution-2026';
+    const secret = this.getSessionSecret();
+    const now = Math.floor(Date.now() / 1000);
     const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
     const body = Buffer.from(
       JSON.stringify({
         ...payload,
-        exp: Math.floor(Date.now() / 1000) + expiryHours * 3600,
-        iat: Math.floor(Date.now() / 1000),
+        iss: 'srhu-attendance-portal',
+        aud: 'srhu-portal-client',
+        typ: 'ACCESS_TOKEN',
+        iat: now,
+        exp: now + expiryHours * 3600,
       })
     ).toString('base64url');
     const signature = crypto
@@ -276,24 +316,43 @@ export class TokenService {
   }
 
   /**
-   * Verifies a session token's cryptographic signature and validity.
+   * Verifies a session token's cryptographic signature, algorithm, and claims validity.
    */
   static verifySessionToken(token: string): {
     uid: string;
     email: string;
     role: 'STUDENT' | 'FACULTY' | 'HOD' | 'GLOBAL_ADMIN';
     departmentId?: string | null;
+    iss?: string;
+    aud?: string;
+    typ?: string;
   } | null {
     if (!token || typeof token !== 'string') return null;
     const parts = token.split('.');
     if (parts.length !== 3) return null;
 
-    const [header, body, signature] = parts;
-    const secret = process.env.SESSION_SECRET || 'portal-session-secret-key-institution-2026';
+    const [headerB64, bodyB64, signature] = parts;
+
+    // Verify header algorithm & type
+    try {
+      const header = JSON.parse(Buffer.from(headerB64, 'base64url').toString('utf-8'));
+      if (header.alg !== 'HS256' || header.typ !== 'JWT') {
+        return null; // Reject unexpected or 'none' algorithms
+      }
+    } catch {
+      return null;
+    }
+
+    let secret: string;
+    try {
+      secret = this.getSessionSecret();
+    } catch {
+      return null;
+    }
 
     const expectedSig = crypto
       .createHmac('sha256', secret)
-      .update(`${header}.${body}`)
+      .update(`${headerB64}.${bodyB64}`)
       .digest('base64url');
 
     const sigBuf = Buffer.from(signature);
@@ -303,19 +362,48 @@ export class TokenService {
     }
 
     try {
-      const decoded = JSON.parse(Buffer.from(body, 'base64url').toString('utf-8'));
-      if (decoded.exp && Math.floor(Date.now() / 1000) > decoded.exp) {
+      const decoded = JSON.parse(Buffer.from(bodyB64, 'base64url').toString('utf-8'));
+      const now = Math.floor(Date.now() / 1000);
+
+      // Verify expiration (with 60-second clock skew tolerance on future iat)
+      if (decoded.exp && now > decoded.exp) {
         return null; // Expired
       }
+      if (decoded.iat && decoded.iat > now + 60) {
+        return null; // Issued in future
+      }
+
+      // Verify token type (must be access token, not refresh or arbitrary token)
+      if (decoded.typ && decoded.typ !== 'ACCESS_TOKEN') {
+        return null;
+      }
+
+      // Verify issuer and audience if present
+      if (decoded.iss && decoded.iss !== 'srhu-attendance-portal') {
+        return null;
+      }
+      if (decoded.aud && decoded.aud !== 'srhu-portal-client') {
+        return null;
+      }
+
+      const validRoles = ['STUDENT', 'FACULTY', 'HOD', 'GLOBAL_ADMIN'];
+      if (!decoded.role || !validRoles.includes(decoded.role)) {
+        return null;
+      }
+
       return {
         uid: decoded.uid,
         email: decoded.email,
         role: decoded.role,
         departmentId: decoded.departmentId || null,
+        iss: decoded.iss,
+        aud: decoded.aud,
+        typ: decoded.typ,
       };
     } catch {
       return null;
     }
   }
 }
+
 

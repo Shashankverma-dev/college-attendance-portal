@@ -50,7 +50,8 @@ export interface BulkImportResult {
  */
 export function sanitizeFormulaValue(val: any): string {
   if (val === undefined || val === null) return '';
-  const str = String(val).trim();
+  const raw = String(val);
+  const str = raw.trim();
   if (str.length === 0) return '';
 
   // If the value is a valid international phone number (e.g. +91 9876543210) or pure signed number (e.g. -5), preserve it
@@ -59,7 +60,8 @@ export function sanitizeFormulaValue(val: any): string {
   }
 
   // Escape formula injection prefixes when not pure numeric or standard phone
-  if (['=', '@', '+', '-'].includes(str.charAt(0))) {
+  const firstChar = str.charAt(0);
+  if (['=', '@', '+', '-', '\t', '\r', '%', '|'].includes(firstChar) || ['\t', '\r'].includes(raw.charAt(0))) {
     return `'` + str;
   }
   return str;
@@ -70,8 +72,17 @@ export function sanitizeFormulaValue(val: any): string {
  */
 export function sanitizeForExport(val: any): string {
   if (val === undefined || val === null) return '';
-  const str = String(val).trim();
-  if (str.length > 0 && ['=', '+', '-', '@', '\t', '\r'].includes(str.charAt(0))) {
+  const raw = String(val);
+  const str = raw.trim();
+  if (str.length === 0) return '';
+
+  // If the value is a valid international phone number or pure signed number, preserve it
+  if (/^\+\d{1,4}[\s\d\-]{6,16}$/.test(str) || /^[+-]?\d+(\.\d+)?$/.test(str)) {
+    return str;
+  }
+
+  const firstChar = str.charAt(0);
+  if (['=', '+', '-', '@', '\t', '\r', '%', '|'].includes(firstChar) || ['\t', '\r'].includes(raw.charAt(0))) {
     return `'` + str;
   }
   return str;

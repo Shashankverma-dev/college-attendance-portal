@@ -181,12 +181,13 @@ router.get(
       let teacherProfile = localTeachers.find(
         (t) => t.user_uid === uid || (t.faculty_staff_id && uid.toLowerCase().includes(t.faculty_staff_id.toLowerCase()))
       );
-      if (!teacherProfile && req.user!.role === 'FACULTY' && localTeachers.length > 0) {
-        teacherProfile = localTeachers[0];
+      if (!teacherProfile && req.user!.role !== 'GLOBAL_ADMIN') {
+        res.status(403).json({ error: 'NOT_FACULTY', message: 'Faculty profile not found.' });
+        return;
       }
 
       const assignedClasses = localAssignments
-        .filter((fa) => fa.is_active && (req.user!.role === 'GLOBAL_ADMIN' || !teacherProfile || fa.faculty_profile_id === teacherProfile.faculty_profile_id))
+        .filter((fa) => fa.is_active && (req.user!.role === 'GLOBAL_ADMIN' || (teacherProfile && fa.faculty_profile_id === teacherProfile.faculty_profile_id)))
         .map((fa) => {
           const sub = localSubjects.find((s) => s.subject_id === fa.subject_id);
           const sec = localSections.find((sc) => sc.section_id === fa.section_id);
@@ -373,9 +374,6 @@ router.post(
         let teacher = localTeachers.find(
           (t) => t.user_uid === uid || (t.official_email && req.user?.email && t.official_email.toLowerCase() === req.user.email.toLowerCase())
         );
-        if (!teacher && (uid.startsWith('test-') || uid.startsWith('mock-')) && localTeachers.length > 0) {
-          teacher = localTeachers[0];
-        }
         if (!teacher) {
           res.status(403).json({ error: 'NOT_FACULTY', message: 'Faculty profile not found.' });
           return;
@@ -1891,9 +1889,6 @@ router.get(
                (userEmail && s.student_gmail && s.student_gmail.toLowerCase() === userEmail) ||
                (s.student_id && uid.toLowerCase().includes(s.student_id.toLowerCase()))
       );
-      if (!student && (uid.startsWith('test-') || uid.startsWith('mock-')) && localStudents.length > 0) {
-        student = localStudents[0];
-      }
       if (!student) {
         res.status(403).json({ error: 'NOT_A_STUDENT', message: 'Student profile not found.' });
         return;

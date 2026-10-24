@@ -5,6 +5,7 @@
   "description": "Root wrapper ensuring automated Render and Cloud builds work seamlessly",
   "scripts": {
     "build": "cd backend && npm install --include=dev && npm run build",
+    "test": "npm test --prefix backend",
     "start": "cd backend && npm start"
   },
   "engines": {

@@ -665,38 +665,82 @@ router.get(
       }
 
       // In-Memory Mode
-      const student = localStudents.find((s) => s.user_uid === uid || s.student_id === 'STU-101') || localStudents[0];
-      const records = localAttendanceRecords.filter((r) => r.student_id === student.student_id);
+      const userEmail = (req.user?.email || '').toLowerCase();
+      const student = localStudents.find((s) => 
+        s.user_uid === uid || 
+        (userEmail && s.student_gmail && s.student_gmail.toLowerCase() === userEmail) ||
+        (s.student_id && uid.toLowerCase().includes(s.student_id.toLowerCase()))
+      );
 
-      const subjects = [
-        {
-          subject_id: '10000000-0000-0000-0000-000000000001',
-          subject_code: 'BCA-101',
-          subject_name: 'Programming Fundamentals using C',
-          total_sessions: 24,
-          attended_sessions: 22,
-          approved_leave_sessions: 1,
-          attendance_percentage: '95.8',
-        },
-        {
-          subject_id: '10000000-0000-0000-0000-000000000002',
-          subject_code: 'BCA-102',
-          subject_name: 'Computer Architecture & Digital Logic',
-          total_sessions: 22,
-          attended_sessions: 19,
-          approved_leave_sessions: 0,
-          attendance_percentage: '86.4',
-        },
-        {
-          subject_id: '10000000-0000-0000-0000-000000000003',
-          subject_code: 'BCA-103',
-          subject_name: 'Discrete Mathematics',
-          total_sessions: 20,
-          attended_sessions: 18,
-          approved_leave_sessions: 1,
-          attendance_percentage: '95.0',
-        },
-      ];
+      if (!student) {
+        res.status(404).json({ error: 'STUDENT_NOT_FOUND', message: 'Student profile not found.' });
+        return;
+      }
+
+      // Find all locked sessions and the student's records for them
+      const studentRecords = localAttendanceRecords.filter(
+        (r) => r.student_id === student.student_id || r.student_profile_id === student.student_profile_id
+      );
+
+      // Collect all distinct locked sessions
+      const sessionMap = new Map<string, InMemAttendanceSession>();
+      localAttendanceSessions.forEach((sess) => {
+        if (sess.submission_status === 'LOCKED') {
+          sessionMap.set(sess.session_id, sess);
+        }
+      });
+
+      // Group records by subject
+      const subjectStats = new Map<string, {
+        subject_id: string;
+        subject_code: string;
+        subject_name: string;
+        total_sessions: number;
+        attended_sessions: number;
+        approved_leave_sessions: number;
+        absent_sessions: number;
+      }>();
+
+      for (const rec of studentRecords) {
+        const sess = sessionMap.get(rec.session_id);
+        if (!sess) continue;
+
+        const subId = sess.subject_id;
+        if (!subjectStats.has(subId)) {
+          subjectStats.set(subId, {
+            subject_id: subId,
+            subject_code: sess.subject_code || 'SUB-000',
+            subject_name: sess.subject_name || 'Subject',
+            total_sessions: 0,
+            attended_sessions: 0,
+            approved_leave_sessions: 0,
+            absent_sessions: 0,
+          });
+        }
+
+        const stat = subjectStats.get(subId)!;
+        stat.total_sessions++;
+        if (rec.attendance_status === 'P') stat.attended_sessions++;
+        else if (rec.attendance_status === 'L') stat.approved_leave_sessions++;
+        else if (rec.attendance_status === 'A') stat.absent_sessions++;
+      }
+
+      const subjects = Array.from(subjectStats.values()).map((st) => {
+        const validDenominator = st.attended_sessions + st.absent_sessions;
+        const percentage = validDenominator > 0
+          ? ((st.attended_sessions / validDenominator) * 100).toFixed(1)
+          : null;
+
+        return {
+          subject_id: st.subject_id,
+          subject_code: st.subject_code,
+          subject_name: st.subject_name,
+          total_sessions: st.total_sessions,
+          attended_sessions: st.attended_sessions,
+          approved_leave_sessions: st.approved_leave_sessions,
+          attendance_percentage: percentage,
+        };
+      });
 
       res.json({
         student: {

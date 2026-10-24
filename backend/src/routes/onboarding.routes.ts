@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import multer from 'multer';
 import { authenticate, requireRole } from '../middleware/auth';
-import { BulkOnboardingService } from '../services/bulk-onboard';
+import { BulkOnboardingService, localStudents } from '../services/bulk-onboard';
 import { UploadService } from '../services/upload';
 import { EmailService } from '../services/email';
 
@@ -149,7 +149,16 @@ router.get(
   authenticate,
   requireRole(['GLOBAL_ADMIN', 'HOD']),
   (req: Request, res: Response): void => {
-    const studentCount = parseInt((req.query.count as string) || '4165', 10);
+    let studentCount: number;
+    if (req.query.count !== undefined) {
+      studentCount = parseInt(req.query.count as string, 10);
+      if (isNaN(studentCount) || studentCount < 0) {
+        res.status(400).json({ error: 'INVALID_COUNT', message: 'count query parameter must be a positive integer.' });
+        return;
+      }
+    } else {
+      studentCount = localStudents.length;
+    }
     const check = EmailService.verifyDailyQuota(studentCount);
     res.json(check);
   }

@@ -432,6 +432,7 @@ router.get(
 
         const auditCountRes = await pool.query(`SELECT COUNT(*)::int as total FROM audit_logs`);
         const totalAuditEntries = auditCountRes.rows[0]?.total || 0;
+        const auditIntegrity = await AuditService.verifyIntegrity();
 
         res.json({
           success: true,
@@ -443,13 +444,14 @@ router.get(
             pendingFaculty: pendingFacultyRes.rows[0].total,
             todaySessions: sessionStatsRes.rows[0].total_sessions,
             todayLockedSessions: sessionStatsRes.rows[0].locked_sessions,
-            averageAttendanceRate: attendanceRateRes.rows[0]?.avg_attendance || '91.8',
+            averageAttendanceRate: attendanceRateRes.rows[0]?.avg_attendance || null,
           },
           departments: deptSummaryRes.rows,
           auditChainIntegrity: {
-            status: 'VALIDATED',
+            status: auditIntegrity.isValid ? 'VALIDATED' : 'INTEGRITY_BREACH',
             totalChainDepth: totalAuditEntries,
-            tamperedCount: 0,
+            tamperedCount: auditIntegrity.isValid ? 0 : 1,
+            details: auditIntegrity.details,
             algorithm: 'SHA-256 Linear Sequential Hash Chain ($H_i = SHA-256(H_{i-1} || payload_i))',
           },
         });
@@ -466,7 +468,7 @@ router.get(
       const totalValid = pRecords + aRecords;
       const avgRate = totalValid > 0
         ? ((pRecords / totalValid) * 100).toFixed(1)
-        : (totalSessions > 0 ? ((lockedSessions / totalSessions) * 100).toFixed(1) : '100.0');
+        : null;
 
       const deptSummary = localDepartments.map((d) => {
         const facCount = localTeachers.filter((t) => t.department_id === d.department_id).length;
@@ -484,6 +486,8 @@ router.get(
         };
       });
 
+      const auditIntegrity = await AuditService.verifyIntegrity();
+
       res.json({
         success: true,
         dataSource: 'LOCAL_AUTHENTICATED_STORE',
@@ -498,9 +502,10 @@ router.get(
         },
         departments: deptSummary,
         auditChainIntegrity: {
-          status: 'VALIDATED',
+          status: auditIntegrity.isValid ? 'VALIDATED' : 'INTEGRITY_BREACH',
           totalChainDepth: localAuditLogs.length,
-          tamperedCount: 0,
+          tamperedCount: auditIntegrity.isValid ? 0 : 1,
+          details: auditIntegrity.details,
           algorithm: 'SHA-256 Linear Sequential Hash Chain ($H_i = SHA-256(H_{i-1} || payload_i))',
         },
       });

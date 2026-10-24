@@ -17,6 +17,7 @@
       "**/node_modules/**",
       "backend/**",
       "documentation/**",
+      "docs/**",
       "*.zip",
       "*.docx",
       "*.xlsx"

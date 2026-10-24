@@ -53,32 +53,20 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
 
     const uid = decodedToken.uid;
     const email = (decodedToken.email || '').toLowerCase();
-    const rawRole = (decodedToken.role || 'STUDENT').toString().trim().toUpperCase();
     let role: 'STUDENT' | 'FACULTY' | 'HOD' | 'GLOBAL_ADMIN';
-    if (
-      rawRole === 'ADMIN' ||
-      rawRole === 'GLOBAL_ADMIN' ||
-      email === 'shashankvermahsst@gmail.com' ||
-      email === 'admin@college.edu'
-    ) {
-      role = 'GLOBAL_ADMIN';
-    } else if (rawRole === 'TEACHER' || rawRole === 'FACULTY') {
-      role = 'FACULTY';
-    } else if (rawRole === 'HOD') {
-      role = 'HOD';
-    } else {
-      role = 'STUDENT';
-    }
-    const departmentId = (decodedToken.departmentId as string) || null;
+    let departmentId = (decodedToken.departmentId as string) || null;
 
-    // 1b. Check if account is deactivated or suspended (Section 3.E Access Control)
+    // Check trusted server-side user record if PostgreSQL is available
+    let dbChecked = false;
     try {
       const userCheck = await pool.query(
-        `SELECT status FROM users WHERE user_uid = $1`,
-        [uid]
+        `SELECT role, status, department_id FROM users WHERE user_uid = $1 OR LOWER(email) = $2`,
+        [uid, email]
       );
       if (userCheck.rowCount && userCheck.rowCount > 0) {
-        const userStatus = userCheck.rows[0].status;
+        dbChecked = true;
+        const userRow = userCheck.rows[0];
+        const userStatus = userRow.status;
         if (userStatus === 'INACTIVE' || userStatus === 'SUSPENDED') {
           res.status(403).json({
             error: 'ACCOUNT_DEACTIVATED',
@@ -86,13 +74,58 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
           });
           return;
         }
+
+        const dbRole = (userRow.role || '').toString().trim().toUpperCase();
+        if (dbRole === 'GLOBAL_ADMIN' || dbRole === 'ADMIN') {
+          role = 'GLOBAL_ADMIN';
+        } else if (dbRole === 'HOD') {
+          role = 'HOD';
+        } else if (dbRole === 'FACULTY' || dbRole === 'TEACHER') {
+          role = 'FACULTY';
+        } else {
+          role = 'STUDENT';
+        }
+        if (userRow.department_id) {
+          departmentId = userRow.department_id;
+        }
+      } else {
+        // Fall back to cryptographically verified claims from portal session token
+        const rawRole = (decodedToken.role || 'STUDENT').toString().trim().toUpperCase();
+        if (rawRole === 'GLOBAL_ADMIN' || rawRole === 'ADMIN') {
+          role = 'GLOBAL_ADMIN';
+        } else if (rawRole === 'HOD') {
+          role = 'HOD';
+        } else if (rawRole === 'FACULTY' || rawRole === 'TEACHER') {
+          role = 'FACULTY';
+        } else {
+          role = 'STUDENT';
+        }
       }
-    } catch (_dbErr) {
-      // Allow proceeding if local database is not reachable, fallback handlers apply downstream
+    } catch (dbErr) {
+      // Fail closed in production: database errors during auth must never grant access
+      if (process.env.NODE_ENV === 'production') {
+        res.status(503).json({
+          error: 'AUTHORIZATION_SERVICE_UNAVAILABLE',
+          message: 'Unable to verify account status with institutional directory.',
+        });
+        return;
+      }
+
+      // Development / Test mode fallback
+      const rawRole = (decodedToken.role || 'STUDENT').toString().trim().toUpperCase();
+      if (rawRole === 'GLOBAL_ADMIN' || rawRole === 'ADMIN') {
+        role = 'GLOBAL_ADMIN';
+      } else if (rawRole === 'HOD') {
+        role = 'HOD';
+      } else if (rawRole === 'FACULTY' || rawRole === 'TEACHER') {
+        role = 'FACULTY';
+      } else {
+        role = 'STUDENT';
+      }
     }
 
     // In-memory student suspension check
-    const inMemStudent = localStudents.find((s) => s.user_uid === uid);
+    const inMemStudent = localStudents.find((s) => s.user_uid === uid || (email && s.student_gmail.toLowerCase() === email));
     if (inMemStudent && inMemStudent.status === 'SUSPENDED') {
       res.status(403).json({
         error: 'ACCOUNT_DEACTIVATED',
@@ -102,7 +135,7 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
     }
 
     // In-memory faculty deactivation/suspension check
-    const inMemTeacher = localTeachers.find((t) => t.user_uid === uid);
+    const inMemTeacher = localTeachers.find((t) => t.user_uid === uid || (email && t.official_email.toLowerCase() === email));
     if (inMemTeacher && (inMemTeacher.status === 'INACTIVE' || inMemTeacher.status === 'SUSPENDED')) {
       res.status(403).json({
         error: 'ACCOUNT_DEACTIVATED',

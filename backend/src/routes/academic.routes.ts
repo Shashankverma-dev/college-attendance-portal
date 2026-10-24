@@ -142,13 +142,37 @@ const CalendarEventSchema = z.object({
     .transform(v => v === 'ALL' ? 'INSTITUTION' : v)
     .optional()
     .default('INSTITUTION'),
-  course_id: z.string().uuid().nullable().optional(),
-  academic_year_id: z.string().uuid().nullable().optional(),
-  semester_id: z.string().uuid().nullable().optional(),
-  section_id: z.string().uuid().nullable().optional(),
+  course_id: z.string().nullable().optional(),
+  academic_year_id: z.string().nullable().optional(),
+  semester_id: z.string().nullable().optional(),
+  section_id: z.string().nullable().optional(),
 }).refine(data => data.end_date >= data.start_date, {
   message: 'End date must be on or after start date',
   path: ['end_date'],
+}).refine(data => {
+  if (data.audience_tier === 'COURSE' && !data.course_id) return false;
+  return true;
+}, {
+  message: 'course_id is required when audience_tier is COURSE',
+  path: ['course_id'],
+}).refine(data => {
+  if (data.audience_tier === 'YEAR' && !data.academic_year_id) return false;
+  return true;
+}, {
+  message: 'academic_year_id is required when audience_tier is YEAR',
+  path: ['academic_year_id'],
+}).refine(data => {
+  if (data.audience_tier === 'SEMESTER' && !data.semester_id) return false;
+  return true;
+}, {
+  message: 'semester_id is required when audience_tier is SEMESTER',
+  path: ['semester_id'],
+}).refine(data => {
+  if (data.audience_tier === 'SECTION' && !data.section_id) return false;
+  return true;
+}, {
+  message: 'section_id is required when audience_tier is SECTION',
+  path: ['section_id'],
 });
 
 /**

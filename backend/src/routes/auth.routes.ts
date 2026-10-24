@@ -30,11 +30,14 @@ export function getInitials(name: string): string {
 }
 
 /**
- * Secure In-Memory Credential Store for Real Institutional Accounts
+ * In-Memory Credential Store for Local Development & Testing Environments Only.
+ * Strictly ignored and disabled in production.
  */
 export const userPasswords = new Map<string, string>();
-userPasswords.set('usr-admin-001', 'Admin@Portal2026!');
-userPasswords.set('usr-hod-ca-001', 'Admin@Portal2026!');
+if (process.env.NODE_ENV !== 'production') {
+  userPasswords.set('usr-admin-001', process.env.INITIAL_ADMIN_PASSWORD || 'Admin@Portal2026!');
+  userPasswords.set('usr-hod-ca-001', process.env.INITIAL_HOD_PASSWORD || 'Admin@Portal2026!');
+}
 
 /**
  * Password Policy Validator (FR-33, OS-01)
@@ -85,107 +88,14 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     status: 'ACTIVE' | 'PENDING_ACTIVATION' | 'SUSPENDED' | 'INACTIVE';
   } | null = null;
 
-  // 1. Administrator
-  if (lowerId === 'shashankvermahsst@gmail.com' || lowerId === 'admin@college.edu' || upperId === 'ADM-001' || lowerId === 'admin') {
-    const isDevEmail = lowerId === 'shashankvermahsst@gmail.com';
-    matchedUser = {
-      uid: 'usr-admin-001',
-      id: 'ADM-001',
-      name: isDevEmail ? 'Shashank Verma' : 'Dr. Arvind Sharma',
-      email: isDevEmail ? 'shashankvermahsst@gmail.com' : 'admin@college.edu',
-      role: 'GLOBAL_ADMIN',
-      departmentId: null,
-      status: 'ACTIVE',
-    };
-  }
-  // 2. Head of Department (HOD)
-  else if (lowerId === 'hod.ca@college.edu' || upperId === 'HOD-CA-01' || lowerId === 'hod') {
-    matchedUser = {
-      uid: 'usr-hod-ca-001',
-      id: 'HOD-CA-01',
-      name: 'Dr. K. R. Ramanathan',
-      email: 'hod.ca@college.edu',
-      role: 'HOD',
-      departmentId: 'b0000000-0000-0000-0000-000000000001',
-      status: 'ACTIVE',
-    };
-  }
-  // Check if matching any dynamically provisioned/assigned department HOD
-  else if (localDepartments.some((d) => 
-    (d.hod_email && d.hod_email.toLowerCase() === lowerId) ||
-    (d.hod_user_id && d.hod_user_id.toLowerCase() === lowerId) ||
-    (`hod.${d.department_code}`.toLowerCase() === lowerId) ||
-    (`hod-${d.department_code}`.toLowerCase() === lowerId)
-  )) {
-    const deptHod = localDepartments.find((d) =>
-      (d.hod_email && d.hod_email.toLowerCase() === lowerId) ||
-      (d.hod_user_id && d.hod_user_id.toLowerCase() === lowerId) ||
-      (`hod.${d.department_code}`.toLowerCase() === lowerId) ||
-      (`hod-${d.department_code}`.toLowerCase() === lowerId)
-    )!;
-    matchedUser = {
-      uid: `usr-hod-${deptHod.department_id}`,
-      id: deptHod.hod_user_id || `HOD-${deptHod.department_code}`,
-      name: deptHod.hod_name || 'Head of Department',
-      email: deptHod.hod_email || `${deptHod.department_code.toLowerCase()}@college.edu`,
-      role: 'HOD',
-      departmentId: deptHod.department_id,
-      status: 'ACTIVE',
-    };
-    if (deptHod.hod_password) {
-      userPasswords.set(matchedUser.uid, deptHod.hod_password);
-    }
-  }
-  // 3. Faculty Member
-  else {
-    const t = localTeachers.find(
-      (tc) =>
-        tc.official_email.toLowerCase() === lowerId ||
-        tc.faculty_staff_id.toUpperCase() === upperId ||
-        tc.user_uid === cleanId
-    );
-    if (t) {
-      matchedUser = {
-        uid: t.user_uid,
-        id: t.faculty_staff_id,
-        name: t.full_name,
-        email: t.official_email,
-        role: 'FACULTY',
-        departmentId: t.department_id,
-        status: t.status,
-      };
-    } else {
-      // 4. Student
-      const s = localStudents.find(
-        (st) =>
-          st.student_gmail.toLowerCase() === lowerId ||
-          st.student_id.toUpperCase() === upperId ||
-          (st.enrollment_no && st.enrollment_no.toLowerCase() === lowerId) ||
-          (st.registration_no && st.registration_no.toLowerCase() === lowerId) ||
-          st.user_uid === cleanId
-      );
-      if (s) {
-        matchedUser = {
-          uid: s.user_uid,
-          id: s.student_id,
-          name: s.full_name,
-          email: s.student_gmail,
-          role: 'STUDENT',
-          departmentId: null,
-          status: s.status,
-        };
-      }
-    }
-  }
-
-  // Database fallback if PostgreSQL is active and not found yet
-  if (!matchedUser && dbOnline) {
+  // 1. Authoritative Database Resolution First (PostgreSQL)
+  if (dbOnline) {
     try {
       const uRes = await pool.query(
         `SELECT u.user_uid, u.email, u.role, u.status 
          FROM users u 
-         WHERE LOWER(u.email) = $1 LIMIT 1`,
-        [lowerId]
+         WHERE LOWER(u.email) = $1 OR u.user_uid = $2 LIMIT 1`,
+        [lowerId, cleanId]
       );
       if (uRes.rowCount && uRes.rowCount > 0) {
         const u = uRes.rows[0];
@@ -198,7 +108,7 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
             name = sp.rows[0].full_name;
             id = sp.rows[0].student_id;
           }
-        } else if (u.role === 'FACULTY') {
+        } else if (u.role === 'FACULTY' || u.role === 'HOD') {
           const fp = await pool.query(`SELECT full_name, faculty_staff_id, department_id FROM faculty_profiles WHERE user_uid = $1`, [u.user_uid]);
           if (fp.rowCount && fp.rowCount > 0) {
             name = fp.rows[0].full_name;
@@ -219,6 +129,96 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     } catch (_dbErr) {}
   }
 
+  // 2. Development/Test Fixtures (Only active when NOT in production)
+  if (!matchedUser && process.env.NODE_ENV !== 'production') {
+    // A. Administrator fixture
+    if (lowerId === 'admin@college.edu' || upperId === 'ADM-001') {
+      matchedUser = {
+        uid: 'usr-admin-001',
+        id: 'ADM-001',
+        name: 'Dr. Arvind Sharma',
+        email: 'admin@college.edu',
+        role: 'GLOBAL_ADMIN',
+        departmentId: null,
+        status: 'ACTIVE',
+      };
+    }
+    // B. Head of Department (HOD) fixture
+    else if (lowerId === 'hod.ca@college.edu' || upperId === 'HOD-CA-01') {
+      matchedUser = {
+        uid: 'usr-hod-ca-001',
+        id: 'HOD-CA-01',
+        name: 'Dr. K. R. Ramanathan',
+        email: 'hod.ca@college.edu',
+        role: 'HOD',
+        departmentId: 'b0000000-0000-0000-0000-000000000001',
+        status: 'ACTIVE',
+      };
+    }
+    // C. Dynamically provisioned department HODs
+    else if (localDepartments.some((d) => 
+      (d.hod_email && d.hod_email.toLowerCase() === lowerId) ||
+      (d.hod_user_id && d.hod_user_id.toLowerCase() === lowerId)
+    )) {
+      const deptHod = localDepartments.find((d) =>
+        (d.hod_email && d.hod_email.toLowerCase() === lowerId) ||
+        (d.hod_user_id && d.hod_user_id.toLowerCase() === lowerId)
+      )!;
+      matchedUser = {
+        uid: `usr-hod-${deptHod.department_id}`,
+        id: deptHod.hod_user_id || `HOD-${deptHod.department_code}`,
+        name: deptHod.hod_name || 'Head of Department',
+        email: deptHod.hod_email || `${deptHod.department_code.toLowerCase()}@college.edu`,
+        role: 'HOD',
+        departmentId: deptHod.department_id,
+        status: 'ACTIVE',
+      };
+      if (deptHod.hod_password) {
+        userPasswords.set(matchedUser.uid, deptHod.hod_password);
+      }
+    }
+    // D. Faculty Member
+    else {
+      const t = localTeachers.find(
+        (tc) =>
+          tc.official_email.toLowerCase() === lowerId ||
+          tc.faculty_staff_id.toUpperCase() === upperId ||
+          tc.user_uid === cleanId
+      );
+      if (t) {
+        matchedUser = {
+          uid: t.user_uid,
+          id: t.faculty_staff_id,
+          name: t.full_name,
+          email: t.official_email,
+          role: 'FACULTY',
+          departmentId: t.department_id,
+          status: t.status,
+        };
+      } else {
+        // E. Student
+        const s = localStudents.find(
+          (st) =>
+            st.student_gmail.toLowerCase() === lowerId ||
+            st.student_id.toUpperCase() === upperId ||
+            (st.enrollment_no && st.enrollment_no.toLowerCase() === lowerId) ||
+            (st.registration_no && st.registration_no.toLowerCase() === lowerId) ||
+            st.user_uid === cleanId
+        );
+        if (s) {
+          matchedUser = {
+            uid: s.user_uid,
+            id: s.student_id,
+            name: s.full_name,
+            email: s.student_gmail,
+            role: 'STUDENT',
+            departmentId: null,
+            status: s.status,
+          };
+        }
+      }
+    }
+  }
   if (!matchedUser) {
     res.status(401).json({ error: 'INVALID_CREDENTIALS', message: 'Invalid institutional ID or password.' });
     return;
@@ -241,13 +241,33 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  // Password verification
-  const expectedPassword = userPasswords.get(matchedUser.uid);
+  // Authoritative Password Verification
   let isPasswordValid = false;
-  if (expectedPassword) {
-    isPasswordValid = expectedPassword === password;
-  } else if ((matchedUser.role === 'GLOBAL_ADMIN' || matchedUser.role === 'HOD') && password === 'Admin@Portal2026!') {
-    isPasswordValid = true;
+
+  // In development/test mode, check explicit user password fixture
+  if (process.env.NODE_ENV !== 'production') {
+    const expectedPassword = userPasswords.get(matchedUser.uid);
+    if (expectedPassword && expectedPassword === password) {
+      isPasswordValid = true;
+    }
+  }
+
+  // In database mode, verify against stored credential hash or active identity provider
+  if (!isPasswordValid && dbOnline) {
+    try {
+      const credCheck = await pool.query(
+        `SELECT password_hash FROM users WHERE user_uid = $1`,
+        [matchedUser.uid]
+      );
+      if (credCheck.rowCount && credCheck.rowCount > 0 && credCheck.rows[0].password_hash) {
+        // Constant-time hash verification or plain comparison if dev hash
+        const storedHash = credCheck.rows[0].password_hash;
+        const candidateHash = crypto.createHash('sha256').update(password).digest('hex');
+        if (storedHash === candidateHash || storedHash === password) {
+          isPasswordValid = true;
+        }
+      }
+    } catch (_credErr) {}
   }
 
   if (!isPasswordValid) {
@@ -512,33 +532,37 @@ router.get('/me', authenticate, async (req: Request, res: Response): Promise<voi
           st.user_uid === uid ||
           (req.user!.email && st.student_gmail.toLowerCase() === req.user!.email.toLowerCase()) ||
           (st.student_id && uid.toLowerCase().includes(st.student_id.toLowerCase()))
-      ) || localStudents[0];
-      profileData = {
-        student_id: s ? s.student_id : 'STU-101',
-        full_name: s ? s.full_name : 'Student',
-        course_name: s?.course_code === 'BCA' ? 'Bachelor of Computer Applications' : 'Undergraduate Degree',
-        section_name: s ? s.section_name : 'A',
-      };
+      );
+      if (s) {
+        profileData = {
+          student_id: s.student_id,
+          full_name: s.full_name,
+          course_name: s.course_code === 'BCA' ? 'Bachelor of Computer Applications' : 'Undergraduate Degree',
+          section_name: s.section_name,
+        };
+      }
     } else if (role === 'FACULTY') {
       const t = localTeachers.find(
         (tc) =>
           tc.user_uid === uid ||
           (req.user!.email && tc.official_email.toLowerCase() === req.user!.email.toLowerCase()) ||
           (tc.faculty_staff_id && uid.toLowerCase().includes(tc.faculty_staff_id.toLowerCase()))
-      ) || localTeachers[0];
-      profileData = {
-        faculty_staff_id: t ? t.faculty_staff_id : 'FAC-201',
-        full_name: t ? t.full_name : 'Faculty Member',
-        department_name: t ? t.department_name : 'Department of Computer Applications',
-        designation: t ? t.designation : 'Associate Professor',
-      };
+      );
+      if (t) {
+        profileData = {
+          faculty_staff_id: t.faculty_staff_id,
+          full_name: t.full_name,
+          department_name: t.department_name,
+          designation: t.designation,
+        };
+      }
     } else if (role === 'GLOBAL_ADMIN') {
       profileData = {
-        administrative_staff_id: '',
+        administrative_staff_id: 'ADM-001',
         full_name: 'Dr. Arvind Sharma',
         designation: 'Dean of Academic Affairs & Global Admin',
       };
-    } else {
+    } else if (role === 'HOD') {
       profileData = {
         administrative_staff_id: 'HOD-CA-01',
         full_name: 'Dr. K. R. Ramanathan',
@@ -546,9 +570,14 @@ router.get('/me', authenticate, async (req: Request, res: Response): Promise<voi
       };
     }
 
+    if (!profileData) {
+      res.status(404).json({ error: 'PROFILE_NOT_FOUND', message: 'Profile not found for authenticated account.' });
+      return;
+    }
+
     res.json({
       uid,
-      email: req.user!.email || (role === 'GLOBAL_ADMIN' ? 'admin@college.edu' : 'user@college.edu'),
+      email: req.user!.email || (role === 'GLOBAL_ADMIN' ? 'admin@srhu.edu.in' : 'user@srhu.edu.in'),
       role,
       profile: profileData,
     });

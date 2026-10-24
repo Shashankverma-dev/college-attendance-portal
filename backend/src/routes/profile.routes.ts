@@ -62,13 +62,13 @@ function getSyntheticProfile(uid: string, role: string, email?: string) {
         (s.student_id && uid.toLowerCase().includes(s.student_id.toLowerCase()))
     );
 
-    if (!matchedStudent && localStudents.length > 0) {
-      matchedStudent = localStudents[0];
+    if (!matchedStudent) {
+      return null;
     }
 
-    const studentName = matchedStudent ? matchedStudent.full_name : (email?.toLowerCase().includes('aarav') ? 'Aarav Sharma' : 'Alex Chen');
-    const studentId = matchedStudent ? matchedStudent.student_id : 'STU-101';
-    const studentEmail = email || matchedStudent?.student_gmail || 'aarav.sharma@college.edu';
+    const studentName = matchedStudent.full_name;
+    const studentId = matchedStudent.student_id;
+    const studentEmail = email || matchedStudent.student_gmail || 'student@srhu.edu.in';
 
     return {
       uid,
@@ -117,13 +117,13 @@ function getSyntheticProfile(uid: string, role: string, email?: string) {
         (t.faculty_staff_id && uid.toLowerCase().includes(t.faculty_staff_id.toLowerCase()))
     );
 
-    if (!matchedTeacher && localTeachers.length > 0) {
-      matchedTeacher = localTeachers[0];
+    if (!matchedTeacher) {
+      return null;
     }
 
-    const teacherName = matchedTeacher ? matchedTeacher.full_name : 'Dr. Meenakshi Sundaram';
-    const teacherId = matchedTeacher ? matchedTeacher.faculty_staff_id : 'FAC-201';
-    const teacherEmail = email || matchedTeacher?.official_email || 'm.sundaram@college.edu';
+    const teacherName = matchedTeacher.full_name;
+    const teacherId = matchedTeacher.faculty_staff_id;
+    const teacherEmail = email || matchedTeacher.official_email || 'faculty@srhu.edu.in';
 
     const teacherAssignments = matchedTeacher
       ? localAssignments.filter((a) => a.faculty_profile_id === matchedTeacher!.faculty_profile_id && a.is_active)
@@ -161,6 +161,10 @@ function getSyntheticProfile(uid: string, role: string, email?: string) {
       },
       editableFields: ['officeLocation', 'contactPhone'],
     };
+  }
+
+  if (role !== 'GLOBAL_ADMIN' && role !== 'HOD') {
+    return null;
   }
 
   const isAdmin = role === 'GLOBAL_ADMIN';

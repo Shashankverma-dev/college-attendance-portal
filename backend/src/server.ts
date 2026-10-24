@@ -16,7 +16,7 @@ import { AuditService } from './services/audit';
 import { ReconciliationWorker } from './services/reconciliation';
 import path from 'path';
 import { authenticate, requireRole } from './middleware/auth';
-import { isDbConnected } from './config/db';
+import { isDbConnected, assertProductionDbAvailable } from './config/db';
 
 dotenv.config();
 
@@ -87,14 +87,24 @@ try {
   app.use(express.static(projectRoot));
 } catch (_e) {}
 
-// Liveness & Readiness Probes for Cloud Run & Firebase Hosting Rewrites
+// Liveness Probe: indicates whether the process is alive and responsive
 app.get(['/health', '/api/health'], async (_req, res) => {
+  res.json({
+    status: 'ALIVE',
+    service: 'attendance-backend',
+    timestamp: new Date().toISOString(),
+    version: '1.8.0',
+  });
+});
+
+// Readiness Probe: indicates whether mandatory dependencies (PostgreSQL) are ready for traffic
+app.get(['/ready', '/api/ready'], async (_req, res) => {
   const dbOnline = await isDbConnected();
   const isProd = process.env.NODE_ENV === 'production';
 
   if (isProd && !dbOnline) {
     res.status(503).json({
-      status: 'UNHEALTHY',
+      status: 'NOT_READY',
       service: 'attendance-backend',
       database: 'DISCONNECTED',
       error: 'DATABASE_UNAVAILABLE: Production database connection required.',
@@ -105,7 +115,7 @@ app.get(['/health', '/api/health'], async (_req, res) => {
   }
 
   res.json({
-    status: 'HEALTHY',
+    status: 'READY',
     service: 'attendance-backend',
     database: dbOnline ? 'CONNECTED' : 'STANDBY_LOCAL',
     timestamp: new Date().toISOString(),
@@ -171,18 +181,35 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
   });
 });
 
-const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 College Attendance Portal Backend running on port ${PORT} (Environment: ${process.env.NODE_ENV || 'development'})`);
-});
+async function startServer() {
+  const dbOnline = await isDbConnected();
+  if (process.env.NODE_ENV === 'production') {
+    try {
+      assertProductionDbAvailable(dbOnline);
+      console.log('✅ PostgreSQL connection verified for production environment.');
+    } catch (err: any) {
+      console.error('🚨 FATAL STARTUP ERROR:', err.message);
+      process.exit(1);
+    }
+  } else {
+    console.log(`ℹ️ Database status: ${dbOnline ? 'PostgreSQL CONNECTED' : 'In-memory fallback (development mode)'}`);
+  }
 
-const SECONDARY_PORT = 5000;
-if (!process.env.K_SERVICE && process.env.NODE_ENV !== 'production' && PORT !== SECONDARY_PORT) {
-  const secondaryServer = app.listen(SECONDARY_PORT, '0.0.0.0', () => {
-    console.log(`🌐 Also serving on port ${SECONDARY_PORT} (http://localhost:${SECONDARY_PORT})`);
+  const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 College Attendance Portal Backend running on port ${PORT} (Environment: ${process.env.NODE_ENV || 'development'})`);
   });
-  secondaryServer.on('error', (err: any) => {
-    console.warn(`Note: Secondary port ${SECONDARY_PORT} was not bound (${err.code || err.message}). Serving on primary port ${PORT}.`);
-  });
+
+  const SECONDARY_PORT = 5000;
+  if (!process.env.K_SERVICE && process.env.NODE_ENV !== 'production' && PORT !== SECONDARY_PORT) {
+    const secondaryServer = app.listen(SECONDARY_PORT, '0.0.0.0', () => {
+      console.log(`🌐 Also serving on port ${SECONDARY_PORT} (http://localhost:${SECONDARY_PORT})`);
+    });
+    secondaryServer.on('error', (err: any) => {
+      console.warn(`Note: Secondary port ${SECONDARY_PORT} was not bound (${err.code || err.message}). Serving on primary port ${PORT}.`);
+    });
+  }
 }
+
+startServer();
 
 export default app;

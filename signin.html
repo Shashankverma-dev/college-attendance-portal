@@ -675,198 +675,74 @@
         }
 
         (async function () {
-          // Check for Admin-Provisioned Head of Department (HOD) Account
-          var hodAccounts = [];
-          try {
-            hodAccounts = JSON.parse(localStorage.getItem('attendance_hod_accounts_v2') || '[]');
-          } catch (e) {}
-
-          var idClean = idVal.trim().toLowerCase();
-          var matchedHod = hodAccounts.find(function (h) {
-            return (h.hodEmail && h.hodEmail.toLowerCase() === idClean) ||
-                   (h.deptId && ('hod.' + h.deptId.toLowerCase()) === idClean) ||
-                   (h.deptCode && ('hod-' + h.deptCode.toLowerCase()) === idClean) ||
-                   (h.deptCode && ('hod.' + h.deptCode.toLowerCase()) === idClean) ||
-                   (h.deptId && h.deptId.toLowerCase() === idClean);
-          });
-
-          if (matchedHod) {
-            if (pwVal === matchedHod.password || pwVal === 'Admin@Portal2026!') {
-              submitBtn.disabled = true;
-              submitBtn.textContent = 'Signing in...';
-              showStatus('Head of Department credentials verified. Signing in...', 'info');
-
-              var idToken = 'hod-auth-token-' + Date.now();
-              sessionStorage.setItem('attendance_auth_token', idToken);
-              sessionStorage.setItem('token', idToken);
-              localStorage.setItem('attendance_auth_token', idToken);
-              sessionStorage.setItem('attendance_session_id', 'hod-sess-' + Date.now());
-              sessionStorage.setItem('attendance_user_id', matchedHod.hodEmail || matchedHod.deptId);
-              sessionStorage.setItem('attendance_user_role', 'hod');
-              sessionStorage.setItem('attendance_user_name', matchedHod.hodName);
-              sessionStorage.setItem('attendance_user_email', matchedHod.hodEmail);
-              localStorage.setItem('attendance_user_email', matchedHod.hodEmail);
-              sessionStorage.setItem('attendance_dept_id', matchedHod.deptId);
-              sessionStorage.setItem('attendance_dept_name', matchedHod.deptName);
-
-              var nameParts = (matchedHod.hodName || 'Head of Department').split(' ');
-              var initials = (nameParts[0][0] + (nameParts[1] ? nameParts[1][0] : '')).toUpperCase();
-              sessionStorage.setItem('attendance_user_initials', initials || 'HD');
-
-              showStatus('Welcome ' + matchedHod.hodName + ' (' + matchedHod.deptName + ')! Redirecting to portal...', 'info');
-              setTimeout(function () {
-                window.location.href = 'admin.html';
-              }, 700);
-              return;
-            } else {
-              submitBtn.disabled = false;
-              submitBtn.textContent = 'Sign in';
-              showStatus('Incorrect password for Head of Department account. Please check the administrator-assigned credentials.', 'error');
-              return;
-            }
-          }
-
-          // Check for Institutional Administrator Account (e.g. ADM-001, admin, admin@college.edu, admin@srhu.edu.in)
-          var isAdminAccount = (idClean === 'adm-001' || idClean === 'admin' || idClean === 'admin@college.edu' || idClean === 'admin@srhu.edu.in');
-          if (isAdminAccount && pwVal === 'Admin@Portal2026!') {
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Signing in...';
-            showStatus('Administrator credentials verified. Signing in...', 'info');
-
-            var idToken = 'admin-auth-token-' + Date.now();
-            sessionStorage.setItem('attendance_auth_token', idToken);
-            sessionStorage.setItem('token', idToken);
-            localStorage.setItem('attendance_auth_token', idToken);
-            sessionStorage.setItem('attendance_session_id', 'admin-sess-' + Date.now());
-            sessionStorage.setItem('attendance_user_id', 'admin');
-            sessionStorage.setItem('attendance_user_role', 'admin');
-            sessionStorage.setItem('attendance_user_name', 'System Administrator');
-            sessionStorage.setItem('attendance_user_email', 'admin@college.edu');
-            localStorage.setItem('attendance_user_email', 'admin@college.edu');
-            sessionStorage.setItem('attendance_user_initials', 'SA');
-            localStorage.setItem('attendance_user_role', 'admin');
-            localStorage.setItem('attendance_user_id', 'admin');
-            localStorage.setItem('attendance_user_name', 'System Administrator');
-
-            showStatus('Welcome Administrator! Redirecting to portal...', 'info');
-            setTimeout(function () {
-              window.location.href = 'admin.html';
-            }, 700);
-            return;
-          }
-
-          // 1. If an email address was entered:
+          // 1. If an email address was entered, attempt Firebase Sign In if available, then verify role via server
           if (idVal.includes('@')) {
             submitBtn.disabled = true;
             submitBtn.textContent = 'Verifying credentials...';
-            showStatus('Authenticating with Firebase Authentication...', 'info');
+            showStatus('Authenticating credentials...', 'info');
 
             var fbReady = await ensureFirebaseReady();
-            if (!fbReady) {
-              submitBtn.disabled = false;
-              submitBtn.textContent = 'Sign in';
-              showStatus('Authentication service is loading. Please check your internet connection and retry.', 'error');
-              return;
-            }
+            if (fbReady) {
+              try {
+                var userCredential = await window.signInWithFirebase(idVal, pwVal);
+                var fbUser = userCredential.user;
+                var idToken = await fbUser.getIdToken();
 
-            // Attempt Firebase Sign In
-            try {
-              var userCredential = await window.signInWithFirebase(idVal, pwVal);
-              var fbUser = userCredential.user;
-              var idToken = await fbUser.getIdToken();
-              var email = fbUser.email || idVal;
-              var lowerEmail = email.toLowerCase();
-              var isAdminUser = /admin|dean|principal/i.test(lowerEmail) || lowerEmail === 'shashankvermahsst@gmail.com';
-              var isHodUser = /hod/i.test(lowerEmail) || hodAccounts.some(function(h) { return (h.hodEmail || '').toLowerCase() === lowerEmail; });
-              var role = 'student';
-              if (isAdminUser) role = 'admin';
-              else if (isHodUser) role = 'hod';
-              else if (/teacher|faculty|prof/i.test(lowerEmail)) role = 'faculty';
+                // Initialize server-side session and resolve authoritative role from backend
+                var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
+                var meRes = await fetch(apiBase + '/api/auth/me', {
+                  headers: { 'Authorization': 'Bearer ' + idToken }
+                });
 
-              sessionStorage.setItem('attendance_auth_token', idToken);
-              sessionStorage.setItem('token', idToken);
-              localStorage.setItem('attendance_auth_token', idToken);
-              sessionStorage.setItem('attendance_session_id', 'fb-sess-' + fbUser.uid.substring(0, 10));
-              sessionStorage.setItem('attendance_user_id', fbUser.uid);
-              sessionStorage.setItem('attendance_user_role', role);
-              var userName = lowerEmail === 'shashankvermahsst@gmail.com' ? 'Shashank Verma' : (fbUser.displayName || email.split('@')[0]);
-              var userInitials = lowerEmail === 'shashankvermahsst@gmail.com' ? 'SV' : email.substring(0, 2).toUpperCase();
-              sessionStorage.setItem('attendance_user_name', userName);
-              sessionStorage.setItem('attendance_user_email', email);
-              localStorage.setItem('attendance_user_email', email);
-              sessionStorage.setItem('attendance_user_initials', userInitials);
+                if (meRes.ok) {
+                  var meData = await meRes.json();
+                  var role = (meData.role || 'STUDENT').toLowerCase();
+                  if (role === 'global_admin') role = 'admin';
 
-              showStatus('Welcome back, ' + userName + '! Signed in with Firebase. Redirecting to dashboard...', 'info');
-              setTimeout(function () {
-                if (role === 'faculty') window.location.href = 'teacher.html';
-                else if (role === 'admin' || role === 'hod') window.location.href = 'admin.html';
-                else window.location.href = 'student.html';
-              }, 700);
-            } catch (fbErr) {
-              console.warn('Firebase sign-in note:', fbErr.code, fbErr.message);
-
-              // Seamless first-time admin setup for Shashankvermahsst@gmail.com
-              if ((fbErr.code === 'auth/user-not-found' || fbErr.code === 'auth/invalid-credential') &&
-                  idVal.trim().toLowerCase() === 'shashankvermahsst@gmail.com' &&
-                  pwVal.length >= 6) {
-                try {
-                  var newAdminCred = await window.createFirebaseUser(idVal, pwVal);
-                  var fbUser = newAdminCred.user;
-                  var idToken = await fbUser.getIdToken();
                   sessionStorage.setItem('attendance_auth_token', idToken);
                   sessionStorage.setItem('token', idToken);
                   localStorage.setItem('attendance_auth_token', idToken);
-                  sessionStorage.setItem('attendance_session_id', 'fb-sess-' + fbUser.uid.substring(0, 10));
                   sessionStorage.setItem('attendance_user_id', fbUser.uid);
-                  sessionStorage.setItem('attendance_user_role', 'admin');
-                  sessionStorage.setItem('attendance_user_name', 'Shashank Verma');
-                  sessionStorage.setItem('attendance_user_email', 'Shashankvermahsst@gmail.com');
-                  localStorage.setItem('attendance_user_email', 'Shashankvermahsst@gmail.com');
-                  sessionStorage.setItem('attendance_user_initials', 'SV');
+                  sessionStorage.setItem('attendance_user_role', role);
+                  sessionStorage.setItem('attendance_user_email', fbUser.email || idVal);
+                  localStorage.setItem('attendance_user_email', fbUser.email || idVal);
 
-                  showStatus('Welcome Administrator Shashank Verma! Initializing dashboard...', 'info');
+                  var displayName = meData.profile?.full_name || fbUser.displayName || (fbUser.email ? fbUser.email.split('@')[0] : 'User');
+                  sessionStorage.setItem('attendance_user_name', displayName);
+                  var initials = displayName.split(' ').map(function(n) { return n[0]; }).join('').substring(0, 2).toUpperCase() || 'U';
+                  sessionStorage.setItem('attendance_user_initials', initials);
+
+                  showStatus('Welcome back, ' + displayName + '! Verified with institutional directory. Redirecting...', 'info');
                   setTimeout(function () {
-                    window.location.href = 'admin.html';
+                    if (role === 'faculty') window.location.href = 'teacher.html';
+                    else if (role === 'admin' || role === 'hod') window.location.href = 'admin.html';
+                    else window.location.href = 'student.html';
                   }, 700);
                   return;
-                } catch (createErr) {
-                  console.warn('Admin account creation check:', createErr);
-                  if (createErr.code === 'auth/email-already-in-use') {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = 'Sign in';
-                    showStatus('Incorrect password for Shashankvermahsst@gmail.com. Please try again or click "Forgot password?".', 'error');
-                    return;
-                  }
                 }
-              }
-
-              submitBtn.disabled = false;
-              submitBtn.textContent = 'Sign in';
-
-              // If Firebase sign in fails, attempt authentication against Render backend (supporting institutional accounts)
-              if (fbErr.code === 'auth/user-not-found' || fbErr.code === 'auth/invalid-credential') {
-                showStatus('Verifying credentials with institutional directory...', 'info');
-                performBackendLogin(idVal, pwVal);
-                return;
-              }
-
-              submitBtn.disabled = false;
-              submitBtn.textContent = 'Sign in';
-
-              if (fbErr.code === 'auth/wrong-password') {
-                showStatus('Incorrect password. Please try again or click "Forgot password?".', 'error');
-              } else if (fbErr.code === 'auth/too-many-requests') {
-                showStatus('Access temporarily disabled due to multiple failed attempts. Please reset your password or try again later.', 'error');
-              } else if (fbErr.code === 'auth/invalid-email') {
-                showStatus('Please enter a valid email address.', 'error');
-              } else {
-                showStatus(fbErr.message || 'Authentication failed. Please verify credentials.', 'error');
+              } catch (fbErr) {
+                console.warn('Firebase sign-in note:', fbErr.code, fbErr.message);
+                if (fbErr.code === 'auth/wrong-password') {
+                  submitBtn.disabled = false;
+                  submitBtn.textContent = 'Sign in';
+                  showStatus('Incorrect password. Please try again or click "Forgot password?".', 'error');
+                  return;
+                } else if (fbErr.code === 'auth/too-many-requests') {
+                  submitBtn.disabled = false;
+                  submitBtn.textContent = 'Sign in';
+                  showStatus('Access temporarily disabled due to multiple failed attempts. Please reset your password or try again later.', 'error');
+                  return;
+                }
+                // If not found in Firebase, fallback to institutional backend directory
               }
             }
+
+            // Fallback to institutional backend authentication (PostgreSQL / Directory)
+            performBackendLogin(idVal, pwVal);
             return;
           }
 
-          // 2. Institutional ID (without '@', e.g. ADM-001, STU-101)
+          // 2. Institutional ID (without '@', e.g. SRHU238990, FAC-201, ADM-001)
           submitBtn.disabled = true;
           submitBtn.textContent = 'Verifying credentials...';
           showStatus('Authenticating institutional credentials...', 'info');
