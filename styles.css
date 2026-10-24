@@ -4687,3 +4687,21 @@ legend {
     width: 200px !important;
   }
 }
+
+/* 12. Google / Gmail Sign-In Button Styling */
+.google-signin-btn {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+.google-signin-btn:hover {
+  background: #F8FAFC !important;
+  border-color: #94A3B8 !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08) !important;
+  transform: translateY(-1px);
+}
+
+.google-signin-btn:active {
+  background: #F1F5F9 !important;
+  transform: translateY(0);
+}
+

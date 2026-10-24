@@ -131,13 +131,13 @@ router.post('/login', async (req: Request, res: Response): Promise<void> => {
 
   // 2. Development/Test Fixtures (Only active when NOT in production)
   if (!matchedUser && process.env.NODE_ENV !== 'production') {
-    // A. Administrator fixture
-    if (lowerId === 'admin@college.edu' || upperId === 'ADM-001') {
+    // A. Administrator fixture (Supports official email, administrator Gmail, or Staff ID)
+    if (lowerId === 'admin@college.edu' || lowerId === 'shashankvermahsst@gmail.com' || upperId === 'ADM-001') {
       matchedUser = {
         uid: 'usr-admin-001',
         id: 'ADM-001',
         name: 'System Administrator',
-        email: 'admin@college.edu',
+        email: lowerId.includes('@') ? lowerId : 'admin@college.edu',
         role: 'GLOBAL_ADMIN',
         departmentId: null,
         status: 'ACTIVE',

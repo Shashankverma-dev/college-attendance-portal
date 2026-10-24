@@ -89,8 +89,16 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
           departmentId = userRow.department_id;
         }
       } else {
-        // Fall back to cryptographically verified claims from portal session token
-        const rawRole = (decodedToken.role || 'STUDENT').toString().trim().toUpperCase();
+        // Fall back to cryptographically verified claims or directory email
+        let rawRole = (decodedToken.role || '').toString().trim().toUpperCase();
+        if (!rawRole && process.env.NODE_ENV !== 'production') {
+          if (email === 'admin@college.edu' || email === 'shashankvermahsst@gmail.com' || email.includes('admin')) {
+            rawRole = 'GLOBAL_ADMIN';
+          } else if (localTeachers.some((t) => t.official_email.toLowerCase() === email)) {
+            rawRole = 'FACULTY';
+          }
+        }
+        rawRole = rawRole || 'STUDENT';
         if (rawRole === 'GLOBAL_ADMIN' || rawRole === 'ADMIN') {
           role = 'GLOBAL_ADMIN';
         } else if (rawRole === 'HOD') {
@@ -112,7 +120,15 @@ export async function authenticate(req: Request, res: Response, next: NextFuncti
       }
 
       // Development / Test mode fallback
-      const rawRole = (decodedToken.role || 'STUDENT').toString().trim().toUpperCase();
+      let rawRole = (decodedToken.role || '').toString().trim().toUpperCase();
+      if (!rawRole && process.env.NODE_ENV !== 'production') {
+        if (email === 'admin@college.edu' || email === 'shashankvermahsst@gmail.com' || email.includes('admin')) {
+          rawRole = 'GLOBAL_ADMIN';
+        } else if (localTeachers.some((t) => t.official_email.toLowerCase() === email)) {
+          rawRole = 'FACULTY';
+        }
+      }
+      rawRole = rawRole || 'STUDENT';
       if (rawRole === 'GLOBAL_ADMIN' || rawRole === 'ADMIN') {
         role = 'GLOBAL_ADMIN';
       } else if (rawRole === 'HOD') {

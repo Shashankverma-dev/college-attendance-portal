@@ -7,7 +7,9 @@ import {
   createUserWithEmailAndPassword, 
   sendPasswordResetEmail,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  GoogleAuthProvider,
+  signInWithPopup
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
   getFirestore,
@@ -154,6 +156,15 @@ window.dbListenCollection = function (collName, callback, whereField = null, op 
   }, (err) => {
     console.error('dbListenCollection error:', collName, err);
   });
+};
+
+// Google Sign-In Provider & Helpers
+export const googleProvider = new GoogleAuthProvider();
+googleProvider.setCustomParameters({ prompt: 'select_account' });
+window.googleAuthProvider = googleProvider;
+
+window.signInWithGoogle = function () {
+  return signInWithPopup(auth, googleProvider);
 };
 
 // Email/Password Auth Helpers
