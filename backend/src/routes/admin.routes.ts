@@ -241,7 +241,13 @@ router.get(
             todayLockedSessions: sessionStatsRes.rows[0].locked_sessions,
             averageAttendanceRate: attendanceRateRes.rows[0]?.avg_attendance || null,
           },
-          departments: deptSummaryRes.rows,
+          departments: deptSummaryRes.rows.map((r: any) => ({
+            ...r,
+            id: r.id || r.department_id,
+            code: r.code || r.department_code,
+            name: r.name || r.department_name,
+            is_user_created: true,
+          })),
           auditChainIntegrity: {
             status: auditIntegrity.isValid ? 'VALIDATED' : 'INTEGRITY_BREACH',
             totalChainDepth: totalAuditEntries,
@@ -269,6 +275,9 @@ router.get(
         const facCount = localTeachers.filter((t) => t.department_id === d.department_id).length;
         const crsCount = localCourses.filter((c) => c.department_id === d.department_id).length;
         return {
+          id: d.department_id,
+          code: d.department_code,
+          name: d.department_name,
           department_id: d.department_id,
           department_code: d.department_code,
           department_name: d.department_name,
@@ -278,6 +287,7 @@ router.get(
           hod_name: d.hod_name || '',
           hod_email: d.hod_email || '',
           complianceRate: facCount > 0 ? '100.0%' : '100.0%',
+          is_user_created: true,
         };
       });
 
@@ -1842,8 +1852,9 @@ export function deduplicateDepartmentsList(departments: any[]): any[] {
   const seenCodes = new Set<string>();
   const seenNames = new Set<string>();
   const result: any[] = [];
-  for (const d of departments) {
-    if (!d) continue;
+  for (const rawD of departments) {
+    if (!rawD) continue;
+    const d = { ...rawD };
     let code = String(d.department_code || d.code || '').trim().toUpperCase();
     const rawName = String(d.department_name || d.name || d.school_name || '').trim();
     const nameKey = rawName.toLowerCase().replace(/\s+/g, ' ');
@@ -1858,6 +1869,17 @@ export function deduplicateDepartmentsList(departments: any[]): any[] {
     }
     if (code) seenCodes.add(code);
     if (nameKey) seenNames.add(nameKey);
+    const id = d.id || d.department_id || d.school_id || (code ? `dept-${code.toLowerCase()}` : 'dept');
+    d.id = id;
+    d.code = code;
+    d.name = rawName || (code ? `Department of ${code}` : 'Academic Department');
+    d.department_id = id;
+    d.department_code = code;
+    d.department_name = d.name;
+    d.school_id = id;
+    d.school_code = code;
+    d.school_name = d.name;
+    d.is_user_created = true;
     result.push(d);
   }
   return result;

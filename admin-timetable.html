@@ -1373,7 +1373,10 @@
       if (!identifier) return;
       try {
         const list = getDeletedBlacklist();
-        const cats = ['schools', 'departments'];
+        let cats = [category];
+        if (category === 'schools' || category === 'departments') {
+          cats = ['schools', 'departments'];
+        }
         const norm = String(identifier).trim().toLowerCase();
         const normClean = norm.replace(/&amp;/g, '&').replace(/\band\b/g, '&').replace(/[^a-z0-9]/g, '');
         cats.forEach(cat => {
@@ -1384,6 +1387,12 @@
               const xClean = xNorm.replace(/&amp;/g, '&').replace(/\band\b/g, '&').replace(/[^a-z0-9]/g, '');
               if (xNorm === norm || (xClean && normClean && xClean === normClean)) return false;
               if (norm.length >= 3 && xNorm.length >= 3 && (xNorm.includes(norm) || norm.includes(xNorm) || (xClean && normClean && (xClean.includes(normClean) || normClean.includes(xClean))))) return false;
+              if (norm.startsWith('prog-') && xNorm === norm.replace(/^prog-/, '')) return false;
+              if (norm.startsWith('dept-') && xNorm === norm.replace(/^dept-/, '')) return false;
+              if (norm.startsWith('sem-') && xNorm === norm.replace(/^sem-/, '')) return false;
+              if (xNorm.startsWith('prog-') && xNorm.replace(/^prog-/, '') === norm) return false;
+              if (xNorm.startsWith('dept-') && xNorm.replace(/^dept-/, '') === norm) return false;
+              if (xNorm.startsWith('sem-') && xNorm.replace(/^sem-/, '') === norm) return false;
               return true;
             });
           }
@@ -1398,6 +1407,34 @@
           if (item.is_user_created || item.user_created) return false;
         }
       }
+
+      // If category is schools or departments, check if any identifier matches actively saved stores
+      if (category === 'schools' || category === 'departments') {
+        try {
+          const keys = ['attendance_academic_departments_v2', 'attendance_institutional_schools_v1', 'admin_schools_list'];
+          for (let k = 0; k < keys.length; k++) {
+            const raw = localStorage.getItem(keys[k]);
+            if (raw) {
+              const list = JSON.parse(raw);
+              if (Array.isArray(list)) {
+                const match = identifiers.some(id => {
+                  if (!id || typeof id === 'object') return false;
+                  const n = String(id).trim().toLowerCase();
+                  return list.some(item => {
+                    if (!item) return false;
+                    const c = String(item.code || item.department_code || item.school_code || '').trim().toLowerCase();
+                    const name = String(item.name || item.department_name || item.school_name || '').trim().toLowerCase();
+                    const sid = String(item.id || item.department_id || item.school_id || '').trim().toLowerCase();
+                    return n === c || n === name || n === sid;
+                  });
+                });
+                if (match) return false;
+              }
+            }
+          }
+        } catch (e) {}
+      }
+
       const list = getDeletedBlacklist();
       const deletedSet = Array.isArray(list[category]) ? list[category] : [];
       if (deletedSet.length === 0) return false;
@@ -1406,6 +1443,8 @@
         if (typeof id === 'object') return false;
         const norm = String(id).trim().toLowerCase();
         if (!norm) return false;
+        // Never allow generic semester strings like "semester 1" to trigger global deletion
+        if (category === 'semesters' && /^semester\s*\d+$/i.test(norm)) return false;
         return deletedSet.some(c => {
           if (!c) return false;
           const cNorm = String(c).trim().toLowerCase();
@@ -1549,6 +1588,14 @@
         };
         handleHashRoute();
         window.addEventListener('hashchange', handleHashRoute);
+        window.addEventListener('storage', (e) => {
+          if (!e.key || e.key === 'attendance_academic_departments_v2' || e.key === 'attendance_institutional_schools_v1' || e.key === 'admin_academic_state' || e.key === 'admin_schools_list') {
+            loadAcademicEntities();
+          }
+        });
+        window.addEventListener('attendance:academic-entities-updated', () => {
+          loadAcademicEntities();
+        });
       } catch (err) {
         console.error('Initialization error:', err);
       }
@@ -2913,6 +2960,10 @@
                 const inst = JSON.parse(localStorage.getItem('attendance_institutional_schools_v1') || '[]');
                 if (Array.isArray(inst)) localSchoolsList = localSchoolsList.concat(inst);
               } catch (e) {}
+              try {
+                const depts = JSON.parse(localStorage.getItem('attendance_academic_departments_v2') || '[]');
+                if (Array.isArray(depts)) localSchoolsList = localSchoolsList.concat(depts);
+              } catch (e) {}
               if (Array.isArray(loadedSchools) && loadedSchools.length > 0) {
                 localSchoolsList = localSchoolsList.concat(loadedSchools);
               }
@@ -2920,7 +2971,7 @@
                 if (!sch) return;
                 const sCode = normalizeSchoolCode(sch);
                 const sName = (sch.school_name || sch.name || sch.department_name || '').trim();
-                const sId = sch.school_id || sch.id || sCode.toLowerCase();
+                const sId = sch.school_id || sch.department_id || sch.id || (sCode ? ('dept-' + sCode.toLowerCase()) : 'dept');
                 if (sCode && !academicState.departments.some(d => (d.code && d.code.toUpperCase() === sCode) || (d.name && d.name.toLowerCase() === sName.toLowerCase()))) {
                   academicState.departments.push({
                     id: sId,
@@ -2973,6 +3024,38 @@
       } else {
         academicState = JSON.parse(JSON.stringify(defaultInstitutionalState));
       }
+
+      // Merge departments from local storage repositories so freshly created departments in admin.html are always included
+      try {
+        let localDepts = [];
+        try {
+          const d2 = JSON.parse(localStorage.getItem('attendance_academic_departments_v2') || '[]');
+          if (Array.isArray(d2)) localDepts = localDepts.concat(d2);
+        } catch (e) {}
+        try {
+          const s1 = JSON.parse(localStorage.getItem('attendance_institutional_schools_v1') || '[]');
+          if (Array.isArray(s1)) localDepts = localDepts.concat(s1);
+        } catch (e) {}
+        try {
+          const sl = JSON.parse(localStorage.getItem('admin_schools_list') || '[]');
+          if (Array.isArray(sl)) localDepts = localDepts.concat(sl);
+        } catch (e) {}
+        localDepts.forEach(sch => {
+          if (!sch) return;
+          const sCode = normalizeSchoolCode(sch);
+          const sName = (sch.school_name || sch.name || sch.department_name || '').trim();
+          const sId = sch.school_id || sch.department_id || sch.id || (sCode ? ('dept-' + sCode.toLowerCase()) : 'dept');
+          if (sCode && !academicState.departments.some(d => (d.code && d.code.toUpperCase() === sCode) || (d.name && d.name.toLowerCase() === sName.toLowerCase()))) {
+            academicState.departments.push({
+              id: sId,
+              code: sCode,
+              name: sName,
+              is_user_created: true
+            });
+          }
+        });
+        academicState.departments = deduplicateDepartmentsList(academicState.departments);
+      } catch (e) {}
 
       renderDepartmentsTable();
       renderCoursesTable();
@@ -3770,7 +3853,27 @@
           if (data.success) {
             closeAddProgrammeModal();
             await loadAcademicEntities();
-            showSuccessBanner(data.message);
+            if (data.programme) {
+              const p = data.programme;
+              const pId = p.course_id || p.id || prog_id;
+              if (!academicState.courses.some(c => c.id === pId || c.code === code)) {
+                academicState.courses.push({ id: pId, department_id, code, name, total_semesters, is_user_created: true });
+              }
+              if (Array.isArray(data.semesters) && data.semesters.length > 0) {
+                data.semesters.forEach(sm => {
+                  const sId = sm.semester_id || sm.id;
+                  if (!academicState.semesters.some(s => s.id === sId)) {
+                    academicState.semesters.push({ id: sId, course_id: sm.course_id || pId, semester_number: sm.semester_number, display_label: sm.display_label || `Semester ${sm.semester_number}`, is_user_created: true });
+                  }
+                });
+              }
+              try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
+              renderCoursesTable();
+              renderSemestersTable();
+              populateAcademicDropdowns();
+              syncFilterDropdowns();
+            }
+            showSuccessBanner(data.message || `Programme "${name}" (${code}) registered successfully.`);
             return;
           } else if (res.status === 401 || res.status === 403) {
             console.warn('Backend authentication unverified (401/403); saving programme locally:', data);
@@ -3790,14 +3893,15 @@
       }
 
       // Offline fallback
-      academicState.courses.push({ id: prog_id, department_id, code, name, total_semesters });
+      academicState.courses.push({ id: prog_id, department_id, code, name, total_semesters, is_user_created: true });
       // Generate semesters for this course
       for (let s = 1; s <= total_semesters; s++) {
-        academicState.semesters.push({ id: `sem-${code.toLowerCase()}-${s}`, course_id: prog_id, semester_number: s, display_label: `Semester ${s}` });
+        academicState.semesters.push({ id: `sem-${code.toLowerCase()}-${s}`, course_id: prog_id, semester_number: s, display_label: `Semester ${s}`, is_user_created: true });
       }
       try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
       closeAddProgrammeModal();
       renderCoursesTable();
+      renderSemestersTable();
       populateAcademicDropdowns();
       syncFilterDropdowns();
       showSuccessBanner(`Programme "${name}" (${code}) registered successfully.`);
@@ -3811,7 +3915,6 @@
       const msg = document.getElementById('add-sem-msg');
 
       removeFromDeletedBlacklist('semesters', sem_id);
-      removeFromDeletedBlacklist('semesters', display_label);
 
       try {
         if (getApiBase() !== null) {
@@ -3824,6 +3927,17 @@
           if (data.success) {
             closeAddSemesterModal();
             await loadAcademicEntities();
+            if (data.semester) {
+              const sm = data.semester;
+              const sId = sm.semester_id || sm.id || sem_id;
+              if (!academicState.semesters.some(s => s.id === sId)) {
+                academicState.semesters.push({ id: sId, course_id, semester_number, display_label, is_user_created: true });
+                try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
+                renderSemestersTable();
+                populateAcademicDropdowns();
+                syncFilterDropdowns();
+              }
+            }
             showSuccessBanner(data.message || `Semester ${semester_number} created successfully.`);
             return;
           } else if (res.status === 401 || res.status === 403) {
@@ -3852,7 +3966,7 @@
         return;
       }
 
-      academicState.semesters.push({ id: sem_id, course_id, semester_number, display_label });
+      academicState.semesters.push({ id: sem_id, course_id, semester_number, display_label, is_user_created: true });
       try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
       closeAddSemesterModal();
       renderSemestersTable();

@@ -89,13 +89,46 @@ router.get('/academic/all', adminAuth, async (_req: Request, res: Response): Pro
   res.json({
     success: true,
     departments: deduplicateDepartmentsList(localDepartments),
-    programmes: localCourses,
-    courses: localCourses,
-    semesters: localSemesters,
-    sections: localSections,
+    programmes: localCourses.map((c) => ({
+      ...c,
+      id: c.course_id,
+      code: c.course_code,
+      name: c.course_name,
+      total_semesters: c.total_semesters || 6,
+      is_user_created: true,
+    })),
+    courses: localCourses.map((c) => ({
+      ...c,
+      id: c.course_id,
+      code: c.course_code,
+      name: c.course_name,
+      total_semesters: c.total_semesters || 6,
+      is_user_created: true,
+    })),
+    semesters: localSemesters.map((s) => ({
+      ...s,
+      id: s.semester_id,
+      is_user_created: true,
+    })),
+    sections: localSections.map((sec) => ({
+      ...sec,
+      id: sec.section_id,
+      name: sec.section_name,
+      is_user_created: true,
+    })),
     subjects: localSubjects,
-    rooms: localClassrooms.filter((r) => r.is_active !== false),
-    groups: localSectionGroups,
+    rooms: localClassrooms.filter((r) => r.is_active !== false).map((r) => ({
+      ...r,
+      id: r.room_id,
+      name: r.room_name,
+      is_user_created: true,
+    })),
+    groups: localSectionGroups.map((g) => ({
+      ...g,
+      id: g.group_id,
+      name: g.group_name,
+      is_user_created: true,
+    })),
     periods: defaultPeriodSlots,
   });
 });
@@ -253,18 +286,27 @@ router.post('/academic/programme', adminAuth, async (req: Request, res: Response
   const newCourse = {
     course_id: newCourseId,
     department_id,
+    school_id: department_id,
     course_code: cleanCode,
     course_name: cleanName,
+    total_semesters: numSemesters,
+    id: newCourseId,
+    code: cleanCode,
+    name: cleanName,
+    is_user_created: true,
   };
   localCourses.push(newCourse);
 
   const createdSemesters = [];
   for (let s = 1; s <= numSemesters; s++) {
+    const semId = crypto.randomUUID();
     const sem = {
-      semester_id: crypto.randomUUID(),
+      semester_id: semId,
+      id: semId,
       course_id: newCourseId,
       semester_number: s,
       display_label: `Semester ${s}`,
+      is_user_created: true,
     };
     localSemesters.push(sem);
     createdSemesters.push(sem);
@@ -326,11 +368,14 @@ router.post('/academic/semester', adminAuth, async (req: Request, res: Response)
     return;
   }
 
+  const semId = crypto.randomUUID();
   const newSem = {
-    semester_id: crypto.randomUUID(),
+    semester_id: semId,
+    id: semId,
     course_id: resolvedCourseId,
     semester_number: semNum,
     display_label: display_label || `Semester ${semNum}`,
+    is_user_created: true,
   };
   localSemesters.push(newSem);
   res.json({ success: true, message: `Semester ${semNum} added successfully.`, semester: newSem });
@@ -339,14 +384,7 @@ router.post('/academic/semester', adminAuth, async (req: Request, res: Response)
 // Admin Deletion: Semester
 router.delete('/academic/semester/:id', adminAuth, async (req: Request, res: Response): Promise<void> => {
   const targetId = req.params.id;
-  const idx = localSemesters.findIndex((s) => {
-    if (s.semester_id === targetId) return true;
-    const semNumMatch = targetId.match(/\d+$/);
-    if (semNumMatch && s.semester_number === Number(semNumMatch[0])) {
-      return true;
-    }
-    return false;
-  });
+  const idx = localSemesters.findIndex((s) => s.semester_id === targetId || (s as any).id === targetId);
   if (idx === -1) {
     res.status(404).json({ success: false, message: 'Semester not found.' });
     return;

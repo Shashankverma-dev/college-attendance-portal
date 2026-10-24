@@ -1309,6 +1309,32 @@
         var it = identifiers[i];
         if (it && typeof it === 'object' && (it.is_user_created || it.user_created)) return false;
       }
+
+      // If any identifier matches an actively stored department or school, it is NEVER deleted
+      try {
+        var keysToCheck = ['attendance_academic_departments_v2', 'attendance_institutional_schools_v1', 'admin_schools_list'];
+        for (var k = 0; k < keysToCheck.length; k++) {
+          var rawItems = localStorage.getItem(keysToCheck[k]);
+          if (rawItems) {
+            var parsedItems = JSON.parse(rawItems);
+            if (Array.isArray(parsedItems) && parsedItems.length > 0) {
+              var matchesActive = identifiers.some(function(id) {
+                if (!id || typeof id === 'object') return false;
+                var norm = String(id).trim().toLowerCase();
+                return parsedItems.some(function(item) {
+                  if (!item) return false;
+                  var c = String(item.department_code || item.school_code || item.code || '').trim().toLowerCase();
+                  var n = String(item.department_name || item.school_name || item.name || '').trim().toLowerCase();
+                  var sid = String(item.department_id || item.school_id || item.id || '').trim().toLowerCase();
+                  return norm === c || norm === n || norm === sid;
+                });
+              });
+              if (matchesActive) return false;
+            }
+          }
+        }
+      } catch (e) {}
+
       var list = {};
       try {
         var bl = localStorage.getItem('admin_deleted_entities_blacklist');
@@ -1350,6 +1376,13 @@
         }
       } catch (e) {}
 
+      try {
+        var aState = JSON.parse(localStorage.getItem('admin_academic_state') || '{}');
+        if (Array.isArray(aState.departments) && aState.departments.length > 0) {
+          rawList = rawList.concat(aState.departments);
+        }
+      } catch (e) {}
+
       // Strip legacy pre-seeded mock statistics and mock HOD names
       rawList.forEach(function (d) {
         if (d) {
@@ -1381,22 +1414,52 @@
       });
 
       var deduplicated = deduplicateDepartments(rawList);
+      deduplicated.forEach(function(d) { d.is_user_created = true; });
+
       try {
-        // Persist cleaned list back to BOTH keys so deleted entries can't resurface
+        // Persist cleaned list back to ALL keys so all pages see the exact same synchronized list
         localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(deduplicated));
         var cleanedSchools = deduplicated.map(function(d) {
+          var c = d.department_code || d.school_code || d.code || '';
+          var n = d.department_name || d.school_name || d.name || '';
+          var sid = d.department_id || d.school_id || d.id || ('dept-' + c.toLowerCase());
           return {
-            school_id:    d.department_id || d.school_id || d.id || (d.code || d.department_code || '').toLowerCase(),
-            school_code:  d.department_code || d.school_code || d.code || '',
-            school_name:  d.department_name || d.school_name || d.name || '',
-            programs:     d.programs || '',
-            hod_name:     d.hod_name  || d.hodName  || '',
-            hod_email:    d.hod_email || d.hodEmail || '',
+            school_id:     sid,
+            school_code:   c,
+            school_name:   n,
+            programs:      d.programs || '',
+            hod_name:      d.hod_name  || d.hodName  || '',
+            hod_email:     d.hod_email || d.hodEmail || '',
             faculty_count: d.facultyCount || d.faculty_count || 0,
             student_count: d.student_count || 0,
+            is_active:     true,
+            is_user_created: true
           };
         });
         localStorage.setItem('attendance_institutional_schools_v1', JSON.stringify(cleanedSchools));
+        localStorage.setItem('admin_schools_list', JSON.stringify(cleanedSchools));
+
+        var aState = {};
+        try { aState = JSON.parse(localStorage.getItem('admin_academic_state') || '{}'); } catch (e) {}
+        if (!aState || typeof aState !== 'object') aState = {};
+        aState.departments = deduplicated.map(function(d) {
+          var c = (d.code || d.department_code || d.school_code || '').toUpperCase();
+          var n = (d.name || d.department_name || d.school_name || '').trim();
+          var sid = d.id || d.department_id || d.school_id || ('dept-' + c.toLowerCase());
+          return {
+            id: sid,
+            code: c,
+            name: n,
+            department_id: sid,
+            department_code: c,
+            department_name: n,
+            programs: d.programs || '',
+            hod_name: d.hod_name || d.hodName || '',
+            hod_email: d.hod_email || d.hodEmail || '',
+            is_user_created: true
+          };
+        });
+        localStorage.setItem('admin_academic_state', JSON.stringify(aState));
       } catch (e) {}
 
       return deduplicated;
@@ -1405,7 +1468,77 @@
     function saveStoredDepartments(list) {
       try {
         var cleaned = deduplicateDepartments(list);
+        cleaned.forEach(function(d) { d.is_user_created = true; });
         localStorage.setItem('attendance_academic_departments_v2', JSON.stringify(cleaned));
+
+        var cleanedSchools = cleaned.map(function(d) {
+          var c = d.department_code || d.school_code || d.code || '';
+          var n = d.department_name || d.school_name || d.name || '';
+          var sid = d.department_id || d.school_id || d.id || ('dept-' + c.toLowerCase());
+          return {
+            school_id:     sid,
+            school_code:   c,
+            school_name:   n,
+            programs:      d.programs || '',
+            hod_name:      d.hod_name  || d.hodName  || '',
+            hod_email:     d.hod_email || d.hodEmail || '',
+            faculty_count: d.facultyCount || d.faculty_count || 0,
+            student_count: d.student_count || 0,
+            is_active:     true,
+            is_user_created: true
+          };
+        });
+        localStorage.setItem('attendance_institutional_schools_v1', JSON.stringify(cleanedSchools));
+        localStorage.setItem('admin_schools_list', JSON.stringify(cleanedSchools));
+
+        var aState = {};
+        try { aState = JSON.parse(localStorage.getItem('admin_academic_state') || '{}'); } catch (e) {}
+        if (!aState || typeof aState !== 'object') aState = {};
+        aState.departments = cleaned.map(function(d) {
+          var c = (d.code || d.department_code || d.school_code || '').toUpperCase();
+          var n = (d.name || d.department_name || d.school_name || '').trim();
+          var sid = d.id || d.department_id || d.school_id || ('dept-' + c.toLowerCase());
+          return {
+            id: sid,
+            code: c,
+            name: n,
+            department_id: sid,
+            department_code: c,
+            department_name: n,
+            programs: d.programs || '',
+            hod_name: d.hod_name || d.hodName || '',
+            hod_email: d.hod_email || d.hodEmail || '',
+            is_user_created: true
+          };
+        });
+        localStorage.setItem('admin_academic_state', JSON.stringify(aState));
+
+        // Purge newly saved active entities from blacklist
+        try {
+          var bl = JSON.parse(localStorage.getItem('admin_deleted_entities_blacklist') || '{}');
+          cleaned.forEach(function(d) {
+            var c = String(d.code || d.department_code || '').toLowerCase().trim();
+            var n = String(d.name || d.department_name || '').toLowerCase().trim();
+            var sid = String(d.id || d.department_id || '').toLowerCase().trim();
+            ['schools', 'departments'].forEach(function(cat) {
+              if (Array.isArray(bl[cat])) {
+                bl[cat] = bl[cat].filter(function(x) {
+                  if (!x) return false;
+                  var xNorm = String(x).toLowerCase().trim();
+                  if (xNorm === c || xNorm === n || xNorm === sid || xNorm === ('dept-' + c) || xNorm === ('school-' + c)) return false;
+                  return true;
+                });
+              }
+            });
+          });
+          localStorage.setItem('admin_deleted_entities_blacklist', JSON.stringify(bl));
+        } catch (e) {}
+
+        // Notify other windows/tabs and dynamic listeners
+        try {
+          window.dispatchEvent(new Event('storage'));
+          window.dispatchEvent(new CustomEvent('attendance:academic-entities-updated'));
+        } catch (e) {}
       } catch (e) {}
     }
 
@@ -1608,15 +1741,16 @@
         var bl = JSON.parse(localStorage.getItem('admin_deleted_entities_blacklist') || '{}');
         ['schools', 'departments'].forEach(function(cat) {
           if (Array.isArray(bl[cat])) {
-            var cNorm = code.toLowerCase();
-            var nNorm = name.toLowerCase();
+            var cNorm = code.toLowerCase().trim();
+            var nNorm = name.toLowerCase().trim();
+            var dNorm = deptId.toLowerCase().trim();
             var nClean = nNorm.replace(/&amp;/g, '&').replace(/\band\b/g, '&').replace(/[^a-z0-9]/g, '');
             bl[cat] = bl[cat].filter(function(x) {
               if (!x) return false;
               var xNorm = String(x).toLowerCase().trim();
               var xClean = xNorm.replace(/&amp;/g, '&').replace(/\band\b/g, '&').replace(/[^a-z0-9]/g, '');
-              if (xNorm === cNorm || xNorm === nNorm || (xClean && nClean && xClean === nClean)) return false;
-              if (cNorm.length >= 4 && xNorm.length >= 4 && (xNorm.includes(cNorm) || cNorm.includes(xNorm))) return false;
+              if (xNorm === cNorm || xNorm === nNorm || xNorm === dNorm || xNorm === ('dept-' + cNorm) || xNorm === ('school-' + cNorm) || (xClean && nClean && xClean === nClean)) return false;
+              if (cNorm && (xNorm.includes(cNorm) || cNorm.includes(xNorm))) return false;
               return true;
             });
           }
@@ -2380,6 +2514,14 @@
     // Initial page load
     document.addEventListener('DOMContentLoaded', function () {
       loadDashboardMetrics(false);
+      window.addEventListener('storage', function(e) {
+        if (!e.key || e.key === 'attendance_academic_departments_v2' || e.key === 'attendance_institutional_schools_v1' || e.key === 'admin_academic_state') {
+          renderDepartmentTable(getStoredDepartments());
+        }
+      });
+      window.addEventListener('attendance:academic-entities-updated', function() {
+        renderDepartmentTable(getStoredDepartments());
+      });
     });
   </script>
   <script type="module" src="firebase-init.js"></script>

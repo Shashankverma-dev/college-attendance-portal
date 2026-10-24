@@ -2214,6 +2214,36 @@
 
         function isEntityDeleted() {
           var identifiers = Array.prototype.slice.call(arguments);
+          for (var i = 0; i < identifiers.length; i++) {
+            var it = identifiers[i];
+            if (it && typeof it === 'object' && (it.is_user_created || it.user_created)) return false;
+          }
+
+          // If actively stored, it is not deleted
+          try {
+            var keys = ['attendance_academic_departments_v2', 'attendance_institutional_schools_v1', 'admin_schools_list'];
+            for (var k = 0; k < keys.length; k++) {
+              var raw = localStorage.getItem(keys[k]);
+              if (raw) {
+                var list = JSON.parse(raw);
+                if (Array.isArray(list)) {
+                  var isMatch = identifiers.some(function(id) {
+                    if (!id || typeof id === 'object') return false;
+                    var norm = String(id).trim().toLowerCase();
+                    return list.some(function(item) {
+                      if (!item) return false;
+                      var c = String(item.code || item.department_code || item.school_code || '').trim().toLowerCase();
+                      var name = String(item.name || item.department_name || item.school_name || '').trim().toLowerCase();
+                      var sid = String(item.id || item.department_id || item.school_id || '').trim().toLowerCase();
+                      return norm === c || norm === name || norm === sid;
+                    });
+                  });
+                  if (isMatch) return false;
+                }
+              }
+            }
+          } catch (e) {}
+
           var list = {};
           try {
             var bl = localStorage.getItem('admin_deleted_entities_blacklist');
@@ -2224,6 +2254,7 @@
           if (combined.length === 0) return false;
           return identifiers.some(function(id) {
             if (!id) return false;
+            if (typeof id === 'object') return false;
             var norm = String(id).trim().toLowerCase();
             var normClean = norm.replace(/&amp;/g, '&').replace(/\band\b/g, '&').replace(/[^a-z0-9]/g, '');
             return combined.some(function(c) {
@@ -2336,22 +2367,59 @@
           if (editDept) editDept.innerHTML = modalHtml;
         }
 
-        fetch(getApiBase() + '/api/admin/academic/departments', { headers: getAuthHeaders() })
-          .then(function (res) { return res.json(); })
-          .then(function (depts) {
-            renderDepts(depts);
-          })
-          .catch(function (err) {
-            var defaultDepts = [];
-            try {
-              var stored = localStorage.getItem('attendance_academic_departments_v2') || localStorage.getItem('admin_schools_list');
-              if (stored) {
-                var parsed = JSON.parse(stored);
-                if (Array.isArray(parsed)) defaultDepts = parsed;
+        function loadAllDepartmentSources() {
+          var localDepts = [];
+          try {
+            var rawD = localStorage.getItem('attendance_academic_departments_v2');
+            if (rawD) {
+              var pD = JSON.parse(rawD);
+              if (Array.isArray(pD)) localDepts = localDepts.concat(pD);
+            }
+          } catch (e) {}
+          try {
+            var rawS = localStorage.getItem('attendance_institutional_schools_v1');
+            if (rawS) {
+              var pS = JSON.parse(rawS);
+              if (Array.isArray(pS)) localDepts = localDepts.concat(pS);
+            }
+          } catch (e) {}
+          try {
+            var rawA = localStorage.getItem('admin_schools_list');
+            if (rawA) {
+              var pA = JSON.parse(rawA);
+              if (Array.isArray(pA)) localDepts = localDepts.concat(pA);
+            }
+          } catch (e) {}
+          try {
+            var rawSt = localStorage.getItem('admin_academic_state');
+            if (rawSt) {
+              var pSt = JSON.parse(rawSt);
+              if (Array.isArray(pSt.departments)) localDepts = localDepts.concat(pSt.departments);
+            }
+          } catch (e) {}
+
+          renderDepts(localDepts);
+
+          fetch(getApiBase() + '/api/admin/academic/departments', { headers: getAuthHeaders() })
+            .then(function (res) { return res.json(); })
+            .then(function (depts) {
+              if (Array.isArray(depts)) {
+                renderDepts(localDepts.concat(depts));
               }
-            } catch (e) {}
-            renderDepts(defaultDepts);
-          });
+            })
+            .catch(function () {});
+        }
+
+        loadAllDepartmentSources();
+
+        window.addEventListener('storage', function (e) {
+          if (!e.key || e.key === 'attendance_academic_departments_v2' || e.key === 'attendance_institutional_schools_v1' || e.key === 'admin_schools_list' || e.key === 'admin_academic_state') {
+            loadAllDepartmentSources();
+          }
+        });
+        window.addEventListener('attendance:academic-entities-updated', function () {
+          loadAllDepartmentSources();
+        });
       };
 
       loadDepartmentDropdowns();
