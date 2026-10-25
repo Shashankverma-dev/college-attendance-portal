@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { PoolClient } from 'pg';
-import { pool } from '../config/db';
+import { pool, isDbConnected } from '../config/db';
 
 export interface AuditLogEntry {
   actorUid: string;
@@ -22,14 +22,6 @@ export interface InMemAuditLogEntry extends AuditLogEntry {
 
 export const localAuditLogs: InMemAuditLogEntry[] = [];
 
-async function isDbConnected(): Promise<boolean> {
-  try {
-    const res = await pool.query('SELECT 1');
-    return res.rowCount === 1;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Append-Only Audit Logging Service

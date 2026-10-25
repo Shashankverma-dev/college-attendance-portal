@@ -1023,6 +1023,7 @@
       var urlParams = new URLSearchParams(window.location.search);
       var mode = urlParams.get('mode');
       var token = urlParams.get('token');
+      var verifiedEmail = '';
 
       if (mode === 'activate') {
         document.querySelector('h1.display').textContent = 'Activate Account';
@@ -1047,12 +1048,14 @@
             .then(function (r) { return r.json(); })
             .then(function (data) {
               if (data.isValid) {
+                if (data.email) verifiedEmail = data.email;
                 var dispName = data.userName || data.studentName || 'Account Holder';
                 var dispRole = data.userRole ? (' [' + data.userRole + ']') : '';
                 showStatus('48-hour activation link verified for ' + dispName + dispRole + '. Please create your permanent password.', 'info');
               } else {
-                var localAccount = findLocalAccountForActivation(token, emailParam);
+                var localAccount = findLocalAccountForActivation(token, emailParam || verifiedEmail);
                 if (localAccount) {
+                  if (localAccount.email) verifiedEmail = localAccount.email;
                   showStatus('48-hour activation link verified for ' + localAccount.name + ' [' + (localAccount.role || 'User').toUpperCase() + ']. Please create your permanent password.', 'info');
                 } else {
                   showStatus('Activation link invalid or expired: ' + (data.message || 'Please contact your administrator for a new invitation.'), 'error');
@@ -1132,10 +1135,11 @@
           submitBtn.disabled = true;
           submitBtn.textContent = mode === 'activate' ? 'Activating account...' : 'Updating password...';
 
+          var effectiveEmail = urlParams.get('email') || verifiedEmail || '';
           var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
           var endpoint = apiBase + (mode === 'activate' ? '/api/auth/activate' : '/api/auth/reset-password');
           var payload = mode === 'activate'
-            ? { token: token, password: pwVal, email: urlParams.get('email') || undefined }
+            ? { token: token, password: pwVal, email: effectiveEmail || undefined }
             : { token: token, newPassword: pwVal };
 
           fetch(endpoint, {
@@ -1150,7 +1154,7 @@
             if (result.status >= 200 && result.status < 300 && result.data.success) {
               if (mode === 'activate') {
                 showStatus('Account activated on server. Synchronizing Firebase credentials...', 'info');
-                await activateLocalAccount(token, urlParams.get('email'), pwVal);
+                await activateLocalAccount(token, effectiveEmail, pwVal);
               }
               showStatus(result.data.message || 'Success! Your password has been established. Redirecting to sign in...', 'info');
               setTimeout(function () {
@@ -1159,7 +1163,7 @@
             } else {
               if (mode === 'activate') {
                 showStatus('Synchronizing account credentials...', 'info');
-                var activated = await activateLocalAccount(token, urlParams.get('email'), pwVal);
+                var activated = await activateLocalAccount(token, effectiveEmail, pwVal);
                 if (activated) {
                   showStatus('Success! Account activated. Redirecting to sign in...', 'info');
                   setTimeout(function () { window.location.href = 'signin.html'; }, 1200);
@@ -1174,7 +1178,7 @@
           .catch(async function (err) {
             if (mode === 'activate') {
               showStatus('Connecting to local credential registry...', 'info');
-              var activated = await activateLocalAccount(token, urlParams.get('email'), pwVal);
+              var activated = await activateLocalAccount(token, effectiveEmail, pwVal);
               if (activated) {
                 showStatus('Success! Account activated locally. Redirecting to sign in...', 'info');
                 setTimeout(function () { window.location.href = 'signin.html'; }, 1200);

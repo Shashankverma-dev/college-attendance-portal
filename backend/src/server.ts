@@ -97,7 +97,61 @@ app.get(['/health', '/api/health'], async (_req, res) => {
     status: 'ALIVE',
     service: 'attendance-backend',
     timestamp: new Date().toISOString(),
-    version: '1.8.1',
+    version: '1.8.2',
+  });
+});
+
+app.get(['/health/smtp', '/api/health/smtp'], async (_req, res) => {
+  const nodemailer = require('nodemailer');
+  const user = process.env.SMTP_USER || 'shashankvermahsst@gmail.com';
+  const pass = process.env.SMTP_PASSWORD || 'hwbiochekjvqvtvo';
+  const host = process.env.SMTP_HOST || 'smtp.gmail.com';
+
+  let port465Success = false;
+  let port587Success = false;
+  let error465: string | null = null;
+  let error587: string | null = null;
+
+  try {
+    const t465 = nodemailer.createTransport({
+      host,
+      port: 465,
+      secure: true,
+      auth: { user, pass },
+      connectionTimeout: 4000,
+      greetingTimeout: 4000,
+    });
+    await t465.verify();
+    port465Success = true;
+  } catch (err: any) {
+    error465 = err.message;
+  }
+
+  if (!port465Success) {
+    try {
+      const t587 = nodemailer.createTransport({
+        host,
+        port: 587,
+        secure: false,
+        auth: { user, pass },
+        connectionTimeout: 4000,
+        greetingTimeout: 4000,
+      });
+      await t587.verify();
+      port587Success = true;
+    } catch (err: any) {
+      error587 = err.message;
+    }
+  }
+
+  res.json({
+    status: port465Success || port587Success ? 'HEALTHY' : 'DEGRADED',
+    smtpHost: host,
+    smtpUser: user,
+    port465: port465Success ? 'CONNECTED' : (error465 || 'FAILED'),
+    port587: port587Success ? 'CONNECTED' : (error587 || (port465Success ? 'STANDBY' : 'FAILED')),
+    timestamp: new Date().toISOString(),
+    version: '1.8.2',
   });
 });
 

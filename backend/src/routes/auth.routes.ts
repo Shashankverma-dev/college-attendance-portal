@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { authenticate } from '../middleware/auth';
-import { pool } from '../config/db';
-import { firebaseAuth, firestore, safeFirebaseOp } from '../config/firebase';
+import { pool, isDbConnected } from '../config/db';
+import { firebaseAuth, firestore, safeFirebaseOp, syncUserToFirebaseAuth } from '../config/firebase';
 import { AuditService } from '../services/audit';
 import { TokenService } from '../services/token';
 import { EmailService } from '../services/email';
@@ -10,15 +10,6 @@ import { localStudents } from '../services/bulk-onboard';
 import { localTeachers, localDepartments, localSchools } from './admin.routes';
 
 const router = Router();
-
-async function isDbConnected(): Promise<boolean> {
-  try {
-    const res = await pool.query('SELECT 1');
-    return res.rowCount === 1;
-  } catch {
-    return false;
-  }
-}
 
 export function getInitials(name: string): string {
   if (!name) return '??';
@@ -682,33 +673,10 @@ router.post('/activate', async (req: Request, res: Response): Promise<void> => {
       const uid = redemption.userUid!;
 
       // Update password in Firebase Authentication
-      await safeFirebaseOp(async () => {
-        let existingFbUser;
-        try {
-          existingFbUser = await firebaseAuth.getUser(uid);
-        } catch (e1) {
-          if (redemption.targetEmail) {
-            try {
-              existingFbUser = await firebaseAuth.getUserByEmail(redemption.targetEmail);
-            } catch (e2) {}
-          }
-        }
-
-        if (existingFbUser) {
-          await firebaseAuth.updateUser(existingFbUser.uid, {
-            password,
-            emailVerified: true,
-          });
-          await firebaseAuth.setCustomUserClaims(existingFbUser.uid, { role: 'FACULTY' }).catch(() => {});
-        } else if (redemption.targetEmail) {
-          const createdUser = await firebaseAuth.createUser({
-            email: redemption.targetEmail,
-            password,
-            emailVerified: true,
-          });
-          await firebaseAuth.setCustomUserClaims(createdUser.uid, { role: 'FACULTY' }).catch(() => {});
-        }
-      });
+      const targetEm = redemption.targetEmail || '';
+      if (targetEm) {
+        await syncUserToFirebaseAuth(targetEm, password, undefined, 'FACULTY');
+      }
 
       // Mark user ACTIVE in Cloud Firestore
       await safeFirebaseOp(async () => {
@@ -789,37 +757,11 @@ router.post('/activate', async (req: Request, res: Response): Promise<void> => {
       userPasswords.set(teacher.official_email.toLowerCase(), password);
     }
 
-    // Synchronize to Firebase Auth & Cloud Firestore
-    await safeFirebaseOp(async () => {
-      let existingFbUser;
-      try {
-        if (teacher.user_uid && !teacher.user_uid.startsWith('firebase-uid-')) {
-          existingFbUser = await firebaseAuth.getUser(teacher.user_uid);
-        }
-      } catch (e1) {}
-
-      if (!existingFbUser && teacher.official_email) {
-        try {
-          existingFbUser = await firebaseAuth.getUserByEmail(teacher.official_email);
-        } catch (e2) {}
-      }
-
-      if (existingFbUser) {
-        await firebaseAuth.updateUser(existingFbUser.uid, { password, emailVerified: true });
-        teacher.user_uid = existingFbUser.uid;
-      } else if (teacher.official_email) {
-        const createdUser = await firebaseAuth.createUser({
-          email: teacher.official_email,
-          password,
-          displayName: teacher.full_name,
-          emailVerified: true
-        });
-        teacher.user_uid = createdUser.uid;
-      }
-      if (teacher.user_uid && !teacher.user_uid.startsWith('firebase-uid-')) {
-        await firebaseAuth.setCustomUserClaims(teacher.user_uid, { role: 'FACULTY' }).catch(() => {});
-      }
-    });
+    // Synchronize to Firebase Auth (via Admin SDK or Identity Toolkit REST API)
+    const fbSync = await syncUserToFirebaseAuth(teacher.official_email, password, teacher.full_name, 'FACULTY');
+    if (fbSync.success && fbSync.uid) {
+      teacher.user_uid = fbSync.uid;
+    }
 
     await safeFirebaseOp(async () => {
       await firestore.collection('teachers').doc(teacher.faculty_staff_id).set({

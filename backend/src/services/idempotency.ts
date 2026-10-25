@@ -1,5 +1,5 @@
 import { PoolClient } from 'pg';
-import { pool } from '../config/db';
+import { pool, isDbConnected } from '../config/db';
 
 export interface IdempotencyClaimResult {
   isAlreadyProcessed: boolean;
@@ -7,15 +7,6 @@ export interface IdempotencyClaimResult {
 }
 
 export const localIdempotencyKeys = new Map<string, { status: string; responsePayload?: any }>();
-
-async function isDbConnected(): Promise<boolean> {
-  try {
-    const res = await pool.query('SELECT 1');
-    return res.rowCount === 1;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Persistent Application-Level Idempotency Service

@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { PoolClient } from 'pg';
-import { pool } from '../config/db';
+import { pool, isDbConnected } from '../config/db';
 
 export interface TokenCreationResult {
   rawToken: string;
@@ -20,15 +20,6 @@ export interface InMemToken {
 }
 
 export const localTokens: InMemToken[] = [];
-
-async function isDbConnected(): Promise<boolean> {
-  try {
-    const res = await pool.query('SELECT 1');
-    return res.rowCount === 1;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Single-Use Cryptographic Token Service (FR-17–23, OS-03, OS-04)

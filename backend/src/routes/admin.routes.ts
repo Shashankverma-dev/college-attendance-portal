@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { z } from 'zod';
 import { authenticate, requireRole } from '../middleware/auth';
-import { pool, runWithTransactionContext } from '../config/db';
+import { pool, runWithTransactionContext, isDbConnected } from '../config/db';
 import { AuditService, localAuditLogs } from '../services/audit';
 import { EmailService } from '../services/email';
 import { localStudents } from '../services/bulk-onboard';
@@ -12,7 +12,7 @@ import { localAttendanceSessions, localAttendanceRecords } from './attendance.ro
 import { localAssessments, localAssessmentMarks } from './marks.routes';
 import { localEnrollmentHistory } from './student.routes';
 import { userPasswords } from './auth.routes';
-import { firebaseAuth, firestore, safeFirebaseOp } from '../config/firebase';
+import { firebaseAuth, firestore, safeFirebaseOp, syncUserToFirebaseAuth } from '../config/firebase';
 
 export function purgeAllMockAndTestData(): { studentsCleared: number; teachersCleared: number } {
   const studentsCleared = localStudents.length;
@@ -163,16 +163,6 @@ export const localAssignments: InMemAssignment[] = [];
 export function initializeAcademicHierarchy(): void {
   // Demo, mock, and preseed data removed.
   // The system relies exclusively on authentic data created and managed by the administrator.
-}
-
-
-async function isDbConnected(): Promise<boolean> {
-  try {
-    const res = await pool.query('SELECT 1');
-    return res.rowCount === 1;
-  } catch {
-    return false;
-  }
 }
 
 async function purgeSeedMockDataFromDb(): Promise<void> {
@@ -1080,24 +1070,10 @@ router.post(
 
           // Provision user in Firebase Authentication
           let fbUserUid: string | null = null;
-          await safeFirebaseOp(async () => {
-            try {
-              const fbUser = await firebaseAuth.createUser({
-                email: officialEmail,
-                displayName: fullName,
-                disabled: false,
-                emailVerified: false,
-              });
-              fbUserUid = fbUser.uid;
-              await firebaseAuth.setCustomUserClaims(fbUser.uid, { role: 'FACULTY' });
-            } catch (fbErr: any) {
-              if (fbErr.code === 'auth/email-already-exists') {
-                const fbUser = await firebaseAuth.getUserByEmail(officialEmail);
-                fbUserUid = fbUser.uid;
-                await firebaseAuth.setCustomUserClaims(fbUser.uid, { role: 'FACULTY' });
-              }
-            }
-          });
+          const fbSync = await syncUserToFirebaseAuth(officialEmail, undefined, fullName, 'FACULTY');
+          if (fbSync.success && fbSync.uid) {
+            fbUserUid = fbSync.uid;
+          }
 
           const newUserUid = fbUserUid || `firebase-uid-fac-${facultyStaffId.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
 
@@ -1190,8 +1166,9 @@ router.post(
           const appBaseUrl = process.env.APP_BASE_URL || process.env.APP_URL || 'https://attendace-d3b3e.web.app';
           const dbActivationLink = `${appBaseUrl}/signin.html?mode=activate&token=${dbRawToken}&email=${encodeURIComponent(officialEmail)}`;
 
+          let emailResult: any = null;
           try {
-            await EmailService.sendEmail({
+            emailResult = await EmailService.sendEmail({
               to: officialEmail,
               subject: 'Activate Your Faculty Attendance Portal Account',
               idempotencyKey: `act-fac-${newUserUid}-${Date.now()}`,
@@ -1211,13 +1188,20 @@ router.post(
                 </div>
               `,
             });
-          } catch (_emailErr) {}
+          } catch (_emailErr: any) {
+            console.error('Email dispatch error:', _emailErr.message);
+            emailResult = { success: false, error: _emailErr.message };
+          }
+
+          const emailSent = !!(emailResult && emailResult.provider === 'SMTP');
 
           await client.query('COMMIT');
 
           res.status(201).json({
             success: true,
-            message: `Faculty member ${fullName} (${facultyStaffId}) provisioned successfully. 48-hour activation email dispatched to ${officialEmail}.`,
+            message: emailSent
+              ? `Faculty member ${fullName} (${facultyStaffId}) provisioned successfully. 48-hour activation email dispatched to ${officialEmail}.`
+              : `Faculty member ${fullName} (${facultyStaffId}) provisioned successfully. Activation link generated.`,
             teacher: {
               faculty_profile_id: facultyProfileId,
               faculty_staff_id: facultyStaffId,
@@ -1230,6 +1214,9 @@ router.post(
             },
             activationToken: dbRawToken,
             activationLink: dbActivationLink,
+            emailDelivered: emailSent,
+            emailMessageId: emailResult?.messageId || null,
+            emailError: emailResult?.error || null,
           });
           return;
         } catch (dbErr: any) {
@@ -1296,26 +1283,14 @@ router.post(
         localDepartments.push(dept);
       }
 
+      const { rawToken, tokenHash, expiresAt } = TokenService.generateToken(48);
+
       // Provision user in Firebase Authentication
       let fbUserUid: string | null = null;
-      await safeFirebaseOp(async () => {
-        try {
-          const fbUser = await firebaseAuth.createUser({
-            email: officialEmail,
-            displayName: fullName,
-            disabled: false,
-            emailVerified: false,
-          });
-          fbUserUid = fbUser.uid;
-          await firebaseAuth.setCustomUserClaims(fbUser.uid, { role: 'FACULTY' });
-        } catch (fbErr: any) {
-          if (fbErr.code === 'auth/email-already-exists') {
-            const fbUser = await firebaseAuth.getUserByEmail(officialEmail);
-            fbUserUid = fbUser.uid;
-            await firebaseAuth.setCustomUserClaims(fbUser.uid, { role: 'FACULTY' });
-          }
-        }
-      });
+      const fbSync = await syncUserToFirebaseAuth(officialEmail, undefined, fullName, 'FACULTY');
+      if (fbSync.success && fbSync.uid) {
+        fbUserUid = fbSync.uid;
+      }
 
       const newId = crypto.randomUUID();
       const newUserUid = fbUserUid || `firebase-uid-fac-${facultyStaffId.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
@@ -1404,7 +1379,6 @@ router.post(
         }
       }
 
-      const { rawToken, tokenHash, expiresAt } = TokenService.generateToken(48);
       localTokens.push({
         token_id: `tok-fac-${Date.now()}`,
         user_uid: newUserUid,
@@ -1419,8 +1393,9 @@ router.post(
       const appBaseUrl = process.env.APP_BASE_URL || process.env.APP_URL || 'https://attendace-d3b3e.web.app';
       const activationLink = `${appBaseUrl}/signin.html?mode=activate&token=${rawToken}&email=${encodeURIComponent(officialEmail)}`;
 
+      let emailResult: any = null;
       try {
-        await EmailService.sendEmail({
+        emailResult = await EmailService.sendEmail({
           to: officialEmail,
           subject: 'Activate Your Faculty Attendance Portal Account',
           idempotencyKey: `act-fac-${newUserUid}-${Date.now()}`,
@@ -1440,14 +1415,24 @@ router.post(
             </div>
           `,
         });
-      } catch (_emailErr) {}
+      } catch (_emailErr: any) {
+        console.error('Email dispatch error:', _emailErr.message);
+        emailResult = { success: false, error: _emailErr.message };
+      }
+
+      const emailSent = !!(emailResult && emailResult.provider === 'SMTP');
 
       res.status(201).json({
         success: true,
-        message: `Faculty member ${fullName} (${facultyStaffId}) provisioned successfully. 48-hour activation email dispatched to ${officialEmail}.`,
+        message: emailSent
+          ? `Faculty member ${fullName} (${facultyStaffId}) provisioned successfully. 48-hour activation email dispatched to ${officialEmail}.`
+          : `Faculty member ${fullName} (${facultyStaffId}) provisioned successfully. Activation link generated.`,
         teacher: newTeacher,
         activationToken: rawToken,
         activationLink,
+        emailDelivered: emailSent,
+        emailMessageId: emailResult?.messageId || null,
+        emailError: emailResult?.error || null,
       });
     } catch (err: any) {
       console.error('Error creating teacher account:', err);
@@ -1735,6 +1720,180 @@ router.patch(
     } catch (err: any) {
       console.error('Error changing teacher status:', err);
       res.status(500).json({ error: 'STATUS_CHANGE_FAILED', message: 'Failed to update account status.' });
+    }
+  }
+);
+
+// =============================================================================
+// 6B. REISSUE 48-HOUR ACTIVATION INVITATION FOR FACULTY
+// =============================================================================
+
+router.post(
+  '/teachers/:id/reissue-token',
+  authenticate,
+  requireRole(['GLOBAL_ADMIN']),
+  async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    try {
+      const dbOnline = await isDbConnected();
+
+      if (dbOnline) {
+        const teacherRes = await pool.query(
+          `SELECT fp.faculty_profile_id, fp.user_uid, fp.faculty_staff_id, fp.full_name, fp.official_email, u.status
+           FROM faculty_profiles fp
+           JOIN users u ON fp.user_uid = u.user_uid
+           WHERE fp.faculty_profile_id = $1 OR fp.faculty_staff_id = $1`,
+          [id]
+        );
+
+        if (teacherRes.rowCount === 0) {
+          res.status(404).json({ error: 'TEACHER_NOT_FOUND', message: 'Faculty record not found.' });
+          return;
+        }
+
+        const teacher = teacherRes.rows[0];
+
+        if (teacher.status === 'ACTIVE') {
+          res.status(400).json({
+            error: 'ALREADY_ACTIVATED',
+            message: `Faculty account for ${teacher.full_name} (${teacher.faculty_staff_id}) is already active.`,
+          });
+          return;
+        }
+
+        const { rawToken, tokenHash, expiresAt } = TokenService.generateToken(48);
+        await TokenService.storeToken(null, teacher.user_uid, tokenHash, 'ACCOUNT_ACTIVATION', teacher.official_email, expiresAt);
+
+        const appBaseUrl = process.env.APP_BASE_URL || process.env.APP_URL || 'https://attendace-d3b3e.web.app';
+        const activationLink = `${appBaseUrl}/signin.html?mode=activate&token=${rawToken}&email=${encodeURIComponent(teacher.official_email)}`;
+
+        let emailResult: any = null;
+        try {
+          emailResult = await EmailService.sendEmail({
+            to: teacher.official_email,
+            subject: 'Reissued: Activate Your Faculty Attendance Portal Account',
+            idempotencyKey: `reissue-fac-${teacher.user_uid}-${Date.now()}`,
+            operationType: 'ACCOUNT_ACTIVATION',
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #E2E8F0; border-radius: 8px;">
+                <h2 style="color: #1D3C72; margin-top: 0;">Account Activation Link Reissued</h2>
+                <p>Dear ${teacher.full_name},</p>
+                <p>Your institutional activation link has been refreshed by the administrator.</p>
+                <p>Please click the button below to verify your email and establish your secure password:</p>
+                <div style="margin: 24px 0;">
+                  <a href="${activationLink}" style="background: #1D3C72; color: #FFFFFF; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 700; display: inline-block;">
+                    Verify Email & Create Password
+                  </a>
+                </div>
+                <p style="font-size: 13px; color: #64748B;">This link is valid for 48 hours. Any previously sent activation links are now void.<br>Direct link: <a href="${activationLink}" style="color: #1D4ED8;">${activationLink}</a></p>
+              </div>
+            `,
+          });
+        } catch (_emailErr: any) {
+          console.error('Reissue email dispatch error:', _emailErr.message);
+          emailResult = { success: false, error: _emailErr.message };
+        }
+
+        const emailSent = !!(emailResult && emailResult.provider === 'SMTP');
+
+        res.json({
+          success: true,
+          message: emailSent
+            ? `Fresh 48-hour activation link dispatched to ${teacher.official_email}.`
+            : `Fresh 48-hour activation link generated for ${teacher.official_email}.`,
+          activationToken: rawToken,
+          activationLink,
+          emailDelivered: emailSent,
+        });
+        return;
+      }
+
+      // In-Memory Reissue
+      const cleanId = String(id || '').trim().toLowerCase();
+      const teacher = localTeachers.find(
+        (t) =>
+          (t.faculty_profile_id && t.faculty_profile_id.toLowerCase() === cleanId) ||
+          (t.faculty_staff_id && t.faculty_staff_id.toLowerCase() === cleanId) ||
+          (t.faculty_profile_id && cleanId.includes(t.faculty_profile_id.toLowerCase())) ||
+          (t.faculty_staff_id && cleanId.includes(t.faculty_staff_id.toLowerCase()))
+      );
+
+      if (!teacher) {
+        res.status(404).json({ error: 'TEACHER_NOT_FOUND', message: 'Faculty record not found.' });
+        return;
+      }
+
+      if (teacher.status === 'ACTIVE') {
+        res.status(400).json({
+          error: 'ALREADY_ACTIVATED',
+          message: `Faculty account for ${teacher.full_name} (${teacher.faculty_staff_id}) is already active.`,
+        });
+        return;
+      }
+
+      // Invalidate existing tokens
+      localTokens.forEach((t) => {
+        if (t.user_uid === teacher.user_uid && t.purpose === 'ACCOUNT_ACTIVATION') {
+          t.is_invalidated = true;
+        }
+      });
+
+      const { rawToken, tokenHash, expiresAt } = TokenService.generateToken(48);
+      localTokens.push({
+        token_id: `tok-fac-${Date.now()}`,
+        user_uid: teacher.user_uid,
+        token_hash: tokenHash,
+        purpose: 'ACCOUNT_ACTIVATION',
+        target_email: teacher.official_email,
+        expires_at: expiresAt,
+        used_at: null,
+        is_invalidated: false,
+      });
+
+      const appBaseUrl = process.env.APP_BASE_URL || process.env.APP_URL || 'https://attendace-d3b3e.web.app';
+      const activationLink = `${appBaseUrl}/signin.html?mode=activate&token=${rawToken}&email=${encodeURIComponent(teacher.official_email)}`;
+
+      let emailResult: any = null;
+      try {
+        emailResult = await EmailService.sendEmail({
+          to: teacher.official_email,
+          subject: 'Reissued: Activate Your Faculty Attendance Portal Account',
+          idempotencyKey: `reissue-fac-${teacher.user_uid}-${Date.now()}`,
+          operationType: 'ACCOUNT_ACTIVATION',
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #E2E8F0; border-radius: 8px;">
+              <h2 style="color: #1D3C72; margin-top: 0;">Account Activation Link Reissued</h2>
+              <p>Dear ${teacher.full_name},</p>
+              <p>Your institutional activation link has been refreshed by the administrator.</p>
+              <p>Please click the button below to verify your email and establish your secure password:</p>
+              <div style="margin: 24px 0;">
+                <a href="${activationLink}" style="background: #1D3C72; color: #FFFFFF; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 700; display: inline-block;">
+                  Verify Email & Create Password
+                </a>
+              </div>
+              <p style="font-size: 13px; color: #64748B;">This link is valid for 48 hours. Any previously sent activation links are now void.<br>Direct link: <a href="${activationLink}" style="color: #1D4ED8;">${activationLink}</a></p>
+            </div>
+          `,
+        });
+      } catch (_emailErr: any) {
+        console.error('Reissue email dispatch error:', _emailErr.message);
+        emailResult = { success: false, error: _emailErr.message };
+      }
+
+      const emailSent = !!(emailResult && emailResult.provider === 'SMTP');
+
+      res.json({
+        success: true,
+        message: emailSent
+          ? `Fresh 48-hour activation link dispatched to ${teacher.official_email}.`
+          : `Fresh 48-hour activation link generated for ${teacher.official_email}.`,
+        activationToken: rawToken,
+        activationLink,
+        emailDelivered: emailSent,
+      });
+    } catch (err: any) {
+      console.error('Error reissuing activation token:', err);
+      res.status(500).json({ error: 'REISSUE_FAILED', message: 'Failed to reissue activation token.' });
     }
   }
 );

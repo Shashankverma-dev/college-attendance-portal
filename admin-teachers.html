@@ -2658,11 +2658,18 @@
 
         showToast('New 48-hr activation link generated & copied to clipboard for ' + name + (teacherEmail ? ' (' + teacherEmail + ')' : '') + '.', 'success');
 
-        // Also try backend reissue if available
+        // Dispatch backend reissue and send real email
         fetch(getApiBase() + '/api/admin/teachers/' + encodeURIComponent(teacherId) + '/reissue-token', {
           method: 'POST',
           headers: getAuthHeaders()
-        }).catch(function() {});
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+          if (data && data.success) {
+            showToast(data.message || 'Activation email dispatched directly.', 'success');
+          }
+        })
+        .catch(function () {});
       };
 
       window.exportFacultyRosterCSV = function () {
