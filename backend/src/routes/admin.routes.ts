@@ -12,7 +12,7 @@ import { localAttendanceSessions, localAttendanceRecords } from './attendance.ro
 import { localAssessments, localAssessmentMarks } from './marks.routes';
 import { localEnrollmentHistory } from './student.routes';
 import { userPasswords } from './auth.routes';
-import { firebaseAuth, firestore } from '../config/firebase';
+import { firebaseAuth, firestore, safeFirebaseOp } from '../config/firebase';
 
 export function purgeAllMockAndTestData(): { studentsCleared: number; teachersCleared: number } {
   const studentsCleared = localStudents.length;
@@ -1080,10 +1080,9 @@ router.post(
 
           // Provision user in Firebase Authentication
           let fbUserUid: string | null = null;
-          try {
-            let fbUser;
+          await safeFirebaseOp(async () => {
             try {
-              fbUser = await firebaseAuth.createUser({
+              const fbUser = await firebaseAuth.createUser({
                 email: officialEmail,
                 displayName: fullName,
                 disabled: false,
@@ -1093,16 +1092,12 @@ router.post(
               await firebaseAuth.setCustomUserClaims(fbUser.uid, { role: 'FACULTY' });
             } catch (fbErr: any) {
               if (fbErr.code === 'auth/email-already-exists') {
-                fbUser = await firebaseAuth.getUserByEmail(officialEmail);
+                const fbUser = await firebaseAuth.getUserByEmail(officialEmail);
                 fbUserUid = fbUser.uid;
                 await firebaseAuth.setCustomUserClaims(fbUser.uid, { role: 'FACULTY' });
-              } else {
-                console.warn('[Firebase Auth] User provisioning note:', fbErr.message);
               }
             }
-          } catch (fbSyncErr: any) {
-            console.warn('[Firebase Auth] Sync note:', fbSyncErr.message);
-          }
+          });
 
           const newUserUid = fbUserUid || `firebase-uid-fac-${facultyStaffId.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
 
@@ -1132,7 +1127,7 @@ router.post(
           const facultyProfileId = profileRes.rows[0].faculty_profile_id;
 
           // Provision in Cloud Firestore
-          try {
+          await safeFirebaseOp(async () => {
             await firestore.collection('teachers').doc(facultyStaffId).set({
               faculty_profile_id: facultyProfileId,
               faculty_staff_id: facultyStaffId,
@@ -1140,7 +1135,7 @@ router.post(
               full_name: fullName,
               official_email: officialEmail,
               department_id: departmentId,
-              department_name: deptCheck.rows[0].department_name,
+              department_name: deptCheck.rows[0]?.department_name || '',
               designation: designation,
               office_location: officeLocation || 'Main Campus',
               contact_phone: contactPhone || '',
@@ -1160,9 +1155,7 @@ router.post(
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             }, { merge: true });
-          } catch (fsErr: any) {
-            console.warn('[Cloud Firestore] Write note:', fsErr.message);
-          }
+          });
 
           if (initialSubjectId && initialSectionId) {
             await client.query(
@@ -1305,10 +1298,9 @@ router.post(
 
       // Provision user in Firebase Authentication
       let fbUserUid: string | null = null;
-      try {
-        let fbUser;
+      await safeFirebaseOp(async () => {
         try {
-          fbUser = await firebaseAuth.createUser({
+          const fbUser = await firebaseAuth.createUser({
             email: officialEmail,
             displayName: fullName,
             disabled: false,
@@ -1318,16 +1310,12 @@ router.post(
           await firebaseAuth.setCustomUserClaims(fbUser.uid, { role: 'FACULTY' });
         } catch (fbErr: any) {
           if (fbErr.code === 'auth/email-already-exists') {
-            fbUser = await firebaseAuth.getUserByEmail(officialEmail);
+            const fbUser = await firebaseAuth.getUserByEmail(officialEmail);
             fbUserUid = fbUser.uid;
             await firebaseAuth.setCustomUserClaims(fbUser.uid, { role: 'FACULTY' });
-          } else {
-            console.warn('[Firebase Auth Fallback] User provisioning note:', fbErr.message);
           }
         }
-      } catch (fbSyncErr: any) {
-        console.warn('[Firebase Auth Fallback] Sync note:', fbSyncErr.message);
-      }
+      });
 
       const newId = crypto.randomUUID();
       const newUserUid = fbUserUid || `firebase-uid-fac-${facultyStaffId.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
@@ -1353,7 +1341,7 @@ router.post(
       localTeachers.unshift(newTeacher);
 
       // Provision in Cloud Firestore
-      try {
+      await safeFirebaseOp(async () => {
         await firestore.collection('teachers').doc(facultyStaffId).set({
           faculty_profile_id: newId,
           faculty_staff_id: facultyStaffId,
@@ -1382,9 +1370,7 @@ router.post(
           created_at: newTeacher.created_at,
           updated_at: newTeacher.created_at,
         }, { merge: true });
-      } catch (fsErr: any) {
-        console.warn('[Cloud Firestore Fallback] Write note:', fsErr.message);
-      }
+      });
 
       if (initialSubjectId && initialSectionId) {
         const sub = localSubjects.find(

@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { authenticate } from '../middleware/auth';
 import { pool } from '../config/db';
-import { firebaseAuth, firestore } from '../config/firebase';
+import { firebaseAuth, firestore, safeFirebaseOp } from '../config/firebase';
 import { AuditService } from '../services/audit';
 import { TokenService } from '../services/token';
 import { EmailService } from '../services/email';
@@ -682,7 +682,7 @@ router.post('/activate', async (req: Request, res: Response): Promise<void> => {
       const uid = redemption.userUid!;
 
       // Update password in Firebase Authentication
-      try {
+      await safeFirebaseOp(async () => {
         let existingFbUser;
         try {
           existingFbUser = await firebaseAuth.getUser(uid);
@@ -708,12 +708,10 @@ router.post('/activate', async (req: Request, res: Response): Promise<void> => {
           });
           await firebaseAuth.setCustomUserClaims(createdUser.uid, { role: 'FACULTY' }).catch(() => {});
         }
-      } catch (fbErr: any) {
-        console.warn('[Firebase Auth] DB activation sync note:', fbErr.message);
-      }
+      });
 
       // Mark user ACTIVE in Cloud Firestore
-      try {
+      await safeFirebaseOp(async () => {
         await firestore.collection('users').doc(uid).set({
           status: 'ACTIVE',
           emailVerified: true,
@@ -730,9 +728,7 @@ router.post('/activate', async (req: Request, res: Response): Promise<void> => {
             updated_at: new Date().toISOString(),
           }, { merge: true });
         }
-      } catch (fsErr: any) {
-        console.warn('[Cloud Firestore] Activation sync note:', fsErr.message);
-      }
+      });
 
       // Mark user ACTIVE in PostgreSQL
       await client.query(
@@ -794,7 +790,7 @@ router.post('/activate', async (req: Request, res: Response): Promise<void> => {
     }
 
     // Synchronize to Firebase Auth & Cloud Firestore
-    try {
+    await safeFirebaseOp(async () => {
       let existingFbUser;
       try {
         if (teacher.user_uid && !teacher.user_uid.startsWith('firebase-uid-')) {
@@ -823,10 +819,9 @@ router.post('/activate', async (req: Request, res: Response): Promise<void> => {
       if (teacher.user_uid && !teacher.user_uid.startsWith('firebase-uid-')) {
         await firebaseAuth.setCustomUserClaims(teacher.user_uid, { role: 'FACULTY' }).catch(() => {});
       }
-    } catch (fbErr: any) {
-      console.warn('[Firebase Auth Fallback] User activation sync note:', fbErr.message);
-    }
-    try {
+    });
+
+    await safeFirebaseOp(async () => {
       await firestore.collection('teachers').doc(teacher.faculty_staff_id).set({
         status: 'ACTIVE',
         activated_at: teacher.activated_at,
@@ -837,7 +832,7 @@ router.post('/activate', async (req: Request, res: Response): Promise<void> => {
         activated_at: teacher.activated_at,
         updated_at: teacher.activated_at,
       }, { merge: true });
-    } catch (fsErr) {}
+    });
   }
 
   const student = localStudents.find(
