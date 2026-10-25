@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { authenticate } from '../middleware/auth';
 import { pool } from '../config/db';
-import { firebaseAuth } from '../config/firebase';
+import { firebaseAuth, firestore } from '../config/firebase';
 import { AuditService } from '../services/audit';
 import { TokenService } from '../services/token';
 import { EmailService } from '../services/email';
@@ -681,11 +681,46 @@ router.post('/activate', async (req: Request, res: Response): Promise<void> => {
 
       const uid = redemption.userUid!;
 
-      // Update password in Firebase
-      await firebaseAuth.updateUser(uid, {
-        password,
-        emailVerified: true,
-      });
+      // Update password in Firebase Authentication
+      try {
+        await firebaseAuth.updateUser(uid, {
+          password,
+          emailVerified: true,
+        });
+      } catch (fbErr: any) {
+        if (fbErr.code === 'auth/user-not-found' && redemption.targetEmail) {
+          try {
+            await firebaseAuth.createUser({
+              uid: uid.startsWith('firebase-uid-') ? undefined : uid,
+              email: redemption.targetEmail,
+              password,
+              emailVerified: true,
+            });
+          } catch (createErr) {}
+        }
+      }
+
+      // Mark user ACTIVE in Cloud Firestore
+      try {
+        await firestore.collection('users').doc(uid).set({
+          status: 'ACTIVE',
+          emailVerified: true,
+          activated_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        }, { merge: true });
+
+        const facRes = await client.query('SELECT faculty_staff_id FROM faculty_profiles WHERE user_uid = $1', [uid]);
+        if (facRes.rowCount && facRes.rowCount > 0) {
+          const sId = facRes.rows[0].faculty_staff_id;
+          await firestore.collection('teachers').doc(sId).set({
+            status: 'ACTIVE',
+            activated_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          }, { merge: true });
+        }
+      } catch (fsErr: any) {
+        console.warn('[Cloud Firestore] Activation sync note:', fsErr.message);
+      }
 
       // Mark user ACTIVE in PostgreSQL
       await client.query(
@@ -728,22 +763,65 @@ router.post('/activate', async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
+  const targetLower = (redemption.targetEmail || '').toLowerCase();
   let activatedRole = 'STUDENT';
-  const student = localStudents.find((s) => s.user_uid === redemption.userUid);
-  if (student) {
-    student.status = 'ACTIVE';
-    student.activated_at = new Date().toISOString();
-    activatedRole = 'STUDENT';
-  }
-  const teacher = localTeachers.find((t) => t.user_uid === redemption.userUid);
+
+  const teacher = localTeachers.find(
+    (t) =>
+      (redemption.userUid && t.user_uid === redemption.userUid) ||
+      (targetLower && t.official_email && t.official_email.toLowerCase() === targetLower) ||
+      (redemption.userUid && t.faculty_staff_id && redemption.userUid.toLowerCase().includes(t.faculty_staff_id.toLowerCase()))
+  );
   if (teacher) {
     teacher.status = 'ACTIVE';
     teacher.is_email_verified = true;
     teacher.activated_at = new Date().toISOString();
     activatedRole = 'FACULTY';
+    if (teacher.official_email) {
+      userPasswords.set(teacher.official_email.toLowerCase(), password);
+    }
+
+    // Synchronize to Firebase Auth & Cloud Firestore
+    try {
+      if (teacher.user_uid && !teacher.user_uid.startsWith('firebase-uid-')) {
+        await firebaseAuth.updateUser(teacher.user_uid, { password, emailVerified: true });
+      } else {
+        await firebaseAuth.createUser({
+          email: teacher.official_email,
+          password,
+          displayName: teacher.full_name,
+          emailVerified: true
+        });
+      }
+    } catch (fbErr) {}
+    try {
+      await firestore.collection('teachers').doc(teacher.faculty_staff_id).set({
+        status: 'ACTIVE',
+        activated_at: teacher.activated_at,
+        updated_at: teacher.activated_at,
+      }, { merge: true });
+      await firestore.collection('users').doc(teacher.user_uid).set({
+        status: 'ACTIVE',
+        activated_at: teacher.activated_at,
+        updated_at: teacher.activated_at,
+      }, { merge: true });
+    } catch (fsErr) {}
   }
 
-  const targetLower = (redemption.targetEmail || '').toLowerCase();
+  const student = localStudents.find(
+    (s) =>
+      (redemption.userUid && s.user_uid === redemption.userUid) ||
+      (targetLower && s.student_gmail && s.student_gmail.toLowerCase() === targetLower) ||
+      (redemption.userUid && s.student_id && redemption.userUid.toLowerCase().includes(s.student_id.toLowerCase()))
+  );
+  if (student) {
+    student.status = 'ACTIVE';
+    student.activated_at = new Date().toISOString();
+    if (!teacher) activatedRole = 'STUDENT';
+    if (student.student_gmail) {
+      userPasswords.set(student.student_gmail.toLowerCase(), password);
+    }
+  }
   const dept = localDepartments.find((d) =>
     `usr-hod-${d.department_id}` === redemption.userUid ||
     (d.hod_email && d.hod_email.toLowerCase() === targetLower)

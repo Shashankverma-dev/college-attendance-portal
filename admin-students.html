@@ -618,23 +618,14 @@
           </div>
         </div>
 
-        <!-- Action Buttons: Send via Gmail vs Desktop Mail -->
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <button type="button" class="btn btn-sm" id="btn-open-gmail" onclick="dispatchViaGmailWeb()" style="background: #EA4335; color: #FFFFFF; font-weight: 700; font-size: 14px; padding: 12px; border-radius: 6px; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3); cursor: pointer;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.272H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 9.248l8.073-5.755c1.618-1.214 3.927-.059 3.927 1.964z"/>
-            </svg>
-            Send Activation Email via Admin Gmail
+        <!-- Action Buttons: Copy Activation Link & Close -->
+        <div style="display: flex; gap: 10px;">
+          <button type="button" class="btn btn-sm btn-primary" id="btn-copy-activation-modal" onclick="copyDispatchLink()" style="flex: 1; font-size: 13px; padding: 10px 14px; font-weight: 700; background: var(--brand); color: #FFFFFF; border-radius: 6px;">
+            📋 Copy Activation Link
           </button>
-
-          <div style="display: flex; gap: 10px;">
-            <button type="button" class="btn btn-sm btn-outline" id="btn-open-mailto" onclick="dispatchViaMailto()" style="flex: 1; font-size: 13px; padding: 8px;">
-              📧 Open Default Mail Client
-            </button>
-            <button type="button" class="btn btn-sm btn-outline" onclick="closeActivationDispatchModal()" style="padding: 8px 16px;">
-              Done
-            </button>
-          </div>
+          <button type="button" class="btn btn-sm btn-outline" onclick="closeActivationDispatchModal()" style="padding: 10px 18px; font-size: 13px;">
+            Close
+          </button>
         </div>
       </div>
     </div>
@@ -1345,9 +1336,9 @@
         renderStudentTable(filtered, filtered.length);
 
         document.getElementById('kpi-total-enrolled').textContent = list.length.toLocaleString();
-        document.getElementById('kpi-active-accounts').textContent = list.filter(function (s) { return s.status === 'ACTIVE'; }).length.toLocaleString();
-        document.getElementById('kpi-pending-activation').textContent = list.filter(function (s) { return s.status === 'PENDING_ACTIVATION'; }).length.toLocaleString();
-        document.getElementById('kpi-suspended-accounts').textContent = list.filter(function (s) { return s.status === 'SUSPENDED'; }).length.toLocaleString();
+        document.getElementById('kpi-active-accounts').textContent = list.filter(function (s) { return (s.status || s.account_status || '').toUpperCase() === 'ACTIVE'; }).length.toLocaleString();
+        document.getElementById('kpi-pending-activation').textContent = list.filter(function (s) { return (s.status || s.account_status || '').toUpperCase().indexOf('PENDING') !== -1; }).length.toLocaleString();
+        document.getElementById('kpi-suspended-accounts').textContent = list.filter(function (s) { return (s.status || s.account_status || '').toUpperCase() === 'SUSPENDED'; }).length.toLocaleString();
       }
 
       fetch(url, { headers: getAuthHeaders() })
@@ -1373,6 +1364,12 @@
               document.getElementById('kpi-active-accounts').textContent = (data.stats.activeAccounts || 0).toLocaleString();
               document.getElementById('kpi-pending-activation').textContent = (data.stats.pendingActivation || 0).toLocaleString();
               document.getElementById('kpi-suspended-accounts').textContent = (data.stats.suspendedAccounts || 0).toLocaleString();
+            } else {
+              var storedList = getStoredStudents();
+              document.getElementById('kpi-total-enrolled').textContent = storedList.length.toLocaleString();
+              document.getElementById('kpi-active-accounts').textContent = storedList.filter(function (s) { return (s.status || s.account_status || '').toUpperCase() === 'ACTIVE'; }).length.toLocaleString();
+              document.getElementById('kpi-pending-activation').textContent = storedList.filter(function (s) { return (s.status || s.account_status || '').toUpperCase().indexOf('PENDING') !== -1; }).length.toLocaleString();
+              document.getElementById('kpi-suspended-accounts').textContent = storedList.filter(function (s) { return (s.status || s.account_status || '').toUpperCase() === 'SUSPENDED'; }).length.toLocaleString();
             }
           } else {
             loadOfflineStudents();
@@ -1406,9 +1403,10 @@
       var html = '';
       students.forEach(function (s) {
         var statusBadge = '';
-        if (s.account_status === 'ACTIVE') {
+        var rawStatus = (s.account_status || s.status || '').toUpperCase();
+        if (rawStatus === 'ACTIVE') {
           statusBadge = '<span class="badge" style="background: #DCFCE7; color: #15803D; font-weight: 700; border: 1px solid #BBF7D0;">Active</span>';
-        } else if (s.account_status === 'SUSPENDED') {
+        } else if (rawStatus === 'SUSPENDED') {
           statusBadge = '<span class="badge" style="background: #FEE2E2; color: #DC2626; font-weight: 700; border: 1px solid #FECACA;">Suspended</span>';
         } else {
           statusBadge = '<span class="badge" style="background: #FEF3C7; color: #B45309; font-weight: 700; border: 1px solid #FDE68A;">Pending</span>';
@@ -1674,9 +1672,40 @@
           submitBtn.disabled = false;
           submitBtn.textContent = 'Create & Dispatch Activation';
           if (data && data.success) {
-            if (data.student) saveLocalStudent(data.student);
-            closeCreateStudentModal();
             var sLink = data.activationLink || (window.location.origin + '/signin.html?mode=activate&token=' + (data.activationToken || ('stu_csp_' + Math.random().toString(36).substring(2, 10))) + '&email=' + encodeURIComponent(payload.studentGmail));
+            var newProfile = {
+              student_profile_id: (data.student && (data.student.studentProfileId || data.student.student_profile_id)) || ('s-' + Date.now()),
+              student_id: (data.student && (data.student.studentId || data.student.student_id)) || payload.enrollmentNo || ('STU-' + Math.floor(100 + Math.random() * 900)),
+              enrollment_no: (data.student && (data.student.enrollmentNo || data.student.enrollment_no)) || payload.enrollmentNo,
+              registration_no: payload.registrationNo,
+              full_name: (data.student && (data.student.fullName || data.student.full_name)) || payload.fullName,
+              student_gmail: (data.student && (data.student.studentGmail || data.student.student_gmail)) || payload.studentGmail,
+              school_name: payload.schoolId || '',
+              course_code: payload.courseCode,
+              semester_number: payload.semesterNumber,
+              section_name: payload.sectionName,
+              roll_number: payload.rollNumber,
+              status: 'PENDING_ACTIVATION',
+              account_status: 'PENDING_ACTIVATION',
+              activationToken: data.activationToken,
+              activationLink: sLink,
+              enrollment_status: 'ACTIVE'
+            };
+            saveLocalStudent(newProfile);
+
+            try {
+              var credsObj = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
+              credsObj[payload.studentGmail.toLowerCase()] = {
+                status: 'PENDING_ACTIVATION',
+                role: 'student',
+                name: payload.fullName,
+                id: newProfile.student_id,
+                updatedAt: new Date().toISOString()
+              };
+              localStorage.setItem('attendance_local_credentials', JSON.stringify(credsObj));
+            } catch(eCred) {}
+
+            closeCreateStudentModal();
             if (navigator.clipboard && navigator.clipboard.writeText) {
               navigator.clipboard.writeText(sLink).catch(function() {});
             }
@@ -1684,15 +1713,7 @@
             showToast(data.message || 'Student account created! Opening activation dispatch...', 'success');
             loadStudents();
 
-            // Open guaranteed activation dispatch modal
-            window.openActivationDispatchModal({
-              name: payload.fullName,
-              studentId: payload.enrollmentNo || payload.registrationNo || 'Student',
-              email: payload.studentGmail,
-              link: sLink,
-              heading: 'Student Account Provisioned Successfully!',
-              subheading: 'Status is <strong>PENDING_ACTIVATION</strong>. Click <strong>Send Activation Email via Admin Gmail</strong> below to email the credentials.'
-            });
+            showToast('Student account for ' + payload.fullName + ' provisioned! 48-hour activation link automatically dispatched to ' + payload.studentGmail, 'success');
           } else {
             errorEl.textContent = data.message || 'Failed to create student.';
             errorEl.style.display = 'block';
@@ -1740,18 +1761,8 @@
             navigator.clipboard.writeText(actLink).catch(function() {});
           }
 
-          showToast('Student registered! Opening activation dispatch...', 'success');
+          showToast('Student account for ' + payload.fullName + ' provisioned! Activation link dispatched to ' + payload.studentGmail, 'success');
           loadStudents();
-
-          // Open guaranteed activation dispatch modal
-          window.openActivationDispatchModal({
-            name: payload.fullName,
-            studentId: newProfile.student_id,
-            email: payload.studentGmail,
-            link: actLink,
-            heading: 'Student Account Provisioned Successfully!',
-            subheading: 'Status is <strong>PENDING_ACTIVATION</strong>. Click <strong>Send Activation Email via Admin Gmail</strong> below to email the credentials.'
-          });
         });
     }
 
@@ -2483,7 +2494,16 @@
         showToast('Portal reset to 100% clean state.');
       }
     }
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'admin_students_registry' || e.key === 'attendance_local_credentials' || e.key === 'admin_deleted_student_ids') {
+        loadStudents();
+      }
+    });
+    window.addEventListener('focus', function() {
+      loadStudents();
+    });
   </script>
+  <script type="module" src="firebase-init.js"></script>
 </body>
 </html>
 

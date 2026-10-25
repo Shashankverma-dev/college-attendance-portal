@@ -52,10 +52,11 @@ export class EmailService {
 
   private static getTransporter(): nodemailer.Transporter {
     if (!this.transporter) {
+      const port = parseInt(process.env.SMTP_PORT || '587', 10);
       this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtp-relay.gmail.com',
-        port: parseInt(process.env.SMTP_PORT || '587', 10),
-        secure: false, // TLS via STARTTLS
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: port,
+        secure: port === 465, // SSL on 465, STARTTLS on 587
         auth: {
           user: process.env.SMTP_USER || 'noreply@college.edu',
           pass: process.env.SMTP_PASSWORD || '',

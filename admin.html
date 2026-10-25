@@ -1114,7 +1114,15 @@
       }
 
       // 2. Enrolled Students KPI
+      var localStudents = [];
+      try {
+        localStudents = JSON.parse(localStorage.getItem('admin_students_registry') || '[]');
+      } catch (e) {}
+
       var totalStudents = metrics.totalStudents !== undefined ? metrics.totalStudents : (data.totalStudents !== undefined ? data.totalStudents : 0);
+      if (totalStudents === 0 && localStudents.length > 0) {
+        totalStudents = localStudents.length;
+      }
       var studentsEl = document.getElementById('kpi-total-students');
       var studentsSubEl = document.getElementById('kpi-students-sub');
       if (studentsEl) {
@@ -1125,9 +1133,33 @@
       }
 
       // 3. Active Faculty KPI
+      var localTeachers = [];
+      try {
+        localTeachers = JSON.parse(localStorage.getItem('admin_teachers_list') || '[]');
+      } catch (e) {}
+
+      var localActiveFac = localTeachers.filter(function (t) { return (t.status || '').toUpperCase() === 'ACTIVE'; }).length;
+      var localPendingFac = localTeachers.filter(function (t) { return (t.status || '').toUpperCase().indexOf('PENDING') !== -1; }).length;
+
       var totalFaculty = metrics.totalFaculty !== undefined ? metrics.totalFaculty : (data.totalFaculty !== undefined ? data.totalFaculty : 0);
       var activeFaculty = metrics.activeFaculty !== undefined ? metrics.activeFaculty : (data.activeFaculty !== undefined ? data.activeFaculty : 0);
       var pendingFaculty = metrics.pendingFaculty !== undefined ? metrics.pendingFaculty : (data.pendingFaculty !== undefined ? data.pendingFaculty : 0);
+
+      // Reconcile with local roster if local created/activated records exist
+      if (localTeachers.length > 0) {
+        if (totalFaculty === 0 || localTeachers.length > totalFaculty) {
+          totalFaculty = localTeachers.length;
+        }
+        if (localActiveFac > activeFaculty) {
+          activeFaculty = localActiveFac;
+        }
+        if (localTeachers.length === totalFaculty) {
+          activeFaculty = localActiveFac;
+          pendingFaculty = localPendingFac;
+        } else if (pendingFaculty === 0 && localPendingFac > 0) {
+          pendingFaculty = localPendingFac;
+        }
+      }
       
       var facultyEl = document.getElementById('kpi-active-teachers');
       var facultySubEl = document.getElementById('kpi-faculty-sub');
@@ -2244,14 +2276,26 @@
 
     // Offline verified fallback if backend API is offline during local development
     function useOfflineDashboardFallback(isManualRefresh) {
+      var localTeachers = [];
+      try {
+        localTeachers = JSON.parse(localStorage.getItem('admin_teachers_list') || '[]');
+      } catch (e) {}
+      var localStudents = [];
+      try {
+        localStudents = JSON.parse(localStorage.getItem('admin_students_registry') || '[]');
+      } catch (e) {}
+
+      var activeFac = localTeachers.filter(function (t) { return (t.status || '').toUpperCase() === 'ACTIVE'; }).length;
+      var pendingFac = localTeachers.filter(function (t) { return (t.status || '').toUpperCase().indexOf('PENDING') !== -1; }).length;
+
       var offlineData = {
         academicTerm: 'Autumn Term 2026',
         todayDate: new Date().toISOString().split('T')[0],
-        totalStudents: 0,
+        totalStudents: localStudents.length,
         totalPrograms: 0,
-        totalFaculty: 0,
-        activeFaculty: 0,
-        pendingFaculty: 0,
+        totalFaculty: localTeachers.length,
+        activeFaculty: activeFac,
+        pendingFaculty: pendingFac,
         todayCompletionRate: 100.0,
         todayRegisters: { submitted: 0, total: 0 },
         examCycles: { total: 0, finalized: 0, underVerification: 0 },
@@ -2589,9 +2633,16 @@
         if (!e.key || e.key === 'attendance_academic_departments_v2' || e.key === 'attendance_institutional_schools_v1' || e.key === 'admin_academic_state') {
           renderDepartmentTable(getStoredDepartments());
         }
+        if (!e.key || e.key === 'admin_teachers_list' || e.key === 'admin_students_registry' || e.key === 'attendance_local_credentials') {
+          loadDashboardMetrics(false);
+        }
+      });
+      window.addEventListener('focus', function() {
+        loadDashboardMetrics(false);
       });
       window.addEventListener('attendance:academic-entities-updated', function() {
         renderDepartmentTable(getStoredDepartments());
+        loadDashboardMetrics(false);
       });
     });
   </script>

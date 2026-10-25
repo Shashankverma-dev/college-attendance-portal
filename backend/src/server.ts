@@ -18,7 +18,7 @@ import path from 'path';
 import { authenticate, requireRole } from './middleware/auth';
 import { isDbConnected, assertProductionDbAvailable } from './config/db';
 
-dotenv.config();
+dotenv.config(); // Reloaded with Gmail SMTP configuration
 
 // Startup Environment Validation
 if (!process.env.SESSION_SECRET || process.env.SESSION_SECRET.length < 32) {

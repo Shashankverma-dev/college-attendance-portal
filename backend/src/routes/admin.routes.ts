@@ -12,6 +12,7 @@ import { localAttendanceSessions, localAttendanceRecords } from './attendance.ro
 import { localAssessments, localAssessmentMarks } from './marks.routes';
 import { localEnrollmentHistory } from './student.routes';
 import { userPasswords } from './auth.routes';
+import { firebaseAuth, firestore } from '../config/firebase';
 
 export function purgeAllMockAndTestData(): { studentsCleared: number; teachersCleared: number } {
   const studentsCleared = localStudents.length;
@@ -699,6 +700,19 @@ router.get(
         const totalRes = await pool.query(query, params);
         const totalCount = totalRes.rowCount || 0;
 
+        const statsRes = await pool.query(`
+          SELECT 
+            COUNT(DISTINCT fp.faculty_profile_id)::int as total_faculty,
+            COUNT(DISTINCT CASE WHEN u.status = 'ACTIVE' THEN fp.faculty_profile_id END)::int as active_faculty,
+            COUNT(DISTINCT CASE WHEN u.status = 'PENDING_ACTIVATION' THEN fp.faculty_profile_id END)::int as pending_faculty,
+            COUNT(fa.assignment_id)::int as total_allocations,
+            COUNT(DISTINCT fp.department_id)::int as departments_count
+          FROM faculty_profiles fp
+          JOIN users u ON fp.user_uid = u.user_uid
+          LEFT JOIN faculty_assignments fa ON fp.faculty_profile_id = fa.faculty_profile_id AND fa.is_active = TRUE
+        `);
+        const statsRow = statsRes.rows[0] || {};
+
         params.push(limit);
         query += ` LIMIT $${params.length}`;
         params.push((page - 1) * limit);
@@ -713,6 +727,13 @@ router.get(
           page,
           totalPages: Math.ceil(totalCount / limit),
           limit,
+          stats: {
+            totalFaculty: statsRow.total_faculty !== undefined ? statsRow.total_faculty : totalCount,
+            activeFaculty: statsRow.active_faculty || 0,
+            pendingFaculty: statsRow.pending_faculty || 0,
+            totalAllocations: statsRow.total_allocations || 0,
+            departmentsCount: statsRow.departments_count || 0,
+          },
         });
         return;
       }
@@ -757,6 +778,12 @@ router.get(
         };
       });
 
+      const totalFacultyCount = localTeachers.length;
+      const activeFacultyCount = localTeachers.filter((t) => t.status === 'ACTIVE').length;
+      const pendingFacultyCount = localTeachers.filter((t) => t.status === 'PENDING_ACTIVATION').length;
+      const totalAllocationsCount = localAssignments.filter((a) => a.is_active).length;
+      const departmentsCount = new Set(localTeachers.map((t) => t.department_id || t.department_code)).size;
+
       res.json({
         success: true,
         teachers: paginated,
@@ -764,6 +791,13 @@ router.get(
         page,
         totalPages: Math.ceil(totalCount / limit),
         limit,
+        stats: {
+          totalFaculty: totalFacultyCount,
+          activeFaculty: activeFacultyCount,
+          pendingFaculty: pendingFacultyCount,
+          totalAllocations: totalAllocationsCount,
+          departmentsCount,
+        },
       });
     } catch (err: any) {
       console.error('Error listing teachers:', err);
@@ -976,7 +1010,7 @@ router.post(
           await client.query('BEGIN');
 
           const idCheck = await client.query(
-            `SELECT faculty_profile_id FROM faculty_profiles WHERE faculty_staff_id = $1`,
+            `SELECT faculty_profile_id FROM faculty_profiles WHERE LOWER(faculty_staff_id) = LOWER($1)`,
             [facultyStaffId]
           );
           if (idCheck.rowCount && idCheck.rowCount > 0) {
@@ -986,7 +1020,7 @@ router.post(
           }
 
           const emailCheck = await client.query(
-            `SELECT user_uid FROM users WHERE email = $1`,
+            `SELECT user_uid FROM users WHERE LOWER(email) = LOWER($1)`,
             [officialEmail]
           );
           if (emailCheck.rowCount && emailCheck.rowCount > 0) {
@@ -1005,7 +1039,33 @@ router.post(
             return;
           }
 
-          const newUserUid = `firebase-uid-fac-${facultyStaffId.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+          // Provision user in Firebase Authentication
+          let fbUserUid: string | null = null;
+          try {
+            let fbUser;
+            try {
+              fbUser = await firebaseAuth.createUser({
+                email: officialEmail,
+                displayName: fullName,
+                disabled: false,
+                emailVerified: false,
+              });
+              fbUserUid = fbUser.uid;
+              await firebaseAuth.setCustomUserClaims(fbUser.uid, { role: 'FACULTY' });
+            } catch (fbErr: any) {
+              if (fbErr.code === 'auth/email-already-exists') {
+                fbUser = await firebaseAuth.getUserByEmail(officialEmail);
+                fbUserUid = fbUser.uid;
+                await firebaseAuth.setCustomUserClaims(fbUser.uid, { role: 'FACULTY' });
+              } else {
+                console.warn('[Firebase Auth] User provisioning note:', fbErr.message);
+              }
+            }
+          } catch (fbSyncErr: any) {
+            console.warn('[Firebase Auth] Sync note:', fbSyncErr.message);
+          }
+
+          const newUserUid = fbUserUid || `firebase-uid-fac-${facultyStaffId.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
 
           await client.query(
             `INSERT INTO users (user_uid, email, role, status, is_email_verified)
@@ -1031,6 +1091,39 @@ router.post(
           );
 
           const facultyProfileId = profileRes.rows[0].faculty_profile_id;
+
+          // Provision in Cloud Firestore
+          try {
+            await firestore.collection('teachers').doc(facultyStaffId).set({
+              faculty_profile_id: facultyProfileId,
+              faculty_staff_id: facultyStaffId,
+              user_uid: newUserUid,
+              full_name: fullName,
+              official_email: officialEmail,
+              department_id: departmentId,
+              department_name: deptCheck.rows[0].department_name,
+              designation: designation,
+              office_location: officeLocation || 'Main Campus',
+              contact_phone: contactPhone || '',
+              status: 'PENDING_ACTIVATION',
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }, { merge: true });
+
+            await firestore.collection('users').doc(newUserUid).set({
+              user_uid: newUserUid,
+              email: officialEmail,
+              role: 'FACULTY',
+              status: 'PENDING_ACTIVATION',
+              full_name: fullName,
+              faculty_staff_id: facultyStaffId,
+              department_id: departmentId,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }, { merge: true });
+          } catch (fsErr: any) {
+            console.warn('[Cloud Firestore] Write note:', fsErr.message);
+          }
 
           if (initialSubjectId && initialSectionId) {
             await client.query(
@@ -1115,9 +1208,9 @@ router.post(
         }
       }
 
-      // In-Memory Fallback
+      // In-Memory Fallback: Duplicate Validation
       const idExists = localTeachers.some(
-        (t) => t.faculty_staff_id.toLowerCase() === facultyStaffId.toLowerCase()
+        (t) => (t.faculty_staff_id || '').toLowerCase() === facultyStaffId.toLowerCase()
       );
       if (idExists) {
         res.status(409).json({ error: 'DUPLICATE_STAFF_ID', message: `Faculty ID '${facultyStaffId}' is already registered.` });
@@ -1125,10 +1218,18 @@ router.post(
       }
 
       const emailExists = localTeachers.some(
-        (t) => t.official_email.toLowerCase() === officialEmail.toLowerCase()
+        (t) => (t.official_email || '').toLowerCase() === officialEmail.toLowerCase()
       );
       if (emailExists) {
         res.status(409).json({ error: 'DUPLICATE_EMAIL', message: `Official email '${officialEmail}' is already registered.` });
+        return;
+      }
+
+      const emailInStudents = localStudents.some(
+        (s) => (s.student_gmail || '').toLowerCase() === officialEmail.toLowerCase()
+      );
+      if (emailInStudents) {
+        res.status(409).json({ error: 'DUPLICATE_EMAIL', message: `Email '${officialEmail}' is already registered to a student account.` });
         return;
       }
 
@@ -1143,8 +1244,34 @@ router.post(
         return;
       }
 
+      // Provision user in Firebase Authentication
+      let fbUserUid: string | null = null;
+      try {
+        let fbUser;
+        try {
+          fbUser = await firebaseAuth.createUser({
+            email: officialEmail,
+            displayName: fullName,
+            disabled: false,
+            emailVerified: false,
+          });
+          fbUserUid = fbUser.uid;
+          await firebaseAuth.setCustomUserClaims(fbUser.uid, { role: 'FACULTY' });
+        } catch (fbErr: any) {
+          if (fbErr.code === 'auth/email-already-exists') {
+            fbUser = await firebaseAuth.getUserByEmail(officialEmail);
+            fbUserUid = fbUser.uid;
+            await firebaseAuth.setCustomUserClaims(fbUser.uid, { role: 'FACULTY' });
+          } else {
+            console.warn('[Firebase Auth Fallback] User provisioning note:', fbErr.message);
+          }
+        }
+      } catch (fbSyncErr: any) {
+        console.warn('[Firebase Auth Fallback] Sync note:', fbSyncErr.message);
+      }
+
       const newId = crypto.randomUUID();
-      const newUserUid = `firebase-uid-fac-${facultyStaffId.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+      const newUserUid = fbUserUid || `firebase-uid-fac-${facultyStaffId.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
 
       const newTeacher: InMemTeacher = {
         faculty_profile_id: newId,
@@ -1165,6 +1292,40 @@ router.post(
       };
 
       localTeachers.unshift(newTeacher);
+
+      // Provision in Cloud Firestore
+      try {
+        await firestore.collection('teachers').doc(facultyStaffId).set({
+          faculty_profile_id: newId,
+          faculty_staff_id: facultyStaffId,
+          user_uid: newUserUid,
+          full_name: fullName,
+          official_email: officialEmail,
+          department_id: dept.department_id,
+          department_name: dept.department_name,
+          department_code: dept.department_code,
+          designation,
+          office_location: officeLocation || 'Main Campus',
+          contact_phone: contactPhone || '+1 (555) 019-0000',
+          status: 'PENDING_ACTIVATION',
+          created_at: newTeacher.created_at,
+          updated_at: newTeacher.created_at,
+        }, { merge: true });
+
+        await firestore.collection('users').doc(newUserUid).set({
+          user_uid: newUserUid,
+          email: officialEmail,
+          role: 'FACULTY',
+          status: 'PENDING_ACTIVATION',
+          full_name: fullName,
+          faculty_staff_id: facultyStaffId,
+          department_id: dept.department_id,
+          created_at: newTeacher.created_at,
+          updated_at: newTeacher.created_at,
+        }, { merge: true });
+      } catch (fsErr: any) {
+        console.warn('[Cloud Firestore Fallback] Write note:', fsErr.message);
+      }
 
       if (initialSubjectId && initialSectionId) {
         const sub = localSubjects.find(

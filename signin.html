@@ -480,6 +480,25 @@
         var detectedName = '';
         var detectedId = '';
 
+        // Pre-check unified local credentials if emailHint is provided
+        try {
+          var credsPre = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
+          if (cleanEmail && credsPre[cleanEmail]) {
+            if (credsPre[cleanEmail].role) detectedRole = credsPre[cleanEmail].role;
+            if (credsPre[cleanEmail].name) detectedName = credsPre[cleanEmail].name;
+            if (credsPre[cleanEmail].id) detectedId = credsPre[cleanEmail].id;
+          }
+        } catch (e) {}
+
+        // Token prefix heuristics
+        if (cleanTok.indexOf('fac_') === 0 || cleanTok.indexOf('tea_') === 0) {
+          detectedRole = 'faculty';
+        } else if (cleanTok.indexOf('stu_') === 0) {
+          detectedRole = 'student';
+        } else if (cleanTok.indexOf('hod_') === 0) {
+          detectedRole = 'hod';
+        }
+
         // 1. Update HOD
         try {
           var hods = JSON.parse(localStorage.getItem('attendance_hod_accounts_v2') || '[]');
@@ -501,40 +520,76 @@
         // 2. Update Teachers
         try {
           var teachers = JSON.parse(localStorage.getItem('admin_teachers_list') || '[]');
+          var teacherMatched = false;
           teachers.forEach(function(item) {
             if ((cleanTok && item.activationToken === cleanTok) || (cleanEmail && item.email && item.email.toLowerCase() === cleanEmail)) {
               item.status = 'ACTIVE';
               item.password = newPassword;
               item.activatedAt = new Date().toISOString();
               found = true;
+              teacherMatched = true;
               detectedRole = 'faculty';
               detectedName = item.name || detectedName;
               detectedId = item.staffId || detectedId;
               if (item.email) cleanEmail = item.email.toLowerCase();
             }
           });
+          if (!teacherMatched && (detectedRole === 'faculty' || cleanTok.indexOf('fac_') === 0) && cleanEmail) {
+            teachers.push({
+              id: 'fac-' + Date.now(),
+              staffId: detectedId || ('FAC-' + Math.floor(100 + Math.random() * 900)),
+              name: detectedName || cleanEmail.split('@')[0],
+              email: cleanEmail,
+              status: 'ACTIVE',
+              role: 'Teacher',
+              password: newPassword,
+              activatedAt: new Date().toISOString(),
+              createdAt: new Date().toISOString(),
+              is_user_created: true
+            });
+            found = true;
+            detectedRole = 'faculty';
+          }
           localStorage.setItem('admin_teachers_list', JSON.stringify(teachers));
         } catch (e) {}
 
         // 3. Update Students
         try {
           var students = JSON.parse(localStorage.getItem('admin_students_registry') || '[]');
+          var studentMatched = false;
           students.forEach(function(item) {
             if ((cleanTok && item.activationToken === cleanTok) || (cleanEmail && item.student_gmail && item.student_gmail.toLowerCase() === cleanEmail)) {
               item.status = 'ACTIVE';
+              item.account_status = 'ACTIVE';
               item.password = newPassword;
               item.activatedAt = new Date().toISOString();
               found = true;
+              studentMatched = true;
               detectedRole = 'student';
               detectedName = item.full_name || detectedName;
               detectedId = item.student_id || detectedId;
               if (item.student_gmail) cleanEmail = item.student_gmail.toLowerCase();
             }
           });
+          if (!studentMatched && (detectedRole === 'student' || cleanTok.indexOf('stu_') === 0) && cleanEmail) {
+            students.push({
+              student_profile_id: 's-' + Date.now(),
+              student_id: detectedId || ('STU-' + Math.floor(100 + Math.random() * 900)),
+              full_name: detectedName || cleanEmail.split('@')[0],
+              student_gmail: cleanEmail,
+              status: 'ACTIVE',
+              account_status: 'ACTIVE',
+              password: newPassword,
+              activatedAt: new Date().toISOString(),
+              is_user_created: true
+            });
+            found = true;
+            detectedRole = 'student';
+          }
           localStorage.setItem('admin_students_registry', JSON.stringify(students));
         } catch (e) {}
 
-        // 4. Update unified local credentials dictionary (with role, name, id for correct login routing)
+        // 4. Update unified local credentials dictionary
         try {
           var creds = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
           if (cleanEmail) {
@@ -549,6 +604,24 @@
           }
           localStorage.setItem('attendance_local_credentials', JSON.stringify(creds));
         } catch (e) {}
+
+        // 5. Update Cloud Firestore if available
+        try {
+          if (typeof window.dbSetDoc === 'function' && cleanEmail) {
+            var collName = detectedRole === 'faculty' ? 'teachers' : (detectedRole === 'student' ? 'students' : 'users');
+            var docId = detectedId || cleanEmail.replace(/[^a-z0-9]/gi, '_');
+            window.dbSetDoc(collName, docId, {
+              status: 'ACTIVE',
+              activatedAt: new Date().toISOString()
+            }).catch(function() {});
+            window.dbSetDoc('users', docId, {
+              email: cleanEmail,
+              status: 'ACTIVE',
+              role: detectedRole.toUpperCase(),
+              activatedAt: new Date().toISOString()
+            }).catch(function() {});
+          }
+        } catch (eFs) {}
 
         return found;
       }
@@ -583,6 +656,13 @@
               sessionStorage.setItem('attendance_user_role', role);
               sessionStorage.setItem('attendance_user_name', user.name);
               sessionStorage.setItem('attendance_user_initials', user.initials || user.id.substring(0, 2).toUpperCase());
+              if (user.email) {
+                sessionStorage.setItem('attendance_user_email', user.email.toLowerCase());
+                localStorage.setItem('attendance_user_email', user.email.toLowerCase());
+              } else if (identifier.includes('@')) {
+                sessionStorage.setItem('attendance_user_email', identifier.toLowerCase());
+                localStorage.setItem('attendance_user_email', identifier.toLowerCase());
+              }
 
               showStatus('Welcome back, ' + user.name + '! Redirecting...', 'info');
 
@@ -1042,7 +1122,7 @@
           var apiBase = typeof getApiBase === 'function' ? getApiBase() : '';
           var endpoint = apiBase + (mode === 'activate' ? '/api/auth/activate' : '/api/auth/reset-password');
           var payload = mode === 'activate'
-            ? { token: token, password: pwVal }
+            ? { token: token, password: pwVal, email: urlParams.get('email') || undefined }
             : { token: token, newPassword: pwVal };
 
           fetch(endpoint, {

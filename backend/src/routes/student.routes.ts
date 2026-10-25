@@ -183,12 +183,29 @@ router.get('/', adminAuth, async (req: Request, res: Response): Promise<void> =>
         [...queryParams, limitNum, (pageNum - 1) * limitNum]
       );
 
+      const statsRes = await pool.query(`
+        SELECT 
+          COUNT(*)::int as total_enrolled,
+          COUNT(CASE WHEN u.status = 'ACTIVE' THEN 1 END)::int as active_accounts,
+          COUNT(CASE WHEN u.status = 'PENDING_ACTIVATION' THEN 1 END)::int as pending_activation,
+          COUNT(CASE WHEN u.status = 'SUSPENDED' THEN 1 END)::int as suspended_accounts
+        FROM student_profiles sp
+        JOIN users u ON sp.user_uid = u.user_uid
+      `);
+      const statsRow = statsRes.rows[0] || {};
+
       res.json({
         success: true,
         total,
         page: pageNum,
         limit: limitNum,
         totalPages: Math.ceil(total / limitNum),
+        stats: {
+          totalEnrolled: statsRow.total_enrolled !== undefined ? statsRow.total_enrolled : total,
+          activeAccounts: statsRow.active_accounts || 0,
+          pendingActivation: statsRow.pending_activation || 0,
+          suspendedAccounts: statsRow.suspended_accounts || 0,
+        },
         students: dataRes.rows,
       });
       return;
@@ -640,7 +657,7 @@ router.post('/', adminAuth, async (req: Request, res: Response): Promise<void> =
     await TokenService.storeToken(null, userUid, token.tokenHash, 'ACCOUNT_ACTIVATION', cleanEmail, token.expiresAt);
 
     const appBaseUrl = process.env.APP_URL || 'http://localhost:5000';
-    const activationLink = `${appBaseUrl}/signin.html?mode=activate&token=${token.rawToken}`;
+    const activationLink = `${appBaseUrl}/signin.html?mode=activate&token=${token.rawToken}&email=${encodeURIComponent(cleanEmail)}`;
 
     await EmailService.sendEmail({
       to: cleanEmail,
@@ -687,6 +704,7 @@ router.post('/', adminAuth, async (req: Request, res: Response): Promise<void> =
       success: true,
       message: `Student account created for ${newStudent.full_name} (${finalStudentId}) and 48-hour activation link dispatched.`,
       student: newStudent,
+      activationToken: token.rawToken,
       activationLink,
     });
   } catch (err: any) {
