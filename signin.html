@@ -343,7 +343,39 @@
               if (c.status === 'PENDING_ACTIVATION') {
                 return { success: false, notActivated: true, message: 'Account pending activation. Please verify your email and set your password.' };
               }
-              return { success: true, user: { id: cleanId, email: cleanId, name: c.name || cleanId.split('@')[0], role: c.role || 'student' } };
+              var role = c.role;
+              var name = c.name;
+              var id = c.id;
+              // If role missing or defaulted, detect from registries
+              if (!role || role === 'student') {
+                try {
+                  var tList = JSON.parse(localStorage.getItem('admin_teachers_list') || '[]');
+                  var tMatch = tList.find(function(t) {
+                    return (t.email && t.email.toLowerCase() === cleanId) ||
+                           (t.staffId && t.staffId.toLowerCase() === cleanId);
+                  });
+                  if (tMatch) {
+                    role = 'faculty';
+                    name = name || tMatch.name;
+                    id = id || tMatch.staffId;
+                  }
+                } catch(e1) {}
+              }
+              if (!role || role === 'student') {
+                try {
+                  var hList = JSON.parse(localStorage.getItem('attendance_hod_accounts_v2') || '[]');
+                  var hMatch = hList.find(function(h) {
+                    return (h.hodEmail && h.hodEmail.toLowerCase() === cleanId) ||
+                           (h.deptCode && h.deptCode.toLowerCase() === cleanId);
+                  });
+                  if (hMatch) {
+                    role = 'hod';
+                    name = name || hMatch.hodName;
+                    id = id || hMatch.deptCode;
+                  }
+                } catch(e2) {}
+              }
+              return { success: true, user: { id: id || cleanId, email: cleanId, name: name || cleanId.split('@')[0], role: role || 'student' } };
             }
           }
         } catch (e) {}
@@ -444,6 +476,9 @@
         var found = false;
         var cleanTok = (tok || '').trim();
         var cleanEmail = (emailHint || '').trim().toLowerCase();
+        var detectedRole = 'student';
+        var detectedName = '';
+        var detectedId = '';
 
         // 1. Update HOD
         try {
@@ -454,6 +489,9 @@
               item.password = newPassword;
               item.activatedAt = new Date().toISOString();
               found = true;
+              detectedRole = 'hod';
+              detectedName = item.hodName || detectedName;
+              detectedId = item.deptCode || detectedId;
               if (item.hodEmail) cleanEmail = item.hodEmail.toLowerCase();
             }
           });
@@ -469,6 +507,9 @@
               item.password = newPassword;
               item.activatedAt = new Date().toISOString();
               found = true;
+              detectedRole = 'faculty';
+              detectedName = item.name || detectedName;
+              detectedId = item.staffId || detectedId;
               if (item.email) cleanEmail = item.email.toLowerCase();
             }
           });
@@ -484,17 +525,27 @@
               item.password = newPassword;
               item.activatedAt = new Date().toISOString();
               found = true;
+              detectedRole = 'student';
+              detectedName = item.full_name || detectedName;
+              detectedId = item.student_id || detectedId;
               if (item.student_gmail) cleanEmail = item.student_gmail.toLowerCase();
             }
           });
           localStorage.setItem('admin_students_registry', JSON.stringify(students));
         } catch (e) {}
 
-        // 4. Update unified local credentials dictionary
+        // 4. Update unified local credentials dictionary (with role, name, id for correct login routing)
         try {
           var creds = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
           if (cleanEmail) {
-            creds[cleanEmail] = { password: newPassword, status: 'ACTIVE', updatedAt: new Date().toISOString() };
+            creds[cleanEmail] = {
+              password: newPassword,
+              status: 'ACTIVE',
+              role: detectedRole,
+              name: detectedName || cleanEmail.split('@')[0],
+              id: detectedId || cleanEmail,
+              updatedAt: new Date().toISOString()
+            };
           }
           localStorage.setItem('attendance_local_credentials', JSON.stringify(creds));
         } catch (e) {}
@@ -556,6 +607,18 @@
                   var cleanEmail = identifier.toLowerCase();
                   if (cleanEmail === 'admin@college.edu' || cleanEmail === 'shashankvermahsst@gmail.com' || /admin|dean/i.test(cleanEmail)) {
                     role = 'admin';
+                  } else {
+                    try {
+                      var credsLookup = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
+                      if (credsLookup[cleanEmail] && credsLookup[cleanEmail].role) {
+                        role = credsLookup[cleanEmail].role;
+                      } else {
+                        var tList = JSON.parse(localStorage.getItem('admin_teachers_list') || '[]');
+                        if (tList.some(function(t) { return t.email && t.email.toLowerCase() === cleanEmail; })) {
+                          role = 'faculty';
+                        }
+                      }
+                    } catch(e) {}
                   }
                   var displayName = fbUser.displayName || identifier.split('@')[0];
 
@@ -634,6 +697,18 @@
                 var cleanEmail = identifier.toLowerCase();
                 if (cleanEmail === 'admin@college.edu' || cleanEmail === 'shashankvermahsst@gmail.com' || /admin|dean/i.test(cleanEmail)) {
                   role = 'admin';
+                } else {
+                  try {
+                    var credsLookup = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
+                    if (credsLookup[cleanEmail] && credsLookup[cleanEmail].role) {
+                      role = credsLookup[cleanEmail].role;
+                    } else {
+                      var tList = JSON.parse(localStorage.getItem('admin_teachers_list') || '[]');
+                      if (tList.some(function(t) { return t.email && t.email.toLowerCase() === cleanEmail; })) {
+                        role = 'faculty';
+                      }
+                    }
+                  } catch(e) {}
                 }
                 var displayName = fbUser.displayName || identifier.split('@')[0];
 

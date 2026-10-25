@@ -1598,10 +1598,21 @@
           if (data && data.success) {
             if (data.student) saveLocalStudent(data.student);
             closeCreateStudentModal();
-            if (data.activationLink && navigator.clipboard && navigator.clipboard.writeText) {
-              navigator.clipboard.writeText(data.activationLink).catch(function() {});
+            var sLink = data.activationLink || (window.location.origin + '/signin.html?mode=activate&token=' + (data.activationToken || ('stu_csp_' + Math.random().toString(36).substring(2, 10))) + '&email=' + encodeURIComponent(payload.studentGmail));
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(sLink).catch(function() {});
             }
-            showToast(data.message || 'Student account created! 48-hr activation link dispatched (copied to clipboard).');
+            var emailSubject = encodeURIComponent('SRHU Attendance Portal – Activate Your Student Account');
+            var emailBody = encodeURIComponent(
+              'Dear ' + payload.fullName + ',\n\n' +
+              'Your student account has been registered on the SRHU Attendance Portal.\n\n' +
+              'Enrollment No: ' + (payload.enrollmentNo || '--') + '\n\n' +
+              'Please click the link below within 48 hours to set your password and activate your account:\n\n' +
+              sLink + '\n\n' +
+              'Regards,\nSRHU Academic Administration'
+            );
+            window.open('mailto:' + encodeURIComponent(payload.studentGmail) + '?subject=' + emailSubject + '&body=' + emailBody, '_blank');
+            showToast(data.message || 'Student account created! Activation email draft opened & link copied to clipboard.');
             loadStudents();
           } else {
             errorEl.textContent = data.message || 'Failed to create student.';
@@ -1632,11 +1643,34 @@
             enrollment_status: 'ACTIVE'
           };
           saveLocalStudent(newProfile);
+
+          try {
+            var credsObj = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
+            credsObj[payload.studentGmail.toLowerCase()] = {
+              status: 'PENDING_ACTIVATION',
+              role: 'student',
+              name: payload.fullName,
+              id: newProfile.student_id,
+              updatedAt: new Date().toISOString()
+            };
+            localStorage.setItem('attendance_local_credentials', JSON.stringify(credsObj));
+          } catch(eCred) {}
+
           closeCreateStudentModal();
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(actLink).catch(function() {});
           }
-          showToast('Student registered with 48h invitation link queued (copied to clipboard)!');
+          var emailSubject = encodeURIComponent('SRHU Attendance Portal – Activate Your Student Account');
+          var emailBody = encodeURIComponent(
+            'Dear ' + payload.fullName + ',\n\n' +
+            'Your student account has been registered on the SRHU Attendance Portal.\n\n' +
+            'Enrollment No: ' + (payload.enrollmentNo || '--') + '\n\n' +
+            'Please click the link below within 48 hours to set your password and activate your account:\n\n' +
+            actLink + '\n\n' +
+            'Regards,\nSRHU Academic Administration'
+          );
+          window.open('mailto:' + encodeURIComponent(payload.studentGmail) + '?subject=' + emailSubject + '&body=' + emailBody, '_blank');
+          showToast('Student registered! Activation email draft opened & link copied to clipboard.');
           loadStudents();
         });
     }

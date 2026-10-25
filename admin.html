@@ -1987,6 +1987,18 @@
       }
       saveStoredHodAccounts(hodAccounts);
 
+      try {
+        var credsObj = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
+        credsObj[hodEmail.toLowerCase()] = {
+          status: 'PENDING_ACTIVATION',
+          role: 'hod',
+          name: hodName,
+          id: deptCode,
+          updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem('attendance_local_credentials', JSON.stringify(credsObj));
+      } catch(eCred) {}
+
       // Backend sync
       fetch(getApiBase() + '/api/admin/academic/departments/' + encodeURIComponent(deptId) + '/assign-hod', {
         method: 'POST',

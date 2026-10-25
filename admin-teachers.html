@@ -1276,7 +1276,19 @@
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(link).catch(function() {});
           }
-          showToast('Faculty member ' + name + ' (' + staffId + ') provisioned! 48-hr activation link dispatched (copied to clipboard).', 'success');
+          // Open admin's Gmail to send activation email to teacher
+          var emailSubject = encodeURIComponent('SRHU Attendance Portal – Activate Your Faculty Account');
+          var emailBody = encodeURIComponent(
+            'Dear ' + name + ',\n\n' +
+            'Your faculty account has been provisioned on the SRHU Attendance Portal.\n\n' +
+            'Staff ID: ' + staffId + '\n\n' +
+            'Please click the link below within 48 hours to set your permanent password and activate your account:\n\n' +
+            link + '\n\n' +
+            'If you did not expect this email or have questions, please contact the IT Helpdesk.\n\n' +
+            'Regards,\nSRHU Academic Administration'
+          );
+          window.open('mailto:' + encodeURIComponent(email) + '?subject=' + emailSubject + '&body=' + emailBody, '_blank');
+          showToast('Faculty member ' + name + ' (' + staffId + ') provisioned! Activation email draft opened & link copied to clipboard.', 'success');
           fetchTeacherList(currentPage);
         })
         .catch(function (err) {
@@ -1317,12 +1329,39 @@
               existingTeachers.unshift(newTeacherObj);
             }
             localStorage.setItem('admin_teachers_list', JSON.stringify(existingTeachers));
+
+            // Sync credentials dictionary with PENDING_ACTIVATION
+            try {
+              var credsObj = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
+              var cleanE = email.toLowerCase();
+              credsObj[cleanE] = {
+                status: 'PENDING_ACTIVATION',
+                role: 'faculty',
+                name: name,
+                id: staffId,
+                updatedAt: new Date().toISOString()
+              };
+              localStorage.setItem('attendance_local_credentials', JSON.stringify(credsObj));
+            } catch(eCred) {}
+
             window.closeProvisionModal();
             document.getElementById('form-provision-teacher').reset();
             if (navigator.clipboard && navigator.clipboard.writeText) {
               navigator.clipboard.writeText(actLink).catch(function() {});
             }
-            showToast('Faculty member ' + name + ' (' + staffId + ') provisioned! 48-hr activation link dispatched (copied to clipboard).', 'success');
+            // Open admin's Gmail to send activation email to teacher
+            var emailSubject = encodeURIComponent('SRHU Attendance Portal – Activate Your Faculty Account');
+            var emailBody = encodeURIComponent(
+              'Dear ' + name + ',\n\n' +
+              'Your faculty account has been provisioned on the SRHU Attendance Portal.\n\n' +
+              'Staff ID: ' + staffId + '\n\n' +
+              'Please click the link below within 48 hours to set your permanent password and activate your account:\n\n' +
+              actLink + '\n\n' +
+              'If you did not expect this email or have questions, please contact the IT Helpdesk.\n\n' +
+              'Regards,\nSRHU Academic Administration'
+            );
+            window.open('mailto:' + encodeURIComponent(email) + '?subject=' + emailSubject + '&body=' + emailBody, '_blank');
+            showToast('Faculty member ' + name + ' (' + staffId + ') provisioned! Activation email draft opened & link copied to clipboard.', 'success');
             fetchTeacherList(currentPage);
           } catch (storageErr) {
             showToast(err.message || 'Failed to provision account', 'error');
@@ -1978,6 +2017,29 @@
               existingTeachers[tIdx].statusReason = reason;
               existingTeachers[tIdx].updated_at = new Date().toISOString();
               localStorage.setItem('admin_teachers_list', JSON.stringify(existingTeachers));
+
+              // Sync attendance_local_credentials status
+              try {
+                var t = existingTeachers[tIdx];
+                if (t && t.email) {
+                  var creds2 = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
+                  var credKey = t.email.toLowerCase();
+                  if (creds2[credKey]) {
+                    creds2[credKey].status = targetStatus;
+                    creds2[credKey].updatedAt = new Date().toISOString();
+                  } else if (targetStatus === 'ACTIVE' && t.password) {
+                    creds2[credKey] = {
+                      password: t.password,
+                      status: 'ACTIVE',
+                      role: 'faculty',
+                      name: t.name,
+                      id: t.staffId,
+                      updatedAt: new Date().toISOString()
+                    };
+                  }
+                  localStorage.setItem('attendance_local_credentials', JSON.stringify(creds2));
+                }
+              } catch(e3) {}
             }
           } catch (ex) {}
 
@@ -2075,7 +2137,66 @@
           }
         })
         .catch(function (err) {
-          showToast('Failed to load profile: ' + err.message, 'error');
+          // Fallback: search in currentTeacherList or localStorage
+          var teacher = currentTeacherList.find(function(t) {
+            return String(t.id || '').toLowerCase() === String(teacherId).toLowerCase() ||
+                   String(t.staffId || '').toLowerCase() === String(teacherId).toLowerCase();
+          });
+          if (!teacher) {
+            try {
+              var stored = getStoredTeachers();
+              teacher = stored.find(function(t) {
+                return String(t.id || '').toLowerCase() === String(teacherId).toLowerCase() ||
+                       String(t.staffId || '').toLowerCase() === String(teacherId).toLowerCase();
+              });
+            } catch(e2) {}
+          }
+          if (teacher) {
+            var name = teacher.full_name || teacher.name || 'Faculty Member';
+            var staffId = teacher.faculty_staff_id || teacher.staffId || teacher.id;
+            var email = teacher.official_email || teacher.email || 'N/A';
+            var designation = teacher.designation || 'Faculty Member';
+            var office = teacher.office_location || teacher.officeLocation || 'Main Campus';
+            var dept = teacher.department_name || deptNameMap[teacher.department_id] || deptNameMap[teacher.departmentId] || 'Computer Applications';
+            var status = teacher.status || 'ACTIVE';
+
+            var initials = (name).split(' ').map(function (w) { return w[0]; }).join('').slice(-2).toUpperCase() || 'FC';
+            document.getElementById('prof-view-avatar').textContent = initials;
+            document.getElementById('modal-prof-title').textContent = name;
+            document.getElementById('prof-view-staff-id').textContent = 'Staff ID: ' + staffId;
+            document.getElementById('prof-view-name').textContent = name;
+            document.getElementById('prof-view-email').textContent = email;
+            document.getElementById('prof-view-dept').textContent = dept;
+            document.getElementById('prof-view-designation').textContent = designation;
+            document.getElementById('prof-view-office').textContent = office;
+            document.getElementById('prof-view-status').innerHTML = getStatusBadge(status);
+
+            var allocContainer = document.getElementById('prof-view-allocations');
+            allocContainer.innerHTML = '';
+            var rawAssignments = teacher.assignments || [];
+            if (rawAssignments.length === 0) {
+              allocContainer.innerHTML = '<span style="font-size: 13px; color: var(--card-muted); font-style: italic;">No current teaching assignments.</span>';
+            } else {
+              rawAssignments.forEach(function (a) {
+                var div = document.createElement('div');
+                div.style.cssText = 'padding: 8px 12px; background: var(--bg-dark); border: 1px solid var(--line); border-radius: var(--radius); font-size: 13px; font-weight: 600; color: var(--card-ink);';
+                var code = a.subject_code || a.subjectCode || a.subjectId || 'Subject';
+                var sec = a.section_name ? ('Section ' + a.section_name) : (a.section_code || a.sectionCode || a.sectionId || 'Section');
+                var term = a.academic_calendar_term || a.academicTerm || 'Autumn 2026';
+                div.textContent = code + ' (' + sec + ') • ' + term;
+                allocContainer.appendChild(div);
+              });
+            }
+
+            var modal = document.getElementById('modal-profile-view');
+            if (modal) {
+              modal.removeAttribute('hidden');
+              modal.classList.add('is-open');
+              modal.style.display = 'flex';
+            }
+          } else {
+            showToast('Failed to load profile: ' + err.message, 'error');
+          }
         });
       };
 
@@ -2091,11 +2212,67 @@
       // 10. REISSUE TOKEN & CSV EXPORT
       // =========================================================================
       window.reissueActivationLink = function (teacherId, name) {
-        var tokenUrl = window.location.origin + '/signin.html?mode=activate&token=fac_csp_' + Math.random().toString(36).substring(2, 12);
+        var actToken = 'fac_csp_' + Math.random().toString(36).substring(2, 12);
+        var teacherEmail = '';
+        var staffId = teacherId;
+
+        // Update teacher record in localStorage with new token
+        try {
+          var existingTeachers = getStoredTeachers();
+          var tIdx = existingTeachers.findIndex(function(t) {
+            return String(t.id || '').toLowerCase() === String(teacherId).toLowerCase() ||
+                   String(t.staffId || '').toLowerCase() === String(teacherId).toLowerCase();
+          });
+          if (tIdx >= 0) {
+            existingTeachers[tIdx].activationToken = actToken;
+            existingTeachers[tIdx].status = 'PENDING_ACTIVATION';
+            teacherEmail = existingTeachers[tIdx].email || '';
+            staffId = existingTeachers[tIdx].staffId || staffId;
+            var actLink = window.location.origin + '/signin.html?mode=activate&token=' + actToken + (teacherEmail ? '&email=' + encodeURIComponent(teacherEmail) : '');
+            existingTeachers[tIdx].activationLink = actLink;
+            localStorage.setItem('admin_teachers_list', JSON.stringify(existingTeachers));
+
+            // Sync credentials dictionary with PENDING_ACTIVATION
+            if (teacherEmail) {
+              var credsObj = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
+              credsObj[teacherEmail.toLowerCase()] = {
+                status: 'PENDING_ACTIVATION',
+                role: 'faculty',
+                name: name,
+                id: staffId,
+                updatedAt: new Date().toISOString()
+              };
+              localStorage.setItem('attendance_local_credentials', JSON.stringify(credsObj));
+            }
+          }
+        } catch(e) {}
+
+        var tokenUrl = window.location.origin + '/signin.html?mode=activate&token=' + actToken + (teacherEmail ? '&email=' + encodeURIComponent(teacherEmail) : '');
         if (navigator.clipboard) {
           navigator.clipboard.writeText(tokenUrl).catch(function () {});
         }
-        showToast('New 48-hr activation token issued for ' + name + ' (' + teacherId + '). Link copied to clipboard.', 'success');
+
+        // Open admin's Gmail to send new activation email to teacher
+        if (teacherEmail) {
+          var emailSubject = encodeURIComponent('SRHU Attendance Portal – New Faculty Activation Link');
+          var emailBody = encodeURIComponent(
+            'Dear ' + name + ',\n\n' +
+            'A new 48-hour activation link has been issued for your faculty account on the SRHU Attendance Portal.\n\n' +
+            'Staff ID: ' + staffId + '\n\n' +
+            'Please click the link below to set your permanent password and activate your account:\n\n' +
+            tokenUrl + '\n\n' +
+            'This link expires in 48 hours.\n\nRegards,\nSRHU Academic Administration'
+          );
+          window.open('mailto:' + encodeURIComponent(teacherEmail) + '?subject=' + emailSubject + '&body=' + emailBody, '_blank');
+        }
+
+        showToast('New 48-hr activation token issued for ' + name + '. Email draft opened & link copied to clipboard.', 'success');
+
+        // Also try backend reissue if available
+        fetch(getApiBase() + '/api/admin/teachers/' + encodeURIComponent(teacherId) + '/reissue-token', {
+          method: 'POST',
+          headers: getAuthHeaders()
+        }).catch(function() {});
       };
 
       window.exportFacultyRosterCSV = function () {
