@@ -1,12 +1,12 @@
 ---
 milestone: Milestone 1 - Production Stabilization & Feature Parity
 version: 1.0.0
-updated: 2026-10-25T12:15:00Z
+updated: 2026-10-25T12:30:00Z
 ---
 
 # Roadmap
 
-> **Current Phase:** Phase 3 - Timetable Engine & Overlap Conflict Detection
+> **Current Phase:** Phase 4 - Examination & Continuous Internal Assessment (CIA)
 > **Status:** planning
 
 ## Must-Haves (from SPEC)
@@ -14,7 +14,7 @@ updated: 2026-10-25T12:15:00Z
 - [x] Zero-denominator attendance calculation returns explicit `N/A` without division errors
 - [x] Approved Leave (`L`) strictly excluded from attendance rates
 - [x] Rotating HMAC-SHA256 QR-code session tokens with 20-second validity
-- [ ] Strict timetable interval boundaries ($\text{start} < \text{end}$) and teacher overlap conflict detection
+- [x] Strict timetable interval boundaries ($\text{start} < \text{end}$) and teacher overlap conflict detection
 - [ ] Examination and CIA component marks lifecycle (`DRAFT` $\to$ `SUBMITTED` $\to$ `PUBLISHED`)
 - [ ] Linear SHA-256 hash-chained cryptographic audit trail verification
 
@@ -45,13 +45,13 @@ updated: 2026-10-25T12:15:00Z
 ---
 
 ### Phase 3: Timetable Engine & Overlap Conflict Detection
-**Status:** ⬜ Not Started
+**Status:** ✅ Complete
 **Objective:** Validate interval boundaries, room allocations, teacher schedules, and practical lab subgroups.
 **Requirements:** REQ-05
 
 **Plans:**
-- [ ] Plan 3.1: Interval overlap boundary testing and classroom collision detection
-- [ ] Plan 3.2: Parallel practical subgroup (C1/C2) scheduling validation
+- [x] Plan 3.1: Interval overlap boundary testing and classroom collision detection
+- [x] Plan 3.2: Parallel practical subgroup (C1/C2) scheduling validation
 
 ---
 
@@ -83,7 +83,7 @@ updated: 2026-10-25T12:15:00Z
 |-------|--------|-------|----------|
 | 1. Authentication & RBAC | ✅ Complete | 2/2 | 100% |
 | 2. Attendance & QR Engine | ✅ Complete | 2/2 | 100% |
-| 3. Timetable Engine | ⬜ Not Started | 0/2 | 0% |
+| 3. Timetable Engine | ✅ Complete | 2/2 | 100% |
 | 4. Examination & Marks | ⬜ Not Started | 0/2 | 0% |
 | 5. Production Baseline | ⬜ Not Started | 0/2 | 0% |
 

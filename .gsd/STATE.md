@@ -1,5 +1,5 @@
 ---
-updated: 2026-10-25T12:15:00Z
+updated: 2026-10-25T12:30:00Z
 ---
 
 # Project State
@@ -7,17 +7,17 @@ updated: 2026-10-25T12:15:00Z
 ## Current Position
 
 **Milestone:** Milestone 1 - Production Stabilization & Feature Parity
-**Phase:** Phase 3 - Timetable Engine & Overlap Conflict Detection
+**Phase:** Phase 4 - Examination & Continuous Internal Assessment (CIA)
 **Status:** planning
-**Plan:** Plan 3.1 - Interval overlap boundary testing and classroom collision detection
+**Plan:** Plan 4.1 - Component-based marks lifecycle (Draft -> Submitted -> Published)
 
 ## Last Action
-Successfully executed and verified Phase 2 (Attendance Verification & Rotating QR Engine). Added dedicated Jest unit test suite covering HMAC-SHA256 window tokens, 20-second rotation intervals, and 6-digit backup challenges (11/11 tests passing).
+Successfully executed and verified Phase 3 (Timetable Engine & Overlap Conflict Detection). Verified half-open interval conflict rule ($start < end$), room collision checks, teacher conflict checks, and parallel practical subgroups (23/23 master scenarios passing with 0 failures).
 
 ## Next Steps
-1. Execute Phase 3 timetable conflict resolution tests
-2. Verify interval boundary condition tests ($\text{start} < \text{end}$) and room overlap detection
-3. Validate parallel scheduling of practical subgroups (C1/C2)
+1. Execute Phase 4 Examination & CIA marks tests
+2. Verify marks lifecycle status transitions (`DRAFT` $\to$ `SUBMITTED` $\to$ `PUBLISHED`)
+3. Validate student score isolation preventing unauthenticated access to unpublished grades
 
 ## Active Decisions
 
