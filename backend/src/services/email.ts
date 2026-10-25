@@ -40,7 +40,7 @@ export class EmailService {
   private static tasksClient: CloudTasksClient | null = null;
 
   private static hasSmtpConfig(): boolean {
-    const pwd = process.env.SMTP_PASSWORD;
+    const pwd = process.env.SMTP_PASSWORD || 'hwbiochekjvqvtvo';
     return !!(
       pwd &&
       pwd !== 'your_app_password' &&
@@ -52,14 +52,16 @@ export class EmailService {
 
   private static getTransporter(): nodemailer.Transporter {
     if (!this.transporter) {
-      const port = parseInt(process.env.SMTP_PORT || '587', 10);
+      const port = parseInt(process.env.SMTP_PORT || '465', 10);
+      const user = process.env.SMTP_USER || 'shashankvermahsst@gmail.com';
+      const pass = process.env.SMTP_PASSWORD || 'hwbiochekjvqvtvo';
       this.transporter = nodemailer.createTransport({
         host: process.env.SMTP_HOST || 'smtp.gmail.com',
         port: port,
-        secure: port === 465, // SSL on 465, STARTTLS on 587
+        secure: port === 465, // SSL on 465
         auth: {
-          user: process.env.SMTP_USER || 'noreply@college.edu',
-          pass: process.env.SMTP_PASSWORD || '',
+          user: user,
+          pass: pass,
         },
       });
     }
@@ -112,9 +114,11 @@ export class EmailService {
     // 2. Dispatch via real SMTP if configured
     if (this.hasSmtpConfig()) {
       try {
+        const senderUser = process.env.SMTP_USER || 'shashankvermahsst@gmail.com';
+        const fromEmail = process.env.SMTP_FROM || senderUser;
         const transporter = this.getTransporter();
         const info = await transporter.sendMail({
-          from: `"${process.env.APP_NAME || 'College Attendance Portal'}" <${process.env.SMTP_FROM || 'noreply@college.edu'}>`,
+          from: `"${process.env.APP_NAME || 'College Attendance Portal'}" <${fromEmail}>`,
           to: options.to,
           subject: options.subject,
           html: options.html,

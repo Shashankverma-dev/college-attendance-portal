@@ -142,7 +142,15 @@ export interface InMemAssignment {
 }
 
 // Academic entities initialized with authentic Swami Rama Himalayan University (SRHU) hierarchy
-export const localDepartments: InMemDepartment[] = [];
+export const localDepartments: InMemDepartment[] = [
+  { department_id: 'ca', school_id: 'ca', department_code: 'CA', department_name: 'Department of Computer Applications', programs: 'BCA, MCA' },
+  { department_id: 'cse', school_id: 'cse', department_code: 'CSE', department_name: 'Department of Computer Science & Engineering', programs: 'B.Tech CSE, M.Tech' },
+  { department_id: 'hims', school_id: 'hims', department_code: 'HIMS', department_name: 'Himalayan Institute of Medical Sciences', programs: 'MBBS, MD' },
+  { department_id: 'hcn', school_id: 'hcn', department_code: 'HCN', department_name: 'Himalayan College of Nursing', programs: 'B.Sc Nursing, M.Sc' },
+  { department_id: 'hsms', school_id: 'hsms', department_code: 'HSMS', department_name: 'Himalayan School of Management Studies', programs: 'BBA, MBA' },
+  { department_id: 'hsps', school_id: 'hsps', department_code: 'HSPS', department_name: 'Himalayan School of Pharmaceutical Sciences', programs: 'B.Pharm, D.Pharm' },
+  { department_id: 'hsys', school_id: 'hsys', department_code: 'HSYS', department_name: 'Himalayan School of Yoga Sciences', programs: 'B.Sc Yoga' },
+];
 export const localCourses: InMemCourse[] = [];
 export const localSemesters: InMemSemester[] = [];
 export const localSections: InMemSection[] = [];
@@ -755,7 +763,14 @@ router.get(
       }
 
       if (status !== 'all') {
-        filtered = filtered.filter((t) => t.status === status);
+        const targetStat = status.toUpperCase();
+        filtered = filtered.filter((t) => {
+          const s = (t.status || '').toUpperCase();
+          if (targetStat === 'PENDING' || targetStat === 'PENDING_ACTIVATION') {
+            return s === 'PENDING_ACTIVATION' || s === 'PENDING';
+          }
+          return s === targetStat;
+        });
       }
 
       filtered.sort((a, b) => {
@@ -779,8 +794,11 @@ router.get(
       });
 
       const totalFacultyCount = localTeachers.length;
-      const activeFacultyCount = localTeachers.filter((t) => t.status === 'ACTIVE').length;
-      const pendingFacultyCount = localTeachers.filter((t) => t.status === 'PENDING_ACTIVATION').length;
+      const activeFacultyCount = localTeachers.filter((t) => (t.status || '').toUpperCase() === 'ACTIVE').length;
+      const pendingFacultyCount = localTeachers.filter((t) => {
+        const s = (t.status || '').toUpperCase();
+        return s === 'PENDING_ACTIVATION' || s === 'PENDING';
+      }).length;
       const totalAllocationsCount = localAssignments.filter((a) => a.is_active).length;
       const departmentsCount = new Set(localTeachers.map((t) => t.department_id || t.department_code)).size;
 
@@ -1029,14 +1047,35 @@ router.post(
             return;
           }
 
-          const deptCheck = await client.query(
-            `SELECT department_id, department_name FROM departments WHERE department_id = $1 AND is_active = TRUE`,
+          let deptCheck = await client.query(
+            `SELECT department_id, department_name FROM departments WHERE department_id = $1 OR LOWER(department_code) = LOWER($1)`,
             [departmentId]
           );
           if (deptCheck.rowCount === 0) {
-            await client.query('ROLLBACK');
-            res.status(400).json({ error: 'INVALID_DEPARTMENT', message: 'Selected academic department does not exist or is inactive.' });
-            return;
+            const cleanCode = departmentId.length <= 6 ? departmentId.toUpperCase() : departmentId.substring(0, 4).toUpperCase();
+            const deptNames: Record<string, string> = {
+              'ca': 'Department of Computer Applications',
+              'cse': 'Department of Computer Science & Engineering',
+              'it': 'Department of Information Technology',
+              'ece': 'Department of Electronics & Communication',
+              'me': 'Department of Mechanical Engineering',
+              'hims': 'Himalayan Institute of Medical Sciences',
+              'hcn': 'Himalayan College of Nursing',
+              'hsms': 'Himalayan School of Management Studies',
+              'hsps': 'Himalayan School of Pharmaceutical Sciences',
+              'hsys': 'Himalayan School of Yoga Sciences'
+            };
+            const resolvedName = deptNames[departmentId.toLowerCase()] || `Department of ${cleanCode}`;
+            await client.query(
+              `INSERT INTO departments (department_id, school_id, department_code, department_name, is_active)
+               VALUES ($1, $1, $2, $3, TRUE)
+               ON CONFLICT (department_code) DO NOTHING`,
+              [departmentId.toLowerCase(), cleanCode, resolvedName]
+            );
+            deptCheck = await client.query(
+              `SELECT department_id, department_name FROM departments WHERE department_id = $1 OR LOWER(department_code) = LOWER($1)`,
+              [departmentId]
+            );
           }
 
           // Provision user in Firebase Authentication
@@ -1233,15 +1272,35 @@ router.post(
         return;
       }
 
-      const dept = localDepartments.find(
+      let dept = localDepartments.find(
         (d) =>
-          d.department_id === departmentId ||
+          d.department_id.toLowerCase() === departmentId.toLowerCase() ||
           d.department_code.toLowerCase() === departmentId.toLowerCase() ||
           d.department_name.toLowerCase() === departmentId.toLowerCase()
-      ) || (localDepartments.length > 0 ? localDepartments[0] : null);
+      );
       if (!dept) {
-        res.status(400).json({ error: 'INVALID_DEPARTMENT', message: 'Selected academic department does not exist.' });
-        return;
+        const cleanCode = departmentId.length <= 6 ? departmentId.toUpperCase() : departmentId.substring(0, 4).toUpperCase();
+        const deptNames: Record<string, string> = {
+          'ca': 'Department of Computer Applications',
+          'cse': 'Department of Computer Science & Engineering',
+          'it': 'Department of Information Technology',
+          'ece': 'Department of Electronics & Communication',
+          'me': 'Department of Mechanical Engineering',
+          'hims': 'Himalayan Institute of Medical Sciences',
+          'hcn': 'Himalayan College of Nursing',
+          'hsms': 'Himalayan School of Management Studies',
+          'hsps': 'Himalayan School of Pharmaceutical Sciences',
+          'hsys': 'Himalayan School of Yoga Sciences'
+        };
+        const resolvedName = deptNames[departmentId.toLowerCase()] || `Department of ${cleanCode}`;
+        dept = {
+          department_id: departmentId.toLowerCase(),
+          school_id: departmentId.toLowerCase(),
+          department_code: cleanCode,
+          department_name: resolvedName,
+          programs: `${cleanCode} Degree Programs`
+        };
+        localDepartments.push(dept);
       }
 
       // Provision user in Firebase Authentication

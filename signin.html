@@ -323,10 +323,10 @@
 
       // Helper to ensure Firebase module is fully initialized
       async function ensureFirebaseReady() {
-        if (typeof window.signInWithFirebase === 'function') return true;
+        if (typeof window.signInWithFirebase === 'function' && typeof window.activateOrSetFirebasePassword === 'function') return true;
         for (var i = 0; i < 40; i++) {
           await new Promise(function (r) { setTimeout(r, 100); });
-          if (typeof window.signInWithFirebase === 'function') return true;
+          if (typeof window.signInWithFirebase === 'function' && typeof window.activateOrSetFirebasePassword === 'function') return true;
         }
         return typeof window.signInWithFirebase === 'function';
       }
@@ -472,7 +472,7 @@
         return null;
       }
 
-      function activateLocalAccount(tok, emailHint, newPassword) {
+      async function activateLocalAccount(tok, emailHint, newPassword) {
         var found = false;
         var cleanTok = (tok || '').trim();
         var cleanEmail = (emailHint || '').trim().toLowerCase();
@@ -625,12 +625,16 @@
 
         // 6. Create or update user in Firebase Authentication
         try {
-          if (typeof window.activateOrSetFirebasePassword === 'function' && cleanEmail && newPassword) {
-            window.activateOrSetFirebasePassword(cleanEmail, newPassword, detectedName).catch(function(eAuthErr) {
-              console.warn('Firebase Auth activation note:', eAuthErr);
-            });
+          if (typeof ensureFirebaseReady === 'function') {
+            await ensureFirebaseReady();
           }
-        } catch (eAuth) {}
+          if (typeof window.activateOrSetFirebasePassword === 'function' && cleanEmail && newPassword) {
+            var fbRes = await window.activateOrSetFirebasePassword(cleanEmail, newPassword, detectedName, tok);
+            console.log('Firebase Auth activation result:', fbRes);
+          }
+        } catch (eAuth) {
+          console.warn('Firebase Auth activation note:', eAuth);
+        }
 
         return found;
       }
@@ -1142,21 +1146,23 @@
           .then(function (res) {
             return res.json().then(function (data) { return { status: res.status, data: data }; });
           })
-          .then(function (result) {
+          .then(async function (result) {
             if (result.status >= 200 && result.status < 300 && result.data.success) {
               if (mode === 'activate') {
-                activateLocalAccount(token, urlParams.get('email'), pwVal);
+                showStatus('Account activated on server. Synchronizing Firebase credentials...', 'info');
+                await activateLocalAccount(token, urlParams.get('email'), pwVal);
               }
               showStatus(result.data.message || 'Success! Your password has been established. Redirecting to sign in...', 'info');
               setTimeout(function () {
                 window.location.href = 'signin.html';
-              }, 1400);
+              }, 1200);
             } else {
               if (mode === 'activate') {
-                var activated = activateLocalAccount(token, urlParams.get('email'), pwVal);
+                showStatus('Synchronizing account credentials...', 'info');
+                var activated = await activateLocalAccount(token, urlParams.get('email'), pwVal);
                 if (activated) {
                   showStatus('Success! Account activated. Redirecting to sign in...', 'info');
-                  setTimeout(function () { window.location.href = 'signin.html'; }, 1400);
+                  setTimeout(function () { window.location.href = 'signin.html'; }, 1200);
                   return;
                 }
               }
@@ -1165,12 +1171,13 @@
               showStatus(result.data.message || 'Operation failed. The link may have expired.', 'error');
             }
           })
-          .catch(function (err) {
+          .catch(async function (err) {
             if (mode === 'activate') {
-              var activated = activateLocalAccount(token, urlParams.get('email'), pwVal);
+              showStatus('Connecting to local credential registry...', 'info');
+              var activated = await activateLocalAccount(token, urlParams.get('email'), pwVal);
               if (activated) {
                 showStatus('Success! Account activated locally. Redirecting to sign in...', 'info');
-                setTimeout(function () { window.location.href = 'signin.html'; }, 1400);
+                setTimeout(function () { window.location.href = 'signin.html'; }, 1200);
                 return;
               }
             }

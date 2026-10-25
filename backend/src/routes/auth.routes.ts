@@ -683,21 +683,33 @@ router.post('/activate', async (req: Request, res: Response): Promise<void> => {
 
       // Update password in Firebase Authentication
       try {
-        await firebaseAuth.updateUser(uid, {
-          password,
-          emailVerified: true,
-        });
-      } catch (fbErr: any) {
-        if (fbErr.code === 'auth/user-not-found' && redemption.targetEmail) {
-          try {
-            await firebaseAuth.createUser({
-              uid: uid.startsWith('firebase-uid-') ? undefined : uid,
-              email: redemption.targetEmail,
-              password,
-              emailVerified: true,
-            });
-          } catch (createErr) {}
+        let existingFbUser;
+        try {
+          existingFbUser = await firebaseAuth.getUser(uid);
+        } catch (e1) {
+          if (redemption.targetEmail) {
+            try {
+              existingFbUser = await firebaseAuth.getUserByEmail(redemption.targetEmail);
+            } catch (e2) {}
+          }
         }
+
+        if (existingFbUser) {
+          await firebaseAuth.updateUser(existingFbUser.uid, {
+            password,
+            emailVerified: true,
+          });
+          await firebaseAuth.setCustomUserClaims(existingFbUser.uid, { role: 'FACULTY' }).catch(() => {});
+        } else if (redemption.targetEmail) {
+          const createdUser = await firebaseAuth.createUser({
+            email: redemption.targetEmail,
+            password,
+            emailVerified: true,
+          });
+          await firebaseAuth.setCustomUserClaims(createdUser.uid, { role: 'FACULTY' }).catch(() => {});
+        }
+      } catch (fbErr: any) {
+        console.warn('[Firebase Auth] DB activation sync note:', fbErr.message);
       }
 
       // Mark user ACTIVE in Cloud Firestore
@@ -783,17 +795,37 @@ router.post('/activate', async (req: Request, res: Response): Promise<void> => {
 
     // Synchronize to Firebase Auth & Cloud Firestore
     try {
-      if (teacher.user_uid && !teacher.user_uid.startsWith('firebase-uid-')) {
-        await firebaseAuth.updateUser(teacher.user_uid, { password, emailVerified: true });
-      } else {
-        await firebaseAuth.createUser({
+      let existingFbUser;
+      try {
+        if (teacher.user_uid && !teacher.user_uid.startsWith('firebase-uid-')) {
+          existingFbUser = await firebaseAuth.getUser(teacher.user_uid);
+        }
+      } catch (e1) {}
+
+      if (!existingFbUser && teacher.official_email) {
+        try {
+          existingFbUser = await firebaseAuth.getUserByEmail(teacher.official_email);
+        } catch (e2) {}
+      }
+
+      if (existingFbUser) {
+        await firebaseAuth.updateUser(existingFbUser.uid, { password, emailVerified: true });
+        teacher.user_uid = existingFbUser.uid;
+      } else if (teacher.official_email) {
+        const createdUser = await firebaseAuth.createUser({
           email: teacher.official_email,
           password,
           displayName: teacher.full_name,
           emailVerified: true
         });
+        teacher.user_uid = createdUser.uid;
       }
-    } catch (fbErr) {}
+      if (teacher.user_uid && !teacher.user_uid.startsWith('firebase-uid-')) {
+        await firebaseAuth.setCustomUserClaims(teacher.user_uid, { role: 'FACULTY' }).catch(() => {});
+      }
+    } catch (fbErr: any) {
+      console.warn('[Firebase Auth Fallback] User activation sync note:', fbErr.message);
+    }
     try {
       await firestore.collection('teachers').doc(teacher.faculty_staff_id).set({
         status: 'ACTIVE',
