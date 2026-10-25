@@ -1046,7 +1046,7 @@
         }, 250);
       };
 
-      window.fetchTeacherList = function (page) {
+      window.fetchTeacherList = async function (page) {
         currentPage = page || 1;
         var searchInput = document.getElementById('search-faculty-input');
         var searchVal = (searchInput ? searchInput.value : '').trim();
@@ -1067,73 +1067,151 @@
           window.history.replaceState({}, '', currentUrl.pathname + currentUrl.search);
         } catch (e) {}
 
-        var params = new URLSearchParams();
-        params.set('page', currentPage);
-        params.set('limit', 10);
-        if (searchVal) params.set('search', searchVal);
-        if (deptVal && deptVal !== 'all') params.set('departmentId', deptVal);
-        if (statusVal && statusVal !== 'all') params.set('status', statusVal);
-
         var tbody = document.getElementById('faculty-tbody');
-        if (tbody) {
+        if (tbody && (!currentTeacherList || currentTeacherList.length === 0)) {
           tbody.innerHTML = '<tr><td colspan="6" class="admin-loading-row"><span style="display: inline-flex; align-items: center; gap: 8px;"><span class="status-indicator-dot dot-amber"></span>Querying faculty directory...</span></td></tr>';
         }
 
-        fetch(getApiBase() + '/api/admin/teachers?' + params.toString(), {
-          headers: getAuthHeaders()
-        })
-        .then(function (res) {
-          if (!res.ok) throw new Error('HTTP ' + res.status);
-          return res.json();
-        })
-        .then(function (data) {
-          var rawTeachers = data.teachers || [];
-          currentTeacherList = rawTeachers.map(function (t) {
+        // 1. Gather teachers from local cache
+        var storedTeachers = getStoredTeachers();
+
+        // 2. Gather teachers from Cloud Firestore if initialized
+        var firestoreTeachers = [];
+        if (typeof window.dbGetCollection === 'function') {
+          try {
+            firestoreTeachers = await window.dbGetCollection('teachers');
+          } catch (eFs) {
+            console.warn('Cloud Firestore teachers read note:', eFs.message);
+          }
+        }
+
+        // 3. Gather teachers from backend API
+        var apiTeachers = [];
+        try {
+          var params = new URLSearchParams();
+          params.set('page', currentPage);
+          params.set('limit', 50);
+          if (searchVal) params.set('search', searchVal);
+          if (deptVal && deptVal !== 'all') params.set('departmentId', deptVal);
+          if (statusVal && statusVal !== 'all') params.set('status', statusVal);
+
+          var res = await fetch(getApiBase() + '/api/admin/teachers?' + params.toString(), {
+            headers: getAuthHeaders()
+          });
+          if (res.ok) {
+            var data = await res.json();
+            apiTeachers = data.teachers || [];
+          }
+        } catch (eApi) {
+          console.warn('Backend teacher API fetch note:', eApi.message);
+        }
+
+        // 4. Merge all sources together: LocalStorage + Cloud Firestore + Backend API
+        var teacherMap = new Map();
+
+        function addTeacher(raw) {
+          if (!raw) return;
+          var staffId = (raw.faculty_staff_id || raw.staffId || raw.id || '').toString().trim();
+          var email = (raw.official_email || raw.email || '').toString().trim().toLowerCase();
+          var id = raw.faculty_profile_id || raw.id || ('fac-' + staffId.toLowerCase().replace(/[^a-z0-9]/g, ''));
+          var name = raw.full_name || raw.name || 'Faculty Member';
+          var dept = raw.department_code ? raw.department_code.toLowerCase() : (raw.department_id || raw.departmentId || 'ca');
+          var deptName = raw.department_name || raw.departmentName || deptNameMap[dept] || dept;
+          var desig = raw.designation || 'Faculty Member';
+          var loc = raw.office_location || raw.officeLocation || 'Main Campus';
+          var status = raw.status || raw.accountStatus || 'ACTIVE';
+          var assignments = (raw.assignments || []).map(function (a) {
             return {
-              id: t.faculty_profile_id || t.id,
-              staffId: t.faculty_staff_id || t.staffId || t.id,
-              name: t.full_name || t.name,
-              email: t.official_email || t.email,
-              departmentId: t.department_code ? t.department_code.toLowerCase() : (t.department_id || t.departmentId || 'ca'),
-              departmentName: t.department_name || t.departmentName,
-              designation: t.designation || 'Faculty Member',
-              officeLocation: t.office_location || t.officeLocation || 'Main Campus',
-              phone: t.contact_phone || t.phone || '',
-              status: t.status || 'ACTIVE',
-              assignments: (t.assignments || []).map(function (a) {
-                return {
-                  id: a.assignment_id || a.id,
-                  subjectCode: a.subject_code || a.subjectCode || a.subjectId || 'Subject',
-                  subjectName: a.subject_name || a.subjectName || '',
-                  sectionCode: a.section_name ? ('Section ' + a.section_name) : (a.section_code || a.sectionCode || 'Section A')
-                };
-              })
+              id: a.assignment_id || a.id,
+              subjectCode: a.subject_code || a.subjectCode || a.subjectId || 'Subject',
+              subjectName: a.subject_name || a.subjectName || '',
+              sectionCode: a.section_name ? ('Section ' + a.section_name) : (a.section_code || a.sectionCode || 'Section A')
             };
           });
 
-          var paginationObj = data.pagination || {
-            page: data.page || currentPage,
-            totalPages: data.totalPages || 1,
-            totalCount: data.totalCount !== undefined ? data.totalCount : currentTeacherList.length,
-            limit: data.limit || 10
+          // Filter legacy mock seeds
+          var mockStaffIds = ['FAC-101', 'FAC-102', 'FAC-103', 'FAC-104', 'FAC-105', 'FAC-203', 'fac-101', 'fac-102', 'fac-103', 'fac-104', 'fac-105', 'fac-203'];
+          if (mockStaffIds.indexOf(staffId) !== -1 || mockStaffIds.indexOf(id) !== -1) return;
+          if (name === 'Dr. Neha Dave' || name === 'Dr. Sanjay Kumar' || name === 'Dr. Shiv Prasad') return;
+
+          var item = {
+            id: id,
+            staffId: staffId || id,
+            name: name,
+            email: email,
+            departmentId: dept,
+            departmentName: deptName,
+            designation: desig,
+            officeLocation: loc,
+            status: status,
+            assignments: assignments,
+            activationToken: raw.activationToken,
+            activationLink: raw.activationLink,
+            is_user_created: true
           };
 
-          totalPages = paginationObj.totalPages;
-          renderTeacherTable(currentTeacherList, paginationObj);
+          var key = (staffId || email || id).toLowerCase();
+          if (teacherMap.has(key)) {
+            var existing = teacherMap.get(key);
+            if (item.status === 'ACTIVE') existing.status = 'ACTIVE';
+            if (item.assignments.length > 0 && existing.assignments.length === 0) existing.assignments = item.assignments;
+            if (item.email && !existing.email) existing.email = item.email;
+          } else {
+            teacherMap.set(key, item);
+          }
+        }
 
-          var allStored = getStoredTeachers();
-          var statsObj = data.stats || {
-            totalFaculty: Math.max(paginationObj.totalCount, allStored.length),
-            activeFaculty: allStored.filter(function (t) { return t.status === 'ACTIVE'; }).length,
-            pendingFaculty: allStored.filter(function (t) { return t.status === 'PENDING_ACTIVATION'; }).length,
-            totalAllocations: allStored.reduce(function (acc, t) { return acc + (t.assignments ? t.assignments.length : 0); }, 0),
-            departmentsCount: new Set(allStored.map(function(t) { return t.departmentId; })).size
-          };
-          updateQuickStats(statsObj);
-        })
-        .catch(function (err) {
-          console.warn('Teacher API fetch failed, fallback to offline seeds:', err.message);
-          useOfflineTeachersFallback(searchVal, deptVal, statusVal, currentPage);
+        storedTeachers.forEach(addTeacher);
+        firestoreTeachers.forEach(addTeacher);
+        apiTeachers.forEach(addTeacher);
+
+        var allMergedTeachers = Array.from(teacherMap.values());
+
+        // Cache merged list locally
+        try {
+          localStorage.setItem('admin_teachers_list', JSON.stringify(allMergedTeachers));
+        } catch (e) {}
+
+        // 5. Apply filters
+        var filtered = allMergedTeachers.filter(function (t) {
+          var matchesSearch = !searchVal ||
+            t.name.toLowerCase().indexOf(searchVal.toLowerCase()) !== -1 ||
+            (t.staffId && t.staffId.toLowerCase().indexOf(searchVal.toLowerCase()) !== -1) ||
+            (t.email && t.email.toLowerCase().indexOf(searchVal.toLowerCase()) !== -1);
+          var matchesDept = !deptVal || deptVal === 'all' || t.departmentId === deptVal || (t.departmentName && t.departmentName.toLowerCase().indexOf(deptVal.toLowerCase()) !== -1);
+          var matchesStatus = !statusVal || statusVal === 'all' || t.status === statusVal;
+          return matchesSearch && matchesDept && matchesStatus;
+        });
+
+        // 6. Pagination & Render
+        var limit = 10;
+        var totalCount = filtered.length;
+        var totalPagesCalc = Math.max(1, Math.ceil(totalCount / limit));
+        var startIndex = (currentPage - 1) * limit;
+        var pagedList = filtered.slice(startIndex, startIndex + limit);
+
+        currentTeacherList = pagedList;
+        totalPages = totalPagesCalc;
+        renderTeacherTable(pagedList, {
+          page: currentPage,
+          totalPages: totalPagesCalc,
+          totalCount: totalCount,
+          limit: limit
+        });
+
+        // 7. Update Quick Stats
+        var totalFaculty = allMergedTeachers.length;
+        var activeFaculty = allMergedTeachers.filter(function (t) { return t.status === 'ACTIVE'; }).length;
+        var pendingFaculty = allMergedTeachers.filter(function (t) { return t.status === 'PENDING_ACTIVATION'; }).length;
+        var totalAllocations = allMergedTeachers.reduce(function (acc, t) { return acc + (t.assignments ? t.assignments.length : 0); }, 0);
+        var departmentsCount = new Set(allMergedTeachers.map(function (t) { return t.departmentId; })).size;
+
+        updateQuickStats({
+          totalFaculty: totalFaculty,
+          activeFaculty: activeFaculty,
+          pendingFaculty: pendingFaculty,
+          totalAllocations: totalAllocations,
+          departmentsCount: departmentsCount
         });
       };
 
@@ -1442,6 +1520,11 @@
             }).catch(function(e) {});
           }
 
+          // Provision user in Firebase Authentication
+          if (typeof window.provisionSecondaryFirebaseUser === 'function') {
+            window.provisionSecondaryFirebaseUser(email, actToken, name).catch(function(e) {});
+          }
+
           // Automatically copy activation link to clipboard as a fallback
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(link).catch(function() {});
@@ -1512,6 +1595,19 @@
 
             if (typeof window.dbSetDoc === 'function') {
               window.dbSetDoc('teachers', staffId, newTeacherObj).catch(function(e) {});
+              window.dbSetDoc('users', newTeacherObj.id, {
+                email: email,
+                role: 'FACULTY',
+                status: 'PENDING_ACTIVATION',
+                name: name,
+                staffId: staffId,
+                departmentId: departmentId,
+                createdAt: new Date().toISOString()
+              }).catch(function(e) {});
+            }
+
+            if (typeof window.provisionSecondaryFirebaseUser === 'function') {
+              window.provisionSecondaryFirebaseUser(email, actToken, name).catch(function(e) {});
             }
 
             window.closeProvisionModal();
@@ -3016,6 +3112,27 @@
 
       loadDepartmentDropdowns();
       fetchTeacherList(1);
+
+      window.addEventListener('firebase:ready', function () {
+        console.log('[admin-teachers] Firebase initialized, syncing faculty roster with Cloud Firestore...');
+        fetchTeacherList(currentPage);
+        if (typeof window.dbListenCollection === 'function') {
+          try {
+            window.dbListenCollection('teachers', function (fsTeachers) {
+              console.log('[admin-teachers] Real-time Firestore update received (' + (fsTeachers ? fsTeachers.length : 0) + ' teachers)');
+              fetchTeacherList(currentPage);
+            });
+          } catch (eFs) {}
+        }
+      });
+
+      if (typeof window.dbListenCollection === 'function') {
+        try {
+          window.dbListenCollection('teachers', function () {
+            fetchTeacherList(currentPage);
+          });
+        } catch (eFs) {}
+      }
     })();
   </script>
   <script type="module" src="firebase-init.js"></script>

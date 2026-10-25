@@ -1705,6 +1705,24 @@
               localStorage.setItem('attendance_local_credentials', JSON.stringify(credsObj));
             } catch(eCred) {}
 
+            // Synchronize student profile to Cloud Firestore
+            if (typeof window.dbSetDoc === 'function') {
+              window.dbSetDoc('students', newProfile.student_id, newProfile).catch(function(e) {});
+              window.dbSetDoc('users', newProfile.student_profile_id, {
+                email: payload.studentGmail,
+                role: 'STUDENT',
+                status: 'PENDING_ACTIVATION',
+                name: payload.fullName,
+                studentId: newProfile.student_id,
+                createdAt: new Date().toISOString()
+              }).catch(function(e) {});
+            }
+
+            // Provision user in Firebase Authentication
+            if (typeof window.provisionSecondaryFirebaseUser === 'function') {
+              window.provisionSecondaryFirebaseUser(payload.studentGmail, data.activationToken || ('stu_' + Date.now()), payload.fullName).catch(function(e) {});
+            }
+
             closeCreateStudentModal();
             if (navigator.clipboard && navigator.clipboard.writeText) {
               navigator.clipboard.writeText(sLink).catch(function() {});
@@ -1755,6 +1773,24 @@
             };
             localStorage.setItem('attendance_local_credentials', JSON.stringify(credsObj));
           } catch(eCred) {}
+
+          // Synchronize student profile to Cloud Firestore
+          if (typeof window.dbSetDoc === 'function') {
+            window.dbSetDoc('students', newProfile.student_id, newProfile).catch(function(e) {});
+            window.dbSetDoc('users', newProfile.student_profile_id, {
+              email: payload.studentGmail,
+              role: 'STUDENT',
+              status: 'PENDING_ACTIVATION',
+              name: payload.fullName,
+              studentId: newProfile.student_id,
+              createdAt: new Date().toISOString()
+            }).catch(function(e) {});
+          }
+
+          // Provision user in Firebase Authentication
+          if (typeof window.provisionSecondaryFirebaseUser === 'function') {
+            window.provisionSecondaryFirebaseUser(payload.studentGmail, actToken, payload.fullName).catch(function(e) {});
+          }
 
           closeCreateStudentModal();
           if (navigator.clipboard && navigator.clipboard.writeText) {

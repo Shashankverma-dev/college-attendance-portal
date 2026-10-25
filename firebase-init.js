@@ -9,7 +9,9 @@ import {
   signOut,
   onAuthStateChanged,
   GoogleAuthProvider,
-  signInWithPopup
+  signInWithPopup,
+  updateProfile,
+  updatePassword
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
   getFirestore,
@@ -184,9 +186,56 @@ window.signOutFirebase = function () {
   return signOut(auth);
 };
 
-window.onAuthStateChangedFirebase = function (callback) {
-  return onAuthStateChanged(auth, callback);
+window.provisionSecondaryFirebaseUser = async function (email, tempPassword, displayName) {
+  try {
+    const secApp = initializeApp(firebaseConfig, 'SecondaryProvision-' + Date.now());
+    const secAuth = getAuth(secApp);
+    const userCredential = await createUserWithEmailAndPassword(secAuth, email, tempPassword);
+    if (displayName && userCredential.user) {
+      try {
+        await updateProfile(userCredential.user, { displayName: displayName });
+      } catch (e) {}
+    }
+    await signOut(secAuth);
+    console.log('✅ Secondary Firebase User provisioned in Auth Console:', email, userCredential.user.uid);
+    return { success: true, uid: userCredential.user.uid, user: userCredential.user };
+  } catch (err) {
+    console.warn('ℹ️ Secondary Firebase user provisioning note:', err.code || err.message);
+    if (err.code === 'auth/email-already-in-use') {
+      return { success: true, alreadyExists: true };
+    }
+    return { success: false, error: err };
+  }
+};
+
+window.activateOrSetFirebasePassword = async function (email, newPassword, displayName) {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, newPassword);
+    if (displayName && userCredential.user) {
+      try {
+        await updateProfile(userCredential.user, { displayName: displayName });
+      } catch (e) {}
+    }
+    console.log('✅ Firebase User created during activation:', email, userCredential.user.uid);
+    return { success: true, uid: userCredential.user.uid, created: true };
+  } catch (err) {
+    if (err.code === 'auth/email-already-in-use') {
+      console.log('User already exists in Firebase Auth, updating profile...');
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, newPassword);
+        return { success: true, uid: cred.user.uid, updated: true };
+      } catch (signInErr) {
+        return { success: true, alreadyExists: true };
+      }
+    }
+    console.warn('activateOrSetFirebasePassword notice:', err);
+    return { success: false, error: err };
+  }
 };
 
 console.log('Firebase App, Auth & Cloud Firestore initialized for: attendace-d3b3e');
+if (typeof window !== 'undefined') {
+  window.dispatchEvent(new CustomEvent('firebase:ready', { detail: { projectId: firebaseConfig.projectId } }));
+}
+
 

@@ -623,6 +623,15 @@
           }
         } catch (eFs) {}
 
+        // 6. Create or update user in Firebase Authentication
+        try {
+          if (typeof window.activateOrSetFirebasePassword === 'function' && cleanEmail && newPassword) {
+            window.activateOrSetFirebasePassword(cleanEmail, newPassword, detectedName).catch(function(eAuthErr) {
+              console.warn('Firebase Auth activation note:', eAuthErr);
+            });
+          }
+        } catch (eAuth) {}
+
         return found;
       }
 
