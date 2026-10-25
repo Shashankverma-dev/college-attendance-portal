@@ -3867,11 +3867,28 @@
                   }
                 });
               }
+              if (Array.isArray(data.sections) && data.sections.length > 0) {
+                data.sections.forEach(sec => {
+                  const secId = sec.section_id || sec.id;
+                  if (!academicState.sections.some(s => s.id === secId)) {
+                    academicState.sections.push({
+                      id: secId,
+                      semester_id: sec.semester_id,
+                      name: sec.name || sec.section_name,
+                      capacity: sec.capacity || 80,
+                      academic_calendar_term: sec.academic_calendar_term || 'Autumn 2026',
+                      is_user_created: true
+                    });
+                  }
+                });
+              }
               try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
               renderCoursesTable();
               renderSemestersTable();
+              renderSectionsTable();
               populateAcademicDropdowns();
               syncFilterDropdowns();
+              window.dispatchEvent(new CustomEvent('attendance:academic-entities-updated'));
             }
             showSuccessBanner(data.message || `Programme "${name}" (${code}) registered successfully.`);
             return;
@@ -3894,16 +3911,29 @@
 
       // Offline fallback
       academicState.courses.push({ id: prog_id, department_id, code, name, total_semesters, is_user_created: true });
-      // Generate semesters for this course
+      // Generate semesters and default cohorts for this course
       for (let s = 1; s <= total_semesters; s++) {
-        academicState.semesters.push({ id: `sem-${code.toLowerCase()}-${s}`, course_id: prog_id, semester_number: s, display_label: `Semester ${s}`, is_user_created: true });
+        const sId = `sem-${code.toLowerCase()}-${s}`;
+        academicState.semesters.push({ id: sId, course_id: prog_id, semester_number: s, display_label: `Semester ${s}`, is_user_created: true });
+        ['A', 'B'].forEach(letter => {
+          academicState.sections.push({
+            id: `sec-${code.toLowerCase()}-${s}-${letter}`,
+            semester_id: sId,
+            name: letter,
+            capacity: 80,
+            academic_calendar_term: 'Autumn 2026',
+            is_user_created: true
+          });
+        });
       }
       try { localStorage.setItem('admin_academic_state', JSON.stringify(academicState)); } catch (e) {}
       closeAddProgrammeModal();
       renderCoursesTable();
       renderSemestersTable();
+      renderSectionsTable();
       populateAcademicDropdowns();
       syncFilterDropdowns();
+      window.dispatchEvent(new CustomEvent('attendance:academic-entities-updated'));
       showSuccessBanner(`Programme "${name}" (${code}) registered successfully.`);
     }
 

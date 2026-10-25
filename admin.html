@@ -1939,6 +1939,7 @@
 
       showToast('School / Academic Department "' + name + '" created successfully. HOD invite queued.', 'success');
       renderDepartmentTable(depts);
+      window.dispatchEvent(new CustomEvent('attendance:academic-entities-updated'));
     }
 
     // Modal management for Assign HOD

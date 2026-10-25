@@ -2599,6 +2599,523 @@ router.get(
 );
 
 // =============================================================================
+// ACADEMIC PROGRAMMES (COURSES) CRUD ENDPOINTS
+// =============================================================================
+
+router.get(
+  ['/academic/courses', '/academic/programs'],
+  authenticate,
+  requireRole(['GLOBAL_ADMIN', 'HOD']),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const departmentId = (req.query.department_id as string || req.query.departmentId as string || '').trim();
+      const schoolId = (req.query.school_id as string || req.query.schoolId as string || '').trim();
+      const dbOnline = await isDbConnected();
+
+      if (dbOnline) {
+        let query = `
+          SELECT c.*, d.department_name, d.department_code, s.school_name, s.school_code
+          FROM courses c
+          LEFT JOIN departments d ON c.department_id = d.department_id
+          LEFT JOIN schools s ON (c.school_id = s.school_id OR d.school_id = s.school_id)
+          WHERE c.is_active = TRUE
+        `;
+        const params: any[] = [];
+        if (departmentId && departmentId !== 'all') {
+          params.push(departmentId);
+          query += ` AND (c.department_id::text = $${params.length} OR LOWER(d.department_code) = LOWER($${params.length}))`;
+        }
+        if (schoolId && schoolId !== 'all') {
+          params.push(schoolId);
+          query += ` AND (c.school_id::text = $${params.length} OR s.school_id::text = $${params.length} OR LOWER(s.school_code) = LOWER($${params.length}))`;
+        }
+        query += ` ORDER BY c.course_name ASC`;
+        const result = await pool.query(query, params);
+        res.json({ success: true, courses: result.rows, programmes: result.rows });
+        return;
+      }
+
+      let filtered = [...localCourses];
+      if (departmentId && departmentId !== 'all') {
+        const dLower = departmentId.toLowerCase();
+        filtered = filtered.filter(
+          (c) =>
+            (c.department_id && c.department_id.toLowerCase() === dLower) ||
+            (c.school_id && c.school_id.toLowerCase() === dLower)
+        );
+      }
+      if (schoolId && schoolId !== 'all') {
+        const sLower = schoolId.toLowerCase();
+        filtered = filtered.filter((c) => c.school_id && c.school_id.toLowerCase() === sLower);
+      }
+
+      res.json({ success: true, courses: filtered, programmes: filtered });
+    } catch (err: any) {
+      res.status(500).json({ error: 'FETCH_COURSES_FAILED', message: err.message });
+    }
+  }
+);
+
+router.post(
+  ['/academic/courses', '/academic/programs'],
+  authenticate,
+  requireRole(['GLOBAL_ADMIN']),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const department_id = req.body.department_id || req.body.departmentId || req.body.school_id || req.body.schoolId;
+      const course_code = req.body.course_code || req.body.code || req.body.courseCode;
+      const course_name = req.body.course_name || req.body.name || req.body.courseName;
+      const total_semesters = parseInt(req.body.total_semesters || req.body.totalSemesters || '6', 10) || 6;
+
+      if (!course_code || !course_name) {
+        res.status(400).json({ error: 'MISSING_FIELDS', message: 'Programme code and name are required.' });
+        return;
+      }
+
+      const cleanCode = String(course_code).trim().toUpperCase();
+      const cleanName = String(course_name).trim();
+      const cleanDeptId = department_id ? String(department_id).trim() : 'dept-ca';
+
+      let existing = localCourses.find((c) => c.course_code === cleanCode);
+      if (existing) {
+        existing.course_name = cleanName;
+        existing.department_id = cleanDeptId;
+        existing.total_semesters = total_semesters;
+        res.json({ success: true, message: `Programme ${cleanCode} updated.`, course: existing, programme: existing });
+        return;
+      }
+
+      const newCourseId = crypto.randomUUID();
+      const newCourse: InMemCourse = {
+        course_id: newCourseId,
+        department_id: cleanDeptId,
+        school_id: cleanDeptId,
+        course_code: cleanCode,
+        course_name: cleanName,
+        total_semesters,
+      };
+      (newCourse as any).id = newCourseId;
+      (newCourse as any).code = cleanCode;
+      (newCourse as any).name = cleanName;
+      (newCourse as any).is_user_created = true;
+      localCourses.push(newCourse);
+
+      // Auto-create semesters (1 to total_semesters) and default sections (A, B)
+      const createdSemesters: InMemSemester[] = [];
+      const createdSections: InMemSection[] = [];
+      for (let s = 1; s <= total_semesters; s++) {
+        const semId = crypto.randomUUID();
+        const semObj: InMemSemester = {
+          semester_id: semId,
+          course_id: newCourseId,
+          semester_number: s,
+          display_label: `Semester ${s}`,
+        };
+        (semObj as any).id = semId;
+        (semObj as any).is_user_created = true;
+        localSemesters.push(semObj);
+        createdSemesters.push(semObj);
+
+        // Auto-provision Section A and Section B
+        for (const secLetter of ['A', 'B']) {
+          const secId = crypto.randomUUID();
+          const secObj: InMemSection = {
+            section_id: secId,
+            semester_id: semId,
+            section_name: secLetter,
+            max_capacity: 80,
+            academic_calendar_term: 'Autumn 2026',
+          };
+          (secObj as any).id = secId;
+          (secObj as any).name = secLetter;
+          (secObj as any).is_user_created = true;
+          localSections.push(secObj);
+          createdSections.push(secObj);
+        }
+      }
+
+      const dbOnline = await isDbConnected();
+      if (dbOnline) {
+        try {
+          let resolvedDeptId: string | null = null;
+          let resolvedSchoolId: string | null = null;
+          if (cleanDeptId) {
+            const dRes = await pool.query(
+              `SELECT department_id, school_id FROM departments WHERE department_id::text = $1 OR UPPER(department_code) = UPPER($1) LIMIT 1`,
+              [cleanDeptId]
+            );
+            if (dRes.rowCount && dRes.rowCount > 0) {
+              resolvedDeptId = dRes.rows[0].department_id;
+              resolvedSchoolId = dRes.rows[0].school_id;
+            }
+          }
+
+          await pool.query(
+            `INSERT INTO courses (course_id, department_id, school_id, course_code, course_name, duration_years, total_semesters, is_active)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE)
+             ON CONFLICT (course_code) DO UPDATE
+             SET course_name = EXCLUDED.course_name, total_semesters = EXCLUDED.total_semesters, is_active = TRUE`,
+            [newCourseId, resolvedDeptId, resolvedSchoolId, cleanCode, cleanName, Math.ceil(total_semesters / 2), total_semesters]
+          ).catch(async () => {
+            await pool.query(
+              `INSERT INTO courses (course_id, department_id, school_id, course_code, course_name, duration_years, total_semesters, is_active)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE)
+               ON CONFLICT DO NOTHING`,
+              [newCourseId, resolvedDeptId, resolvedSchoolId, cleanCode, cleanName, Math.ceil(total_semesters / 2), total_semesters]
+            );
+          });
+        } catch (_dbErr) {
+          console.warn('DB error saving course:', _dbErr);
+        }
+      }
+
+      res.status(201).json({
+        success: true,
+        message: `Programme "${cleanName}" (${cleanCode}) registered with ${total_semesters} semesters and sections.`,
+        course: newCourse,
+        programme: newCourse,
+        semesters: createdSemesters,
+        sections: createdSections,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: 'CREATE_COURSE_FAILED', message: err.message });
+    }
+  }
+);
+
+router.delete(
+  ['/academic/courses/:id', '/academic/programs/:id'],
+  authenticate,
+  requireRole(['GLOBAL_ADMIN']),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const targetId = req.params.id;
+      const targetUpper = targetId.toUpperCase();
+      const idx = localCourses.findIndex(
+        (c) => c.course_id === targetId || c.course_code.toUpperCase() === targetUpper || (c as any).id === targetId
+      );
+
+      let removed: any = null;
+      if (idx !== -1) {
+        removed = localCourses.splice(idx, 1)[0];
+        const removedSemIds = new Set<string>();
+        for (let i = localSemesters.length - 1; i >= 0; i--) {
+          if (localSemesters[i].course_id === removed.course_id) {
+            removedSemIds.add(localSemesters[i].semester_id);
+            localSemesters.splice(i, 1);
+          }
+        }
+        for (let i = localSections.length - 1; i >= 0; i--) {
+          if (removedSemIds.has(localSections[i].semester_id)) {
+            localSections.splice(i, 1);
+          }
+        }
+      }
+
+      const dbOnline = await isDbConnected();
+      if (dbOnline) {
+        try {
+          await pool.query(
+            `UPDATE courses SET is_active = FALSE WHERE course_id::text = $1 OR UPPER(course_code) = $2`,
+            [targetId, targetUpper]
+          );
+        } catch (_dbErr) {}
+      }
+
+      res.json({
+        success: true,
+        message: `Programme "${removed?.course_name || targetId}" deleted successfully.`,
+        course: removed,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: 'DELETE_COURSE_FAILED', message: err.message });
+    }
+  }
+);
+
+// =============================================================================
+// ACADEMIC SEMESTERS CRUD ENDPOINTS
+// =============================================================================
+
+router.get(
+  '/academic/semesters',
+  authenticate,
+  requireRole(['GLOBAL_ADMIN', 'HOD']),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const courseId = (req.query.course_id as string || req.query.courseId as string || '').trim();
+      const dbOnline = await isDbConnected();
+
+      if (dbOnline) {
+        let query = `SELECT * FROM semesters`;
+        const params: any[] = [];
+        if (courseId) {
+          params.push(courseId);
+          query += ` WHERE course_id::text = $1`;
+        }
+        query += ` ORDER BY semester_number ASC`;
+        try {
+          const result = await pool.query(query, params);
+          if (result.rows && result.rows.length > 0) {
+            res.json({ success: true, semesters: result.rows });
+            return;
+          }
+        } catch (_err) {
+          // If course_id column is on academic_years or different schema, fall through
+        }
+      }
+
+      let filtered = [...localSemesters];
+      if (courseId) {
+        const targetCourse = localCourses.find(
+          (c) => c.course_id === courseId || c.course_code.toUpperCase() === courseId.toUpperCase()
+        );
+        const targetCourseId = targetCourse ? targetCourse.course_id : courseId;
+        filtered = filtered.filter(
+          (s) => s.course_id === targetCourseId || (targetCourse && s.course_id === targetCourse.course_id)
+        );
+      }
+
+      res.json({ success: true, semesters: filtered });
+    } catch (err: any) {
+      res.status(500).json({ error: 'FETCH_SEMESTERS_FAILED', message: err.message });
+    }
+  }
+);
+
+router.post(
+  '/academic/semesters',
+  authenticate,
+  requireRole(['GLOBAL_ADMIN']),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const { course_id, semester_number, display_label } = req.body;
+      if (!course_id || !semester_number) {
+        res.status(400).json({ error: 'MISSING_FIELDS', message: 'course_id and semester_number are required.' });
+        return;
+      }
+
+      const targetCourse = localCourses.find(
+        (c) => c.course_id === course_id || c.course_code.toUpperCase() === String(course_id).toUpperCase()
+      );
+      const resolvedCourseId = targetCourse ? targetCourse.course_id : course_id;
+      const semNum = parseInt(String(semester_number), 10);
+      const label = display_label ? String(display_label).trim() : `Semester ${semNum}`;
+
+      let existing = localSemesters.find((s) => s.course_id === resolvedCourseId && s.semester_number === semNum);
+      if (existing) {
+        existing.display_label = label;
+        res.json({ success: true, message: `Semester ${semNum} updated.`, semester: existing });
+        return;
+      }
+
+      const semId = crypto.randomUUID();
+      const newSem: InMemSemester = {
+        semester_id: semId,
+        course_id: resolvedCourseId,
+        semester_number: semNum,
+        display_label: label,
+      };
+      (newSem as any).id = semId;
+      (newSem as any).is_user_created = true;
+      localSemesters.push(newSem);
+
+      const dbOnline = await isDbConnected();
+      if (dbOnline) {
+        try {
+          await pool.query(
+            `INSERT INTO semesters (semester_id, course_id, semester_number, display_label)
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT DO NOTHING`,
+            [semId, resolvedCourseId, semNum, label]
+          ).catch(() => {});
+        } catch (_dbErr) {}
+      }
+
+      res.status(201).json({ success: true, message: `Semester ${semNum} created successfully.`, semester: newSem });
+    } catch (err: any) {
+      res.status(500).json({ error: 'CREATE_SEMESTER_FAILED', message: err.message });
+    }
+  }
+);
+
+router.delete(
+  '/academic/semesters/:id',
+  authenticate,
+  requireRole(['GLOBAL_ADMIN']),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const targetId = req.params.id;
+      const idx = localSemesters.findIndex((s) => s.semester_id === targetId || (s as any).id === targetId);
+      let removed: any = null;
+      if (idx !== -1) {
+        removed = localSemesters.splice(idx, 1)[0];
+        for (let i = localSections.length - 1; i >= 0; i--) {
+          if (localSections[i].semester_id === removed.semester_id) {
+            localSections.splice(i, 1);
+          }
+        }
+      }
+
+      const dbOnline = await isDbConnected();
+      if (dbOnline) {
+        try {
+          await pool.query(`DELETE FROM semesters WHERE semester_id::text = $1`, [targetId]);
+        } catch (_dbErr) {}
+      }
+
+      res.json({
+        success: true,
+        message: `Semester "${removed?.display_label || targetId}" deleted successfully.`,
+        semester: removed,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: 'DELETE_SEMESTER_FAILED', message: err.message });
+    }
+  }
+);
+
+// =============================================================================
+// ACADEMIC SECTIONS CRUD ENDPOINTS
+// =============================================================================
+
+router.get(
+  '/academic/sections',
+  authenticate,
+  requireRole(['GLOBAL_ADMIN', 'HOD']),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const semesterId = (req.query.semester_id as string || req.query.semesterId as string || '').trim();
+      const dbOnline = await isDbConnected();
+
+      if (dbOnline) {
+        let query = `SELECT * FROM sections WHERE is_active = TRUE`;
+        const params: any[] = [];
+        if (semesterId) {
+          params.push(semesterId);
+          query += ` AND semester_id::text = $1`;
+        }
+        query += ` ORDER BY section_name ASC`;
+        try {
+          const result = await pool.query(query, params);
+          if (result.rows && result.rows.length > 0) {
+            res.json({ success: true, sections: result.rows });
+            return;
+          }
+        } catch (_err) {}
+      }
+
+      let filtered = [...localSections];
+      if (semesterId) {
+        filtered = filtered.filter((s) => s.semester_id === semesterId);
+      }
+
+      res.json({ success: true, sections: filtered });
+    } catch (err: any) {
+      res.status(500).json({ error: 'FETCH_SECTIONS_FAILED', message: err.message });
+    }
+  }
+);
+
+router.post(
+  '/academic/sections',
+  authenticate,
+  requireRole(['GLOBAL_ADMIN']),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const semester_id = req.body.semester_id || req.body.semesterId;
+      const section_name = req.body.section_name || req.body.name || req.body.sectionName;
+      const max_capacity = parseInt(req.body.max_capacity || req.body.capacity || '80', 10) || 80;
+      const academic_calendar_term = req.body.academic_calendar_term || req.body.academicTerm || 'Autumn 2026';
+
+      if (!semester_id || !section_name) {
+        res.status(400).json({ error: 'MISSING_FIELDS', message: 'semester_id and section_name are required.' });
+        return;
+      }
+
+      const cleanSection = String(section_name).trim().toUpperCase();
+
+      let existing = localSections.find(
+        (s) => s.semester_id === semester_id && s.section_name === cleanSection
+      );
+      if (existing) {
+        existing.max_capacity = max_capacity;
+        existing.academic_calendar_term = academic_calendar_term;
+        res.json({ success: true, message: `Section ${cleanSection} updated.`, section: existing });
+        return;
+      }
+
+      const secId = crypto.randomUUID();
+      const newSec: InMemSection = {
+        section_id: secId,
+        semester_id,
+        section_name: cleanSection,
+        max_capacity,
+        academic_calendar_term,
+      };
+      (newSec as any).id = secId;
+      (newSec as any).name = cleanSection;
+      (newSec as any).is_user_created = true;
+      localSections.push(newSec);
+
+      const dbOnline = await isDbConnected();
+      if (dbOnline) {
+        try {
+          await pool.query(
+            `INSERT INTO sections (section_id, semester_id, section_name, max_capacity, academic_calendar_term, is_active)
+             VALUES ($1, $2, $3, $4, $5, TRUE)
+             ON CONFLICT DO NOTHING`,
+            [secId, semester_id, cleanSection, max_capacity, academic_calendar_term]
+          ).catch(() => {});
+        } catch (_dbErr) {}
+      }
+
+      res.status(201).json({ success: true, message: `Section ${cleanSection} created successfully.`, section: newSec });
+    } catch (err: any) {
+      res.status(500).json({ error: 'CREATE_SECTION_FAILED', message: err.message });
+    }
+  }
+);
+
+router.delete(
+  '/academic/sections/:id',
+  authenticate,
+  requireRole(['GLOBAL_ADMIN']),
+  async (req: Request, res: Response): Promise<void> => {
+    try {
+      const targetId = req.params.id;
+      const targetUpper = targetId.toUpperCase();
+      const idx = localSections.findIndex(
+        (s) => s.section_id === targetId || s.section_name.toUpperCase() === targetUpper || (s as any).id === targetId
+      );
+
+      let removed: any = null;
+      if (idx !== -1) {
+        removed = localSections.splice(idx, 1)[0];
+      }
+
+      const dbOnline = await isDbConnected();
+      if (dbOnline) {
+        try {
+          await pool.query(
+            `UPDATE sections SET is_active = FALSE WHERE section_id::text = $1 OR UPPER(section_name) = $2`,
+            [targetId, targetUpper]
+          );
+        } catch (_dbErr) {}
+      }
+
+      res.json({
+        success: true,
+        message: `Section "${removed?.section_name || targetId}" deleted successfully.`,
+        section: removed,
+      });
+    } catch (err: any) {
+      res.status(500).json({ error: 'DELETE_SECTION_FAILED', message: err.message });
+    }
+  }
+);
+
+// =============================================================================
 // 9. INSTITUTIONAL SCHOOLS MANAGEMENT (PHASE 3)
 // =============================================================================
 

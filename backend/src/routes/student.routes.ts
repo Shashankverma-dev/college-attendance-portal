@@ -323,37 +323,132 @@ router.get('/', adminAuth, async (req: Request, res: Response): Promise<void> =>
 
 router.get('/resources/academic-tree', adminAuth, async (_req: Request, res: Response): Promise<void> => {
   try {
-    const tree = localDepartments.map((dept) => {
-      const courses = localCourses
-        .filter((c) => c.department_id === dept.department_id)
-        .map((course) => {
-          const semesters = localSemesters
-            .filter((sem) => sem.course_id === course.course_id)
-            .map((sem) => {
-              const sections = localSections
-                .filter((sec) => sec.semester_id === sem.semester_id)
-                .map((sec) => {
-                  const enrolledCount = localStudents.filter(
-                    (stu) => stu.course_code === course.course_code &&
-                             stu.semester_number === sem.semester_number &&
-                             stu.section_name === sec.section_name &&
-                             (stu.enrollment_status || 'ACTIVE') === 'ACTIVE'
-                  ).length;
-                  return {
-                    section_id: sec.section_id,
-                    section_name: sec.section_name,
-                    max_capacity: sec.max_capacity || 80,
-                    enrolled_count: enrolledCount,
-                    remaining_seats: Math.max(0, (sec.max_capacity || 80) - enrolledCount),
-                  };
-                });
+    const dbOnline = await isDbConnected();
+
+    if (dbOnline) {
+      let deptRows: any[] = [];
+      let courseRows: any[] = [];
+      let semRows: any[] = [];
+      let secRows: any[] = [];
+      let studentCountMap = new Map<string, number>();
+
+      try {
+        deptRows = (await pool.query(`SELECT department_id, department_code, department_name, school_id FROM departments WHERE is_active = TRUE ORDER BY department_name ASC`)).rows;
+      } catch (_e) {}
+
+      try {
+        courseRows = (await pool.query(`SELECT course_id, department_id, school_id, course_code, course_name, total_semesters FROM courses WHERE is_active = TRUE ORDER BY course_name ASC`)).rows;
+      } catch (_e) {}
+
+      try {
+        semRows = (await pool.query(`SELECT semester_id, course_id, semester_number, display_label FROM semesters ORDER BY semester_number ASC`)).rows;
+      } catch (_e) {}
+
+      try {
+        secRows = (await pool.query(`SELECT section_id, semester_id, section_name, max_capacity, academic_calendar_term FROM sections WHERE is_active = TRUE ORDER BY section_name ASC`)).rows;
+      } catch (_e) {}
+
+      try {
+        const scRes = await pool.query(`
+          SELECT current_course_id as course_id, current_semester_number as semester_number, current_section_name as section_name, COUNT(*)::int as count 
+          FROM student_profiles 
+          GROUP BY current_course_id, current_semester_number, current_section_name
+        `);
+        scRes.rows.forEach((r: any) => {
+          studentCountMap.set(`${r.course_id}_${r.semester_number}_${r.section_name}`, r.count || 0);
+        });
+      } catch (_e) {}
+
+      // Merge database records with in-memory store
+      const mergedCourses = [...courseRows];
+      localCourses.forEach((lc) => {
+        if (!mergedCourses.some((mc) => mc.course_id === lc.course_id || String(mc.course_code).toUpperCase() === String(lc.course_code).toUpperCase())) {
+          mergedCourses.push(lc);
+        }
+      });
+
+      const mergedSemesters = [...semRows];
+      localSemesters.forEach((ls) => {
+        if (!mergedSemesters.some((ms) => ms.semester_id === ls.semester_id || (ms.course_id === ls.course_id && ms.semester_number === ls.semester_number))) {
+          mergedSemesters.push(ls);
+        }
+      });
+
+      const mergedSections = [...secRows];
+      localSections.forEach((lsec) => {
+        if (!mergedSections.some((msec) => msec.section_id === lsec.section_id || (msec.semester_id === lsec.semester_id && msec.section_name === lsec.section_name))) {
+          mergedSections.push(lsec);
+        }
+      });
+
+      const deptsToUse = deptRows.length > 0 ? deptRows : localDepartments;
+      const tree = deptsToUse.map((dept: any) => {
+        const dId = String(dept.department_id || dept.id || '').toLowerCase();
+        const dCode = String(dept.department_code || dept.code || '').toLowerCase();
+        const sId = String(dept.school_id || '').toLowerCase();
+
+        const deptCourses = mergedCourses.filter((c: any) => {
+          const cDeptId = String(c.department_id || '').toLowerCase();
+          const cSchoolId = String(c.school_id || '').toLowerCase();
+          return (
+            cDeptId === dId ||
+            cDeptId === dCode ||
+            cSchoolId === dId ||
+            cSchoolId === sId ||
+            (!cDeptId && !cSchoolId)
+          );
+        });
+
+        const courses = deptCourses.map((course: any) => {
+          const cId = course.course_id;
+          let courseSemesters = mergedSemesters.filter((sem: any) => sem.course_id === cId);
+          if (courseSemesters.length === 0) {
+            const numSems = course.total_semesters || 6;
+            for (let s = 1; s <= numSems; s++) {
+              courseSemesters.push({
+                semester_id: `sem-${String(course.course_code).toLowerCase()}-${s}`,
+                semester_number: s,
+                display_label: `Semester ${s}`,
+              });
+            }
+          }
+
+          const semesters = courseSemesters.map((sem: any) => {
+            let semSections = mergedSections.filter((sec: any) => sec.semester_id === sem.semester_id);
+            if (semSections.length === 0) {
+              semSections = [
+                { section_id: `sec-${String(course.course_code).toLowerCase()}-${sem.semester_number}A`, section_name: 'A', max_capacity: 80 },
+                { section_id: `sec-${String(course.course_code).toLowerCase()}-${sem.semester_number}B`, section_name: 'B', max_capacity: 80 },
+              ];
+            }
+
+            const sections = semSections.map((sec: any) => {
+              const enrolledCount = studentCountMap.get(`${cId}_${sem.semester_number}_${sec.section_name}`) ||
+                localStudents.filter(
+                  (stu) =>
+                    (stu.course_code === course.course_code || stu.course_id === cId) &&
+                    stu.semester_number === sem.semester_number &&
+                    stu.section_name === sec.section_name &&
+                    (stu.enrollment_status || 'ACTIVE') === 'ACTIVE'
+                ).length;
+
               return {
-                semester_id: sem.semester_id,
-                semester_number: sem.semester_number,
-                display_label: sem.display_label,
-                sections,
+                section_id: sec.section_id,
+                section_name: sec.section_name,
+                max_capacity: sec.max_capacity || 80,
+                enrolled_count: enrolledCount,
+                remaining_seats: Math.max(0, (sec.max_capacity || 80) - enrolledCount),
               };
             });
+
+            return {
+              semester_id: sem.semester_id,
+              semester_number: sem.semester_number,
+              display_label: sem.display_label || `Semester ${sem.semester_number}`,
+              sections,
+            };
+          });
+
           return {
             course_id: course.course_id,
             course_code: course.course_code,
@@ -361,6 +456,93 @@ router.get('/resources/academic-tree', adminAuth, async (_req: Request, res: Res
             semesters,
           };
         });
+
+        return {
+          department_id: dept.department_id,
+          department_code: dept.department_code,
+          department_name: dept.department_name,
+          courses,
+        };
+      });
+
+      res.json({ success: true, tree });
+      return;
+    }
+
+    // IN-MEMORY HIERARCHY TREE
+    const tree = localDepartments.map((dept) => {
+      const dId = String(dept.department_id || dept.school_id || '').toLowerCase();
+      const dCode = String(dept.department_code || '').toLowerCase();
+      const sId = String(dept.school_id || '').toLowerCase();
+
+      const deptCourses = localCourses.filter((c) => {
+        const cDeptId = String(c.department_id || '').toLowerCase();
+        const cSchoolId = String(c.school_id || '').toLowerCase();
+        return (
+          cDeptId === dId ||
+          cDeptId === dCode ||
+          cSchoolId === dId ||
+          cSchoolId === sId ||
+          (!cDeptId && !cSchoolId)
+        );
+      });
+
+      const courses = deptCourses.map((course) => {
+        let courseSemesters = localSemesters.filter((sem) => sem.course_id === course.course_id);
+        if (courseSemesters.length === 0) {
+          const numSems = course.total_semesters || 6;
+          for (let s = 1; s <= numSems; s++) {
+            courseSemesters.push({
+              semester_id: `sem-${course.course_code.toLowerCase()}-${s}`,
+              course_id: course.course_id,
+              semester_number: s,
+              display_label: `Semester ${s}`,
+            });
+          }
+        }
+
+        const semesters = courseSemesters.map((sem) => {
+          let semSections = localSections.filter((sec) => sec.semester_id === sem.semester_id);
+          if (semSections.length === 0) {
+            semSections = [
+              { section_id: `sec-${course.course_code.toLowerCase()}-${sem.semester_number}A`, semester_id: sem.semester_id, section_name: 'A', max_capacity: 80, academic_calendar_term: 'Autumn 2026' },
+              { section_id: `sec-${course.course_code.toLowerCase()}-${sem.semester_number}B`, semester_id: sem.semester_id, section_name: 'B', max_capacity: 80, academic_calendar_term: 'Autumn 2026' },
+            ];
+          }
+
+          const sections = semSections.map((sec) => {
+            const enrolledCount = localStudents.filter(
+              (stu) =>
+                stu.course_code === course.course_code &&
+                stu.semester_number === sem.semester_number &&
+                stu.section_name === sec.section_name &&
+                (stu.enrollment_status || 'ACTIVE') === 'ACTIVE'
+            ).length;
+            return {
+              section_id: sec.section_id,
+              section_name: sec.section_name,
+              max_capacity: sec.max_capacity || 80,
+              enrolled_count: enrolledCount,
+              remaining_seats: Math.max(0, (sec.max_capacity || 80) - enrolledCount),
+            };
+          });
+
+          return {
+            semester_id: sem.semester_id,
+            semester_number: sem.semester_number,
+            display_label: sem.display_label,
+            sections,
+          };
+        });
+
+        return {
+          course_id: course.course_id,
+          course_code: course.course_code,
+          course_name: course.course_name,
+          semesters,
+        };
+      });
+
       return {
         department_id: dept.department_id,
         department_code: dept.department_code,
@@ -483,35 +665,143 @@ router.post('/', adminAuth, async (req: Request, res: Response): Promise<void> =
       return;
     }
 
-    // D. Academic Structure Validation
-    const course = localCourses.find((c) => c.course_code.toUpperCase() === String(courseCode).toUpperCase());
-    if (!course) {
-      res.status(400).json({ error: 'INVALID_COURSE', message: `Programme '${courseCode}' does not exist.` });
-      return;
+    // D. Academic Structure Validation & Auto-Resolution
+    const dbOnline = await isDbConnected();
+    let course = localCourses.find((c) => c.course_code.toUpperCase() === String(courseCode).toUpperCase());
+
+    if (!course && dbOnline) {
+      try {
+        const cRes = await pool.query(
+          `SELECT * FROM courses WHERE UPPER(course_code) = $1 AND is_active = TRUE LIMIT 1`,
+          [String(courseCode).toUpperCase()]
+        );
+        if (cRes.rowCount && cRes.rowCount > 0) {
+          course = cRes.rows[0];
+          if (!localCourses.some((lc) => lc.course_id === course!.course_id)) {
+            localCourses.push(course!);
+          }
+        }
+      } catch (_e) {}
     }
 
-    const dept = localDepartments.find((d) => d.department_id === course.department_id);
-    const sem = localSemesters.find((s) => s.course_id === course.course_id && s.semester_number === Number(semesterNumber));
+    if (!course) {
+      // Auto-provision programme on-the-fly if not yet formally registered
+      const newCId = crypto.randomUUID();
+      const cleanCCode = String(courseCode).trim().toUpperCase();
+      course = {
+        course_id: newCId,
+        department_id: departmentId || schoolId || 'dept-ca',
+        school_id: schoolId || 'ca',
+        course_code: cleanCCode,
+        course_name: `${cleanCCode} Degree Programme`,
+        total_semesters: 6,
+      };
+      (course as any).id = newCId;
+      (course as any).code = cleanCCode;
+      (course as any).name = course.course_name;
+      (course as any).is_user_created = true;
+      localCourses.push(course);
+
+      if (dbOnline) {
+        try {
+          await pool.query(
+            `INSERT INTO courses (course_id, course_code, course_name, duration_years, total_semesters, is_active)
+             VALUES ($1, $2, $3, 3, 6, TRUE)
+             ON CONFLICT DO NOTHING`,
+            [newCId, cleanCCode, course.course_name]
+          ).catch(() => {});
+        } catch (_dbErr) {}
+      }
+    }
+
+    const dept = localDepartments.find((d) => 
+      d.department_id === course.department_id || 
+      d.department_code.toUpperCase() === String(course.department_id).toUpperCase() ||
+      d.school_id === course.school_id
+    ) || localDepartments[0];
+
+    let sem = localSemesters.find((s) => s.course_id === course.course_id && s.semester_number === Number(semesterNumber));
+    if (!sem && dbOnline) {
+      try {
+        const sRes = await pool.query(
+          `SELECT * FROM semesters WHERE course_id::text = $1 AND semester_number = $2 LIMIT 1`,
+          [course.course_id, Number(semesterNumber)]
+        );
+        if (sRes.rowCount && sRes.rowCount > 0) {
+          sem = sRes.rows[0];
+          if (!localSemesters.some((ls) => ls.semester_id === sem!.semester_id)) {
+            localSemesters.push(sem!);
+          }
+        }
+      } catch (_e) {}
+    }
+
     if (!sem) {
-      res.status(400).json({
-        error: 'INVALID_SEMESTER',
-        message: `Semester ${semesterNumber} is not configured for programme '${courseCode}'.`,
-      });
-      return;
+      const newSemId = crypto.randomUUID();
+      sem = {
+        semester_id: newSemId,
+        course_id: course.course_id,
+        semester_number: Number(semesterNumber),
+        display_label: `Semester ${semesterNumber}`,
+      };
+      (sem as any).id = newSemId;
+      (sem as any).is_user_created = true;
+      localSemesters.push(sem);
+
+      if (dbOnline) {
+        try {
+          await pool.query(
+            `INSERT INTO semesters (semester_id, course_id, semester_number, display_label)
+             VALUES ($1, $2, $3, $4)
+             ON CONFLICT DO NOTHING`,
+            [newSemId, course.course_id, Number(semesterNumber), sem.display_label]
+          ).catch(() => {});
+        } catch (_dbErr) {}
+      }
     }
 
     let sec = localSections.find(
       (s) => s.semester_id === sem.semester_id && s.section_name.toUpperCase() === String(sectionName).toUpperCase()
     );
+    if (!sec && dbOnline) {
+      try {
+        const secRes = await pool.query(
+          `SELECT * FROM sections WHERE semester_id::text = $1 AND UPPER(section_name) = $2 AND is_active = TRUE LIMIT 1`,
+          [sem.semester_id, String(sectionName).toUpperCase()]
+        );
+        if (secRes.rowCount && secRes.rowCount > 0) {
+          sec = secRes.rows[0];
+          if (!localSections.some((lsec) => lsec.section_id === sec!.section_id)) {
+            localSections.push(sec!);
+          }
+        }
+      } catch (_e) {}
+    }
+
     if (!sec) {
+      const newSecId = crypto.randomUUID();
       sec = {
-        section_id: `sec-${course.course_code.toLowerCase()}-${sem.semester_number}${String(sectionName).toLowerCase()}`,
+        section_id: newSecId,
         semester_id: sem.semester_id,
         section_name: String(sectionName).toUpperCase(),
         max_capacity: 80,
-        academic_calendar_term: 'Autumn 2026 (Aug 2026 - Jan 2027)',
+        academic_calendar_term: academicTerm || 'Autumn 2026',
       };
+      (sec as any).id = newSecId;
+      (sec as any).name = sec.section_name;
+      (sec as any).is_user_created = true;
       localSections.push(sec);
+
+      if (dbOnline) {
+        try {
+          await pool.query(
+            `INSERT INTO sections (section_id, semester_id, section_name, max_capacity, academic_calendar_term, is_active)
+             VALUES ($1, $2, $3, 80, $4, TRUE)
+             ON CONFLICT DO NOTHING`,
+            [newSecId, sem.semester_id, sec.section_name, sec.academic_calendar_term]
+          ).catch(() => {});
+        } catch (_dbErr) {}
+      }
     }
 
     // E. Section Capacity Check
@@ -580,8 +870,12 @@ router.post('/', adminAuth, async (req: Request, res: Response): Promise<void> =
       }
     }
 
-    // Resolve School
-    const resolvedSchool = localSchools.find((s) => s.school_id === (schoolId || course.school_id)) || localSchools[0];
+    // Resolve School safely
+    const resolvedSchool = (localSchools.length > 0 ? (localSchools.find((s) => s.school_id === (schoolId || course.school_id)) || localSchools[0]) : null) || {
+      school_id: schoolId || course.school_id || 'sch-default',
+      school_code: course.course_code || 'SST',
+      school_name: 'School of Science & Technology',
+    };
 
     // H. Profile & Enrollment Creation
     const profileId = crypto.randomUUID();

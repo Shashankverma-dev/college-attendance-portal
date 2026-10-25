@@ -310,11 +310,46 @@ router.post('/academic/programme', adminAuth, async (req: Request, res: Response
     };
     localSemesters.push(sem);
     createdSemesters.push(sem);
+
+    // Auto-create default Section A, B, C for each semester
+    for (const secLetter of ['A', 'B', 'C']) {
+      const secId = crypto.randomUUID();
+      const secObj = {
+        section_id: secId,
+        id: secId,
+        semester_id: semId,
+        section_name: secLetter,
+        name: secLetter,
+        max_capacity: 80,
+        academic_calendar_term: 'Autumn 2026',
+        is_user_created: true,
+      };
+      localSections.push(secObj);
+    }
+  }
+
+  if (pool) {
+    try {
+      await pool.query(
+        `INSERT INTO courses (course_id, department_id, school_id, course_code, course_name, duration_years, total_semesters, is_active)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE)
+         ON CONFLICT (course_code) DO UPDATE
+         SET course_name = EXCLUDED.course_name, total_semesters = EXCLUDED.total_semesters, is_active = TRUE`,
+        [newCourseId, department_id, department_id, cleanCode, cleanName, Math.ceil(numSemesters / 2), numSemesters]
+      ).catch(async () => {
+        await pool.query(
+          `INSERT INTO courses (course_id, department_id, school_id, course_code, course_name, duration_years, total_semesters, is_active)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE)
+           ON CONFLICT DO NOTHING`,
+          [newCourseId, department_id, department_id, cleanCode, cleanName, Math.ceil(numSemesters / 2), numSemesters]
+        ).catch(() => {});
+      });
+    } catch (_dbErr) {}
   }
 
   res.json({
     success: true,
-    message: `Programme ${cleanCode} registered with ${numSemesters} semesters.`,
+    message: `Programme ${cleanCode} registered with ${numSemesters} semesters and default sections.`,
     programme: newCourse,
     semesters: createdSemesters,
   });
@@ -349,6 +384,16 @@ router.delete('/academic/programme/:id', adminAuth, async (req: Request, res: Re
       localSections.splice(i, 1);
     }
   }
+
+  if (pool) {
+    try {
+      await pool.query(
+        `UPDATE courses SET is_active = FALSE WHERE course_id::text = $1 OR UPPER(course_code) = $2`,
+        [targetId, targetUpper]
+      ).catch(() => {});
+    } catch (_dbErr) {}
+  }
+
   res.json({ success: true, message: `Programme "${removed.course_name}" (${removed.course_code}) deleted successfully.` });
 });
 

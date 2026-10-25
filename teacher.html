@@ -867,6 +867,41 @@
           });
         }
 
+        // Also merge allocations from published timetables for this faculty member
+        try {
+          var published = JSON.parse(localStorage.getItem('admin_published_timetables') || '[]');
+          var teacherIdNorm = (storedId || (currentTeacher && (currentTeacher.staffId || currentTeacher.id)) || '').toLowerCase().trim();
+          var teacherNameNorm = (storedName || (currentTeacher && currentTeacher.name) || '').toLowerCase().trim();
+
+          published.forEach(function(tt) {
+            if (Array.isArray(tt.entries)) {
+              tt.entries.forEach(function(e) {
+                var entryTeacherId = (e.teacher_id || '').toLowerCase().trim();
+                var entryTeacherName = (e.teacher_name || '').toLowerCase().trim();
+                var isMatch = (teacherIdNorm && entryTeacherId && entryTeacherId === teacherIdNorm) ||
+                              (teacherNameNorm && entryTeacherName && (entryTeacherName.includes(teacherNameNorm) || teacherNameNorm.includes(entryTeacherName)));
+                if (isMatch) {
+                  var sCode = e.subject_code || 'Subject';
+                  var secCode = tt.section_name || 'A';
+                  var cCode = tt.course_code || 'BCA';
+                  var semNum = Number(tt.semester_number) || 1;
+                  var cleanSec = secCode.replace(/section\s*/i, '').toUpperCase();
+                  if (!allocations.some(function(a) { return (a.courseCode === cCode && a.semesterNumber === semNum && a.sectionCode.replace(/section\s*/i, '').toUpperCase() === cleanSec && a.subjectCode === sCode); })) {
+                    allocations.push({
+                      id: e.entry_id || ('alloc-tt-' + allocations.length),
+                      subjectCode: sCode,
+                      subjectName: e.subject_name || '',
+                      sectionCode: secCode.indexOf('Section') !== -1 ? secCode : ('Section ' + secCode),
+                      courseCode: cCode,
+                      semesterNumber: semNum
+                    });
+                  }
+                }
+              });
+            }
+          });
+        } catch(ePub) {}
+
         currentTeacherAllocations = allocations;
 
         // Update KPIs

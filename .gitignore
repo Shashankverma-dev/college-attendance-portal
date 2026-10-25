@@ -30,3 +30,7 @@ Thumbs.db
 # Large docs / archives
 *.zip
 *.docx
+
+# Python cache
+__pycache__/
+*.pyc
