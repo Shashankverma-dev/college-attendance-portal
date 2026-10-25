@@ -390,13 +390,15 @@ router.get('/resources/academic-tree', adminAuth, async (_req: Request, res: Res
         const deptCourses = mergedCourses.filter((c: any) => {
           const cDeptId = String(c.department_id || '').toLowerCase();
           const cSchoolId = String(c.school_id || '').toLowerCase();
-          return (
-            cDeptId === dId ||
-            cDeptId === dCode ||
-            cSchoolId === dId ||
-            cSchoolId === sId ||
-            (!cDeptId && !cSchoolId)
-          );
+          if (cDeptId || cSchoolId) {
+            return (
+              cDeptId === dId ||
+              cDeptId === dCode ||
+              cSchoolId === dId ||
+              cSchoolId === sId
+            );
+          }
+          return dId === String(deptsToUse[0]?.department_id || '').toLowerCase();
         });
 
         const courses = deptCourses.map((course: any) => {
@@ -478,13 +480,15 @@ router.get('/resources/academic-tree', adminAuth, async (_req: Request, res: Res
       const deptCourses = localCourses.filter((c) => {
         const cDeptId = String(c.department_id || '').toLowerCase();
         const cSchoolId = String(c.school_id || '').toLowerCase();
-        return (
-          cDeptId === dId ||
-          cDeptId === dCode ||
-          cSchoolId === dId ||
-          cSchoolId === sId ||
-          (!cDeptId && !cSchoolId)
-        );
+        if (cDeptId || cSchoolId) {
+          return (
+            cDeptId === dId ||
+            cDeptId === dCode ||
+            cSchoolId === dId ||
+            cSchoolId === sId
+          );
+        }
+        return dId === String(localDepartments[0]?.department_id || '').toLowerCase();
       });
 
       const courses = deptCourses.map((course) => {
@@ -685,33 +689,17 @@ router.post('/', adminAuth, async (req: Request, res: Response): Promise<void> =
     }
 
     if (!course) {
-      // Auto-provision programme on-the-fly if not yet formally registered
-      const newCId = crypto.randomUUID();
+      // Reject student creation if the programme hasn't been formally registered by admin.
+      // Auto-provisioning ghost courses caused data inconsistency between the student view
+      // and Timetable & Academic Scheduling (ghost courses appeared in one but not the other).
+      // Admin must first register the programme via Timetable > Academic Entities.
       const cleanCCode = String(courseCode).trim().toUpperCase();
-      course = {
-        course_id: newCId,
-        department_id: departmentId || schoolId || 'dept-ca',
-        school_id: schoolId || 'ca',
-        course_code: cleanCCode,
-        course_name: `${cleanCCode} Degree Programme`,
-        total_semesters: 6,
-      };
-      (course as any).id = newCId;
-      (course as any).code = cleanCCode;
-      (course as any).name = course.course_name;
-      (course as any).is_user_created = true;
-      localCourses.push(course);
-
-      if (dbOnline) {
-        try {
-          await pool.query(
-            `INSERT INTO courses (course_id, course_code, course_name, duration_years, total_semesters, is_active)
-             VALUES ($1, $2, $3, 3, 6, TRUE)
-             ON CONFLICT DO NOTHING`,
-            [newCId, cleanCCode, course.course_name]
-          ).catch(() => {});
-        } catch (_dbErr) {}
-      }
+      res.status(400).json({
+        error: 'PROGRAMME_NOT_FOUND',
+        message: `Programme "${cleanCCode}" is not registered in the academic directory. Please create it first in the Timetable & Academic Scheduling section (Academic Entities tab), then enroll the student.`,
+        hint: 'Navigate to: Admin → Timetable & Academic Scheduling → Academic Entities → Add Programme',
+      });
+      return;
     }
 
     const dept = localDepartments.find((d) => 
@@ -737,6 +725,16 @@ router.post('/', adminAuth, async (req: Request, res: Response): Promise<void> =
     }
 
     if (!sem) {
+      // Validate semester number is within the registered programme's range
+      const maxSems = course.total_semesters || 8;
+      if (Number(semesterNumber) < 1 || Number(semesterNumber) > maxSems) {
+        res.status(400).json({
+          error: 'INVALID_SEMESTER',
+          message: `Semester ${semesterNumber} is out of range for ${course.course_name} (${course.course_code}). Valid range: 1–${maxSems}.`,
+        });
+        return;
+      }
+      // Auto-provision semester row for an in-range semester of a registered course
       const newSemId = crypto.randomUUID();
       sem = {
         semester_id: newSemId,
@@ -950,7 +948,7 @@ router.post('/', adminAuth, async (req: Request, res: Response): Promise<void> =
     const token = TokenService.generateToken(48);
     await TokenService.storeToken(null, userUid, token.tokenHash, 'ACCOUNT_ACTIVATION', cleanEmail, token.expiresAt);
 
-    const appBaseUrl = process.env.APP_URL || 'http://localhost:5000';
+    const appBaseUrl = process.env.APP_BASE_URL || process.env.APP_URL || 'https://attendace-d3b3e.web.app';
     const activationLink = `${appBaseUrl}/signin.html?mode=activate&token=${token.rawToken}&email=${encodeURIComponent(cleanEmail)}`;
 
     await EmailService.sendEmail({
@@ -1345,8 +1343,8 @@ router.post('/:id/resend-activation', adminAuth, async (req: Request, res: Respo
     const token = TokenService.generateToken(48);
     await TokenService.storeToken(null, student.user_uid, token.tokenHash, 'ACCOUNT_ACTIVATION', student.student_gmail, token.expiresAt);
 
-    const appBaseUrl = process.env.APP_URL || 'http://localhost:5000';
-    const activationLink = `${appBaseUrl}/signin.html?mode=activate&token=${token.rawToken}`;
+    const appBaseUrl = process.env.APP_BASE_URL || process.env.APP_URL || 'https://attendace-d3b3e.web.app';
+    const activationLink = `${appBaseUrl}/signin.html?mode=activate&token=${token.rawToken}&email=${encodeURIComponent(student.student_gmail)}`;
 
     student.invitation_status = 'SENT';
     student.invitation_sent_at = new Date().toISOString();
@@ -1711,8 +1709,15 @@ router.post('/import/commit', adminAuth, async (req: Request, res: Response): Pr
       }
 
       const course = localCourses.find((c) => c.course_code.toUpperCase() === r.courseCode.toUpperCase());
-      const dept = course ? localDepartments.find((d) => d.department_id === course.department_id) : null;
-      const sem = course ? localSemesters.find((s) => s.course_id === course.course_id && s.semester_number === r.semesterNumber) : null;
+      if (!course) {
+        errors.push({
+          rowNumber: r.rowNumber,
+          message: `Programme "${r.courseCode}" is not registered in the academic directory. Please register it in Timetable & Academic Scheduling first.`,
+        });
+        continue;
+      }
+      const dept = localDepartments.find((d) => d.department_id === course.department_id) || null;
+      const sem = localSemesters.find((s) => s.course_id === course.course_id && s.semester_number === r.semesterNumber) || null;
       const sec = sem ? localSections.find((s) => s.semester_id === sem.semester_id && s.section_name.toUpperCase() === r.sectionName.toUpperCase()) : null;
       const school = localSchools.find((s) => s.school_id === course?.school_id || s.school_code === r.schoolCode) || localSchools[0];
 
@@ -1792,8 +1797,8 @@ router.post('/import/commit', adminAuth, async (req: Request, res: Response): Pr
       const token = TokenService.generateToken(48);
       await TokenService.storeToken(null, userUid, token.tokenHash, 'ACCOUNT_ACTIVATION', r.studentGmail, token.expiresAt);
 
-      const appBaseUrl = process.env.APP_URL || 'http://localhost:5000';
-      const activationLink = `${appBaseUrl}/signin.html?mode=activate&token=${token.rawToken}`;
+      const appBaseUrl = process.env.APP_BASE_URL || process.env.APP_URL || 'https://attendace-d3b3e.web.app';
+      const activationLink = `${appBaseUrl}/signin.html?mode=activate&token=${token.rawToken}&email=${encodeURIComponent(r.studentGmail)}`;
 
       await EmailService.sendEmail({
         to: r.studentGmail,

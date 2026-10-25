@@ -1628,23 +1628,16 @@
         });
       }
 
-      // If still no courses exist, provide default options so admin is never blocked
+      // No programmes registered yet — guide admin to create them first
       if (courseSel.children.length === 1) {
-        var fallbackCourses = [
-          { code: 'BCA', name: 'Bachelor of Computer Applications' },
-          { code: 'BTECH_CSE', name: 'B.Tech Computer Science & Engineering' },
-          { code: 'MCA', name: 'Master of Computer Applications' },
-          { code: 'BBA', name: 'Bachelor of Business Administration' }
-        ];
-        fallbackCourses.forEach(function(fc) {
-          var opt = document.createElement('option');
-          opt.value = fc.code;
-          opt.textContent = fc.name + ' (' + fc.code + ')';
-          courseSel.appendChild(opt);
-        });
+        var noProgOpt = document.createElement('option');
+        noProgOpt.value = '';
+        noProgOpt.disabled = true;
+        noProgOpt.textContent = '⚠ No programmes registered — create them in Timetable → Academic Entities first.';
+        courseSel.appendChild(noProgOpt);
       }
 
-      if (courseSel.children.length > 1) {
+      if (courseSel.children.length > 1 && courseSel.options[1] && !courseSel.options[1].disabled) {
         courseSel.selectedIndex = 1;
       }
 
@@ -1660,15 +1653,19 @@
       secSel.innerHTML = '<option value="">Select Section</option>';
 
       var foundCourse = null;
+      var addedSems = new Set();
       academicTree.forEach(function (dept) {
         (dept.courses || []).forEach(function (c) {
           if (c && c.course_code === courseCode) {
             foundCourse = c;
             if (Array.isArray(c.semesters) && c.semesters.length > 0) {
               c.semesters.forEach(function (s) {
+                var sNum = Number(s.semester_number);
+                if (addedSems.has(sNum)) return;
+                addedSems.add(sNum);
                 var opt = document.createElement('option');
-                opt.value = s.semester_number;
-                opt.textContent = s.display_label || ('Semester ' + s.semester_number);
+                opt.value = sNum;
+                opt.textContent = s.display_label || ('Semester ' + sNum);
                 semSel.appendChild(opt);
               });
             }
@@ -1702,6 +1699,7 @@
       secSel.innerHTML = '<option value="">Select Section</option>';
 
       var foundSem = null;
+      var addedSecs = new Set();
       academicTree.forEach(function (dept) {
         (dept.courses || []).forEach(function (c) {
           if (c && c.course_code === courseCode) {
@@ -1710,6 +1708,9 @@
                 foundSem = s;
                 if (Array.isArray(s.sections) && s.sections.length > 0) {
                   s.sections.forEach(function (sec) {
+                    var sName = String(sec.section_name || '').toUpperCase();
+                    if (!sName || addedSecs.has(sName)) return;
+                    addedSecs.add(sName);
                     var opt = document.createElement('option');
                     opt.value = sec.section_name;
                     var seats = (sec.remaining_seats !== undefined && sec.remaining_seats !== null) ? ' (' + sec.remaining_seats + ' seats remaining)' : '';
@@ -2223,11 +2224,14 @@
       // Populate courses
       var courseSel = document.getElementById('transfer-course-code');
       courseSel.innerHTML = '<option value="">Select Programme</option>';
+      var seenTransferCourses = new Set();
       academicTree.forEach(function (dept) {
-        dept.courses.forEach(function (c) {
+        (dept.courses || []).forEach(function (c) {
+          if (!c || !c.course_code || seenTransferCourses.has(c.course_code)) return;
+          seenTransferCourses.add(c.course_code);
           var opt = document.createElement('option');
           opt.value = c.course_code;
-          opt.textContent = c.course_name + ' (' + c.course_code + ')';
+          opt.textContent = (c.course_name || c.course_code) + ' (' + c.course_code + ')';
           if (c.course_code === student.course_code) opt.selected = true;
           courseSel.appendChild(opt);
         });
@@ -2249,13 +2253,17 @@
       semSel.innerHTML = '<option value="">Select Semester</option>';
       secSel.innerHTML = '<option value="">Select Section</option>';
 
+      var addedTransferSems = new Set();
       academicTree.forEach(function (dept) {
-        dept.courses.forEach(function (c) {
-          if (c.course_code === courseCode) {
+        (dept.courses || []).forEach(function (c) {
+          if (c.course_code === courseCode && Array.isArray(c.semesters)) {
             c.semesters.forEach(function (s) {
+              var sNum = Number(s.semester_number);
+              if (addedTransferSems.has(sNum)) return;
+              addedTransferSems.add(sNum);
               var opt = document.createElement('option');
-              opt.value = s.semester_number;
-              opt.textContent = s.display_label;
+              opt.value = sNum;
+              opt.textContent = s.display_label || ('Semester ' + sNum);
               semSel.appendChild(opt);
             });
           }
@@ -2269,15 +2277,20 @@
       var secSel = document.getElementById('transfer-section');
       secSel.innerHTML = '<option value="">Select Section</option>';
 
+      var addedTransferSecs = new Set();
       academicTree.forEach(function (dept) {
-        dept.courses.forEach(function (c) {
-          if (c.course_code === courseCode) {
+        (dept.courses || []).forEach(function (c) {
+          if (c.course_code === courseCode && Array.isArray(c.semesters)) {
             c.semesters.forEach(function (s) {
-              if (s.semester_number === semNum) {
+              if (Number(s.semester_number) === semNum && Array.isArray(s.sections)) {
                 s.sections.forEach(function (sec) {
+                  var sName = String(sec.section_name || '').toUpperCase();
+                  if (!sName || addedTransferSecs.has(sName)) return;
+                  addedTransferSecs.add(sName);
                   var opt = document.createElement('option');
                   opt.value = sec.section_name;
-                  opt.textContent = 'Section ' + sec.section_name + ' (' + sec.remaining_seats + ' seats remaining)';
+                  var seats = (sec.remaining_seats !== undefined && sec.remaining_seats !== null) ? ' (' + sec.remaining_seats + ' seats remaining)' : '';
+                  opt.textContent = 'Section ' + sec.section_name + seats;
                   secSel.appendChild(opt);
                 });
               }
@@ -2490,6 +2503,8 @@
     function resendActivation(studentProfileId) {
       if (!confirm('Reissue a fresh 48-hour activation link? Any previous links will be invalidated.')) return;
 
+      var stu = currentStudents.find(function(s) { return s.student_profile_id === studentProfileId || s.student_id === studentProfileId; });
+
       fetch(getApiBase() + '/api/admin/students/' + studentProfileId + '/resend-activation', {
         method: 'POST',
         headers: getAuthHeaders()
@@ -2499,6 +2514,21 @@
           if (data.success) {
             showToast(data.message || 'Fresh activation link reissued!');
             loadStudents();
+            if (data.activationLink) {
+              if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(data.activationLink).catch(function() {});
+              }
+              if (typeof openActivationDispatchModal === 'function') {
+                openActivationDispatchModal({
+                  name: (stu && stu.full_name) || 'Student',
+                  studentId: (stu && (stu.enrollment_no || stu.student_id)) || studentProfileId,
+                  email: (stu && stu.student_gmail) || '',
+                  link: data.activationLink,
+                  heading: 'Activation Link Dispatched & Ready!',
+                  subheading: 'A fresh 48-hour activation link has been generated, dispatched via email, and copied to your clipboard.'
+                });
+              }
+            }
           } else {
             showToast(data.message || 'Failed to reissue link.', true);
           }

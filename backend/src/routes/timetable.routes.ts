@@ -29,6 +29,9 @@ import {
   localSubjects,
   localTeachers,
   deduplicateDepartmentsList,
+  InMemCourse,
+  InMemSemester,
+  InMemSection,
 } from './admin.routes';
 
 // Connect timetable service dynamically to live registered faculty
@@ -86,6 +89,88 @@ router.get('/resources/faculty', adminAuth, async (req: Request, res: Response):
 
 // Complete Academic Directory (Departments, Programmes, Semesters, Sections, Rooms, Groups)
 router.get('/academic/all', adminAuth, async (_req: Request, res: Response): Promise<void> => {
+  if (pool) {
+    try {
+      const dbCheck = await pool.query('SELECT 1');
+      if (dbCheck.rowCount === 1) {
+        const cRows = (
+          await pool.query(
+            `SELECT course_id, department_id, school_id, course_code, course_name, total_semesters 
+             FROM courses WHERE is_active = TRUE ORDER BY course_name ASC`
+          )
+        ).rows;
+        // 1. Purge any inactive courses from in-memory cache
+        const inactiveRows = (
+          await pool.query(
+            `SELECT course_id, course_code FROM courses WHERE is_active = FALSE`
+          )
+        ).rows;
+        inactiveRows.forEach((ir: any) => {
+          const inIdx = localCourses.findIndex(
+            (lc) => lc.course_id === ir.course_id || lc.course_code.toUpperCase() === String(ir.course_code).toUpperCase()
+          );
+          if (inIdx !== -1) {
+            const rem = localCourses.splice(inIdx, 1)[0];
+            const semIds = new Set(localSemesters.filter((s) => s.course_id === rem.course_id).map((s) => s.semester_id));
+            for (let i = localSemesters.length - 1; i >= 0; i--) {
+              if (localSemesters[i].course_id === rem.course_id) localSemesters.splice(i, 1);
+            }
+            for (let i = localSections.length - 1; i >= 0; i--) {
+              if (semIds.has(localSections[i].semester_id)) localSections.splice(i, 1);
+            }
+          }
+        });
+
+        // 2. Sync active courses into in-memory cache with default semesters and sections
+        cRows.forEach((r: any) => {
+          let courseObj: InMemCourse | undefined = localCourses.find(
+            (lc) => lc.course_id === r.course_id || lc.course_code.toUpperCase() === String(r.course_code).toUpperCase()
+          );
+          if (!courseObj) {
+            courseObj = {
+              course_id: r.course_id,
+              department_id: r.department_id,
+              school_id: r.school_id,
+              course_code: r.course_code,
+              course_name: r.course_name,
+              total_semesters: r.total_semesters || 6,
+            };
+            localCourses.push(courseObj);
+          }
+
+          const targetCourseId = courseObj.course_id;
+          const courseCode = courseObj.course_code;
+          const numSems = courseObj.total_semesters || 6;
+          for (let s = 1; s <= numSems; s++) {
+            let sem: InMemSemester | undefined = localSemesters.find((ls) => ls.course_id === targetCourseId && ls.semester_number === s);
+            if (!sem) {
+              const semId = `sem-${String(courseCode).toLowerCase()}-${s}`;
+              sem = {
+                semester_id: semId,
+                course_id: targetCourseId,
+                semester_number: s,
+                display_label: `Semester ${s}`,
+              };
+              localSemesters.push(sem);
+            }
+            for (const secLetter of ['A', 'B', 'C']) {
+              if (!localSections.some((lsec) => lsec.semester_id === sem!.semester_id && lsec.section_name === secLetter)) {
+                const sec: InMemSection = {
+                  section_id: `sec-${String(courseCode).toLowerCase()}-${s}-${secLetter}`,
+                  semester_id: sem!.semester_id,
+                  section_name: secLetter,
+                  max_capacity: 80,
+                  academic_calendar_term: 'Autumn 2026',
+                };
+                localSections.push(sec);
+              }
+            }
+          }
+        });
+      }
+    } catch (_dbErr) {}
+  }
+
   res.json({
     success: true,
     departments: deduplicateDepartmentsList(localDepartments),
@@ -368,6 +453,19 @@ router.delete('/academic/programme/:id', adminAuth, async (req: Request, res: Re
       c.course_name.toLowerCase().trim() === targetId.toLowerCase().trim()
   );
   if (idx === -1) {
+    if (pool) {
+      try {
+        const dbRes = await pool.query(
+          `UPDATE courses SET is_active = FALSE WHERE course_id::text = $1 OR UPPER(course_code) = $2 RETURNING course_id, course_code, course_name`,
+          [targetId, targetUpper]
+        );
+        if (dbRes.rowCount && dbRes.rowCount > 0) {
+          const row = dbRes.rows[0];
+          res.json({ success: true, message: `Programme "${row.course_name}" (${row.course_code}) deleted successfully.` });
+          return;
+        }
+      } catch (_e) {}
+    }
     res.status(404).json({ success: false, message: 'Programme not found.' });
     return;
   }

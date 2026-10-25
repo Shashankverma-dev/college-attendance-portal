@@ -41,13 +41,8 @@ export class EmailService {
 
   private static hasSmtpConfig(): boolean {
     const pwd = process.env.SMTP_PASSWORD || 'hwbiochekjvqvtvo';
-    return !!(
-      pwd &&
-      pwd !== 'your_app_password' &&
-      pwd !== 'placeholder' &&
-      pwd !== 'CHANGE_ME' &&
-      process.env.SMTP_PROVIDER !== 'local'
-    );
+    const placeholders = ['your_app_password', 'placeholder', 'CHANGE_ME', ''];
+    return !placeholders.includes(pwd) && process.env.SMTP_PROVIDER !== 'local';
   }
 
   private static getTransporter(): nodemailer.Transporter {
@@ -175,38 +170,10 @@ export class EmailService {
       console.error(`[EmailService] Outbound SMTP failed to ${options.to}:`, lastErr?.message);
     }
 
-    // 2B. Firebase Identity Toolkit HTTPS Provider (Bypasses PaaS outbound SMTP port blocking on Render)
-    try {
-      const fbApiKey = process.env.FIREBASE_API_KEY || 'AIzaSyBhb8eZXSthDp4FQsctxxdNBBvBThZkxn4';
-      if (fbApiKey) {
-        console.log(`[EmailService] Attempting HTTPS email delivery via Firebase Identity Toolkit for ${options.to}...`);
-        const resp = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:sendOobCode?key=${fbApiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            requestType: 'PASSWORD_RESET',
-            email: options.to,
-          }),
-        });
-
-        if (resp.ok) {
-          const fbMsgId = `firebase-oob-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
-          console.log(`[EmailService] ✅ Firebase HTTPS transactional email dispatched to ${options.to} (MessageId: ${fbMsgId})`);
-          await IdempotencyService.complete(null, options.idempotencyKey, { messageId: fbMsgId });
-          return {
-            success: true,
-            messageId: fbMsgId,
-            provider: 'FIREBASE_HTTPS',
-            deliveryStatus: 'DELIVERED',
-          };
-        } else {
-          const errBody = await resp.text();
-          console.warn(`[EmailService] Firebase sendOobCode note: ${resp.status} ${errBody}`);
-        }
-      }
-    } catch (fbErr: any) {
-      console.warn(`[EmailService] Firebase HTTPS email fallback error:`, fbErr.message);
-    }
+    // NOTE: Firebase Identity Toolkit OOB code fallback has been removed.
+    // It was sending a generic PASSWORD_RESET link (not our custom activation email),
+    // which caused students to receive the wrong link or nothing if not yet in Firebase Auth.
+    // Configure SMTP_PASSWORD env var to enable real email delivery.
 
     // 3. Institutional Local Fallback Provider
     const simulatedMessageId = `local-msg-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
@@ -220,6 +187,13 @@ export class EmailService {
       timestamp: new Date().toISOString(),
     });
 
+    // Extract and prominently log the activation/action link so admin can manually share it
+    const activateLinkRe = new RegExp('href="(https?://[^"]+signin\\.html[^"]*)"', 'i');
+    const activateModeRe = new RegExp('href="(https?://[^"]+mode=activate[^"]*)"', 'i');
+    const linkMatch = options.html.match(activateLinkRe) || options.html.match(activateModeRe);
+    if (linkMatch) {
+      console.log(`[EmailService:LOCAL_SIMULATOR] \u26a1 ACTIVATION LINK for ${options.to}: ${linkMatch[1]}`);
+    }
     console.log(`[EmailService:LOCAL_SIMULATOR] Stored [${options.operationType}] email for ${options.to} -> MessageId: ${simulatedMessageId}`);
     await IdempotencyService.complete(null, options.idempotencyKey, { messageId: simulatedMessageId });
 
