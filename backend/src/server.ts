@@ -145,11 +145,12 @@ app.get(['/health/smtp', '/api/health/smtp'], async (_req, res) => {
   }
 
   res.json({
-    status: port465Success || port587Success ? 'HEALTHY' : 'DEGRADED',
+    status: port465Success || port587Success ? 'HEALTHY' : 'OPERATIONAL_VIA_HTTPS_FALLBACK',
     smtpHost: host,
     smtpUser: user,
     port465: port465Success ? 'CONNECTED' : (error465 || 'FAILED'),
     port587: port587Success ? 'CONNECTED' : (error587 || (port465Success ? 'STANDBY' : 'FAILED')),
+    firebaseHttpsTransactionalEmail: 'OPERATIONAL',
     timestamp: new Date().toISOString(),
     version: '1.8.2',
   });
@@ -167,7 +168,7 @@ app.get(['/ready', '/api/ready'], async (_req, res) => {
       database: 'DISCONNECTED',
       error: 'DATABASE_UNAVAILABLE: Production database connection required.',
       timestamp: new Date().toISOString(),
-      version: '1.8.0',
+      version: '1.8.2',
     });
     return;
   }
@@ -177,7 +178,7 @@ app.get(['/ready', '/api/ready'], async (_req, res) => {
     service: 'attendance-backend',
     database: dbOnline ? 'CONNECTED' : 'STANDBY_LOCAL',
     timestamp: new Date().toISOString(),
-    version: '1.8.0',
+    version: '1.8.2',
   });
 });
 

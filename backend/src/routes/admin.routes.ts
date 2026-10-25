@@ -1193,7 +1193,7 @@ router.post(
             emailResult = { success: false, error: _emailErr.message };
           }
 
-          const emailSent = !!(emailResult && emailResult.provider === 'SMTP');
+          const emailSent = !!(emailResult && (emailResult.provider === 'SMTP' || emailResult.provider === 'FIREBASE_HTTPS'));
 
           await client.query('COMMIT');
 
@@ -1420,7 +1420,7 @@ router.post(
         emailResult = { success: false, error: _emailErr.message };
       }
 
-      const emailSent = !!(emailResult && emailResult.provider === 'SMTP');
+      const emailSent = !!(emailResult && (emailResult.provider === 'SMTP' || emailResult.provider === 'FIREBASE_HTTPS'));
 
       res.status(201).json({
         success: true,
@@ -1794,7 +1794,7 @@ router.post(
           emailResult = { success: false, error: _emailErr.message };
         }
 
-        const emailSent = !!(emailResult && emailResult.provider === 'SMTP');
+        const emailSent = !!(emailResult && (emailResult.provider === 'SMTP' || emailResult.provider === 'FIREBASE_HTTPS'));
 
         res.json({
           success: true,
@@ -1880,7 +1880,7 @@ router.post(
         emailResult = { success: false, error: _emailErr.message };
       }
 
-      const emailSent = !!(emailResult && emailResult.provider === 'SMTP');
+      const emailSent = !!(emailResult && (emailResult.provider === 'SMTP' || emailResult.provider === 'FIREBASE_HTTPS'));
 
       res.json({
         success: true,

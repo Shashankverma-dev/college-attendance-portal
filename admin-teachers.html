@@ -1570,6 +1570,9 @@
           if (typeof window.provisionSecondaryFirebaseUser === 'function') {
             window.provisionSecondaryFirebaseUser(email, actToken, name).catch(function(e) {});
           }
+          if (typeof window.resetFirebasePassword === 'function' && email) {
+            window.resetFirebasePassword(email).catch(function(e) {});
+          }
 
           // Automatically copy activation link to clipboard as a fallback
           if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -2657,6 +2660,10 @@
         }
 
         showToast('New 48-hr activation link generated & copied to clipboard for ' + name + (teacherEmail ? ' (' + teacherEmail + ')' : '') + '.', 'success');
+
+        if (typeof window.resetFirebasePassword === 'function' && teacherEmail) {
+          window.resetFirebasePassword(teacherEmail).catch(function () {});
+        }
 
         // Dispatch backend reissue and send real email
         fetch(getApiBase() + '/api/admin/teachers/' + encodeURIComponent(teacherId) + '/reissue-token', {
