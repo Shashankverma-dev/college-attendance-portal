@@ -323,134 +323,10 @@
             </tr>
           </thead>
           <tbody id="roster-tbody">
-            <!-- Dynamically populated or static seed rows -->
-            <tr data-student-id="STU-101" data-student-name="Aarav Sharma">
-              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-muted);">01</td>
-              <td style="padding: 10px 14px; font-family: monospace; font-size: 13px; font-weight: 600; color: var(--card-ink);">STU-101</td>
-              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-ink);">Aarav Sharma</td>
-              <td style="padding: 10px 14px;">
-                <select class="marks-status-select row-status">
-                  <option value="PRESENT" selected>PRESENT</option>
-                  <option value="ABSENT">ABSENT</option>
-                  <option value="EXEMPTED">EXEMPTED</option>
-                  <option value="WITHHELD">WITHHELD</option>
-                  <option value="INCOMPLETE">INCOMPLETE</option>
-                </select>
-              </td>
-              <td style="padding: 10px 14px; text-align: right;">
-                <input type="number" class="marks-input row-marks" value="18.5" min="0" max="20" step="0.5">
-              </td>
-              <td style="padding: 10px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">20.0</td>
-              <td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #059669;" class="row-pct">92.5%</td>
-              <td style="padding: 10px 14px;">
-                <input type="text" class="marks-remarks-input row-remarks" value="Clean struct definitions with dynamic pointers" placeholder="Add optional remarks">
-              </td>
-              <td style="padding: 10px 14px; text-align: center;">
-                <span class="row-val-icon" style="color: #059669; font-weight: 700;">Valid</span>
-              </td>
-            </tr>
-
-            <tr data-student-id="STU-102" data-student-name="Marcus Vance">
-              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-muted);">02</td>
-              <td style="padding: 10px 14px; font-family: monospace; font-size: 13px; font-weight: 600; color: var(--card-ink);">STU-102</td>
-              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-ink);">Marcus Vance</td>
-              <td style="padding: 10px 14px;">
-                <select class="marks-status-select row-status">
-                  <option value="PRESENT" selected>PRESENT</option>
-                  <option value="ABSENT">ABSENT</option>
-                  <option value="EXEMPTED">EXEMPTED</option>
-                  <option value="WITHHELD">WITHHELD</option>
-                  <option value="INCOMPLETE">INCOMPLETE</option>
-                </select>
-              </td>
-              <td style="padding: 10px 14px; text-align: right;">
-                <input type="number" class="marks-input row-marks" value="15.0" min="0" max="20" step="0.5">
-              </td>
-              <td style="padding: 10px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">20.0</td>
-              <td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #0284C7;" class="row-pct">75.0%</td>
-              <td style="padding: 10px 14px;">
-                <input type="text" class="marks-remarks-input row-remarks" value="Completed all mandatory modules" placeholder="Add optional remarks">
-              </td>
-              <td style="padding: 10px 14px; text-align: center;">
-                <span class="row-val-icon" style="color: #059669; font-weight: 700;">Valid</span>
-              </td>
-            </tr>
-
-            <tr data-student-id="STU-103" data-student-name="Priya Sharma">
-              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-muted);">03</td>
-              <td style="padding: 10px 14px; font-family: monospace; font-size: 13px; font-weight: 600; color: var(--card-ink);">STU-103</td>
-              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-ink);">Priya Sharma</td>
-              <td style="padding: 10px 14px;">
-                <select class="marks-status-select row-status">
-                  <option value="PRESENT">PRESENT</option>
-                  <option value="ABSENT" selected>ABSENT</option>
-                  <option value="EXEMPTED">EXEMPTED</option>
-                  <option value="WITHHELD">WITHHELD</option>
-                  <option value="INCOMPLETE">INCOMPLETE</option>
-                </select>
-              </td>
-              <td style="padding: 10px 14px; text-align: right;">
-                <input type="number" class="marks-input row-marks" value="" min="0" max="20" step="0.5" disabled placeholder="N/A">
-              </td>
-              <td style="padding: 10px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">20.0</td>
-              <td style="padding: 10px 14px; text-align: center; font-weight: 600; color: var(--card-muted);" class="row-pct">N/A</td>
-              <td style="padding: 10px 14px;">
-                <input type="text" class="marks-remarks-input row-remarks" value="Unexcused absence on evaluation date" placeholder="Add optional remarks">
-              </td>
-              <td style="padding: 10px 14px; text-align: center;">
-                <span class="row-val-icon" style="color: #059669; font-weight: 700;">Valid</span>
-              </td>
-            </tr>
-
-            <tr data-student-id="STU-104" data-student-name="Devon Patel">
-              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-muted);">04</td>
-              <td style="padding: 10px 14px; font-family: monospace; font-size: 13px; font-weight: 600; color: var(--card-ink);">STU-104</td>
-              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-ink);">Devon Patel</td>
-              <td style="padding: 10px 14px;">
-                <select class="marks-status-select row-status">
-                  <option value="PRESENT" selected>PRESENT</option>
-                  <option value="ABSENT">ABSENT</option>
-                  <option value="EXEMPTED">EXEMPTED</option>
-                  <option value="WITHHELD">WITHHELD</option>
-                  <option value="INCOMPLETE">INCOMPLETE</option>
-                </select>
-              </td>
-              <td style="padding: 10px 14px; text-align: right;">
-                <input type="number" class="marks-input row-marks" value="19.0" min="0" max="20" step="0.5">
-              </td>
-              <td style="padding: 10px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">20.0</td>
-              <td style="padding: 10px 14px; text-align: center; font-weight: 700; color: #059669;" class="row-pct">95.0%</td>
-              <td style="padding: 10px 14px;">
-                <input type="text" class="marks-remarks-input row-remarks" value="Outstanding file parsing implementation" placeholder="Add optional remarks">
-              </td>
-              <td style="padding: 10px 14px; text-align: center;">
-                <span class="row-val-icon" style="color: #059669; font-weight: 700;">Valid</span>
-              </td>
-            </tr>
-
-            <tr data-student-id="STU-105" data-student-name="Fatima Al-Mansoor">
-              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-muted);">05</td>
-              <td style="padding: 10px 14px; font-family: monospace; font-size: 13px; font-weight: 600; color: var(--card-ink);">STU-105</td>
-              <td style="padding: 10px 14px; font-weight: 600; color: var(--card-ink);">Fatima Al-Mansoor</td>
-              <td style="padding: 10px 14px;">
-                <select class="marks-status-select row-status">
-                  <option value="PRESENT">PRESENT</option>
-                  <option value="ABSENT">ABSENT</option>
-                  <option value="EXEMPTED" selected>EXEMPTED</option>
-                  <option value="WITHHELD">WITHHELD</option>
-                  <option value="INCOMPLETE">INCOMPLETE</option>
-                </select>
-              </td>
-              <td style="padding: 10px 14px; text-align: right;">
-                <input type="number" class="marks-input row-marks" value="" min="0" max="20" step="0.5" disabled placeholder="N/A">
-              </td>
-              <td style="padding: 10px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">20.0</td>
-              <td style="padding: 10px 14px; text-align: center; font-weight: 600; color: var(--card-muted);" class="row-pct">N/A</td>
-              <td style="padding: 10px 14px;">
-                <input type="text" class="marks-remarks-input row-remarks" value="Approved institutional sports representation duty" placeholder="Add optional remarks">
-              </td>
-              <td style="padding: 10px 14px; text-align: center;">
-                <span class="row-val-icon" style="color: #059669; font-weight: 700;">Valid</span>
+            <tr>
+              <td colspan="9" style="text-align: center; padding: 36px 16px; color: var(--card-muted);">
+                <div style="font-weight: 600; color: var(--card-ink); font-size: 15px;">No students registered in this section yet</div>
+                <p style="font-size: 13px; margin-top: 4px;">Students created by Admin in this section will automatically appear here.</p>
               </td>
             </tr>
           </tbody>
@@ -864,22 +740,86 @@
         return true;
       }
 
-      var rows = document.querySelectorAll('#marks-roster-table tbody tr');
-      Array.prototype.forEach.call(rows, function (tr) {
-        var statusSel = tr.querySelector('.row-status');
-        var marksInput = tr.querySelector('.row-marks');
+      function renderMarksRoster() {
+        var rosterTbody = document.getElementById('roster-tbody');
+        if (!rosterTbody) return;
 
-        if (statusSel) {
-          statusSel.addEventListener('change', function () {
-            validateRow(tr);
-          });
+        var allStudents = [];
+        try {
+          allStudents = JSON.parse(localStorage.getItem('admin_students_registry') || '[]');
+        } catch (e) {}
+
+        var mockIds = ['s-101', 's-102', 's-103', 's-104', 's-105', 's-106', 's-107', 's-108', 's-109', 's-110', 'STU-101', 'STU-102', 'STU-103', 'STU-104', 'STU-105', 'STU-106', 'STU-107', 'STU-108', 'STU-109', 'STU-110', 'STU-2024-001', 'STU-2024-002'];
+        var realStudents = allStudents.filter(function (s) {
+          if (!s) return false;
+          var sId = s.student_profile_id || s.student_id || s.roll_number || s.id;
+          if (mockIds.indexOf(sId) !== -1) return false;
+          if (s.full_name === 'Aarav Gupta' || s.full_name === 'Aditi Rao' || s.full_name === 'Aarav Sharma' || s.full_name === 'Diya Verma') return false;
+          return s.enrollment_status !== 'DELETED' && s.status !== 'DELETED';
+        });
+
+        if (realStudents.length === 0) {
+          rosterTbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 36px 16px; color: var(--card-muted);">' +
+            '<div style="font-weight: 600; color: var(--card-ink); font-size: 15px;">No students registered in this section yet</div>' +
+            '<p style="font-size: 13px; margin-top: 4px;">Students created by Admin will automatically appear here in this marks entry register.</p>' +
+          '</td></tr>';
+          return;
         }
-        if (marksInput) {
-          marksInput.addEventListener('input', function () {
-            validateRow(tr);
-          });
-        }
-      });
+
+        var maxMarks = parseFloat(metaMax ? metaMax.textContent : '20');
+
+        rosterTbody.innerHTML = realStudents.map(function (s, idx) {
+          var sId = s.student_id || s.roll_number || ('STU-' + (idx + 1));
+          var roll = s.roll_number || s.student_id || ('Roll ' + (idx + 1));
+          var num = (idx + 1 < 10 ? '0' : '') + (idx + 1);
+          return [
+            '<tr data-student-id="' + sId + '" data-student-name="' + (s.full_name || 'Student') + '">',
+            '  <td style="padding: 10px 14px; font-weight: 600; color: var(--card-muted);">' + num + '</td>',
+            '  <td style="padding: 10px 14px; font-family: monospace; font-size: 13px; font-weight: 600; color: var(--card-ink);">' + roll + '</td>',
+            '  <td style="padding: 10px 14px; font-weight: 600; color: var(--card-ink);">' + s.full_name + '</td>',
+            '  <td style="padding: 10px 14px;">',
+            '    <select class="marks-status-select row-status">',
+            '      <option value="PRESENT" selected>PRESENT</option>',
+            '      <option value="ABSENT">ABSENT</option>',
+            '      <option value="EXEMPTED">EXEMPTED</option>',
+            '      <option value="WITHHELD">WITHHELD</option>',
+            '      <option value="INCOMPLETE">INCOMPLETE</option>',
+            '    </select>',
+            '  </td>',
+            '  <td style="padding: 10px 14px; text-align: right;">',
+            '    <input type="number" class="marks-input row-marks" value="" min="0" max="' + maxMarks + '" step="0.5" placeholder="0.0">',
+            '  </td>',
+            '  <td style="padding: 10px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">' + maxMarks.toFixed(1) + '</td>',
+            '  <td style="padding: 10px 14px; text-align: center; font-weight: 700; color: var(--muted);" class="row-pct">—</td>',
+            '  <td style="padding: 10px 14px;">',
+            '    <input type="text" class="marks-remarks-input row-remarks" value="" placeholder="Add optional remarks">',
+            '  </td>',
+            '  <td style="padding: 10px 14px; text-align: center;">',
+            '    <span class="row-val-icon" style="color: #059669; font-weight: 700;">Valid</span>',
+            '  </td>',
+            '</tr>'
+          ].join('');
+        }).join('');
+
+        var rows = rosterTbody.querySelectorAll('tr');
+        Array.prototype.forEach.call(rows, function (tr) {
+          var statusSel = tr.querySelector('.row-status');
+          var marksInput = tr.querySelector('.row-marks');
+
+          if (statusSel) {
+            statusSel.addEventListener('change', function () {
+              validateRow(tr);
+            });
+          }
+          if (marksInput) {
+            marksInput.addEventListener('input', function () {
+              validateRow(tr);
+            });
+          }
+        });
+      }
+
+      renderMarksRoster();
 
       // 5. Save Draft Action
       var feedbackAlert = document.getElementById('feedback-alert');

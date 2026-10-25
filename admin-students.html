@@ -562,6 +562,84 @@
     </div>
   </div>
 
+  <!-- MODAL: ACCOUNT ACTIVATION DISPATCH -->
+  <div class="modal" id="modal-activation-dispatch" role="dialog" aria-modal="true" aria-labelledby="modal-act-title" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+    <div class="card" style="max-width: 540px; width: 100%; padding: 0; background: #FFFFFF; border-radius: 12px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);">
+      <div style="background: linear-gradient(135deg, #1D3C72 0%, #0F244A 100%); color: #FFFFFF; padding: 18px 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 36px; height: 36px; font-size: 18px; background: rgba(255,255,255,0.2); color: #fff; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+            ✉️
+          </div>
+          <div>
+            <h3 id="modal-act-title" style="margin: 0; font-size: 17px; color: #FFFFFF;">Student Provisioned — Dispatch Activation Email</h3>
+            <span style="font-size: 12px; color: #CBD5E1;" id="modal-act-subtitle">Official 48-Hour Student Portal Activation</span>
+          </div>
+        </div>
+        <button type="button" onclick="closeActivationDispatchModal()" aria-label="Close modal" style="background: none; border: none; color: #fff; font-size: 20px; cursor: pointer;">✕</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px; padding: 20px;">
+        <div style="background: #F0FDF4; border: 1px solid #86EFAC; border-radius: 8px; padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px;">
+          <span style="font-size: 20px; line-height: 1;">✅</span>
+          <div>
+            <strong style="color: #15803D; font-size: 14px;" id="dispatch-target-heading">Student Account Provisioned Successfully!</strong>
+            <div style="font-size: 13px; color: #166534; margin-top: 2px;" id="dispatch-target-desc">
+              Status is <strong>PENDING_ACTIVATION</strong>. Send the activation link below so the student can set their password.
+            </div>
+          </div>
+        </div>
+
+        <!-- Recipient & Token Details Card -->
+        <div style="background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 14px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; margin-bottom: 12px;">
+            <div>
+              <span style="color: var(--muted); display: block; font-size: 11px; text-transform: uppercase; font-weight: 700;">Student Name</span>
+              <strong id="dispatch-user-name" style="color: #17345C;">—</strong>
+            </div>
+            <div>
+              <span style="color: var(--muted); display: block; font-size: 11px; text-transform: uppercase; font-weight: 700;">Enrollment / ID</span>
+              <strong id="dispatch-user-id" style="color: #1D3C72; font-family: monospace;">—</strong>
+            </div>
+            <div style="grid-column: 1 / -1;">
+              <span style="color: var(--muted); display: block; font-size: 11px; text-transform: uppercase; font-weight: 700;">Student Gmail Address</span>
+              <strong id="dispatch-user-email" style="color: #17345C; word-break: break-all;">—</strong>
+            </div>
+          </div>
+
+          <!-- Direct Activation Link Input with Copy -->
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; display: block; margin-bottom: 4px;">48-Hour Activation Link</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="dispatch-act-link" readonly style="flex: 1; padding: 8px 10px; font-size: 12px; font-family: monospace; border: 1px solid var(--border); border-radius: 6px; background: #FFFFFF; color: #17345C;" onclick="this.select()">
+              <button type="button" class="btn btn-sm btn-outline" id="btn-copy-dispatch-link" onclick="copyDispatchLink()" style="font-size: 12px; white-space: nowrap; padding: 0 12px;">
+                📋 Copy Link
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons: Send via Gmail vs Desktop Mail -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button type="button" class="btn btn-sm" id="btn-open-gmail" onclick="dispatchViaGmailWeb()" style="background: #EA4335; color: #FFFFFF; font-weight: 700; font-size: 14px; padding: 12px; border-radius: 6px; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3); cursor: pointer;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.272H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 9.248l8.073-5.755c1.618-1.214 3.927-.059 3.927 1.964z"/>
+            </svg>
+            Send Activation Email via Admin Gmail
+          </button>
+
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn btn-sm btn-outline" id="btn-open-mailto" onclick="dispatchViaMailto()" style="flex: 1; font-size: 13px; padding: 8px;">
+              📧 Open Default Mail Client
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="closeActivationDispatchModal()" style="padding: 8px 16px;">
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ========================================================================= -->
   <!-- MODAL 2: VIEW STUDENT DETAILS & ENROLLMENT HISTORY -->
   <!-- ========================================================================= -->
@@ -1602,18 +1680,19 @@
             if (navigator.clipboard && navigator.clipboard.writeText) {
               navigator.clipboard.writeText(sLink).catch(function() {});
             }
-            var emailSubject = encodeURIComponent('SRHU Attendance Portal – Activate Your Student Account');
-            var emailBody = encodeURIComponent(
-              'Dear ' + payload.fullName + ',\n\n' +
-              'Your student account has been registered on the SRHU Attendance Portal.\n\n' +
-              'Enrollment No: ' + (payload.enrollmentNo || '--') + '\n\n' +
-              'Please click the link below within 48 hours to set your password and activate your account:\n\n' +
-              sLink + '\n\n' +
-              'Regards,\nSRHU Academic Administration'
-            );
-            window.open('mailto:' + encodeURIComponent(payload.studentGmail) + '?subject=' + emailSubject + '&body=' + emailBody, '_blank');
-            showToast(data.message || 'Student account created! Activation email draft opened & link copied to clipboard.');
+
+            showToast(data.message || 'Student account created! Opening activation dispatch...', 'success');
             loadStudents();
+
+            // Open guaranteed activation dispatch modal
+            window.openActivationDispatchModal({
+              name: payload.fullName,
+              studentId: payload.enrollmentNo || payload.registrationNo || 'Student',
+              email: payload.studentGmail,
+              link: sLink,
+              heading: 'Student Account Provisioned Successfully!',
+              subheading: 'Status is <strong>PENDING_ACTIVATION</strong>. Click <strong>Send Activation Email via Admin Gmail</strong> below to email the credentials.'
+            });
           } else {
             errorEl.textContent = data.message || 'Failed to create student.';
             errorEl.style.display = 'block';
@@ -1660,20 +1739,180 @@
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(actLink).catch(function() {});
           }
-          var emailSubject = encodeURIComponent('SRHU Attendance Portal – Activate Your Student Account');
-          var emailBody = encodeURIComponent(
-            'Dear ' + payload.fullName + ',\n\n' +
-            'Your student account has been registered on the SRHU Attendance Portal.\n\n' +
-            'Enrollment No: ' + (payload.enrollmentNo || '--') + '\n\n' +
-            'Please click the link below within 48 hours to set your password and activate your account:\n\n' +
-            actLink + '\n\n' +
-            'Regards,\nSRHU Academic Administration'
-          );
-          window.open('mailto:' + encodeURIComponent(payload.studentGmail) + '?subject=' + emailSubject + '&body=' + emailBody, '_blank');
-          showToast('Student registered! Activation email draft opened & link copied to clipboard.');
+
+          showToast('Student registered! Opening activation dispatch...', 'success');
           loadStudents();
+
+          // Open guaranteed activation dispatch modal
+          window.openActivationDispatchModal({
+            name: payload.fullName,
+            studentId: newProfile.student_id,
+            email: payload.studentGmail,
+            link: actLink,
+            heading: 'Student Account Provisioned Successfully!',
+            subheading: 'Status is <strong>PENDING_ACTIVATION</strong>. Click <strong>Send Activation Email via Admin Gmail</strong> below to email the credentials.'
+          });
         });
     }
+
+    // =========================================================================
+    // ACTIVATION EMAIL DISPATCH MODAL HANDLERS
+    // =========================================================================
+    var activeDispatchData = null;
+
+    window.openActivationDispatchModal = function(data) {
+      activeDispatchData = data;
+      var nameEl = document.getElementById('dispatch-user-name');
+      var idEl = document.getElementById('dispatch-user-id');
+      var emailEl = document.getElementById('dispatch-user-email');
+      var linkEl = document.getElementById('dispatch-act-link');
+      var headEl = document.getElementById('dispatch-target-heading');
+      var descEl = document.getElementById('dispatch-target-desc');
+
+      if (nameEl) nameEl.textContent = data.name || 'Student';
+      if (idEl) idEl.textContent = data.studentId || data.id || '—';
+      if (emailEl) emailEl.textContent = data.email || '—';
+      if (linkEl) linkEl.value = data.link || '';
+      if (headEl && data.heading) headEl.textContent = data.heading;
+      if (descEl && data.subheading) descEl.innerHTML = data.subheading;
+
+      var modal = document.getElementById('modal-activation-dispatch');
+      if (modal) {
+        modal.style.display = 'flex';
+      }
+    };
+
+    window.closeActivationDispatchModal = function() {
+      var modal = document.getElementById('modal-activation-dispatch');
+      if (modal) {
+        modal.style.display = 'none';
+      }
+      activeDispatchData = null;
+    };
+
+    window.copyDispatchLink = function() {
+      var input = document.getElementById('dispatch-act-link');
+      if (input && input.value) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(input.value).catch(function() {});
+        }
+        input.select();
+        var btn = document.getElementById('btn-copy-dispatch-link');
+        if (btn) {
+          btn.textContent = '✓ Copied!';
+          btn.style.color = '#15803D';
+          setTimeout(function() {
+            btn.textContent = '📋 Copy Link';
+            btn.style.color = '';
+          }, 2500);
+        }
+        showToast('Activation link copied to clipboard.');
+      }
+    };
+
+    window.dispatchViaGmailWeb = function() {
+      if (!activeDispatchData || !activeDispatchData.email) {
+        showToast('No recipient email available to open Gmail.', true);
+        return;
+      }
+      var name = activeDispatchData.name || 'Student';
+      var studentId = activeDispatchData.studentId || '';
+      var link = activeDispatchData.link || '';
+      var email = activeDispatchData.email;
+
+      var subject = 'SRHU Attendance Portal – Activate Your Student Account';
+      var body = 'Dear ' + name + ',\n\n' +
+        'Your student account (' + studentId + ') has been registered on the SRHU Attendance Portal.\n\n' +
+        'Please click the link below within 48 hours to set your password and activate your account:\n\n' +
+        link + '\n\n' +
+        'Regards,\nSRHU Academic Administration';
+
+      var gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(email) +
+        '&su=' + encodeURIComponent(subject) +
+        '&body=' + encodeURIComponent(body);
+
+      window.open(gmailUrl, '_blank');
+      showToast('Gmail composer opened in a new tab. Click "Send" in Gmail to deliver the activation link.');
+    };
+
+    window.dispatchViaMailto = function() {
+      if (!activeDispatchData || !activeDispatchData.email) return;
+      var name = activeDispatchData.name || 'Student';
+      var studentId = activeDispatchData.studentId || '';
+      var link = activeDispatchData.link || '';
+      var email = activeDispatchData.email;
+
+      var subject = 'SRHU Attendance Portal – Activate Your Student Account';
+      var body = 'Dear ' + name + ',\n\n' +
+        'Your student account (' + studentId + ') has been registered on the SRHU Attendance Portal.\n\n' +
+        'Please click the link below within 48 hours to set your password and activate your account:\n\n' +
+        link + '\n\n' +
+        'Regards,\nSRHU Academic Administration';
+
+      window.open('mailto:' + encodeURIComponent(email) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body), '_blank');
+    };
+
+    window.resendActivation = function(studentProfileId) {
+      var student = currentStudents.find(function(s) {
+        return s.student_profile_id === studentProfileId || s.student_id === studentProfileId;
+      });
+      if (!student) {
+        try {
+          var stored = getStoredStudents();
+          student = stored.find(function(s) {
+            return s.student_profile_id === studentProfileId || s.student_id === studentProfileId;
+          });
+        } catch(e) {}
+      }
+
+      var email = (student && (student.student_gmail || student.email)) || '';
+      var name = (student && student.full_name) || 'Student';
+      var stuId = (student && (student.student_id || student.enrollment_no)) || studentProfileId;
+      var newToken = 'stu_csp_' + Math.random().toString(36).substring(2, 10);
+      var tokenUrl = window.location.origin + '/signin.html?mode=activate&token=' + newToken + (email ? '&email=' + encodeURIComponent(email) : '');
+
+      if (student) {
+        student.activationToken = newToken;
+        student.activationLink = tokenUrl;
+        student.status = 'PENDING_ACTIVATION';
+        try {
+          var reg = getStoredStudents();
+          var idx = reg.findIndex(function(s) {
+            return s.student_profile_id === studentProfileId || s.student_id === studentProfileId;
+          });
+          if (idx >= 0) {
+            reg[idx].activationToken = newToken;
+            reg[idx].activationLink = tokenUrl;
+            reg[idx].status = 'PENDING_ACTIVATION';
+            localStorage.setItem('admin_students_registry', JSON.stringify(reg));
+          }
+        } catch(e2) {}
+      }
+
+      if (email) {
+        try {
+          var creds = JSON.parse(localStorage.getItem('attendance_local_credentials') || '{}');
+          creds[email.toLowerCase()] = {
+            status: 'PENDING_ACTIVATION',
+            role: 'student',
+            name: name,
+            id: stuId,
+            updatedAt: new Date().toISOString()
+          };
+          localStorage.setItem('attendance_local_credentials', JSON.stringify(creds));
+        } catch(e3) {}
+      }
+
+      closeViewStudentModal();
+      window.openActivationDispatchModal({
+        name: name,
+        studentId: stuId,
+        email: email,
+        link: tokenUrl,
+        heading: 'New 48-Hour Token Reissued!',
+        subheading: 'A fresh single-use activation link has been generated for <strong>' + (email || name) + '</strong>. Click <strong>Send Activation Email via Admin Gmail</strong> below to email it.'
+      });
+    };
 
     // =========================================================================
     // MODAL 2: VIEW DETAILS & HISTORY

@@ -708,7 +708,69 @@
   window.syncRoleNavigation = syncRoleNavigation;
   window.enforceRouteGuards = enforceRouteGuards;
 
+  // Centralized Sanitizer: Purge any legacy pre-seeded mock records across roles
+  function sanitizeLegacyMockData() {
+    try {
+      // 1. Sanitize students
+      var rawStudents = localStorage.getItem('admin_students_registry');
+      if (rawStudents) {
+        var students = JSON.parse(rawStudents);
+        if (Array.isArray(students)) {
+          var mockStudentIds = ['s-101','s-102','s-103','s-104','s-105','s-106','s-107','s-108','s-109','s-110','STU-101','STU-102','STU-103','STU-104','STU-105','STU-106','STU-107','STU-108','STU-109','STU-110'];
+          var mockStudentNames = ['Aarav Sharma','Aarav Gupta','Aditi Rao','Ananya Iyer','Rohan Mehta','Pooja Patel','Ishaan Verma','Kavita Nair','Siddharth Sen','Neha Joshi','Vikram Malhotra','Elena Rostova'];
+          var cleanStudents = students.filter(function (s) {
+            if (!s) return false;
+            if (mockStudentIds.indexOf(s.student_id) !== -1 || mockStudentIds.indexOf(s.student_profile_id) !== -1) return false;
+            if (mockStudentNames.indexOf(s.full_name) !== -1 || mockStudentNames.indexOf(s.name) !== -1) return false;
+            return true;
+          });
+          if (cleanStudents.length !== students.length) {
+            localStorage.setItem('admin_students_registry', JSON.stringify(cleanStudents));
+          }
+        }
+      }
+
+      // 2. Sanitize teachers
+      var rawTeachers = localStorage.getItem('admin_teachers_list');
+      if (rawTeachers) {
+        var teachers = JSON.parse(rawTeachers);
+        if (Array.isArray(teachers)) {
+          var mockTeacherIds = ['FAC-101','FAC-102','FAC-103','FAC-104','FAC-105','FAC-203','fac-101','fac-102','fac-103','fac-104','fac-105','fac-203'];
+          var mockTeacherNames = ['Dr. Aris Thorne','Prof. Maya Lin','Dr. Kevin Varma','Dr. Neha Dave','Dr. Sanjay Kumar','Dr. Shiv Prasad'];
+          var cleanTeachers = teachers.filter(function (t) {
+            if (!t) return false;
+            if (mockTeacherIds.indexOf(t.staffId) !== -1 || mockTeacherIds.indexOf(t.id) !== -1) return false;
+            if (mockTeacherNames.indexOf(t.name) !== -1) return false;
+            return true;
+          });
+          if (cleanTeachers.length !== teachers.length) {
+            localStorage.setItem('admin_teachers_list', JSON.stringify(cleanTeachers));
+          }
+        }
+      }
+
+      // 3. Sanitize recorded sessions
+      var rawSessions = localStorage.getItem('attendance_recorded_sessions');
+      if (rawSessions) {
+        var sessions = JSON.parse(rawSessions);
+        if (Array.isArray(sessions)) {
+          var cleanSessions = sessions.filter(function (sess) {
+            if (!sess) return false;
+            if (sess.conductedBy && (sess.conductedBy.indexOf('FAC-') === 0 || sess.conductedBy.indexOf('fac-') === 0)) return false;
+            return true;
+          });
+          if (cleanSessions.length !== sessions.length) {
+            localStorage.setItem('attendance_recorded_sessions', JSON.stringify(cleanSessions));
+          }
+        }
+      }
+    } catch (e) {}
+  }
+
+  window.sanitizeLegacyMockData = sanitizeLegacyMockData;
+
   function initAll() {
+    sanitizeLegacyMockData();
     syncRoleNavigation();
   }
 
@@ -717,7 +779,6 @@
   } else {
     initAll();
   }
-
 
 })();
 

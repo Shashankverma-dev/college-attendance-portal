@@ -227,8 +227,8 @@
             </svg>
           </div>
         </div>
-        <div class="admin-kpi-val">24</div>
-        <div class="admin-kpi-sub">100% Locked and Submitted</div>
+        <div class="admin-kpi-val" id="kpi-past-sessions">0</div>
+        <div class="admin-kpi-sub" id="kpi-past-sessions-sub">0 Locked and Submitted</div>
       </div>
 
       <!-- 2. Average Attendance -->
@@ -242,8 +242,8 @@
             </svg>
           </div>
         </div>
-        <div class="admin-kpi-val" style="color: #059669;">91.3%</div>
-        <div class="admin-kpi-sub">Above 75% statutory threshold</div>
+        <div class="admin-kpi-val" id="kpi-past-avg" style="color: #059669;">0.0%</div>
+        <div class="admin-kpi-sub" id="kpi-past-avg-sub">Real-time aggregate turnout</div>
       </div>
 
       <!-- 3. Student Records -->
@@ -259,8 +259,8 @@
             </svg>
           </div>
         </div>
-        <div class="admin-kpi-val">240</div>
-        <div class="admin-kpi-sub">219 Present &bull; 15 Absent &bull; 6 Leave</div>
+        <div class="admin-kpi-val" id="kpi-past-records">0</div>
+        <div class="admin-kpi-sub" id="kpi-past-records-sub">0 Present • 0 Absent • 0 Leave</div>
       </div>
 
       <!-- 4. Audit Status -->
@@ -273,8 +273,8 @@
             </svg>
           </div>
         </div>
-        <div class="admin-kpi-val" style="color: #0284C7;">Verified</div>
-        <div class="admin-kpi-sub">0 Unresolved Discrepancies</div>
+        <div class="admin-kpi-val" id="kpi-past-audit" style="color: #0284C7;">Pending</div>
+        <div class="admin-kpi-sub">Institutional audit chain</div>
       </div>
     </div>
 
@@ -334,105 +334,11 @@
             </tr>
           </thead>
           <tbody id="past-registers-tbody">
-            <tr data-subject="CS301" data-section="Section A" data-month="OCT">
-              <td><strong style="color: var(--card-ink);">16 Oct 2026</strong></td>
-              <td style="color: var(--card-ink);">CS301 - Database Systems</td>
-              <td style="color: var(--card-muted);">Section A • Room 204</td>
-              <td style="color: var(--card-muted);">10:00 – 11:00</td>
-              <td><span style="color: #15803D; font-weight: 600;">9 Present</span> / <span style="color: #DC2626; font-weight: 600;">1 Absent</span></td>
-              <td><strong style="color: #059669;">90.0%</strong></td>
-              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
-              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('16 Oct 2026', 'CS301 - Database Systems', 'Section A', 'Room 204', '10:00 - 11:00', 9, 1, 0, 'Relational Algebra & Normalization')">View Slip</button></td>
-            </tr>
-            <tr data-subject="CS303" data-section="Section A" data-month="OCT">
-              <td><strong style="color: var(--card-ink);">15 Oct 2026</strong></td>
-              <td style="color: var(--card-ink);">CS303 - Computer Networks</td>
-              <td style="color: var(--card-muted);">Section A • Room 206</td>
-              <td style="color: var(--card-muted);">11:30 – 12:30</td>
-              <td><span style="color: #15803D; font-weight: 600;">10 Present</span> / <span style="color: #DC2626; font-weight: 600;">0 Absent</span></td>
-              <td><strong style="color: #059669;">100.0%</strong></td>
-              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
-              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('15 Oct 2026', 'CS303 - Computer Networks', 'Section A', 'Room 206', '11:30 - 12:30', 10, 0, 0, 'TCP/IP Model and OSI Architecture')">View Slip</button></td>
-            </tr>
-            <tr data-subject="CS305" data-section="Section B" data-month="OCT">
-              <td><strong style="color: var(--card-ink);">14 Oct 2026</strong></td>
-              <td style="color: var(--card-ink);">CS305 - Database Systems Lab</td>
-              <td style="color: var(--card-muted);">Section B • Turing Lab</td>
-              <td style="color: var(--card-muted);">14:00 – 16:00</td>
-              <td><span style="color: #15803D; font-weight: 600;">10 Present</span> / <span style="color: #DC2626; font-weight: 600;">0 Absent</span></td>
-              <td><strong style="color: #059669;">100.0%</strong></td>
-              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
-              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('14 Oct 2026', 'CS305 - Database Systems Lab', 'Section B', 'Turing Lab', '14:00 - 16:00', 10, 0, 0, 'Complex SQL Queries and Joins')">View Slip</button></td>
-            </tr>
-            <tr data-subject="CS301" data-section="Section A" data-month="OCT">
-              <td><strong style="color: var(--card-ink);">13 Oct 2026</strong></td>
-              <td style="color: var(--card-ink);">CS301 - Database Systems</td>
-              <td style="color: var(--card-muted);">Section A • Room 204</td>
-              <td style="color: var(--card-muted);">10:00 – 11:00</td>
-              <td><span style="color: #15803D; font-weight: 600;">8 Present</span> / <span style="color: #DC2626; font-weight: 600;">1 Absent</span> / <span style="color: #D97706; font-weight: 600;">1 Leave</span></td>
-              <td><strong style="color: #059669;">80.0%</strong></td>
-              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
-              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('13 Oct 2026', 'CS301 - Database Systems', 'Section A', 'Room 204', '10:00 - 11:00', 8, 1, 1, 'ER Diagrams and Cardinality Ratios')">View Slip</button></td>
-            </tr>
-            <tr data-subject="CS303" data-section="Section A" data-month="OCT">
-              <td><strong style="color: var(--card-ink);">12 Oct 2026</strong></td>
-              <td style="color: var(--card-ink);">CS303 - Computer Networks</td>
-              <td style="color: var(--card-muted);">Section A • Room 206</td>
-              <td style="color: var(--card-muted);">11:30 – 12:30</td>
-              <td><span style="color: #15803D; font-weight: 600;">9 Present</span> / <span style="color: #DC2626; font-weight: 600;">1 Absent</span></td>
-              <td><strong style="color: #059669;">90.0%</strong></td>
-              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
-              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('12 Oct 2026', 'CS303 - Computer Networks', 'Section A', 'Room 206', '11:30 - 12:30', 9, 1, 0, 'Data Link Layer and Framing')">View Slip</button></td>
-            </tr>
-            <tr data-subject="CS305" data-section="Section B" data-month="OCT">
-              <td><strong style="color: var(--card-ink);">10 Oct 2026</strong></td>
-              <td style="color: var(--card-ink);">CS305 - Database Systems Lab</td>
-              <td style="color: var(--card-muted);">Section B • Turing Lab</td>
-              <td style="color: var(--card-muted);">14:00 – 16:00</td>
-              <td><span style="color: #15803D; font-weight: 600;">9 Present</span> / <span style="color: #DC2626; font-weight: 600;">1 Absent</span></td>
-              <td><strong style="color: #059669;">90.0%</strong></td>
-              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
-              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('10 Oct 2026', 'CS305 - Database Systems Lab', 'Section B', 'Turing Lab', '14:00 - 16:00', 9, 1, 0, 'DDL Commands & Primary Key Constraints')">View Slip</button></td>
-            </tr>
-            <tr data-subject="CS301" data-section="Section A" data-month="OCT">
-              <td><strong style="color: var(--card-ink);">09 Oct 2026</strong></td>
-              <td style="color: var(--card-ink);">CS301 - Database Systems</td>
-              <td style="color: var(--card-muted);">Section A • Room 204</td>
-              <td style="color: var(--card-muted);">10:00 – 11:00</td>
-              <td><span style="color: #15803D; font-weight: 600;">10 Present</span> / <span style="color: #DC2626; font-weight: 600;">0 Absent</span></td>
-              <td><strong style="color: #059669;">100.0%</strong></td>
-              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
-              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('09 Oct 2026', 'CS301 - Database Systems', 'Section A', 'Room 204', '10:00 - 11:00', 10, 0, 0, 'Introduction to Relational Model')">View Slip</button></td>
-            </tr>
-            <tr data-subject="CS303" data-section="Section A" data-month="SEP">
-              <td><strong style="color: var(--card-ink);">30 Sep 2026</strong></td>
-              <td style="color: var(--card-ink);">CS303 - Computer Networks</td>
-              <td style="color: var(--card-muted);">Section A • Room 206</td>
-              <td style="color: var(--card-muted);">11:30 – 12:30</td>
-              <td><span style="color: #15803D; font-weight: 600;">8 Present</span> / <span style="color: #DC2626; font-weight: 600;">2 Absent</span></td>
-              <td><strong style="color: #059669;">80.0%</strong></td>
-              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
-              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('30 Sep 2026', 'CS303 - Computer Networks', 'Section A', 'Room 206', '11:30 - 12:30', 8, 2, 0, 'Network Topologies & Transmission Media')">View Slip</button></td>
-            </tr>
-            <tr data-subject="CS305" data-section="Section B" data-month="SEP">
-              <td><strong style="color: var(--card-ink);">28 Sep 2026</strong></td>
-              <td style="color: var(--card-ink);">CS305 - Database Systems Lab</td>
-              <td style="color: var(--card-muted);">Section B • Turing Lab</td>
-              <td style="color: var(--card-muted);">14:00 – 16:00</td>
-              <td><span style="color: #15803D; font-weight: 600;">10 Present</span> / <span style="color: #DC2626; font-weight: 600;">0 Absent</span></td>
-              <td><strong style="color: #059669;">100.0%</strong></td>
-              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
-              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('28 Sep 2026', 'CS305 - Database Systems Lab', 'Section B', 'Turing Lab', '14:00 - 16:00', 10, 0, 0, 'Database Installation and Configuration')">View Slip</button></td>
-            </tr>
-            <tr data-subject="CS301" data-section="Section A" data-month="SEP">
-              <td><strong style="color: var(--card-ink);">26 Sep 2026</strong></td>
-              <td style="color: var(--card-ink);">CS301 - Database Systems</td>
-              <td style="color: var(--card-muted);">Section A • Room 204</td>
-              <td style="color: var(--card-muted);">10:00 – 11:00</td>
-              <td><span style="color: #15803D; font-weight: 600;">9 Present</span> / <span style="color: #DC2626; font-weight: 600;">0 Absent</span> / <span style="color: #D97706; font-weight: 600;">1 Leave</span></td>
-              <td><strong style="color: #059669;">90.0%</strong></td>
-              <td><span class="tag tag-present">Submitted &amp; Locked</span></td>
-              <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal('26 Sep 2026', 'CS301 - Database Systems', 'Section A', 'Room 204', '10:00 - 11:00', 9, 0, 1, 'Course Syllabus and Database Concepts')">View Slip</button></td>
+            <tr>
+              <td colspan="8" style="text-align: center; padding: 36px 16px; color: var(--card-muted);">
+                <div style="font-weight: 600; color: var(--card-ink); font-size: 15px;">No attendance registers submitted yet</div>
+                <p style="font-size: 13px; margin-top: 4px;">Classroom registers and QR sessions finalized by teachers will automatically be archived here.</p>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -479,42 +385,11 @@
               <th>Remark</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="slip-roster-tbody">
             <tr>
-              <td>STU-101</td>
-              <td>Aarav Sharma</td>
-              <td><span class="tag tag-present">Present</span></td>
-              <td>Attended session</td>
-            </tr>
-            <tr>
-              <td>STU-102</td>
-              <td>Priya Sharma</td>
-              <td><span class="tag tag-present">Present</span></td>
-              <td>Attended session</td>
-            </tr>
-            <tr>
-              <td>STU-103</td>
-              <td>Marcus Brody</td>
-              <td><span class="tag" style="background: rgba(239, 68, 68, 0.2); color: #F87171; border: 1px solid rgba(239, 68, 68, 0.4);">Absent</span></td>
-              <td>Unexcused absence</td>
-            </tr>
-            <tr>
-              <td>STU-104</td>
-              <td>Elena Rostova</td>
-              <td><span class="tag tag-present">Present</span></td>
-              <td>Attended session</td>
-            </tr>
-            <tr>
-              <td>STU-105</td>
-              <td>David Kim</td>
-              <td><span class="tag tag-present">Present</span></td>
-              <td>Attended session</td>
-            </tr>
-            <tr>
-              <td>STU-106</td>
-              <td>Ananya Roy</td>
-              <td><span class="tag tag-present">Present</span></td>
-              <td>Attended session</td>
+              <td colspan="4" style="text-align: center; padding: 16px; color: var(--card-muted);">
+                Awaiting student data...
+              </td>
             </tr>
           </tbody>
         </table>
@@ -608,7 +483,9 @@
 
   <script src="site.js?v=4" defer></script>
   <script>
-    function openSlipModal(date, title, section, room, time, p, a, l, topic) {
+    var currentSessionsList = [];
+
+    function openSlipModal(date, title, section, room, time, p, a, l, topic, sessionIdx) {
       document.getElementById('slip-title').textContent = title;
       document.getElementById('slip-meta').textContent = date + ' • ' + time + ' • ' + section + ' (' + room + ')';
       document.getElementById('slip-topic').textContent = topic || 'Standard Lecture Session';
@@ -621,6 +498,28 @@
         var uid = sessionStorage.getItem('attendance_user_id') || '';
         conductorEl.textContent = user + (uid ? ' (' + uid + ')' : '');
       }
+
+      var slipTbody = document.getElementById('slip-roster-tbody');
+      if (slipTbody) {
+        var sess = currentSessionsList[sessionIdx];
+        var records = sess && sess.records ? sess.records : [];
+        if (records.length === 0) {
+          slipTbody.innerHTML = '<tr><td colspan="4" style="text-align: center; padding: 16px; color: var(--card-muted);">No student records logged in this session.</td></tr>';
+        } else {
+          slipTbody.innerHTML = records.map(function (r) {
+            var stClass = r.status === 'P' ? 'tag tag-present' : (r.status === 'L' ? 'tag tag-leave' : 'tag tag-absent');
+            var stLabel = r.status === 'P' ? 'Present' : (r.status === 'L' ? 'Leave' : 'Absent');
+            var remark = r.status === 'P' ? 'Attended session' : (r.status === 'L' ? 'Approved leave' : 'Unexcused absence');
+            return '<tr>' +
+              '<td style="font-family: monospace; font-weight: 600;">' + (r.rollNumber || r.studentId || '—') + '</td>' +
+              '<td>' + (r.studentName || 'Student') + '</td>' +
+              '<td><span class="' + stClass + '">' + stLabel + '</span></td>' +
+              '<td style="font-size: 12px; color: var(--card-muted);">' + remark + '</td>' +
+            '</tr>';
+          }).join('');
+        }
+      }
+
       var modal = document.getElementById('slip-modal');
       modal.style.display = 'flex';
     }
@@ -648,13 +547,13 @@
         var del = document.getElementById('drawer-user-id');
         if (del) del.textContent = 'ID: ' + storedId + ' (Teacher)';
       }
+
       var searchInput = document.getElementById('filter-search');
       var subjectSelect = document.getElementById('filter-subject');
       var sectionSelect = document.getElementById('filter-section');
       var resetBtn = document.getElementById('filter-reset-btn');
       var monthButtons = document.querySelectorAll('.cal-filter-btn');
       var activeMonth = 'ALL';
-      var rows = document.querySelectorAll('#past-registers-tbody tr');
       var countEl = document.getElementById('register-count');
 
       function filterRows() {
@@ -662,6 +561,7 @@
         var sub = subjectSelect.value;
         var sec = sectionSelect.value;
         var visibleCount = 0;
+        var rows = document.querySelectorAll('#past-registers-tbody tr');
 
         rows.forEach(function (row) {
           var rowSub = row.getAttribute('data-subject');
@@ -684,6 +584,109 @@
 
         if (countEl) countEl.textContent = visibleCount;
       }
+
+      function loadPastRegistersData() {
+        var allSessions = [];
+        try {
+          allSessions = JSON.parse(localStorage.getItem('attendance_recorded_sessions') || '[]');
+        } catch (e) {}
+
+        currentSessionsList = allSessions;
+
+        var kpiSessions = document.getElementById('kpi-past-sessions');
+        var kpiSessionsSub = document.getElementById('kpi-past-sessions-sub');
+        var kpiAvg = document.getElementById('kpi-past-avg');
+        var kpiRecords = document.getElementById('kpi-past-records');
+        var kpiRecordsSub = document.getElementById('kpi-past-records-sub');
+        var kpiAudit = document.getElementById('kpi-past-audit');
+
+        var totalSessions = allSessions.length;
+        var totalPresent = 0;
+        var totalAbsent = 0;
+        var totalLeave = 0;
+
+        allSessions.forEach(function (sess) {
+          totalPresent += (sess.totalPresent || 0);
+          totalAbsent += (sess.totalAbsent || 0);
+          totalLeave += (sess.totalLeave || 0);
+        });
+
+        var totalRecordedStudents = totalPresent + totalAbsent + totalLeave;
+        var avgPct = totalRecordedStudents > 0 ? ((totalPresent / totalRecordedStudents) * 100).toFixed(1) + '%' : '0.0%';
+
+        if (kpiSessions) kpiSessions.textContent = totalSessions;
+        if (kpiSessionsSub) kpiSessionsSub.textContent = totalSessions + ' Locked and Submitted';
+        if (kpiAvg) kpiAvg.textContent = avgPct;
+        if (kpiRecords) kpiRecords.textContent = totalRecordedStudents;
+        if (kpiRecordsSub) kpiRecordsSub.textContent = totalPresent + ' Present • ' + totalAbsent + ' Absent • ' + totalLeave + ' Leave';
+        if (kpiAudit) kpiAudit.textContent = totalSessions > 0 ? 'Verified' : 'Pending';
+
+        var tbody = document.getElementById('past-registers-tbody');
+        if (!tbody) return;
+
+        if (totalSessions === 0) {
+          tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 36px 16px; color: var(--card-muted);">' +
+            '<div style="font-weight: 600; color: var(--card-ink); font-size: 15px;">No attendance registers submitted yet</div>' +
+            '<p style="font-size: 13px; margin-top: 4px;">Classroom registers and QR sessions finalized by teachers will automatically be archived here.</p>' +
+          '</td></tr>';
+          if (countEl) countEl.textContent = '0';
+          return;
+        }
+
+        var uniqueSubjects = {};
+        var uniqueSections = {};
+
+        tbody.innerHTML = allSessions.map(function (sess, idx) {
+          var dateObj = new Date(sess.sessionDate || sess.createdAt || Date.now());
+          var dateStr = dateObj.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+          var monthCode = dateObj.toLocaleString('en-US', { month: 'short' }).toUpperCase();
+          var subjCode = sess.subjectCode || 'General';
+          var subjName = sess.subjectName || subjCode;
+          var sec = sess.sectionName || 'Section A';
+          var p = sess.totalPresent || 0;
+          var a = sess.totalAbsent || 0;
+          var l = sess.totalLeave || 0;
+          var enrolled = sess.totalEnrolled || (p + a + l);
+          var pct = enrolled > 0 ? ((p / enrolled) * 100).toFixed(1) + '%' : '100.0%';
+
+          uniqueSubjects[subjCode] = subjName;
+          uniqueSections[sec] = true;
+
+          return [
+            '<tr data-subject="' + subjCode + '" data-section="' + sec + '" data-month="' + monthCode + '">',
+            '  <td><strong style="color: var(--card-ink);">' + dateStr + '</strong></td>',
+            '  <td style="color: var(--card-ink);">' + subjCode + ' - ' + subjName + '</td>',
+            '  <td style="color: var(--card-muted);">' + sec + '</td>',
+            '  <td style="color: var(--card-muted);">Standard Slot</td>',
+            '  <td><span style="color: #15803D; font-weight: 600;">' + p + ' Present</span> / <span style="color: #DC2626; font-weight: 600;">' + a + ' Absent</span>' + (l > 0 ? ' / <span style="color: #D97706; font-weight: 600;">' + l + ' Leave</span>' : '') + '</td>',
+            '  <td><strong style="color: #059669;">' + pct + '</strong></td>',
+            '  <td><span class="tag tag-present">Submitted &amp; Locked</span></td>',
+            '  <td><button type="button" class="btn btn-sm btn-outline" onclick="openSlipModal(\'' + dateStr + '\', \'' + subjCode + ' - ' + subjName + '\', \'' + sec + '\', \'Room 204\', \'Session Slot\', ' + p + ', ' + a + ', ' + l + ', \'Classroom Curriculum Instruction\', ' + idx + ')">View Slip</button></td>',
+            '</tr>'
+          ].join('');
+        }).join('');
+
+        if (subjectSelect) {
+          var subOpts = '<option value="ALL">All Subjects</option>';
+          Object.keys(uniqueSubjects).forEach(function (k) {
+            subOpts += '<option value="' + k + '">' + k + ' - ' + uniqueSubjects[k] + '</option>';
+          });
+          subjectSelect.innerHTML = subOpts;
+        }
+
+        if (sectionSelect) {
+          var secOpts = '<option value="ALL">All Sections</option>';
+          Object.keys(uniqueSections).forEach(function (s) {
+            secOpts += '<option value="' + s + '">' + s + '</option>';
+          });
+          sectionSelect.innerHTML = secOpts;
+        }
+
+        filterRows();
+      }
+
+      window.loadPastRegistersData = loadPastRegistersData;
+      loadPastRegistersData();
 
       if (searchInput) searchInput.addEventListener('input', filterRows);
       if (subjectSelect) subjectSelect.addEventListener('change', filterRows);

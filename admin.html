@@ -991,6 +991,12 @@
               <button type="button" class="btn btn-sm" onclick="copyHodActivationLink()" id="copy-hod-link-btn" style="background: #1D3C72; color: #FFFFFF; white-space: nowrap; height: 34px; font-size: 12px; cursor: pointer;">Copy Link</button>
             </div>
           </div>
+          <button type="button" class="btn btn-sm" id="btn-open-hod-gmail" onclick="dispatchHodViaGmailWeb()" style="background: #EA4335; color: #FFFFFF; font-weight: 700; font-size: 13px; padding: 10px; border-radius: 6px; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3); cursor: pointer; margin-top: 6px;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.272H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 9.248l8.073-5.755c1.618-1.214 3.927-.059 3.927 1.964z"/>
+            </svg>
+            Send Activation Email via Admin Gmail
+          </button>
         </div>
       </div>
       <div class="modal-footer" style="padding: 14px 20px; display: flex; justify-content: flex-end; gap: 10px; border-top: 1px solid var(--line);">
@@ -2084,7 +2090,32 @@
       }
     }
 
-    // Client-side search for Department table
+    function dispatchHodViaGmailWeb() {
+      var name = (document.getElementById('cred-hod-name') ? document.getElementById('cred-hod-name').textContent : '').trim() || 'Head of Department';
+      var email = (document.getElementById('cred-hod-email') ? document.getElementById('cred-hod-email').textContent : '').trim();
+      var dept = (document.getElementById('cred-dept-name') ? document.getElementById('cred-dept-name').textContent : '').trim() || 'Department';
+      var linkInput = document.getElementById('cred-hod-link');
+      var link = linkInput ? linkInput.value : '';
+
+      if (!email || email === '-') {
+        showToast('No HOD email available to open Gmail.', 'error');
+        return;
+      }
+
+      var subject = 'SRHU Attendance Portal – Head of Department Account Activation';
+      var body = 'Dear ' + name + ',\n\n' +
+        'You have been appointed as the Head of Department for ' + dept + ' on the SRHU Attendance Management Portal.\n\n' +
+        'Please click the link below within 48 hours to verify your official email and establish your permanent password:\n\n' +
+        link + '\n\n' +
+        'Regards,\nSRHU Academic Administration';
+
+      var gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(email) +
+        '&su=' + encodeURIComponent(subject) +
+        '&body=' + encodeURIComponent(body);
+
+      window.open(gmailUrl, '_blank');
+      showToast('Gmail composer opened in new tab. Click Send to deliver the HOD activation link.', 'info');
+    }
     function filterDepartmentTable() {
       var query = (document.getElementById('dept-search-input').value || '').toLowerCase().trim();
       var rows = document.querySelectorAll('#department-tbody tr');

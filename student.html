@@ -170,7 +170,7 @@
             <span class="live-dot"></span>
             Student Academic Workspace
           </span>
-          <span class="dash-term-badge">Autumn Term 2026 • BCA Semester 5 (Section C)</span>
+          <span class="dash-term-badge" id="student-cohort-badge">Autumn Term 2026</span>
         </div>
         <h1 class="dash-hero-title">Student Attendance & Academic Records</h1>
         <p class="dash-hero-sub">
@@ -240,9 +240,9 @@
             </svg>
           </div>
         </div>
-        <div class="admin-kpi-val" id="total-percentage">87.5%</div>
+        <div class="admin-kpi-val" id="total-percentage">0.0%</div>
         <div class="admin-kpi-sub">
-          <span class="tag tag-present" id="overall-status-text" style="font-size: 11px; padding: 2px 8px;">Meets 75% Threshold</span>
+          <span class="tag" id="overall-status-text" style="font-size: 11px; padding: 2px 8px;">No sessions recorded yet</span>
         </div>
       </div>
 
@@ -257,7 +257,7 @@
             </svg>
           </div>
         </div>
-        <div class="admin-kpi-val" id="total-conducted">84</div>
+        <div class="admin-kpi-val" id="total-conducted">0</div>
         <div class="admin-kpi-sub">Verified scheduled lectures</div>
       </div>
 
@@ -273,7 +273,7 @@
             </svg>
           </div>
         </div>
-        <div class="admin-kpi-val" id="total-present" style="color: #0284C7;">70</div>
+        <div class="admin-kpi-val" id="total-present" style="color: #0284C7;">0</div>
         <div class="admin-kpi-sub">Present and logged in registry</div>
       </div>
 
@@ -290,10 +290,10 @@
           </div>
         </div>
         <div class="admin-kpi-val">
-          <span id="total-absent" style="color: #DC2626;">10</span> <span style="font-size: 15px; color: var(--card-muted); font-weight: 500;">absent</span>
+          <span id="total-absent" style="color: #DC2626;">0</span> <span style="font-size: 15px; color: var(--card-muted); font-weight: 500;">absent</span>
         </div>
         <div class="admin-kpi-sub">
-          <span id="total-leave">4</span> Approved Medical/Duty Leaves
+          <span id="total-leave">0</span> Approved Medical/Duty Leaves
         </div>
       </div>
     </section>
@@ -333,8 +333,8 @@
     <!-- Subject-wise Breakdown Table -->
     <section class="dash-card" id="subjects" style="margin-bottom: 28px;">
       <div class="dash-card-header">
-        <h2>Subject breakdown</h2>
-        <span style="font-size: 13px; color: var(--muted);">4 Enrolled Subjects</span>
+        <h2>Subject Breakdown</h2>
+        <span style="font-size: 13px; color: var(--muted);" id="student-subjects-count">0 Enrolled Subjects</span>
       </div>
 
       <div class="table-wrap">
@@ -352,74 +352,30 @@
               <th>Status</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="student-subjects-tbody">
             <tr>
-              <td><strong>CS301</strong></td>
-              <td>Database Management Systems</td>
-              <td>Faculty Instructor</td>
-              <td>24</td>
-              <td>21</td>
-              <td>2</td>
-              <td>1</td>
-              <td><strong>91.3%</strong></td>
-              <td><span class="tag tag-present">Compliant</span></td>
-            </tr>
-            <tr>
-              <td><strong>CS302</strong></td>
-              <td>Design and Analysis of Algorithms</td>
-              <td>Prof. David Miller</td>
-              <td>22</td>
-              <td>19</td>
-              <td>3</td>
-              <td>0</td>
-              <td><strong>86.4%</strong></td>
-              <td><span class="tag tag-present">Compliant</span></td>
-            </tr>
-            <tr>
-              <td><strong>CS303</strong></td>
-              <td>Computer Networks</td>
-              <td>Prof. Anita Rao</td>
-              <td>20</td>
-              <td>16</td>
-              <td>3</td>
-              <td>1</td>
-              <td><strong>84.2%</strong></td>
-              <td><span class="tag tag-present">Compliant</span></td>
-            </tr>
-            <tr style="background: rgba(239, 68, 68, 0.08);">
-              <td><strong>MA204</strong></td>
-              <td>Discrete Mathematics</td>
-              <td>Dr. Robert Vance</td>
-              <td>18</td>
-              <td>12</td>
-              <td>5</td>
-              <td>1</td>
-              <td><strong style="color: #DC2626;">70.6%</strong></td>
-              <td><span class="tag tag-absent">Shortage Warning</span></td>
+              <td colspan="9" style="text-align: center; padding: 32px; color: var(--card-muted);">
+                No instructional sessions conducted yet for your registered cohort.
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <div
-        style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--radius); padding: 12px; font-size: 14px; color: #1E3A8A;">
-        <strong>Advisory for MA204:</strong> Your attendance in Discrete Mathematics is currently below 75%. Attend the
-        next consecutive sessions or submit verified medical documents before November 15 to restore eligibility.
+      <div id="student-advisory-box"
+        style="display: none; background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: var(--radius); padding: 12px; font-size: 14px; color: #1E3A8A; margin-top: 14px;">
+        <strong id="student-advisory-text">Advisory:</strong> Attend upcoming sessions to maintain eligibility.
       </div>
     </section>
 
     <!-- Session-wise Attendance History Log -->
     <section class="dash-card" id="history">
       <div class="dash-card-header">
-        <h2>Recent session history</h2>
+        <h2>Recent Session History</h2>
         <div style="display: flex; gap: 8px;">
           <select id="filter-history-subject"
             style="background: #FFFFFF; color: var(--card-ink); border: 1px solid var(--line); border-radius: var(--radius); padding: 4px 8px; font-size: 13px;">
             <option value="all">All Subjects</option>
-            <option value="CS301">CS301 - Database Systems</option>
-            <option value="CS302">CS302 - Algorithms</option>
-            <option value="CS303">CS303 - Networks</option>
-            <option value="MA204">MA204 - Discrete Math</option>
           </select>
         </div>
       </div>
@@ -437,57 +393,11 @@
               <th>Action</th>
             </tr>
           </thead>
-          <tbody>
-            <tr data-subj="CS301">
-              <td>16 Oct 2026</td>
-              <td>CS301 - Database Systems</td>
-              <td>10:00 - 11:00</td>
-              <td>Faculty Instructor</td>
-              <td><span class="tag tag-present">Present</span></td>
-              <td>Regular lecture</td>
-              <td><span style="color: var(--card-muted); font-size: 13px;">N/A</span></td>
-            </tr>
-            <tr data-subj="CS302">
-              <td>15 Oct 2026</td>
-              <td>CS302 - Algorithms</td>
-              <td>11:30 - 12:30</td>
-              <td>Prof. David Miller</td>
-              <td><span class="tag tag-present">Present</span></td>
-              <td>Regular lecture</td>
-              <td><span style="color: var(--card-muted); font-size: 13px;">N/A</span></td>
-            </tr>
-            <tr data-subj="MA204">
-              <td>14 Oct 2026</td>
-              <td>MA204 - Discrete Math</td>
-              <td>09:00 - 10:00</td>
-              <td>Dr. Robert Vance</td>
-              <td><span class="tag tag-absent">Absent</span></td>
-              <td>Unexcused absence</td>
-              <td>
-                <button type="button" class="btn btn-sm btn-outline open-correction-btn"
-                  data-record-id="rec-ma204-14oct" data-subject="MA204 - Discrete Math" data-date="14 Oct 2026"
-                  style="padding: 4px 8px; font-size: 12px;">
-                  Request Correction
-                </button>
+          <tbody id="student-history-tbody">
+            <tr>
+              <td colspan="7" style="text-align: center; padding: 32px; color: var(--card-muted);">
+                No attendance records logged yet.
               </td>
-            </tr>
-            <tr data-subj="CS303">
-              <td>13 Oct 2026</td>
-              <td>CS303 - Networks</td>
-              <td>14:00 - 15:00</td>
-              <td>Prof. Anita Rao</td>
-              <td><span class="tag tag-present">Present</span></td>
-              <td>Lab session</td>
-              <td><span style="color: var(--muted); font-size: 13px;">N/A</span></td>
-            </tr>
-            <tr data-subj="MA204">
-              <td>12 Oct 2026</td>
-              <td>MA204 - Discrete Math</td>
-              <td>09:00 - 10:00</td>
-              <td>Dr. Robert Vance</td>
-              <td><span class="tag tag-leave">Leave</span></td>
-              <td>Medical slip submitted</td>
-              <td><span style="color: var(--muted); font-size: 13px;">N/A</span></td>
             </tr>
           </tbody>
         </table>
@@ -795,21 +705,289 @@
 
     (function () {
       'use strict';
-      // Read session user if available
-      var storedId = sessionStorage.getItem('attendance_user_id');
-      if (storedId) {
-        var el = document.getElementById('display-user-id');
-        if (el) el.textContent = 'ID: ' + storedId + ' (Student)';
-        var del = document.getElementById('drawer-user-id');
-        if (del) del.textContent = 'ID: ' + storedId + ' (Student)';
+
+      var currentStudent = null;
+
+      function getStoredStudent() {
+        var storedId = sessionStorage.getItem('attendance_portal_user_id') || sessionStorage.getItem('attendance_user_id') || localStorage.getItem('attendance_user_id');
+        var storedEmail = (sessionStorage.getItem('attendance_user_email') || localStorage.getItem('attendance_user_email') || '').toLowerCase().trim();
+        var storedName = sessionStorage.getItem('attendance_user_name') || localStorage.getItem('attendance_user_name') || '';
+
+        var allStudents = [];
+        try {
+          allStudents = JSON.parse(localStorage.getItem('admin_students_registry') || '[]');
+        } catch (e) {}
+
+        var mockIds = ['s-101', 's-102', 's-103', 's-104', 's-105', 's-106', 's-107', 's-108', 's-109', 's-110', 'STU-101', 'STU-102', 'STU-103', 'STU-104', 'STU-105', 'STU-106', 'STU-107', 'STU-108', 'STU-109', 'STU-110', 'STU-2024-001', 'STU-2024-002'];
+        var realStudents = allStudents.filter(function (s) {
+          if (!s) return false;
+          var sId = s.student_profile_id || s.student_id || s.roll_number || s.id;
+          if (mockIds.indexOf(sId) !== -1) return false;
+          if (s.full_name === 'Aarav Gupta' || s.full_name === 'Aditi Rao' || s.full_name === 'Aarav Sharma' || s.full_name === 'Diya Verma') return false;
+          return s.enrollment_status !== 'DELETED' && s.status !== 'DELETED';
+        });
+
+        // 1. Try matching by email
+        if (storedEmail) {
+          var byEmail = realStudents.find(function (s) {
+            var sEmail = (s.student_gmail || s.email || '').toLowerCase().trim();
+            return sEmail && sEmail === storedEmail;
+          });
+          if (byEmail) return byEmail;
+        }
+
+        // 2. Try matching by ID or roll number
+        if (storedId) {
+          var byId = realStudents.find(function (s) {
+            return s.student_id === storedId || s.roll_number === storedId || s.student_profile_id === storedId || s.id === storedId;
+          });
+          if (byId) return byId;
+        }
+
+        // 3. Fallback: if real students exist and no other match, use the first real admin-created student
+        if (realStudents.length > 0) {
+          return realStudents[0];
+        }
+
+        // 4. Return basic profile if signed in without admin registry entry
+        if (storedId || storedName || storedEmail) {
+          return {
+            student_id: storedId || 'STU-NEW',
+            roll_number: storedId || 'PENDING',
+            full_name: storedName || 'Enrolled Student',
+            course_code: 'BCA',
+            semester_number: 1,
+            section_name: 'A'
+          };
+        }
+
+        return null;
       }
+
+      function loadStudentDashboardData() {
+        currentStudent = getStoredStudent();
+
+        var displayRoll = currentStudent ? (currentStudent.roll_number || currentStudent.student_id) : '—';
+        var displayName = currentStudent ? currentStudent.full_name : 'Student';
+        var displayCohort = currentStudent ? ((currentStudent.course_code || 'BCA') + ' Semester ' + (currentStudent.semester_number || 1) + ' (Section ' + (currentStudent.section_name || 'A') + ')') : 'Autumn Term 2026';
+
+        var idEl = document.getElementById('display-user-id');
+        if (idEl) idEl.textContent = 'ID: ' + displayRoll + ' (Student)';
+        var del = document.getElementById('drawer-user-id');
+        if (del) del.textContent = 'ID: ' + displayRoll + ' (Student)';
+        var ddel = document.getElementById('dropdown-user-id');
+        if (ddel) ddel.textContent = 'ID: ' + displayRoll + ' • Student';
+
+        var nameEl = document.getElementById('display-user-name');
+        if (nameEl) nameEl.textContent = displayName;
+        var drawerNameEl = document.getElementById('drawer-user-name');
+        if (drawerNameEl) drawerNameEl.textContent = displayName;
+        var dropdownNameEl = document.getElementById('dropdown-user-name');
+        if (dropdownNameEl) dropdownNameEl.textContent = displayName;
+
+        var cohortBadge = document.getElementById('student-cohort-badge');
+        if (cohortBadge) cohortBadge.textContent = displayCohort;
+
+        // Load recorded attendance sessions from localStorage
+        var sessions = [];
+        try {
+          sessions = JSON.parse(localStorage.getItem('attendance_recorded_sessions') || '[]');
+        } catch (e) {}
+
+        // Filter sessions that belong to this student
+        var studentRoll = currentStudent ? (currentStudent.roll_number || currentStudent.student_id) : '';
+        var studentId = currentStudent ? (currentStudent.student_id || currentStudent.roll_number) : '';
+        var studentSec = currentStudent ? (currentStudent.section_name || '').replace(/section\s*/i, '').trim().toUpperCase() : '';
+        var studentCourse = currentStudent ? (currentStudent.course_code || '').toUpperCase() : '';
+        var studentSem = currentStudent ? String(currentStudent.semester_number || 1) : '1';
+
+        var studentSessions = [];
+
+        sessions.forEach(function (sess) {
+          if (!sess) return;
+          var sessSec = (sess.sectionName || '').replace(/section\s*/i, '').trim().toUpperCase();
+          var sessCourse = (sess.courseCode || '').toUpperCase();
+          var sessSem = String(sess.semesterNumber || 1);
+
+          // Check if student has explicit record in session
+          var rec = (sess.records || []).find(function (r) {
+            return (studentRoll && r.rollNumber === studentRoll) ||
+                   (studentId && r.studentId === studentId) ||
+                   (currentStudent && currentStudent.full_name && r.studentName === currentStudent.full_name);
+          });
+
+          if (rec) {
+            studentSessions.push({
+              session: sess,
+              status: (rec.status || 'P').toUpperCase(),
+              date: sess.sessionDate || sess.createdAt ? new Date(sess.sessionDate || sess.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Today'
+            });
+          } else if (studentSec && sessSec && studentSec === sessSec &&
+                     (!studentCourse || !sessCourse || studentCourse === sessCourse) &&
+                     (!studentSem || !sessSem || studentSem === sessSem)) {
+            // Cohort matched session
+            studentSessions.push({
+              session: sess,
+              status: 'A', // Absent if not marked present in cohort session
+              date: sess.sessionDate || sess.createdAt ? new Date(sess.sessionDate || sess.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Today'
+            });
+          }
+        });
+
+        // Compute KPIs
+        var totalConducted = studentSessions.length;
+        var totalPresent = 0;
+        var totalAbsent = 0;
+        var totalLeave = 0;
+
+        studentSessions.forEach(function (s) {
+          if (s.status === 'P') totalPresent++;
+          else if (s.status === 'A') totalAbsent++;
+          else if (s.status === 'L') totalLeave++;
+        });
+
+        var overallPct = totalConducted > 0 ? ((totalPresent / totalConducted) * 100).toFixed(1) + '%' : '0.0%';
+
+        var pctEl = document.getElementById('total-percentage');
+        var condEl = document.getElementById('total-conducted');
+        var presEl = document.getElementById('total-present');
+        var absEl = document.getElementById('total-absent');
+        var leaveEl = document.getElementById('total-leave');
+        var statusText = document.getElementById('overall-status-text');
+
+        if (pctEl) pctEl.textContent = overallPct;
+        if (condEl) condEl.textContent = totalConducted;
+        if (presEl) presEl.textContent = totalPresent;
+        if (absEl) absEl.textContent = totalAbsent;
+        if (leaveEl) leaveEl.textContent = totalLeave;
+
+        if (statusText) {
+          if (totalConducted === 0) {
+            statusText.textContent = 'No sessions recorded yet';
+            statusText.className = 'tag';
+          } else {
+            var num = parseFloat(overallPct);
+            if (num >= 75.0) {
+              statusText.textContent = 'Eligible for Term Exams (>=75%)';
+              statusText.className = 'tag tag-present';
+            } else {
+              statusText.textContent = 'Shortage Warning: Below 75% Threshold';
+              statusText.className = 'tag tag-absent';
+            }
+          }
+        }
+
+        // Render Subject Breakdown Table
+        var subjectsTbody = document.getElementById('student-subjects-tbody');
+        var subjectGroups = {};
+
+        studentSessions.forEach(function (item) {
+          var code = item.session.subjectCode || 'General';
+          if (!subjectGroups[code]) {
+            subjectGroups[code] = {
+              code: code,
+              name: item.session.subjectName || code,
+              teacher: item.session.conductorName || 'Faculty Member',
+              conducted: 0,
+              present: 0,
+              absent: 0,
+              leave: 0
+            };
+          }
+          subjectGroups[code].conducted++;
+          if (item.status === 'P') subjectGroups[code].present++;
+          else if (item.status === 'A') subjectGroups[code].absent++;
+          else if (item.status === 'L') subjectGroups[code].leave++;
+        });
+
+        var subjectKeys = Object.keys(subjectGroups);
+        if (subjectsTbody) {
+          if (subjectKeys.length === 0) {
+            subjectsTbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 32px; color: var(--card-muted);">' +
+              '<div style="font-weight: 600; color: var(--card-ink); font-size: 15px;">No instructional sessions conducted yet for your registered cohort.</div>' +
+              '<p style="font-size: 13px; margin-top: 4px;">Sessions recorded by faculty in your class will automatically compute your real-time attendance here.</p>' +
+            '</td></tr>';
+          } else {
+            subjectsTbody.innerHTML = subjectKeys.map(function (k) {
+              var s = subjectGroups[k];
+              var pct = s.conducted > 0 ? ((s.present / s.conducted) * 100).toFixed(1) : '0.0';
+              var isGood = parseFloat(pct) >= 75.0;
+              return [
+                '<tr>',
+                '  <td><strong>' + s.code + '</strong></td>',
+                '  <td>' + s.name + '</td>',
+                '  <td>' + s.teacher + '</td>',
+                '  <td>' + s.conducted + '</td>',
+                '  <td style="color: #15803D; font-weight: 600;">' + s.present + '</td>',
+                '  <td style="color: #DC2626; font-weight: 600;">' + s.absent + '</td>',
+                '  <td style="color: #D97706; font-weight: 600;">' + s.leave + '</td>',
+                '  <td><strong>' + pct + '%</strong></td>',
+                '  <td><span class="tag ' + (isGood ? 'tag-present' : 'tag-absent') + '">' + (isGood ? 'Satisfactory' : 'Shortage') + '</span></td>',
+                '</tr>'
+              ].join('');
+            }).join('');
+          }
+        }
+
+        // Render Session History Table
+        var historyTbody = document.getElementById('student-history-tbody');
+        var filterSelect = document.getElementById('filter-history-subject');
+
+        if (filterSelect) {
+          filterSelect.innerHTML = '<option value="all">All Subjects</option>' +
+            subjectKeys.map(function (k) {
+              return '<option value="' + k + '">' + k + ' - ' + subjectGroups[k].name + '</option>';
+            }).join('');
+        }
+
+        if (historyTbody) {
+          if (studentSessions.length === 0) {
+            historyTbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 32px; color: var(--card-muted);">' +
+              '<div style="font-weight: 600; color: var(--card-ink); font-size: 15px;">No attendance records logged yet.</div>' +
+              '<p style="font-size: 13px; margin-top: 4px;">Verified classroom check-ins and session registers will appear here in chronological order.</p>' +
+            '</td></tr>';
+          } else {
+            historyTbody.innerHTML = studentSessions.map(function (item) {
+              var sess = item.session;
+              var stClass = item.status === 'P' ? 'tag-present' : (item.status === 'L' ? 'tag-leave' : 'tag-absent');
+              var stLabel = item.status === 'P' ? 'Present' : (item.status === 'L' ? 'Leave' : 'Absent');
+              return [
+                '<tr data-subj="' + (sess.subjectCode || '') + '">',
+                '  <td><strong>' + item.date + '</strong></td>',
+                '  <td>' + (sess.subjectCode || 'General') + ' - ' + (sess.subjectName || 'Session') + '</td>',
+                '  <td>' + (sess.sectionName || 'Section A') + '</td>',
+                '  <td>' + (sess.conductorName || 'Faculty') + '</td>',
+                '  <td><span class="tag ' + stClass + '">' + stLabel + '</span></td>',
+                '  <td style="color: var(--card-muted); font-size: 13px;">Classroom register logged</td>',
+                '  <td><button type="button" class="btn btn-sm btn-outline open-correction-btn" data-subject="' + (sess.subjectCode || '') + '" data-date="' + item.date + '">Dispute</button></td>',
+                '</tr>'
+              ].join('');
+            }).join('');
+
+            // Re-bind dispute buttons
+            var newOpenBtns = historyTbody.querySelectorAll('.open-correction-btn');
+            Array.prototype.forEach.call(newOpenBtns, function (btn) {
+              btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                var subj = btn.getAttribute('data-subject') || '';
+                var date = btn.getAttribute('data-date') || '';
+                openCorrectionModal(subj, date);
+              });
+            });
+          }
+        }
+      }
+
+      window.loadStudentDashboardData = loadStudentDashboardData;
+      window.getStoredStudent = getStoredStudent;
+      loadStudentDashboardData();
 
       // Subject history filter
       var sel = document.getElementById('filter-history-subject');
-      var rows = document.querySelectorAll('#history-table tbody tr');
       if (sel) {
         sel.addEventListener('change', function () {
           var val = sel.value;
+          var rows = document.querySelectorAll('#history-table tbody tr');
           Array.prototype.forEach.call(rows, function (row) {
             if (val === 'all' || row.getAttribute('data-subj') === val) {
               row.style.display = '';
@@ -1026,7 +1204,8 @@
       btn.disabled = true;
       btn.textContent = 'Verifying...';
 
-      var studentId = sessionStorage.getItem('attendance_portal_user_id') || sessionStorage.getItem('attendance_user_id');
+      var currentStu = typeof window.getStoredStudent === 'function' ? window.getStoredStudent() : null;
+      var studentId = currentStu ? (currentStu.roll_number || currentStu.student_id) : (sessionStorage.getItem('attendance_portal_user_id') || sessionStorage.getItem('attendance_user_id'));
       if (!studentId) {
         displayFeedback(false, 'Authentication required. Please sign in to verify attendance.');
         btn.disabled = false;
@@ -1041,10 +1220,11 @@
       function verifyOfflineAttendance(isManualCode) {
         btn.disabled = false;
         btn.textContent = 'Verify & Mark Present';
-        var stuName = sessionStorage.getItem('attendance_user_name') || 'Aarav Sharma';
-        var stuId = studentId || 'STU-2024-001';
+        var stuName = currentStu ? currentStu.full_name : (sessionStorage.getItem('attendance_user_name') || 'Student');
+        var stuId = studentId || 'STU-001';
+        var activeSess = {};
         try {
-          var activeSess = JSON.parse(localStorage.getItem('attendance_active_qr_session') || '{}');
+          activeSess = JSON.parse(localStorage.getItem('attendance_active_qr_session') || '{}');
           if (!activeSess.scans) activeSess.scans = [];
           activeSess.scans.push({
             enrollment_no: stuId,
@@ -1054,9 +1234,13 @@
           });
           localStorage.setItem('attendance_active_qr_session', JSON.stringify(activeSess));
         } catch (e) {}
-        displayFeedback(true, 'Attendance verified! You are marked PRESENT for Database Systems (CS301).');
+
+        var subjTitle = activeSess.subjectName ? (activeSess.subjectName + ' (' + activeSess.subjectCode + ')') : 'your lecture class';
+        displayFeedback(true, 'Attendance verified! You are marked PRESENT for ' + subjTitle + '.');
         if (codeInput) codeInput.value = '';
-        updateStudentPageMetrics();
+        if (typeof window.loadStudentDashboardData === 'function') {
+          window.loadStudentDashboardData();
+        }
       }
 
       if (getApiBase() !== null) {
@@ -1077,7 +1261,9 @@
           if (data.success) {
             displayFeedback(true, 'Attendance verified! You are marked PRESENT for ' + (data.record ? (data.record.subject_code || 'Lecture') : 'your class') + '.');
             if (codeInput) codeInput.value = '';
-            updateStudentPageMetrics();
+            if (typeof window.loadStudentDashboardData === 'function') {
+              window.loadStudentDashboardData();
+            }
           } else {
             verifyOfflineAttendance(true);
           }
@@ -1090,7 +1276,8 @@
     }
 
     async function simulateQRScanDirectly() {
-      var studentId = sessionStorage.getItem('attendance_portal_user_id') || sessionStorage.getItem('attendance_user_id') || 'STU-2024-001';
+      var currentStu = typeof window.getStoredStudent === 'function' ? window.getStoredStudent() : null;
+      var studentId = currentStu ? (currentStu.roll_number || currentStu.student_id) : (sessionStorage.getItem('attendance_portal_user_id') || sessionStorage.getItem('attendance_user_id') || 'STU-001');
       displayFeedback(null, 'Simulating authenticated camera QR scan...');
 
       var token = sessionStorage.getItem('attendance_auth_token') || localStorage.getItem('attendance_auth_token') || sessionStorage.getItem('token') || localStorage.getItem('token') || '';
@@ -1098,9 +1285,10 @@
       if (token) headers['Authorization'] = 'Bearer ' + token;
 
       function simulateOfflineScan() {
-        var stuName = sessionStorage.getItem('attendance_user_name') || 'Aarav Sharma';
+        var stuName = currentStu ? currentStu.full_name : (sessionStorage.getItem('attendance_user_name') || 'Student');
+        var activeSess = {};
         try {
-          var activeSess = JSON.parse(localStorage.getItem('attendance_active_qr_session') || '{}');
+          activeSess = JSON.parse(localStorage.getItem('attendance_active_qr_session') || '{}');
           if (!activeSess.scans) activeSess.scans = [];
           activeSess.scans.push({
             enrollment_no: studentId,
@@ -1110,8 +1298,12 @@
           });
           localStorage.setItem('attendance_active_qr_session', JSON.stringify(activeSess));
         } catch (e) {}
-        displayFeedback(true, 'QR verified! Attendance recorded for Database Systems (CS301).');
-        updateStudentPageMetrics();
+
+        var subjTitle = activeSess.subjectName ? (activeSess.subjectName + ' (' + activeSess.subjectCode + ')') : 'your lecture class';
+        displayFeedback(true, 'QR verified! Attendance recorded for ' + subjTitle + '.');
+        if (typeof window.loadStudentDashboardData === 'function') {
+          window.loadStudentDashboardData();
+        }
       }
 
       if (getApiBase() !== null) {
@@ -1127,7 +1319,9 @@
           var data = await res.json();
           if (data.success) {
             displayFeedback(true, 'QR verified! Attendance recorded for ' + (data.record ? (data.record.subject_code || 'Lecture') : 'your class') + '.');
-            updateStudentPageMetrics();
+            if (typeof window.loadStudentDashboardData === 'function') {
+              window.loadStudentDashboardData();
+            }
           } else {
             simulateOfflineScan();
           }
@@ -1185,17 +1379,8 @@
     }
 
     function updateStudentPageMetrics() {
-      var presEl = document.getElementById('total-present');
-      var condEl = document.getElementById('total-conducted');
-      var pctEl = document.getElementById('total-percentage');
-
-      if (presEl && condEl && pctEl) {
-        var p = parseInt(presEl.textContent, 10) || 70;
-        var c = parseInt(condEl.textContent, 10) || 84;
-        p += 1;
-        presEl.textContent = p;
-        var pct = ((p / c) * 100).toFixed(1) + '%';
-        pctEl.textContent = pct;
+      if (typeof window.loadStudentDashboardData === 'function') {
+        window.loadStudentDashboardData();
       }
     }
   </script>

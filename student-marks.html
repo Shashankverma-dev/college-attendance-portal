@@ -214,8 +214,8 @@
             </svg>
           </div>
         </div>
-        <div class="admin-kpi-val" style="font-size: 22px;">BCA (3-Year)</div>
-        <div class="admin-kpi-sub">Semester 1 &bull; Section A</div>
+        <div class="admin-kpi-val" id="kpi-student-program" style="font-size: 22px;">BCA</div>
+        <div class="admin-kpi-sub" id="kpi-student-cohort">Semester 1 • Section A</div>
       </div>
 
       <!-- 2. Published Assessments -->
@@ -231,14 +231,14 @@
             </svg>
           </div>
         </div>
-        <div class="admin-kpi-val">2 Evaluations</div>
-        <div class="admin-kpi-sub">Out of 4 configured cycles</div>
+        <div class="admin-kpi-val" id="kpi-student-evals">0 Evaluations</div>
+        <div class="admin-kpi-sub">Continuous assessments</div>
       </div>
 
       <!-- 3. Internal Score -->
       <div class="admin-kpi-card accent-amber">
         <div class="admin-kpi-header">
-          <span class="admin-kpi-label">Internal Score (BCA-101)</span>
+          <span class="admin-kpi-label">Internal Aggregate</span>
           <div class="admin-kpi-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <line x1="18" y1="20" x2="18" y2="10"></line>
@@ -247,22 +247,22 @@
             </svg>
           </div>
         </div>
-        <div class="admin-kpi-val" style="color: #059669;">45.5 / 50.0</div>
-        <div class="admin-kpi-sub">Assignment 1 (18.5) + Sessional 1 (27.0)</div>
+        <div class="admin-kpi-val" id="kpi-student-internal" style="color: #059669;">N/A</div>
+        <div class="admin-kpi-sub" id="kpi-student-internal-sub">No marks recorded yet</div>
       </div>
 
       <!-- 4. Final Semester Status -->
       <div class="admin-kpi-card accent-cyan">
         <div class="admin-kpi-header">
-          <span class="admin-kpi-label">Final Semester Status</span>
+          <span class="admin-kpi-label">Term Status</span>
           <div class="admin-kpi-icon">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
             </svg>
           </div>
         </div>
-        <div class="admin-kpi-val" style="color: #0284C7; font-size: 20px;">Pending Release</div>
-        <div class="admin-kpi-sub">Dean verification in progress</div>
+        <div class="admin-kpi-val" style="color: #0284C7; font-size: 20px;">In Progress</div>
+        <div class="admin-kpi-sub">Continuous internal evaluation</div>
       </div>
     </div>
 
@@ -301,65 +301,12 @@
             <th style="padding: 12px 14px; font-size: 13px; font-weight: 700; color: var(--card-ink);">Faculty Remarks</th>
           </tr>
         </thead>
-        <tbody>
-          <!-- Published Row 1: Assignment 1 -->
-          <tr style="border-bottom: 1px solid var(--line); background: #FFFFFF;" data-category="ASSIGNMENT">
-            <td style="padding: 12px 14px; font-weight: 700; color: var(--accent);">BCA-101</td>
-            <td style="padding: 12px 14px; font-weight: 600; color: var(--card-ink);">Programming Fundamentals using C</td>
-            <td style="padding: 12px 14px; font-weight: 600; color: var(--card-ink);">Assignment 1: Pointer Arithmetic & Memory Allocation</td>
-            <td style="padding: 12px 14px; text-align: center;">
-              <span class="badge-status badge-present">PRESENT</span>
+        <tbody id="student-marks-tbody">
+          <tr>
+            <td colspan="9" style="text-align: center; padding: 36px 16px; color: var(--card-muted);">
+              <div style="font-weight: 600; color: var(--card-ink); font-size: 15px;">No examination marks published yet</div>
+              <p style="font-size: 13px; margin-top: 4px;">Continuous internal assessment scores and sessional marks will appear here once officially published by your teachers.</p>
             </td>
-            <td style="padding: 12px 14px; text-align: right; font-weight: 700; font-size: 15px; color: var(--card-ink);">18.50</td>
-            <td style="padding: 12px 14px; text-align: center; color: var(--card-muted); font-size: 13px; font-weight: 600;">20.0</td>
-            <td style="padding: 12px 14px; text-align: center; font-weight: 700; color: #059669;">92.5%</td>
-            <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">18 Sep 2026, 10:00 UTC</td>
-            <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">Excellent dynamic memory handling and edge cases</td>
-          </tr>
-
-          <!-- Published Row 2: Sessional 1 -->
-          <tr style="border-bottom: 1px solid var(--line); background: #FFFFFF;" data-category="SESSIONAL_1">
-            <td style="padding: 12px 14px; font-weight: 700; color: var(--accent);">BCA-101</td>
-            <td style="padding: 12px 14px; font-weight: 600; color: var(--card-ink);">Programming Fundamentals using C</td>
-            <td style="padding: 12px 14px; font-weight: 600; color: var(--card-ink);">Sessional Examination 1 (Theory & Code Tracing)</td>
-            <td style="padding: 12px 14px; text-align: center;">
-              <span class="badge-status badge-present">PRESENT</span>
-            </td>
-            <td style="padding: 12px 14px; text-align: right; font-weight: 700; font-size: 15px; color: var(--card-ink);">27.00</td>
-            <td style="padding: 12px 14px; text-align: center; color: var(--card-muted); font-size: 13px; font-weight: 600;">30.0</td>
-            <td style="padding: 12px 14px; text-align: center; font-weight: 700; color: #059669;">90.0%</td>
-            <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">18 Oct 2026, 14:00 UTC</td>
-            <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">Strong theoretical comprehension of pointer concepts</td>
-          </tr>
-
-          <!-- Unpublished notice Row for Sessional 2 -->
-          <tr style="border-bottom: 1px solid var(--line); background: #F8FAFC;" data-category="SESSIONAL_2">
-            <td style="padding: 12px 14px; font-weight: 700; color: var(--card-muted);">BCA-101</td>
-            <td style="padding: 12px 14px; color: var(--card-muted); font-weight: 600;">Programming Fundamentals using C</td>
-            <td style="padding: 12px 14px; color: var(--card-muted); font-weight: 600;">Sessional Examination 2 (Algorithms & Data Structures)</td>
-            <td style="padding: 12px 14px; text-align: center;">
-              <span class="badge-status badge-submitted">SUBMITTED</span>
-            </td>
-            <td style="padding: 12px 14px; text-align: right; color: var(--card-muted); font-weight: 600;">N/A</td>
-            <td style="padding: 12px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">30.0</td>
-            <td style="padding: 12px 14px; text-align: center; color: var(--card-muted); font-weight: 600;">N/A</td>
-            <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">Unpublished</td>
-            <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted); font-style: italic;">Results under faculty review; will appear upon publication</td>
-          </tr>
-
-          <!-- Unpublished notice Row for Final Semester -->
-          <tr style="background: #F8FAFC;" data-category="FINAL_SEMESTER">
-            <td style="padding: 12px 14px; font-weight: 700; color: var(--card-muted);">BCA-101</td>
-            <td style="padding: 12px 14px; color: var(--card-muted); font-weight: 600;">Programming Fundamentals using C</td>
-            <td style="padding: 12px 14px; color: var(--card-muted); font-weight: 600;">Final Semester University Examination</td>
-            <td style="padding: 12px 14px; text-align: center;">
-              <span class="badge-status badge-finalized">FINALIZED</span>
-            </td>
-            <td style="padding: 12px 14px; text-align: right; color: var(--card-muted); font-weight: 600;">N/A</td>
-            <td style="padding: 12px 14px; text-align: center; color: var(--card-muted); font-size: 13px;">100.0</td>
-            <td style="padding: 12px 14px; text-align: center; color: var(--card-muted); font-weight: 600;">N/A</td>
-            <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted);">Unpublished</td>
-            <td style="padding: 12px 14px; font-size: 13px; color: var(--card-muted); font-style: italic;">Official results awaiting administrative publication release</td>
           </tr>
         </tbody>
       </table>
@@ -450,32 +397,117 @@
     (function () {
       'use strict';
 
-      // 1. Session user reflection
-      var storedId = sessionStorage.getItem('attendance_user_id');
-      var storedName = sessionStorage.getItem('attendance_user_name');
-      if (storedName) {
-        var n1 = document.getElementById('display-user-name');
-        if (n1) n1.textContent = storedName;
-        var n2 = document.getElementById('dropdown-user-name');
-        if (n2) n2.textContent = storedName;
-        var n3 = document.getElementById('drawer-user-name');
-        if (n3) n3.textContent = storedName;
+      var currentStudent = null;
+
+      function getStoredStudent() {
+        var storedId = sessionStorage.getItem('attendance_portal_user_id') || sessionStorage.getItem('attendance_user_id') || localStorage.getItem('attendance_user_id');
+        var storedEmail = (sessionStorage.getItem('attendance_user_email') || localStorage.getItem('attendance_user_email') || '').toLowerCase().trim();
+        var storedName = sessionStorage.getItem('attendance_user_name') || localStorage.getItem('attendance_user_name') || '';
+
+        var allStudents = [];
+        try {
+          allStudents = JSON.parse(localStorage.getItem('admin_students_registry') || '[]');
+        } catch (e) {}
+
+        var mockIds = ['s-101', 's-102', 's-103', 's-104', 's-105', 's-106', 's-107', 's-108', 's-109', 's-110', 'STU-101', 'STU-102', 'STU-103', 'STU-104', 'STU-105', 'STU-106', 'STU-107', 'STU-108', 'STU-109', 'STU-110', 'STU-2024-001', 'STU-2024-002'];
+        var realStudents = allStudents.filter(function (s) {
+          if (!s) return false;
+          var sId = s.student_profile_id || s.student_id || s.roll_number || s.id;
+          if (mockIds.indexOf(sId) !== -1) return false;
+          if (s.full_name === 'Aarav Gupta' || s.full_name === 'Aditi Rao' || s.full_name === 'Aarav Sharma' || s.full_name === 'Diya Verma') return false;
+          return s.enrollment_status !== 'DELETED' && s.status !== 'DELETED';
+        });
+
+        if (storedEmail) {
+          var byEmail = realStudents.find(function (s) {
+            var sEmail = (s.student_gmail || s.email || '').toLowerCase().trim();
+            return sEmail && sEmail === storedEmail;
+          });
+          if (byEmail) return byEmail;
+        }
+
+        if (storedId) {
+          var byId = realStudents.find(function (s) {
+            return s.student_id === storedId || s.roll_number === storedId || s.student_profile_id === storedId || s.id === storedId;
+          });
+          if (byId) return byId;
+        }
+
+        if (realStudents.length > 0) return realStudents[0];
+
+        if (storedId || storedName || storedEmail) {
+          return {
+            student_id: storedId || 'STU-NEW',
+            roll_number: storedId || 'PENDING',
+            full_name: storedName || 'Enrolled Student',
+            course_code: 'BCA',
+            semester_number: 1,
+            section_name: 'A'
+          };
+        }
+        return null;
       }
-      if (storedId) {
-        var el = document.getElementById('display-user-id');
-        if (el) el.textContent = 'ID: ' + storedId + ' (Student)';
-        var del = document.getElementById('drawer-user-id');
-        if (del) del.textContent = 'ID: ' + storedId + ' (Student)';
+
+      currentStudent = getStoredStudent();
+      var displayRoll = currentStudent ? (currentStudent.roll_number || currentStudent.student_id) : '—';
+      var displayName = currentStudent ? currentStudent.full_name : 'Student';
+
+      var n1 = document.getElementById('display-user-name');
+      if (n1) n1.textContent = displayName;
+      var n2 = document.getElementById('dropdown-user-name');
+      if (n2) n2.textContent = displayName;
+      var n3 = document.getElementById('drawer-user-name');
+      if (n3) n3.textContent = displayName;
+
+      var el = document.getElementById('display-user-id');
+      if (el) el.textContent = 'ID: ' + displayRoll + ' (Student)';
+      var del = document.getElementById('drawer-user-id');
+      if (del) del.textContent = 'ID: ' + displayRoll + ' (Student)';
+      var ddel = document.getElementById('dropdown-user-id');
+      if (ddel) ddel.textContent = 'ID: ' + displayRoll + ' • Student';
+
+      if (currentStudent) {
+        var progEl = document.getElementById('kpi-student-program');
+        if (progEl) progEl.textContent = (currentStudent.course_code || 'BCA') + ' (3-Year)';
+        var cohortEl = document.getElementById('kpi-student-cohort');
+        if (cohortEl) cohortEl.textContent = 'Semester ' + (currentStudent.semester_number || 1) + ' • Section ' + (currentStudent.section_name || 'A');
+      }
+
+      // Check real marks
+      var marksList = [];
+      try {
+        marksList = JSON.parse(localStorage.getItem('teacher_recorded_marks') || '[]');
+      } catch (e) {}
+
+      var studentRoll = currentStudent ? (currentStudent.roll_number || currentStudent.student_id) : '';
+      var myMarks = marksList.filter(function (m) {
+        return m.studentId === studentRoll || m.rollNumber === studentRoll;
+      });
+
+      var tbody = document.getElementById('student-marks-tbody');
+      if (myMarks.length > 0 && tbody) {
+        tbody.innerHTML = myMarks.map(function (m) {
+          return [
+            '<tr data-category="' + (m.category || 'ASSIGNMENT') + '">',
+            '  <td><strong>' + (m.subjectCode || 'BCA') + '</strong></td>',
+            '  <td>' + (m.subjectTitle || 'Course Subject') + '</td>',
+            '  <td>' + (m.assessmentTitle || 'Assessment') + '</td>',
+            '  <td style="text-align: center;"><span class="badge-status badge-present">' + (m.status || 'PRESENT') + '</span></td>',
+            '  <td style="text-align: right; font-weight: 700;">' + (m.marks !== undefined ? parseFloat(m.marks).toFixed(2) : 'N/A') + '</td>',
+            '  <td style="text-align: center;">' + (m.maxMarks || '20.0') + '</td>',
+            '  <td style="text-align: center; font-weight: 700; color: #059669;">' + (m.percentage || '—') + '</td>',
+            '  <td>' + (m.publishedDate || new Date().toLocaleDateString('en-GB')) + '</td>',
+            '  <td>' + (m.remarks || 'Official result') + '</td>',
+            '</tr>'
+          ].join('');
+        }).join('');
       }
 
       // 2. Category filtering
       var filterBtns = document.querySelectorAll('.marks-tab-btn');
-      var tableRows = document.querySelectorAll('#student-marks-table tbody tr');
-
       Array.prototype.forEach.call(filterBtns, function (btn) {
         btn.addEventListener('click', function () {
           var category = btn.getAttribute('data-filter');
-
           Array.prototype.forEach.call(filterBtns, function (b) {
             b.classList.remove('active');
             b.setAttribute('aria-selected', 'false');
@@ -483,9 +515,10 @@
           btn.classList.add('active');
           btn.setAttribute('aria-selected', 'true');
 
+          var tableRows = document.querySelectorAll('#student-marks-table tbody tr');
           Array.prototype.forEach.call(tableRows, function (row) {
             var cat = row.getAttribute('data-category');
-            if (category === 'all' || cat === category) {
+            if (category === 'all' || !cat || cat === category) {
               row.style.display = '';
             } else {
               row.style.display = 'none';

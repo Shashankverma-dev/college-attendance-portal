@@ -504,6 +504,89 @@
     </div>
   </div>
 
+  <!-- MODAL: ACCOUNT ACTIVATION DISPATCH -->
+  <div class="modal-backdrop" id="modal-activation-dispatch" style="position: fixed; inset: 0; z-index: 99995; align-items: center; justify-content: center; padding: 20px; display: none;">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="modal-act-title" style="max-width: 540px;">
+      <div class="modal-header" style="background: linear-gradient(135deg, #1D3C72 0%, #0F244A 100%); color: #FFFFFF; border-radius: var(--radius) var(--radius) 0 0;">
+        <div class="modal-header-title">
+          <div class="admin-hub-icon-wrap" style="width: 36px; height: 36px; font-size: 18px; background: rgba(255,255,255,0.2); color: #fff; display: flex; align-items: center; justify-content: center; border-radius: 6px;">
+            ✉️
+          </div>
+          <div>
+            <h3 id="modal-act-title" style="margin: 0; font-size: 18px; color: #FFFFFF;">Account Provisioned — Dispatch Activation Email</h3>
+            <span style="font-size: 12px; color: #CBD5E1;" id="modal-act-subtitle">Official 48-Hour Account Activation</span>
+          </div>
+        </div>
+        <button type="button" class="modal-close-btn" onclick="closeActivationDispatchModal()" aria-label="Close modal" style="color: #fff;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 16px; padding: 20px;">
+        <div style="background: #F0FDF4; border: 1px solid #86EFAC; border-radius: 8px; padding: 12px 16px; display: flex; align-items: flex-start; gap: 12px;">
+          <span style="font-size: 20px; line-height: 1;">✅</span>
+          <div>
+            <strong style="color: #15803D; font-size: 14px;" id="dispatch-target-heading">Faculty Member Provisioned Successfully!</strong>
+            <div style="font-size: 13px; color: #166534; margin-top: 2px;" id="dispatch-target-desc">
+              Account status is <strong>PENDING_ACTIVATION</strong>. Send the activation link below so the user can set their password.
+            </div>
+          </div>
+        </div>
+
+        <!-- Recipient & Token Details Card -->
+        <div style="background: var(--bg-dark); border: 1px solid var(--line); border-radius: 8px; padding: 14px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 13px; margin-bottom: 12px;">
+            <div>
+              <span style="color: var(--card-muted); display: block; font-size: 11px; text-transform: uppercase; font-weight: 700;">Recipient Name</span>
+              <strong id="dispatch-user-name" style="color: var(--card-ink);">—</strong>
+            </div>
+            <div>
+              <span style="color: var(--card-muted); display: block; font-size: 11px; text-transform: uppercase; font-weight: 700;">Staff / User ID</span>
+              <strong id="dispatch-user-id" style="color: #1D3C72; font-family: monospace;">—</strong>
+            </div>
+            <div style="grid-column: 1 / -1;">
+              <span style="color: var(--card-muted); display: block; font-size: 11px; text-transform: uppercase; font-weight: 700;">Official Email Address</span>
+              <strong id="dispatch-user-email" style="color: var(--card-ink); word-break: break-all;">—</strong>
+            </div>
+          </div>
+
+          <!-- Direct Activation Link Input with Copy -->
+          <div>
+            <label style="font-size: 11px; font-weight: 700; color: var(--card-muted); text-transform: uppercase; display: block; margin-bottom: 4px;">48-Hour Activation Link</label>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="dispatch-act-link" readonly style="flex: 1; padding: 8px 10px; font-size: 12px; font-family: monospace; border: 1px solid var(--line); border-radius: 6px; background: #FFFFFF; color: var(--card-ink);" onclick="this.select()">
+              <button type="button" class="btn btn-sm btn-outline" id="btn-copy-dispatch-link" onclick="copyDispatchLink()" style="font-size: 12px; white-space: nowrap; padding: 0 12px;">
+                📋 Copy Link
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Buttons: Send via Gmail vs Desktop Mail -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button type="button" class="btn btn-sm" id="btn-open-gmail" onclick="dispatchViaGmailWeb()" style="background: #EA4335; color: #FFFFFF; font-weight: 700; font-size: 14px; padding: 12px; border-radius: 6px; border: none; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 12px rgba(234, 67, 53, 0.3); cursor: pointer;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.272H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L12 9.248l8.073-5.755c1.618-1.214 3.927-.059 3.927 1.964z"/>
+            </svg>
+            Send Activation Email via Admin Gmail
+          </button>
+
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="btn btn-sm btn-outline" id="btn-open-mailto" onclick="dispatchViaMailto()" style="flex: 1; font-size: 13px; padding: 8px;">
+              📧 Open Default Mail Client
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="closeActivationDispatchModal()" style="padding: 8px 16px;">
+              Done
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL 2: TEACHING ALLOCATIONS MANAGER -->
   <div class="modal-backdrop" id="modal-allocations" style="position: fixed; inset: 0; z-index: 99990; align-items: center; justify-content: center; padding: 20px;">
     <div class="modal-dialog large" role="dialog" aria-modal="true" aria-labelledby="modal-alloc-title">
@@ -1276,20 +1359,19 @@
           if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(link).catch(function() {});
           }
-          // Open admin's Gmail to send activation email to teacher
-          var emailSubject = encodeURIComponent('SRHU Attendance Portal – Activate Your Faculty Account');
-          var emailBody = encodeURIComponent(
-            'Dear ' + name + ',\n\n' +
-            'Your faculty account has been provisioned on the SRHU Attendance Portal.\n\n' +
-            'Staff ID: ' + staffId + '\n\n' +
-            'Please click the link below within 48 hours to set your permanent password and activate your account:\n\n' +
-            link + '\n\n' +
-            'If you did not expect this email or have questions, please contact the IT Helpdesk.\n\n' +
-            'Regards,\nSRHU Academic Administration'
-          );
-          window.open('mailto:' + encodeURIComponent(email) + '?subject=' + emailSubject + '&body=' + emailBody, '_blank');
-          showToast('Faculty member ' + name + ' (' + staffId + ') provisioned! Activation email draft opened & link copied to clipboard.', 'success');
+
+          showToast('Faculty member ' + name + ' (' + staffId + ') provisioned! Sending activation invitation...', 'success');
           fetchTeacherList(currentPage);
+
+          // Open the guaranteed activation dispatch modal
+          window.openActivationDispatchModal({
+            name: name,
+            staffId: staffId,
+            email: email,
+            link: link,
+            heading: 'Faculty Member Provisioned Successfully!',
+            subheading: 'Account status is <strong>PENDING_ACTIVATION</strong>. Click <strong>Send Activation Email via Admin Gmail</strong> below to email the credentials.'
+          });
         })
         .catch(function (err) {
           console.warn('Backend teacher provisioning fallback:', err);
@@ -1349,20 +1431,19 @@
             if (navigator.clipboard && navigator.clipboard.writeText) {
               navigator.clipboard.writeText(actLink).catch(function() {});
             }
-            // Open admin's Gmail to send activation email to teacher
-            var emailSubject = encodeURIComponent('SRHU Attendance Portal – Activate Your Faculty Account');
-            var emailBody = encodeURIComponent(
-              'Dear ' + name + ',\n\n' +
-              'Your faculty account has been provisioned on the SRHU Attendance Portal.\n\n' +
-              'Staff ID: ' + staffId + '\n\n' +
-              'Please click the link below within 48 hours to set your permanent password and activate your account:\n\n' +
-              actLink + '\n\n' +
-              'If you did not expect this email or have questions, please contact the IT Helpdesk.\n\n' +
-              'Regards,\nSRHU Academic Administration'
-            );
-            window.open('mailto:' + encodeURIComponent(email) + '?subject=' + emailSubject + '&body=' + emailBody, '_blank');
-            showToast('Faculty member ' + name + ' (' + staffId + ') provisioned! Activation email draft opened & link copied to clipboard.', 'success');
+
+            showToast('Faculty member ' + name + ' (' + staffId + ') provisioned! Sending activation invitation...', 'success');
             fetchTeacherList(currentPage);
+
+            // Open the guaranteed activation dispatch modal
+            window.openActivationDispatchModal({
+              name: name,
+              staffId: staffId,
+              email: email,
+              link: actLink,
+              heading: 'Faculty Member Provisioned Successfully!',
+              subheading: 'Account status is <strong>PENDING_ACTIVATION</strong>. Click <strong>Send Activation Email via Admin Gmail</strong> below to email the credentials.'
+            });
           } catch (storageErr) {
             showToast(err.message || 'Failed to provision account', 'error');
           }
@@ -1373,6 +1454,109 @@
             btn.textContent = 'Create Faculty Account';
           }
         });
+      };
+
+      // =========================================================================
+      // 5B. ACTIVATION EMAIL DISPATCH MODAL HANDLERS
+      // =========================================================================
+      var activeDispatchData = null;
+
+      window.openActivationDispatchModal = function(data) {
+        activeDispatchData = data;
+        var nameEl = document.getElementById('dispatch-user-name');
+        var idEl = document.getElementById('dispatch-user-id');
+        var emailEl = document.getElementById('dispatch-user-email');
+        var linkEl = document.getElementById('dispatch-act-link');
+        var headEl = document.getElementById('dispatch-target-heading');
+        var descEl = document.getElementById('dispatch-target-desc');
+
+        if (nameEl) nameEl.textContent = data.name || 'Faculty Member';
+        if (idEl) idEl.textContent = data.staffId || data.id || '—';
+        if (emailEl) emailEl.textContent = data.email || '—';
+        if (linkEl) linkEl.value = data.link || '';
+        if (headEl && data.heading) headEl.textContent = data.heading;
+        if (descEl && data.subheading) descEl.innerHTML = data.subheading;
+
+        var modal = document.getElementById('modal-activation-dispatch');
+        if (modal) {
+          modal.removeAttribute('hidden');
+          modal.classList.add('is-open');
+          modal.style.display = 'flex';
+        }
+      };
+
+      window.closeActivationDispatchModal = function() {
+        var modal = document.getElementById('modal-activation-dispatch');
+        if (modal) {
+          modal.classList.remove('is-open');
+          modal.style.display = 'none';
+        }
+        activeDispatchData = null;
+      };
+
+      window.copyDispatchLink = function() {
+        var input = document.getElementById('dispatch-act-link');
+        if (input && input.value) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(input.value).catch(function() {});
+          }
+          input.select();
+          var btn = document.getElementById('btn-copy-dispatch-link');
+          if (btn) {
+            btn.textContent = '✓ Copied!';
+            btn.style.color = '#15803D';
+            setTimeout(function() {
+              btn.textContent = '📋 Copy Link';
+              btn.style.color = '';
+            }, 2500);
+          }
+          showToast('Activation link copied to clipboard.', 'success');
+        }
+      };
+
+      window.dispatchViaGmailWeb = function() {
+        if (!activeDispatchData || !activeDispatchData.email) {
+          showToast('No recipient email available to open Gmail.', 'error');
+          return;
+        }
+        var name = activeDispatchData.name || 'Faculty Member';
+        var staffId = activeDispatchData.staffId || '';
+        var link = activeDispatchData.link || '';
+        var email = activeDispatchData.email;
+
+        var subject = 'SRHU Attendance Portal – Activate Your Faculty Account';
+        var body = 'Dear ' + name + ',\n\n' +
+          'Your faculty account has been provisioned on the SRHU Attendance Portal.\n\n' +
+          'Staff ID: ' + staffId + '\n\n' +
+          'Please click the link below within 48 hours to set your permanent password and activate your account:\n\n' +
+          link + '\n\n' +
+          'If you did not expect this email or have questions, please contact the IT Helpdesk.\n\n' +
+          'Regards,\nSRHU Academic Administration';
+
+        var gmailUrl = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(email) +
+          '&su=' + encodeURIComponent(subject) +
+          '&body=' + encodeURIComponent(body);
+
+        window.open(gmailUrl, '_blank');
+        showToast('Gmail composer opened in a new tab. Click "Send" in Gmail to deliver the activation link.', 'info');
+      };
+
+      window.dispatchViaMailto = function() {
+        if (!activeDispatchData || !activeDispatchData.email) return;
+        var name = activeDispatchData.name || 'Faculty Member';
+        var staffId = activeDispatchData.staffId || '';
+        var link = activeDispatchData.link || '';
+        var email = activeDispatchData.email;
+
+        var subject = 'SRHU Attendance Portal – Activate Your Faculty Account';
+        var body = 'Dear ' + name + ',\n\n' +
+          'Your faculty account has been provisioned on the SRHU Attendance Portal.\n\n' +
+          'Staff ID: ' + staffId + '\n\n' +
+          'Please click the link below within 48 hours to set your permanent password and activate your account:\n\n' +
+          link + '\n\n' +
+          'Regards,\nSRHU Academic Administration';
+
+        window.open('mailto:' + encodeURIComponent(email) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body), '_blank');
       };
 
       // =========================================================================
@@ -2252,21 +2436,17 @@
           navigator.clipboard.writeText(tokenUrl).catch(function () {});
         }
 
-        // Open admin's Gmail to send new activation email to teacher
-        if (teacherEmail) {
-          var emailSubject = encodeURIComponent('SRHU Attendance Portal – New Faculty Activation Link');
-          var emailBody = encodeURIComponent(
-            'Dear ' + name + ',\n\n' +
-            'A new 48-hour activation link has been issued for your faculty account on the SRHU Attendance Portal.\n\n' +
-            'Staff ID: ' + staffId + '\n\n' +
-            'Please click the link below to set your permanent password and activate your account:\n\n' +
-            tokenUrl + '\n\n' +
-            'This link expires in 48 hours.\n\nRegards,\nSRHU Academic Administration'
-          );
-          window.open('mailto:' + encodeURIComponent(teacherEmail) + '?subject=' + emailSubject + '&body=' + emailBody, '_blank');
-        }
+        showToast('New 48-hr activation token issued for ' + name + '! Opening dispatch dialog...', 'success');
 
-        showToast('New 48-hr activation token issued for ' + name + '. Email draft opened & link copied to clipboard.', 'success');
+        // Open guaranteed activation dispatch modal
+        window.openActivationDispatchModal({
+          name: name,
+          staffId: staffId,
+          email: teacherEmail,
+          link: tokenUrl,
+          heading: 'New 48-Hour Token Reissued!',
+          subheading: 'A fresh single-use activation link has been generated for <strong>' + (teacherEmail || name) + '</strong>. Click <strong>Send Activation Email via Admin Gmail</strong> below to email it.'
+        });
 
         // Also try backend reissue if available
         fetch(getApiBase() + '/api/admin/teachers/' + encodeURIComponent(teacherId) + '/reissue-token', {
