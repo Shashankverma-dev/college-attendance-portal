@@ -1,6 +1,6 @@
 {
   "name": "college-attendance-backend",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "Production Cloud Run Backend for College Attendance Management System",
   "main": "dist/server.js",
   "scripts": {

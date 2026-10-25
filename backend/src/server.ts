@@ -97,7 +97,7 @@ app.get(['/health', '/api/health'], async (_req, res) => {
     status: 'ALIVE',
     service: 'attendance-backend',
     timestamp: new Date().toISOString(),
-    version: '1.8.0',
+    version: '1.8.1',
   });
 });
 
