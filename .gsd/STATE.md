@@ -1,5 +1,5 @@
 ---
-updated: 2026-10-25T11:55:00Z
+updated: 2026-10-25T12:15:00Z
 ---
 
 # Project State
@@ -7,18 +7,17 @@ updated: 2026-10-25T11:55:00Z
 ## Current Position
 
 **Milestone:** Milestone 1 - Production Stabilization & Feature Parity
-**Phase:** Phase 2 - Attendance Verification & Rotating QR Engine
-**Status:** in progress
-**Plan:** Plan 2.2 - Rotating HMAC-SHA256 QR-code session generation & geo-proximity check
+**Phase:** Phase 3 - Timetable Engine & Overlap Conflict Detection
+**Status:** planning
+**Plan:** Plan 3.1 - Interval overlap boundary testing and classroom collision detection
 
 ## Last Action
-Completed Phase 1 teacher account activation hardening, invitation token verification, and dual institutional identifier onboarding flows.
+Successfully executed and verified Phase 2 (Attendance Verification & Rotating QR Engine). Added dedicated Jest unit test suite covering HMAC-SHA256 window tokens, 20-second rotation intervals, and 6-digit backup challenges (11/11 tests passing).
 
 ## Next Steps
-1. Verify rotating HMAC-SHA256 QR code generation and 20-second token rotation
-2. Run automated test suite for timetable conflict resolution and overlapping intervals
-3. Validate linear SHA-256 hash chain audit triggers in PostgreSQL
-4. Prepare Cloud SQL migration verification baseline
+1. Execute Phase 3 timetable conflict resolution tests
+2. Verify interval boundary condition tests ($\text{start} < \text{end}$) and room overlap detection
+3. Validate parallel scheduling of practical subgroups (C1/C2)
 
 ## Active Decisions
 

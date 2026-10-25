@@ -1,19 +1,19 @@
 ---
 milestone: Milestone 1 - Production Stabilization & Feature Parity
 version: 1.0.0
-updated: 2026-10-25T11:55:00Z
+updated: 2026-10-25T12:15:00Z
 ---
 
 # Roadmap
 
-> **Current Phase:** Phase 2 - Attendance Verification & Rotating QR Engine
-> **Status:** in progress
+> **Current Phase:** Phase 3 - Timetable Engine & Overlap Conflict Detection
+> **Status:** planning
 
 ## Must-Haves (from SPEC)
 
 - [x] Zero-denominator attendance calculation returns explicit `N/A` without division errors
 - [x] Approved Leave (`L`) strictly excluded from attendance rates
-- [ ] Rotating HMAC-SHA256 QR-code session tokens with 20-second validity
+- [x] Rotating HMAC-SHA256 QR-code session tokens with 20-second validity
 - [ ] Strict timetable interval boundaries ($\text{start} < \text{end}$) and teacher overlap conflict detection
 - [ ] Examination and CIA component marks lifecycle (`DRAFT` $\to$ `SUBMITTED` $\to$ `PUBLISHED`)
 - [ ] Linear SHA-256 hash-chained cryptographic audit trail verification
@@ -34,13 +34,13 @@ updated: 2026-10-25T11:55:00Z
 ---
 
 ### Phase 2: Attendance Verification & Rotating QR Engine
-**Status:** 🔄 In Progress
+**Status:** ✅ Complete
 **Objective:** Verify zero-denominator attendance calculation, leave exclusion, and dynamic HMAC-SHA256 rotating QR codes.
 **Requirements:** REQ-03, REQ-04
 
 **Plans:**
 - [x] Plan 2.1: Attendance rate calculation and leave exclusion verification
-- [ ] Plan 2.2: Rotating HMAC-SHA256 QR-code session generation & geo-proximity check
+- [x] Plan 2.2: Rotating HMAC-SHA256 QR-code session generation & geo-proximity check
 
 ---
 
@@ -82,7 +82,7 @@ updated: 2026-10-25T11:55:00Z
 | Phase | Status | Plans | Complete |
 |-------|--------|-------|----------|
 | 1. Authentication & RBAC | ✅ Complete | 2/2 | 100% |
-| 2. Attendance & QR Engine | 🔄 In Progress | 1/2 | 50% |
+| 2. Attendance & QR Engine | ✅ Complete | 2/2 | 100% |
 | 3. Timetable Engine | ⬜ Not Started | 0/2 | 0% |
 | 4. Examination & Marks | ⬜ Not Started | 0/2 | 0% |
 | 5. Production Baseline | ⬜ Not Started | 0/2 | 0% |
