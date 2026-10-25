@@ -48,7 +48,8 @@
   --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.08);
   --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
   --shadow-lg: 0 12px 28px rgba(15, 23, 42, 0.12);
-  color-scheme: light dark;
+  --border: #CBD5E1;
+  color-scheme: light;
 }
 
 *,
@@ -2315,15 +2316,109 @@ legend {
   color: var(--card-ink);
 }
 
-.modal-body input[type=text],
-.modal-body input[type=password],
+/* ==========================================================================
+   MODAL & CARD FORM CONTROLS - CRISP LIGHT THEME LEGIBILITY LOCK
+   ========================================================================== */
+.modal,
+.modal-backdrop,
+.modal-dialog,
+.modal-card,
+.modal-box,
+.modal-wrapper,
+.modal > .card,
+.modal-dialog > .card,
+.modal-body,
+[id^="modal-"],
+[id*="modal-"],
+[id*="-modal"] {
+  color-scheme: light !important;
+}
+
+.modal input,
+.modal select,
+.modal textarea,
+.modal-backdrop input,
+.modal-backdrop select,
+.modal-backdrop textarea,
+.modal-dialog input,
+.modal-dialog select,
+.modal-dialog textarea,
+.modal-card input,
+.modal-card select,
+.modal-card textarea,
+.modal-box input,
+.modal-box select,
+.modal-box textarea,
+.modal-wrapper input,
+.modal-wrapper select,
+.modal-wrapper textarea,
+.modal-body input,
 .modal-body select,
-.modal-body textarea {
-  background: #FFFFFF;
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  color: var(--card-ink);
+.modal-body textarea,
+.modal > .card input,
+.modal > .card select,
+.modal > .card textarea,
+[id^="modal-"] input,
+[id^="modal-"] select,
+[id^="modal-"] textarea,
+[id*="modal-"] input,
+[id*="modal-"] select,
+[id*="modal-"] textarea,
+[id*="-modal"] input,
+[id*="-modal"] select,
+[id*="-modal"] textarea {
+  color-scheme: light !important;
+  background-color: #FFFFFF !important;
+  background: #FFFFFF !important;
+  color: #17345C !important;
+  border: 1px solid #CBD5E1 !important;
+  font-family: var(--font-body);
   font-size: 14px;
+}
+
+.modal input::placeholder,
+.modal textarea::placeholder,
+.modal-backdrop input::placeholder,
+.modal-backdrop textarea::placeholder,
+.modal-dialog input::placeholder,
+.modal-dialog textarea::placeholder,
+.modal-card input::placeholder,
+.modal-card textarea::placeholder,
+.modal-body input::placeholder,
+.modal-body textarea::placeholder {
+  color: #94A3B8 !important;
+  -webkit-text-fill-color: #94A3B8 !important;
+  opacity: 1 !important;
+}
+
+.modal select option,
+.modal-backdrop select option,
+.modal-dialog select option,
+.modal-card select option,
+.modal-body select option,
+select option {
+  background-color: #FFFFFF !important;
+  background: #FFFFFF !important;
+  color: #17345C !important;
+}
+
+.modal input:focus,
+.modal select:focus,
+.modal textarea:focus,
+.modal-backdrop input:focus,
+.modal-backdrop select:focus,
+.modal-backdrop textarea:focus,
+.modal-dialog input:focus,
+.modal-dialog select:focus,
+.modal-dialog textarea:focus,
+.modal-card input:focus,
+.modal-card select:focus,
+.modal-card textarea:focus {
+  background-color: #FFFFFF !important;
+  color: #17345C !important;
+  border-color: #1685E8 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(22, 133, 232, 0.2) !important;
 }
 
 /* Custom File Upload Dropzone */

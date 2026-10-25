@@ -485,70 +485,70 @@
   <!-- ========================================================================= -->
   <!-- MODAL 1: CREATE SINGLE STUDENT PROFILE -->
   <!-- ========================================================================= -->
-  <div class="modal" id="modal-create-student" role="dialog" aria-modal="true" aria-labelledby="create-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
-    <div class="card" style="max-width: 680px; width: 100%; padding: 28px; background: #FFFFFF; border-radius: 12px; max-height: 90vh; overflow-y: auto;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+  <div class="modal" id="modal-create-student" role="dialog" aria-modal="true" aria-labelledby="create-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; color-scheme: light;">
+    <div class="card" style="max-width: 680px; width: 100%; padding: 28px; background: #FFFFFF; border-radius: 12px; max-height: 90vh; overflow-y: auto; color-scheme: light; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 14px;">
         <div>
           <h3 id="create-modal-title" style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Create Student Profile</h3>
-          <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0 0;">Provisions student identity, assigns academic section, and dispatches 48-hour activation email.</p>
+          <p style="font-size: 13px; color: #64748B; margin: 4px 0 0 0;">Provisions student identity, assigns academic section, and dispatches 48-hour activation email.</p>
         </div>
-        <button type="button" onclick="closeCreateStudentModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">✕</button>
+        <button type="button" onclick="closeCreateStudentModal()" style="background: none; border: none; cursor: pointer; color: #64748B; font-size: 20px;">✕</button>
       </div>
 
       <form id="form-create-student" onsubmit="handleCreateStudentSubmit(event)">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
           <div style="grid-column: 1 / -1;">
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Full Name *</label>
-            <input type="text" id="create-full-name" required placeholder="e.g. Aarav Sharma" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Full Name *</label>
+            <input type="text" id="create-full-name" required placeholder="e.g. Aarav Sharma" style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;">
           </div>
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Institutional Email *</label>
-            <input type="email" id="create-email" required placeholder="e.g. aarav.sharma@college.edu" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Institutional Email *</label>
+            <input type="email" id="create-email" required placeholder="e.g. aarav.sharma@college.edu" style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;">
           </div>
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Enrollment Number (e.g. SRHU238990) *</label>
-            <input type="text" id="create-enrollment-no" required placeholder="e.g. SRHU238990" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Enrollment Number (e.g. SRHU238990) *</label>
+            <input type="text" id="create-enrollment-no" required placeholder="e.g. SRHU238990" style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;">
           </div>
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Registration Number (e.g. dd241104301172) *</label>
-            <input type="text" id="create-registration-no" required placeholder="e.g. dd241104301172" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Registration Number (e.g. dd241104301172) *</label>
+            <input type="text" id="create-registration-no" required placeholder="e.g. dd241104301172" style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;">
           </div>
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">School / Academic Department *</label>
-            <select id="create-school-id" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;" onchange="onCreateSchoolChange()">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">School / Academic Department *</label>
+            <select id="create-school-id" required style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;" onchange="onCreateSchoolChange()">
               <option value="">Select School / Department</option>
             </select>
           </div>
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Programme (Course) *</label>
-            <select id="create-course-code" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;" onchange="onCreateCourseChange()">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Programme (Course) *</label>
+            <select id="create-course-code" required style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;" onchange="onCreateCourseChange()">
               <option value="">Select Programme</option>
             </select>
           </div>
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Semester *</label>
-            <select id="create-semester" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;" onchange="onCreateSemesterChange()">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Semester *</label>
+            <select id="create-semester" required style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;" onchange="onCreateSemesterChange()">
               <option value="">Select Semester</option>
             </select>
           </div>
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Section *</label>
-            <select id="create-section" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Section *</label>
+            <select id="create-section" required style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;">
               <option value="">Select Section</option>
             </select>
-            <span id="create-section-capacity-note" style="font-size: 11px; color: var(--muted); margin-top: 2px; display: block;"></span>
+            <span id="create-section-capacity-note" style="font-size: 11px; color: #64748B; margin-top: 2px; display: block;"></span>
           </div>
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Roll Number *</label>
-            <input type="text" id="create-roll-number" required placeholder="e.g. 01" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Roll Number *</label>
+            <input type="text" id="create-roll-number" required placeholder="e.g. 01" style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;">
           </div>
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Phone Number</label>
-            <input type="text" id="create-phone" placeholder="e.g. +91 98765 43210" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Phone Number</label>
+            <input type="text" id="create-phone" placeholder="e.g. +91 98765 43210" style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;">
           </div>
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Parent / Guardian Contact</label>
-            <input type="text" id="create-parent" placeholder="e.g. +91 98765 43211" style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Parent / Guardian Contact</label>
+            <input type="text" id="create-parent" placeholder="e.g. +91 98765 43211" style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;">
           </div>
         </div>
 
@@ -720,14 +720,14 @@
   <!-- ========================================================================= -->
   <!-- MODAL 3: SECTION & PROGRAMME TRANSFER -->
   <!-- ========================================================================= -->
-  <div class="modal" id="modal-transfer-student" role="dialog" aria-modal="true" aria-labelledby="transfer-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
-    <div class="card" style="max-width: 600px; width: 100%; padding: 28px; background: #FFFFFF; border-radius: 12px;">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+  <div class="modal" id="modal-transfer-student" role="dialog" aria-modal="true" aria-labelledby="transfer-modal-title" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(4px); z-index: 1000; align-items: center; justify-content: center; padding: 20px; overflow-y: auto; color-scheme: light;">
+    <div class="card" style="max-width: 600px; width: 100%; padding: 28px; background: #FFFFFF; border-radius: 12px; color-scheme: light; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.25);">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 14px;">
         <div>
           <h3 id="transfer-modal-title" style="font-size: 20px; font-weight: 700; color: #17345C; margin: 0;">Transfer Student Section</h3>
-          <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0 0;">Reallocates future classes to a new section while preserving past attendance.</p>
+          <p style="font-size: 13px; color: #64748B; margin: 4px 0 0 0;">Reallocates future classes to a new section while preserving past attendance.</p>
         </div>
-        <button type="button" onclick="closeTransferStudentModal()" style="background: none; border: none; cursor: pointer; color: var(--muted); font-size: 20px;">✕</button>
+        <button type="button" onclick="closeTransferStudentModal()" style="background: none; border: none; cursor: pointer; color: #64748B; font-size: 20px;">✕</button>
       </div>
 
       <form id="form-transfer-student" onsubmit="handleTransferSubmit(event)">
@@ -739,31 +739,31 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px;">
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Target Programme *</label>
-            <select id="transfer-course-code" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;" onchange="onTransferCourseChange()">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Target Programme *</label>
+            <select id="transfer-course-code" required style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;" onchange="onTransferCourseChange()">
               <option value="">Select Programme</option>
             </select>
           </div>
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Target Semester *</label>
-            <select id="transfer-semester" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;" onchange="onTransferSemesterChange()">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Target Semester *</label>
+            <select id="transfer-semester" required style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;" onchange="onTransferSemesterChange()">
               <option value="">Select Semester</option>
             </select>
           </div>
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Target Section *</label>
-            <select id="transfer-section" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Target Section *</label>
+            <select id="transfer-section" required style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;">
               <option value="">Select Section</option>
             </select>
-            <span id="transfer-section-capacity-note" style="font-size: 11px; color: var(--muted); margin-top: 2px; display: block;"></span>
+            <span id="transfer-section-capacity-note" style="font-size: 11px; color: #64748B; margin-top: 2px; display: block;"></span>
           </div>
           <div>
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Effective Date *</label>
-            <input type="date" id="transfer-effective-date" required style="width: 100%; height: 38px; border: 1px solid var(--border); border-radius: 6px; padding: 0 10px; font-size: 14px;">
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Effective Date *</label>
+            <input type="date" id="transfer-effective-date" required style="width: 100%; height: 38px; border: 1px solid #CBD5E1; border-radius: 6px; padding: 0 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;">
           </div>
           <div style="grid-column: 1 / -1;">
-            <label style="display: block; font-size: 12px; font-weight: 700; color: #334155; margin-bottom: 4px;">Reason for Transfer</label>
-            <textarea id="transfer-reason" rows="2" placeholder="e.g. Approved section balance or student elective change" style="width: 100%; border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px; font-size: 14px;"></textarea>
+            <label style="display: block; font-size: 12px; font-weight: 700; color: #1E293B; margin-bottom: 4px;">Reason for Transfer</label>
+            <textarea id="transfer-reason" rows="2" placeholder="e.g. Approved section balance or student elective change" style="width: 100%; border: 1px solid #CBD5E1; border-radius: 6px; padding: 8px 10px; font-size: 14px; background: #FFFFFF; color: #17345C; color-scheme: light;"></textarea>
           </div>
         </div>
 
